@@ -602,7 +602,7 @@ input,textarea{font-family:inherit}
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px;margin-top:22px;align-items:start">
             <div data-rf="span2" style="grid-column:span 2;min-width:0;display:flex;flex-direction:column;gap:16px">
               <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:28px">
-                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="font-size:12px;font-weight:600;color:{{ F.sevC }};background:{{ F.sevBg }};padding:3px 9px;border-radius:5px">{{ F.sevL }}</span><span style="font-size:13.5px;color:#586174">{{ F.areaL }} · {{ F.ctrlT }}</span></div>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="font-size:12px;font-weight:600;color:{{ F.sevC }};background:{{ F.sevBg }};padding:3px 9px;border-radius:5px">{{ F.sevL }}</span><span style="font-size:13.5px;color:#586174">{{ F.areaL }} · {{ F.ctrlT }}</span><sc-if value="{{ tourAutoFinding }}"><span style="font-size:11.5px;font-weight:600;color:#174F36;background:#E2F1E8;padding:3px 8px;border-radius:99px">Automatisk valgt i demoen</span></sc-if></div>
                 <h1 style="font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-0.02em;margin:14px 0 0;text-wrap:balance">{{ F.title }}</h1>
                 <p style="font-size:16.5px;line-height:1.55;color:#2A3547;margin:12px 0 0">{{ F.summary }}</p>
                 <div style="display:flex;gap:28px;margin-top:18px;flex-wrap:wrap">
@@ -1032,7 +1032,11 @@ class Component extends DCLogic {
     if (n === 0) this.setState({ ...base, tour: 0, page: 'report', fArea: 'alle', fStatus: 'apne' });
     else if (n === 1) this.setState({ ...base, tour: 1, page: 'finding', fid: fOf('duplikat') || (r.findings[0] || {}).id });
     else if (n === 2) this.setState({ ...base, tour: 2, page: r.recon && !r.recon.reason ? 'recon' : 'report', rid: 'aga' });
-    else if (n === 3) { const id = fOf('avst-aga') || fOf('fordel') || (r.findings[0] || {}).id; this.setState({ ...base, tour: 3, page: 'finding', fid: id }); this.runAi(id); }
+    else if (n === 3) {
+      const id = fOf('uvanlig') || fOf('runde') || fOf('tekst') || (r.findings.find(f => f.area === 'regnskap' || f.area === 'revisjon') || r.findings[0] || {}).id;
+      this.setState({ ...base, tour: 3, page: 'finding', fid: id });
+      this.runAi(id);
+    }
     else this.setState({ ...base, tour: null, showEnd: true, page: 'report' });
   }
   async sendForm(data) { if (!FORM_ENDPOINT) { await new Promise(r => setTimeout(r, 500)); return true; } const r = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) }); return r.ok; }
@@ -1142,17 +1146,17 @@ class Component extends DCLogic {
     const okRows = rc && rc.rows ? rc.rows.filter(r => r.status === 'stemmer' || r.status === 'innenfor').map(r => r.t.toLowerCase()) : [];
     const okTxt = okRows.length ? `${okRows.join(' og ').replace(/^./, c => c.toUpperCase())} stemmer. ` : '';
     const tour4Text = aiS && aiS.loading
-      ? 'AI-demoen går gjennom funnet og kontrollgrunnlaget. Når forklaringen er klar, er det fortsatt du som avgjør hvordan forholdet skal avklares.'
+      ? 'Rettført har automatisk valgt et regnskapsfunn fra Revisjonsblikk. AI-demoen går nå gjennom funnet, tallene og kontrollgrunnlaget. Du kan samtidig åpne grunnlaget og se posteringene selv.'
       : aiD && !fr
-        ? 'AI kan støtte undersøkelsen, men avslutter ikke saken. Velg hvordan du vil avklare funnet i vurderingsfeltet til høyre. Vurderingen lagres i historikken.'
+        ? 'Forklaringen er klar. AI kan støtte undersøkelsen, men avslutter ikke saken. Se grunnlaget, og velg deretter hvordan du vil avklare forholdet i feltet til høyre.'
         : fr
-          ? 'Vurderingen er lagret og dokumentert i historikken.'
-          : 'Rettført viser en AI-støttet forklaring av funnet. Den faglige konklusjonen gjøres alltid av brukeren.';
+          ? 'Vurderingen er lagret og dokumentert i historikken. Dermed er hele kjeden sporbar fra automatisk kontroll til menneskelig konklusjon.'
+          : 'Rettført velger automatisk ut et regnskapsfunn som avviker fra normalt mønster. Du kan undersøke datagrunnlaget og gjøre den endelige vurderingen selv.';
     const TOUR = res ? [
       ['Rettført viser bare det som bør undersøkes', `${rStats}. Det meste stemmer. Rapporten viser de ${openN} forholdene som fortjener oppmerksomhet, fordelt på fire fagområder.`],
       ['Mulig dobbeltføring', 'Samme leverandør, fakturanummer og beløp er bokført to ganger. Rettført viser begge bilagene, hvorfor kontrollen reagerte og hva du bør sjekke.'],
       ['Lønn × regnskap', agaRow ? `Rettført kobler lønnsfilen mot hovedboken. ${okTxt}Arbeidsgiveravgiften avviker med ${kr(Math.abs(agaRow.diff))}, og du ser posteringene og lønnsdataene bak begge tallene.` : 'Rettført kobler lønnsfilen mot hovedboken og viser posteringene bak tallene.'],
-      ['AI-støtte, menneskelig konklusjon', tour4Text]
+      ['Revisjonsblikk + AI-støtte', tour4Text]
     ] : [];
     const inTour = s.tour != null && !!TOUR[s.tour];
 
@@ -1239,10 +1243,11 @@ class Component extends DCLogic {
       startTour: () => this.tourGo(0), exploreSelf: () => this.setState({ showIntro: false, showEnd: false, tour: null, page: 'report' }), openHow: set({ showHow: true }), closeHow: set({ showHow: false }),
       inTour, tourN: inTour ? `Steg ${s.tour + 1} av ${TOUR.length}` : '', tourT: inTour ? TOUR[s.tour][0] : '', tourX: inTour ? TOUR[s.tour][1] : '',
       tourNext: () => s.tour === 3 ? null : this.tourGo(s.tour + 1), tourPrev: () => this.tourGo(Math.max(0, s.tour - 1)),
-      tourNextL: s.tour === 3 ? (aiS && aiS.loading ? 'AI analyserer …' : aiD && !fr ? 'Velg vurdering til høyre' : 'Fullfører …') : 'Neste',
+      tourNextL: s.tour === 3 ? (aiS && aiS.loading ? 'AI analyserer …' : aiD && !fr ? 'Undersøk og velg vurdering' : 'Fullfører …') : 'Neste',
       tourCantNext: s.tour === 3, tourNextBg: s.tour === 3 ? 'rgba(255,255,255,.14)' : '#F6DF6E', tourNextFg: s.tour === 3 ? 'rgba(255,255,255,.72)' : '#0B2545', tourNextCur: s.tour === 3 ? 'default' : 'pointer',
       tourHasPrev: !!s.tour, tourStop: set({ tour: null }),
-      tourAssessShow: s.tour === 3 && !!F && !fr, tourAssessText: aiD ? 'AI-forklaringen er klar. Velg en vurdering nedenfor og godkjenn den for å fullføre demoen.' : 'AI-demoen analyserer funnet først. Deretter velger du selv hvordan forholdet skal avklares.',
+      tourAssessShow: s.tour === 3 && !!F && !fr, tourAssessText: aiD ? 'AI-forklaringen er klar. Se gjerne grunnlaget til venstre, velg så din vurdering nedenfor og godkjenn den for å fullføre demoen.' : 'Rettført har valgt funnet automatisk. AI-demoen analyserer det nå; deretter gjør du selv den faglige vurderingen.',
+      tourAutoFinding: s.tour === 3 && !!F,
       assessBorder: s.tour === 3 && aiD && !fr ? '1.5px solid #E9CF63' : '1px solid #E4DFD4',
       assessShadow: s.tour === 3 && aiD && !fr ? '0 0 0 4px rgba(246,223,110,.22),0 18px 36px -28px rgba(11,37,69,.45)' : 'none',
       hasPay: !!pay, noPay: !pay, payRows, payP0: res && res.payPeriods ? monthName(res.payPeriods[0]) : '', payP1: res && res.payPeriods ? monthName(res.payPeriods[1]) : '',
