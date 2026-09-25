@@ -192,14 +192,14 @@ input,textarea{font-family:inherit}
   <section style="padding:0 20px">
     <div data-rf="dark" style="max-width:1320px;margin:0 auto;background:#0B2545;color:#fff;border-radius:28px;padding:88px clamp(24px,5vw,72px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:56px;align-items:center">
       <div>
-        <h2 style="font-size:clamp(32px,3.8vw,48px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0;text-wrap:balance">Filene forlater aldri maskinen din.</h2>
-        <p style="font-size:17px;line-height:1.6;color:rgba(255,255,255,.72);margin:20px 0 0;max-width:480px">Rettført leser og analyserer filene i nettleseren. Ingenting lastes opp til en server, og ingenting lagres etter at du lukker siden.</p>
+        <h2 style="font-size:clamp(32px,3.8vw,48px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0;text-wrap:balance">Råfilene blir på maskinen din.</h2>
+        <p style="font-size:17px;line-height:1.6;color:rgba(255,255,255,.72);margin:20px 0 0;max-width:480px">SAF-T- og CSV-filene leses i nettleseren og lastes ikke opp som filer. Kontrollmotoren kjører lokalt. Ved en utvidet forklaring kan bare relevante opplysninger fra det valgte funnet sendes videre.</p>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.14);border-radius:14px;overflow:hidden">
-        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Lokal analyse</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Kontrollene kjører på din maskin.</div></div>
-        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Ingen innlogging i bank</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Du bruker eksporter du allerede har.</div></div>
+        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Lokal kontroll</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Kontrollmotoren kjører i nettleseren.</div></div>
+        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Råfiler blir lokale</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">SAF-T- og CSV-filene lastes ikke opp som filer.</div></div>
         <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Regler, ikke gjetning</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Alle beregninger er vanlig kode med faste terskler.</div></div>
-        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Sporbare funn</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Hvert funn viser bilagene det bygger på.</div></div>
+        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Begrenset deling</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Kun relevante opplysninger fra ett funn brukes ved utvidet forklaring.</div></div>
       </div>
     </div>
   </section>
@@ -304,7 +304,7 @@ input,textarea{font-family:inherit}
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Innlesing</span><span>SAF-T Financial (XML) leses med nettleserens XML-parser. Lønn leses som CSV med semikolon eller komma.</span></div>
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Kontroller</span><span>Hver kontroll er en regel med fast terskel, skrevet i vanlig JavaScript. Resultatet er det samme hver gang for samme fil.</span></div>
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Forklaring</span><span>Forklaringer og prioritering tar utgangspunkt i funnene fra kontrollmotoren. De endrer ikke beregningene eller konklusjonen.</span></div>
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Personvern</span><span>All analyse skjer lokalt. Filene sendes ikke til noen server.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Personvern</span><span>Kontrollmotoren kjører lokalt i nettleseren. Selve SAF-T- og CSV-filene sendes ikke til noen server.</span></div>
         </div>
       </section>
       <section>
