@@ -18,7 +18,7 @@ body{position:relative;min-width:0}
 x-dc{display:block;width:100%;max-width:100%;min-width:0;overflow-x:clip}
 *{box-sizing:border-box}
 main,section,article,header,footer,nav,div{min-width:0}
-img,svg{max-width:100%}
+img,svg{max-width:100%} [data-rf=mobmenu]{display:none}
 a{color:#0B2545;text-decoration:none}a:hover{color:#1F7D52}
 button{font-family:inherit;cursor:pointer}
 input,textarea{font-family:inherit}
@@ -62,7 +62,7 @@ input,textarea{font-family:inherit}
 @keyframes rfChip{0%,45%{opacity:0;transform:translateY(6px)}55%,92%{opacity:1;transform:none}100%{opacity:0}}
 @media print{.rf-noprint{display:none !important}}
 @media (max-width:1080px){[data-rf=cta]{padding-right:200px !important}}
-@media (max-width:900px){[data-rf=nav]{display:none !important}[data-rf=sec]{padding-top:72px !important;padding-bottom:56px !important}[data-rf=hero]{padding-top:56px !important;padding-bottom:64px !important;gap:48px !important}[data-rf=dark]{padding-top:56px !important;padding-bottom:56px !important}[data-rf=co]{display:none !important}[data-rf=stick]{position:static !important}}
+@media (max-width:900px){[data-rf=nav]{display:none !important}[data-rf=deskact]{display:none !important}[data-rf=mobmenu]{display:flex !important}[data-rf=sec]{padding-top:72px !important;padding-bottom:56px !important}[data-rf=hero]{padding-top:56px !important;padding-bottom:64px !important;gap:48px !important}[data-rf=dark]{padding-top:56px !important;padding-bottom:56px !important}[data-rf=co]{display:none !important}[data-rf=stick]{position:static !important}}
 @media (max-width:760px){body{width:100%;max-width:100%;overflow-x:hidden}[data-rf=span2]{grid-column:auto !important}[data-rf=cta]{padding:24px !important;margin-top:24px !important}[data-rf=ctaM]{display:none !important}[data-rf=card44]{padding:28px 24px !important}[data-rf=kv]{grid-template-columns:1fr !important}[data-rf=aboutM]{display:none !important}[data-rf=apphdr]{gap:14px !important;padding:0 16px !important}[data-rf=main]{padding:24px 16px 72px !important}[data-rf=hist]{grid-template-columns:1fr auto !important;gap:6px 12px !important}[data-rf=hist]>span:last-child{grid-column:1 / -1}[data-rf=kv2]{grid-template-columns:1fr !important;gap:6px !important}[data-rf=frow]{grid-template-columns:auto minmax(0,1fr) !important}[data-rf=frow]>div:last-child{grid-column:1 / -1;text-align:left !important;display:flex;gap:10px}}
 @media (max-width:520px){[data-rf=hdr]{padding:0 18px !important;gap:12px !important}[data-rf=login]{display:none !important}[data-rf=sec]{padding-left:18px !important;padding-right:18px !important}[data-rf=hero]{padding-left:18px !important;padding-right:18px !important}[data-rf=steps]{gap:48px !important}}
 </style>
@@ -79,11 +79,29 @@ input,textarea{font-family:inherit}
         <a onClick="{{ goPrice }}" style="cursor:pointer;color:#3D4759">Priser</a>
         <a onClick="{{ toAbout }}" style="cursor:pointer;color:#3D4759">Om prosjektet</a>
       </nav>
-      <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
+      <div data-rf="deskact" style="display:flex;gap:8px;align-items:center;margin-left:auto">
         <button data-rf="login" onClick="{{ toLogin }}" style="background:transparent;border:0;font-size:15px;color:#0B2545;padding:9px 14px;border-radius:8px" style-hover="background:#EAE5DA">Logg inn</button>
         <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:15px;font-weight:500;padding:10px 16px;border-radius:8px" style-hover="background:#16345E">Prøv Rettført</button>
       </div>
+      <button data-rf="mobmenu" onClick="{{ mobToggle }}" aria-label="Åpne meny" aria-expanded="{{ mobMenuOpen }}" style="margin-left:auto;width:44px;height:44px;border:1px solid #D9D3C6;border-radius:10px;background:#fff;align-items:center;justify-content:center;flex-direction:column;gap:5px;padding:0">
+        <span style="display:block;width:20px;height:2px;border-radius:2px;background:#0B2545;transform:{{ mobLine1 }};transition:transform .2s"></span>
+        <span style="display:block;width:20px;height:2px;border-radius:2px;background:#0B2545;opacity:{{ mobLine2Op }};transition:opacity .15s"></span>
+        <span style="display:block;width:20px;height:2px;border-radius:2px;background:#0B2545;transform:{{ mobLine3 }};transition:transform .2s"></span>
+      </button>
     </div>
+    <sc-if value="{{ mobMenuOpen }}">
+      <div onClick="{{ mobClose }}" style="position:fixed;left:0;right:0;top:70px;bottom:0;background:rgba(11,37,69,.18);z-index:19;animation:rfFade .18s ease both">
+        <div onClick="{{ stop }}" style="background:#F4F1EA;border-bottom:1px solid #D9D3C6;box-shadow:0 18px 36px -26px rgba(11,37,69,.45);padding:12px 18px 18px;display:flex;flex-direction:column;gap:4px">
+          <button onClick="{{ mobHow }}" style="background:transparent;border:0;border-radius:9px;padding:13px 12px;text-align:left;font-size:16px;color:#0B2545">Slik fungerer det</button>
+          <button onClick="{{ mobCtrl }}" style="background:transparent;border:0;border-radius:9px;padding:13px 12px;text-align:left;font-size:16px;color:#0B2545">Kontroller</button>
+          <button onClick="{{ mobPrice }}" style="background:transparent;border:0;border-radius:9px;padding:13px 12px;text-align:left;font-size:16px;color:#0B2545">Priser</button>
+          <button onClick="{{ mobAbout }}" style="background:transparent;border:0;border-radius:9px;padding:13px 12px;text-align:left;font-size:16px;color:#0B2545">Om prosjektet</button>
+          <div style="height:1px;background:#E4DFD4;margin:6px 0"></div>
+          <button onClick="{{ mobLogin }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:9px;padding:12px 14px;text-align:center;font-size:15px;color:#0B2545">Logg inn</button>
+          <button onClick="{{ mobTry }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 14px;text-align:center;font-size:15px;font-weight:600;margin-top:4px">Prøv Rettført</button>
+        </div>
+      </div>
+    </sc-if>
   </header>
 
   <section data-rf="hero" style="max-width:1240px;margin:0 auto;padding:104px 32px 96px;overflow-x:clip;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:72px;align-items:center">
@@ -956,7 +974,7 @@ const M = ({ s = 130, lx = 0, ly = 0, smile = true, wave = false, hold = false, 
 };
 
 class Component extends DCLogic {
-  state = { screen: 'landing', page: 'new', authMode: 'login', heroStep: 0, ready: false, files: { saft: null, prev: null, curr: null }, drag: null, err: null, runIdx: 0, runList: [], pending: null, result: null, resolved: {}, fArea: 'alle', fStatus: 'apne', fid: null, note: '', toast: null, fmtOpen: false, planHover: 1, tired: false, fidget: null, ex: 0, su: { name: '', email: '', role: '', org: '', notify: true, plan: '' }, suState: 'form', suErr: '', nfEmail: '', nfDone: false, slikSeen: false, demo: false, showIntro: false, showHow: false, showEnd: false, tour: null, hist: [], ai: {}, prio: null, outcome: null, settings: null, rid: null, mapDraft: {}, tolDraft: {} };
+  state = { screen: 'landing', page: 'new', authMode: 'login', heroStep: 0, mobileMenu: false, ready: false, files: { saft: null, prev: null, curr: null }, drag: null, err: null, runIdx: 0, runList: [], pending: null, result: null, resolved: {}, fArea: 'alle', fStatus: 'apne', fid: null, note: '', toast: null, fmtOpen: false, planHover: 1, tired: false, fidget: null, ex: 0, su: { name: '', email: '', role: '', org: '', notify: true, plan: '' }, suState: 'form', suErr: '', nfEmail: '', nfDone: false, slikSeen: false, demo: false, showIntro: false, showHow: false, showEnd: false, tour: null, hist: [], ai: {}, prio: null, outcome: null, settings: null, rid: null, mapDraft: {}, tolDraft: {} };
   timers = [];
   componentDidMount() {
     try { const s = JSON.parse(localStorage.getItem('rettfort_nav') || '{}'); if (s.screen) this.setState({ screen: s.screen, page: s.page === 'controls' || s.page === 'settings' ? s.page : 'new' }); } catch (e) {}
@@ -972,6 +990,7 @@ class Component extends DCLogic {
   }
   componentDidUpdate(pp, ps) {
     if (ps.screen !== this.state.screen || ps.page !== this.state.page || ps.fid !== this.state.fid) {
+      if (this.state.mobileMenu) this.setState({ mobileMenu: false });
       try { localStorage.setItem('rettfort_nav', JSON.stringify({ screen: this.state.screen, page: this.state.page })); } catch (e) {}
       window.scrollTo(0, 0);
       if (ps.screen !== this.state.screen) { clearTimeout(this.tiredT); if (this.state.tired) this.setState({ tired: false }); this.tiredT = setTimeout(() => this.setState({ tired: true }), 25000); }
@@ -1188,7 +1207,15 @@ class Component extends DCLogic {
     return {
       isLanding: s.screen === 'landing', isAbout: s.screen === 'about', isAuth: s.screen === 'auth', isApp: s.screen === 'app',
       isLogin: s.authMode === 'login', isSignup: s.authMode === 'signup', isReset: s.authMode === 'reset',
-      toLanding: set({ screen: 'landing' }), toAbout: set({ screen: 'about' }), toLogin: set({ screen: 'auth', authMode: 'login' }), toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
+      mobMenuOpen: !!s.mobileMenu, mobToggle: () => this.setState(st => ({ mobileMenu: !st.mobileMenu })), mobClose: () => this.setState({ mobileMenu: false }),
+      mobLine1: s.mobileMenu ? 'translateY(7px) rotate(45deg)' : 'none', mobLine2Op: s.mobileMenu ? 0 : 1, mobLine3: s.mobileMenu ? 'translateY(-7px) rotate(-45deg)' : 'none',
+      mobHow: () => { this.setState({ mobileMenu: false }); this.scrollTo('slik'); },
+      mobCtrl: () => { this.setState({ mobileMenu: false }); this.scrollTo('kontroller'); },
+      mobPrice: () => { this.setState({ mobileMenu: false }); this.scrollTo('priser'); },
+      mobAbout: () => this.setState({ mobileMenu: false, screen: 'about' }),
+      mobLogin: () => this.setState({ mobileMenu: false, screen: 'auth', authMode: 'login' }),
+      mobTry: () => { this.setState({ mobileMenu: false }); this.trySample(); },
+      toLanding: set({ screen: 'landing', mobileMenu: false }), toAbout: set({ screen: 'about', mobileMenu: false }), toLogin: set({ screen: 'auth', authMode: 'login', mobileMenu: false }), toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
       enterApp: set({ screen: 'app', page: 'new' }), toUpload: set({ screen: 'app', page: 'new' }), toControls: set({ screen: 'app', page: 'controls' }),
       trySample: () => this.trySample(),
       resetSent: () => this.toast('Lenke sendt (demo)'), logout: set({ screen: 'landing' }),
