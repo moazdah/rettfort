@@ -653,10 +653,13 @@ input,textarea{font-family:inherit}
               </div>
             </div>
             <div data-rf="stick" style="display:flex;flex-direction:column;gap:16px;position:sticky;top:88px">
-              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
-                <div style="font-size:15.5px;font-weight:600">Vurdering</div>
+              <div style="background:#fff;border:{{ assessBorder }};border-radius:14px;padding:22px;box-shadow:{{ assessShadow }};transition:border-color .25s,box-shadow .25s">
+                <div style="font-size:15.5px;font-weight:600">Din vurdering</div>
+                <sc-if value="{{ tourAssessShow }}">
+                  <div style="margin-top:10px;background:#FBF3C8;border:1px solid #E9D98A;border-radius:9px;padding:10px 12px;font-size:13.5px;line-height:1.5;color:#0B2545">{{ tourAssessText }}</div>
+                </sc-if>
                 <sc-if value="{{ fOpen }}" hint-placeholder-val="{{ true }}">
-                  <div style="font-size:13.5px;color:#586174;margin-top:4px">Hvordan vurderer du forholdet?</div>
+                  <div style="font-size:13.5px;color:#586174;margin-top:10px">Hvordan vil du avklare forholdet?</div>
                   <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
                     <sc-for list="{{ outcomes }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.fn }}" style="display:flex;align-items:center;gap:10px;background:{{ o.bg }};border:1px solid {{ o.bd }};border-radius:8px;padding:9px 12px;font-size:14.5px;color:#0B2545;text-align:left"><span style="width:16px;height:16px;border-radius:50%;border:1.5px solid {{ o.rc }};display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="width:8px;height:8px;border-radius:50%;background:{{ o.dot }}"></span></span>{{ o.l }}</button></sc-for>
                   </div>
@@ -893,7 +896,7 @@ input,textarea{font-family:inherit}
     <p style="font-size:14.5px;line-height:1.55;color:rgba(255,255,255,.86);margin:8px 0 0">{{ tourX }}</p>
     <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
       <sc-if value="{{ tourHasPrev }}"><button onClick="{{ tourPrev }}" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:9px 14px;font-size:14px">Tilbake</button></sc-if>
-      <button onClick="{{ tourNext }}" style="background:#F6DF6E;color:#0B2545;border:0;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:600">{{ tourNextL }}</button>
+      <button onClick="{{ tourNext }}" disabled="{{ tourCantNext }}" style="background:{{ tourNextBg }};color:{{ tourNextFg }};border:0;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:600;cursor:{{ tourNextCur }};min-width:120px">{{ tourNextL }}</button>
     </div>
   </div>
 </sc-if>
@@ -1138,11 +1141,18 @@ class Component extends DCLogic {
     const agaRow = rc && rc.rows ? rc.rows.find(r => r.key === 'aga') : null;
     const okRows = rc && rc.rows ? rc.rows.filter(r => r.status === 'stemmer' || r.status === 'innenfor').map(r => r.t.toLowerCase()) : [];
     const okTxt = okRows.length ? `${okRows.join(' og ').replace(/^./, c => c.toUpperCase())} stemmer. ` : '';
+    const tour4Text = aiS && aiS.loading
+      ? 'AI-demoen går gjennom funnet og kontrollgrunnlaget. Når forklaringen er klar, er det fortsatt du som avgjør hvordan forholdet skal avklares.'
+      : aiD && !fr
+        ? 'AI kan støtte undersøkelsen, men avslutter ikke saken. Velg hvordan du vil avklare funnet i vurderingsfeltet til høyre. Vurderingen lagres i historikken.'
+        : fr
+          ? 'Vurderingen er lagret og dokumentert i historikken.'
+          : 'Rettført viser en AI-støttet forklaring av funnet. Den faglige konklusjonen gjøres alltid av brukeren.';
     const TOUR = res ? [
       ['Rettført viser bare det som bør undersøkes', `${rStats}. Det meste stemmer. Rapporten viser de ${openN} forholdene som fortjener oppmerksomhet, fordelt på fire fagområder.`],
       ['Mulig dobbeltføring', 'Samme leverandør, fakturanummer og beløp er bokført to ganger. Rettført viser begge bilagene, hvorfor kontrollen reagerte og hva du bør sjekke.'],
       ['Lønn × regnskap', agaRow ? `Rettført kobler lønnsfilen mot hovedboken. ${okTxt}Arbeidsgiveravgiften avviker med ${kr(Math.abs(agaRow.diff))}, og du ser posteringene og lønnsdataene bak begge tallene.` : 'Rettført kobler lønnsfilen mot hovedboken og viser posteringene bak tallene.'],
-      ['Undersøk funnet, og vurder selv', 'Forklaringen bygger bare på de strukturerte dataene for dette funnet og foreslår hva som kan kontrolleres videre. Tallene kommer fra kontrollmotoren. Til slutt velger du en vurdering til høyre, og den lagres i historikken.']
+      ['AI-støtte, menneskelig konklusjon', tour4Text]
     ] : [];
     const inTour = s.tour != null && !!TOUR[s.tour];
 
@@ -1215,7 +1225,7 @@ class Component extends DCLogic {
       printIt: () => window.print(), toReport: set({ page: 'report' }), toNew: set({ page: 'new' }),
       hasF: !!F, F: F || {}, fWhy: F ? F.why.map(t => ({ t })) : [], fNext: F ? F.next.map((t, i) => ({ t, n: String(i + 1).padStart(2, '0') })) : [], fCols, fRows, fPos: F ? `${idx + 1} / ${fAll.length}` : '', prevF: go(-1), nextF: go(1),
       fOpen: !fr, fDone: !!fr, note: s.note, noteType: e => this.setState({ note: e.target.value }), fNote: fr ? fr.note : '', fHasNote: !!(fr && fr.note), fDoneAt: fr ? `Vurdert av ${fr.who} · ${fr.at}` : '',
-      resolveF: () => { if (!F || !s.outcome) return; const t = this.now(), lbl = OUT_L[s.outcome], nt = s.note.trim(); this.setState(st => ({ resolved: { ...st.resolved, [F.id]: { outcome: st.outcome, note: nt, at: `${t.date} kl. ${t.time}`, who: 'Daniel Berg' } }, outcome: null })); this.log('Daniel Berg', `Vurderte «${F.title}» som «${lbl}».${nt ? ` Kommentar: ${nt}` : ''}`, F.id); this.toast('Vurderingen er lagret'); if (s.tour === 3) this.later(() => this.tourGo(4), 900); },
+      resolveF: () => { if (!F || !s.outcome) return; const t = this.now(), lbl = OUT_L[s.outcome], nt = s.note.trim(); this.setState(st => ({ resolved: { ...st.resolved, [F.id]: { outcome: st.outcome, note: nt, at: `${t.date} kl. ${t.time}`, who: 'Daniel Berg' } }, outcome: null })); this.log('Daniel Berg', `Vurderte «${F.title}» som «${lbl}».${nt ? ` Kommentar: ${nt}` : ''}`, F.id); this.toast('Vurderingen er lagret'); if (s.tour === 3) this.later(() => this.tourGo(4), 1300); },
       reopenF: () => { if (!F) return; this.setState(st => { const r = { ...st.resolved }; delete r[F.id]; return { resolved: r, note: (fr && fr.note) || '' }; }); this.log('Daniel Berg', `Åpnet vurderingen av «${F.title}» igjen.`, F.id); },
       cantResolve: !s.outcome, resBg: s.outcome ? INK : '#A9AEB8', resCur: s.outcome ? 'pointer' : 'not-allowed', outcomes,
       fOutL: fr ? OUT_L[fr.outcome] : '', fOutC: fr && fr.outcome === 'oppfolging' ? '#8E5A0F' : C.grn,
@@ -1227,7 +1237,14 @@ class Component extends DCLogic {
       isDemo: !!(s.demo && res), demoLabel: res ? `${res.company} · ${res.payPeriods ? monthName(res.payPeriods[1]) : ''}` : '', rStats,
       showIntro: !!(s.showIntro && res), showHow: !!s.showHow, showEnd: !!s.showEnd, introCo: res ? res.company : '', introSub: res ? `${res.payPeriods ? monthName(res.payPeriods[1]).replace(/^./, c => c.toUpperCase()) : ''} · ${rStats}` : '',
       startTour: () => this.tourGo(0), exploreSelf: () => this.setState({ showIntro: false, showEnd: false, tour: null, page: 'report' }), openHow: set({ showHow: true }), closeHow: set({ showHow: false }),
-      inTour, tourN: inTour ? `Steg ${s.tour + 1} av ${TOUR.length}` : '', tourT: inTour ? TOUR[s.tour][0] : '', tourX: inTour ? TOUR[s.tour][1] : '', tourNext: () => this.tourGo(s.tour + 1), tourPrev: () => this.tourGo(Math.max(0, s.tour - 1)), tourNextL: s.tour === 3 ? 'Fullfør' : 'Neste', tourHasPrev: !!s.tour, tourStop: set({ tour: null }),
+      inTour, tourN: inTour ? `Steg ${s.tour + 1} av ${TOUR.length}` : '', tourT: inTour ? TOUR[s.tour][0] : '', tourX: inTour ? TOUR[s.tour][1] : '',
+      tourNext: () => s.tour === 3 ? null : this.tourGo(s.tour + 1), tourPrev: () => this.tourGo(Math.max(0, s.tour - 1)),
+      tourNextL: s.tour === 3 ? (aiS && aiS.loading ? 'AI analyserer …' : aiD && !fr ? 'Velg vurdering til høyre' : 'Fullfører …') : 'Neste',
+      tourCantNext: s.tour === 3, tourNextBg: s.tour === 3 ? 'rgba(255,255,255,.14)' : '#F6DF6E', tourNextFg: s.tour === 3 ? 'rgba(255,255,255,.72)' : '#0B2545', tourNextCur: s.tour === 3 ? 'default' : 'pointer',
+      tourHasPrev: !!s.tour, tourStop: set({ tour: null }),
+      tourAssessShow: s.tour === 3 && !!F && !fr, tourAssessText: aiD ? 'AI-forklaringen er klar. Velg en vurdering nedenfor og godkjenn den for å fullføre demoen.' : 'AI-demoen analyserer funnet først. Deretter velger du selv hvordan forholdet skal avklares.',
+      assessBorder: s.tour === 3 && aiD && !fr ? '1.5px solid #E9CF63' : '1px solid #E4DFD4',
+      assessShadow: s.tour === 3 && aiD && !fr ? '0 0 0 4px rgba(246,223,110,.22),0 18px 36px -28px rgba(11,37,69,.45)' : 'none',
       hasPay: !!pay, noPay: !pay, payRows, payP0: res && res.payPeriods ? monthName(res.payPeriods[0]) : '', payP1: res && res.payPeriods ? monthName(res.payPeriods[1]) : '',
       payHead: pay ? `${pay.length} ansatte. Bruttolønn ${kr(payTot[0])} → ${kr(payTot[1])} (${payTot[1] - payTot[0] >= 0 ? '+' : '−'}${kr(Math.abs(payTot[1] - payTot[0]))}).${res.payInfo && res.payInfo.ignored.length ? ` Kolonner som ikke brukes i beregningene: ${res.payInfo.ignored.join(', ')}.` : ''}` : '',
       ctrlGroups, toast: s.toast, hasToast: !!s.toast
