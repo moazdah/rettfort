@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Rettført – kontroll av regnskap og lønn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;background:#F4F1EA;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:"tnum" 1}
+*{box-sizing:border-box}
+a{color:#0B2545;text-decoration:none}a:hover{color:#1F7D52}
+button{font-family:inherit;cursor:pointer}
+input,textarea{font-family:inherit}
+::selection{background:#F6DF6E}
+@keyframes rfIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes rfFade{from{opacity:0}to{opacity:1}}
+@keyframes rfSpin{to{transform:rotate(360deg)}}
+@keyframes rfBlink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes rfBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes rfWave{0%,55%,100%{transform:rotate(0)}65%{transform:rotate(-20deg)}75%{transform:rotate(6deg)}85%{transform:rotate(-14deg)}}
+@keyframes rfSway{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(7deg) translateY(-5px)}}
+@keyframes rfShift{0%,100%{transform:none}25%,40%{transform:translate(1px,.5px) rotate(.9deg)}65%,80%{transform:translate(-1px,.5px) rotate(-.9deg)}}
+@keyframes rfShiftT{0%,100%{transform:translateY(2px) rotate(-1.5deg)}50%{transform:translateY(2.5px) rotate(1.5deg)}}
+@keyframes rfKickL{0%,100%{transform:none}14%{transform:translateY(-6px) rotate(-14deg)}26%{transform:translateY(-1px) rotate(3deg)}38%{transform:translateY(-5px) rotate(-10deg)}50%{transform:none}}
+@keyframes rfKickR{0%,50%,100%{transform:none}64%{transform:translateY(-6px) rotate(13deg)}76%{transform:translateY(-1px) rotate(-3deg)}88%{transform:translateY(-5px) rotate(9deg)}}
+@keyframes rfScan{0%,100%{transform:translate(-7px,3px)}50%{transform:translate(6px,3px)}}
+@keyframes rfAsk{0%,20%{opacity:0;transform:translateY(6px) scale(.8)}35%,80%{opacity:1;transform:none}95%,100%{opacity:0}}
+@keyframes rfSweep{0%,30%{background-size:0% 100%}55%,90%{background-size:100% 100%}100%{background-size:0% 100%}}
+@keyframes rfRow1{0%,8%{opacity:0;transform:scale(.4)}14%,100%{opacity:1;transform:scale(1)}}
+@keyframes rfRow2{0%,18%{opacity:0;transform:scale(.4)}24%,100%{opacity:1;transform:scale(1)}}
+@keyframes rfRow3{0%,38%{opacity:0;transform:scale(.4)}44%,100%{opacity:1;transform:scale(1)}}
+@keyframes rfRow4{0%,48%{opacity:0;transform:scale(.4)}54%,100%{opacity:1;transform:scale(1)}}
+@keyframes rfScrl{0%,8%{transform:translateY(0)}32%,100%{transform:translateY(-35px)}}
+@keyframes rfScrlB{0%,8%{transform:translateY(0)}32%,100%{transform:translateY(-35px)}}
+@keyframes rfIn2{0%,34%{background-size:0% 100%;border-color:#E4DFD4}58%,100%{background-size:100% 100%;border-color:#E9CF63}}
+@keyframes rfIn2B{0%,34%{background-size:0% 100%;border-color:#E4DFD4}58%,100%{background-size:100% 100%;border-color:#E9CF63}}
+@keyframes rfOut2{0%{background-size:100% 100%;border-color:#E9CF63}30%,100%{background-size:0% 100%;border-color:#E4DFD4}}
+@keyframes rfOut2B{0%{background-size:100% 100%;border-color:#E9CF63}30%,100%{background-size:0% 100%;border-color:#E4DFD4}}
+@keyframes rfTin{0%,44%{opacity:0}60%,100%{opacity:1}}
+@keyframes rfTinB{0%,44%{opacity:0}60%,100%{opacity:1}}
+@keyframes rfTout{0%{opacity:1}20%,100%{opacity:0}}
+@keyframes rfToutB{0%{opacity:1}20%,100%{opacity:0}}
+@keyframes rfKin{0%,20%{opacity:0;transform:scale(.4)}34%,100%{opacity:1;transform:none}}
+@keyframes rfKinB{0%,20%{opacity:0;transform:scale(.4)}34%,100%{opacity:1;transform:none}}
+@keyframes rfKno{0%,100%{opacity:0}}
+@keyframes rfWalk{0%{transform:translateX(-40px)}12%{transform:translateX(-30px) translateY(-3px)}24%{transform:translateX(-20px)}36%{transform:translateX(-10px) translateY(-3px)}48%,100%{transform:none}}
+@keyframes rfTray{0%,48%{transform:none}56%{transform:translateY(3px)}64%,100%{transform:none}}
+@keyframes rfLean{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(-8deg) translateX(-3px)}}
+@keyframes rfNod{0%,40%{transform:none}48%{transform:rotate(-9deg) translateX(-6px)}58%,100%{transform:none}}
+@keyframes rfChip{0%,45%{opacity:0;transform:translateY(6px)}55%,92%{opacity:1;transform:none}100%{opacity:0}}
+@media print{.rf-noprint{display:none !important}}
+@media (max-width:1080px){[data-rf=cta]{padding-right:200px !important}}
+@media (max-width:900px){[data-rf=nav]{display:none !important}[data-rf=sec]{padding-top:72px !important;padding-bottom:56px !important}[data-rf=hero]{padding-top:56px !important;padding-bottom:64px !important;gap:48px !important}[data-rf=dark]{padding-top:56px !important;padding-bottom:56px !important}[data-rf=co]{display:none !important}[data-rf=stick]{position:static !important}}
+@media (max-width:760px){[data-rf=span2]{grid-column:auto !important}[data-rf=cta]{padding:24px !important;margin-top:24px !important}[data-rf=ctaM]{display:none !important}[data-rf=card44]{padding:28px 24px !important}[data-rf=kv]{grid-template-columns:1fr !important}[data-rf=aboutM]{display:none !important}[data-rf=apphdr]{gap:14px !important;padding:0 16px !important}[data-rf=main]{padding:24px 16px 72px !important}[data-rf=hist]{grid-template-columns:1fr auto !important;gap:6px 12px !important}[data-rf=hist]>span:last-child{grid-column:1 / -1}[data-rf=kv2]{grid-template-columns:1fr !important;gap:6px !important}[data-rf=frow]{grid-template-columns:auto minmax(0,1fr) !important}[data-rf=frow]>div:last-child{grid-column:1 / -1;text-align:left !important;display:flex;gap:10px}}
+@media (max-width:520px){[data-rf=hdr]{padding:0 18px !important;gap:12px !important}[data-rf=login]{display:none !important}[data-rf=sec]{padding-left:18px !important;padding-right:18px !important}[data-rf=hero]{padding-left:18px !important;padding-right:18px !important}[data-rf=steps]{gap:48px !important}}
+</style>
+</helmet>
+
+<sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+<div style="min-height:100vh">
+  <header style="position:sticky;top:0;z-index:20;background:rgba(244,241,234,.9);backdrop-filter:blur(10px);border-bottom:1px solid #E4DFD4">
+    <div data-rf="hdr" style="max-width:1240px;margin:0 auto;padding:0 32px;height:70px;display:flex;align-items:center;gap:40px">
+      <div onClick="{{ toLanding }}" style="width:103px;height:26px;overflow:hidden;position:relative;flex-shrink:0;cursor:pointer"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;left:-14.6px;top:-8.3px;width:131px;height:43.7px"></div>
+      <nav data-rf="nav" style="display:flex;gap:22px;font-size:15px;flex:1;min-width:0;overflow:hidden;white-space:nowrap">
+        <a onClick="{{ goHow }}" style="cursor:pointer;color:#3D4759">Slik fungerer det</a>
+        <a onClick="{{ goCtrl }}" style="cursor:pointer;color:#3D4759">Kontroller</a>
+        <a onClick="{{ goPrice }}" style="cursor:pointer;color:#3D4759">Priser</a>
+        <a onClick="{{ toAbout }}" style="cursor:pointer;color:#3D4759">Om prosjektet</a>
+      </nav>
+      <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
+        <button data-rf="login" onClick="{{ toLogin }}" style="background:transparent;border:0;font-size:15px;color:#0B2545;padding:9px 14px;border-radius:8px" style-hover="background:#EAE5DA">Logg inn</button>
+        <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:15px;font-weight:500;padding:10px 16px;border-radius:8px" style-hover="background:#16345E">Prøv Rettført</button>
+      </div>
+    </div>
+  </header>
+
+  <section data-rf="hero" style="max-width:1240px;margin:0 auto;padding:104px 32px 96px;overflow-x:clip;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:72px;align-items:center">
+    <div style="animation:rfIn .7s ease both">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:15px;color:#586174"><span style="font-size:12.5px;font-weight:600;color:#0B2545;background:#F6DF6E;padding:3px 10px;border-radius:99px">Tidlig versjon</span>Kontroll av SAF-T og lønnsfiler</div>
+      <h1 style="font-size:clamp(42px,5.4vw,70px);line-height:1.02;letter-spacing:-0.035em;font-weight:600;margin:22px 0 0;text-wrap:balance">Se det som fortjener <span style="background:linear-gradient(transparent 60%,#F6DF6E 60%,#F6DF6E 92%,transparent 92%)">en ekstra vurdering.</span></h1>
+      <p style="font-size:19px;line-height:1.55;color:#3D4759;margin:26px 0 0;max-width:520px;text-wrap:pretty">Last opp en SAF-T-fil eller lønnsfil fra systemet du allerede bruker. Rettført kjører kontrollene og viser deg hva som bør undersøkes.</p>
+      <div style="display:flex;gap:10px;margin-top:38px;flex-wrap:wrap">
+        <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:16px;font-weight:500;padding:14px 22px;border-radius:9px;display:flex;align-items:center;gap:10px" style-hover="background:#16345E">Prøv Rettført {{ iArrow }}</button>
+        <button onClick="{{ toUpload }}" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;font-size:16px;padding:14px 22px;border-radius:9px" style-hover="border-color:#A9A294">Last opp egen fil</button>
+      </div>
+      <div style="margin-top:40px;display:flex;gap:28px;font-size:14px;color:#586174;flex-wrap:wrap"><span>SAF-T Financial 1.30</span><span>Lønn som CSV</span><span>Filene lastes ikke opp</span></div>
+    </div>
+
+    <div style="position:relative;animation:rfIn .9s .15s ease both">
+      <div style="position:relative;z-index:1;background:#fff;border:1px solid #E1DBCE;border-radius:16px;box-shadow:0 1px 2px rgba(11,37,69,.04),0 30px 60px -30px rgba(11,37,69,.28);overflow:hidden">
+        <div style="padding:20px 24px;border-bottom:1px solid #EFEBE2;display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <div><div style="font-size:13px;color:#8A909C">Kontrollrapport</div><div style="font-size:15px;font-weight:600;margin-top:2px">Nordhavn Drift AS · september 2026</div></div>
+          <sc-if value="{{ heroBusy }}" hint-placeholder-val="{{ true }}"><span style="width:16px;height:16px;border:2px solid #E4DFD4;border-top-color:#35AE74;border-radius:50%;animation:rfSpin .8s linear infinite"></span></sc-if>
+          <sc-if value="{{ heroDone }}"><span style="font-size:12.5px;color:#1F7D52;background:#E2F1E8;padding:4px 10px;border-radius:99px">Ferdig</span></sc-if>
+        </div>
+        <div style="padding:24px">
+          <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.25"><span style="font-family:'IBM Plex Mono',monospace;font-weight:500">{{ heroLinesS }}</span> posteringer analysert.</div>
+          <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.25;opacity:{{ heroSumOp }};transition:opacity .4s">{{ heroOkS }} kontroller bestått. {{ heroOpenS }} forhold bør vurderes.</div>
+          <div style="height:4px;background:#EFEBE2;border-radius:2px;margin-top:18px;overflow:hidden"><div style="height:100%;width:{{ heroW }};background:#35AE74;transition:width .35s linear"></div></div>
+          <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ heroFinds }}" as="h" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;border:1px solid #EFEBE2;border-radius:9px;padding:11px 14px;font-size:14px;opacity:{{ h.op }};transform:translateY({{ h.y }});transition:opacity .45s,transform .45s;background:linear-gradient(#FBEFA8,#FBEFA8) no-repeat;background-size:{{ h.w }} 100%;transition-property:opacity,transform,background-size;transition-duration:.45s,.45s,.7s">
+                <span style="font-size:11.5px;font-weight:500;color:{{ h.c }};background:{{ h.bg }};padding:2px 8px;border-radius:4px;flex-shrink:0">{{ h.sev }}</span>
+                <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.t }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;white-space:nowrap">{{ h.a }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="slik" ref="{{ slikRef }}" style="background:#fff;border-top:1px solid #E4DFD4;border-bottom:1px solid #E4DFD4">
+    <div data-rf="sec" style="max-width:1240px;margin:0 auto;padding:120px 32px 112px">
+      <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0 auto;max-width:760px;text-align:center;text-wrap:balance">Last opp. Analyser. Vurder.</h2>
+      <div data-rf="steps" style="margin-top:80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:64px 40px;text-align:center">
+        <div>
+          <div style="height:200px;position:relative">
+            <div style="position:absolute;left:calc(50% + 34px);bottom:14px;width:108px;height:62px;background:#fff;border:1px solid #D9D3C6;border-radius:8px 8px 10px 10px;box-shadow:0 14px 26px -18px rgba(11,37,69,.35);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9px;animation:{{ s1Tray }}">
+              <div style="position:absolute;top:-7px;left:10px;right:10px;height:7px;background:#EAE5DA;border-radius:4px 4px 0 0"></div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#586174">SAF-T · CSV</div>
+            </div>
+            <div style="position:absolute;left:calc(50% - 150px);bottom:0;animation:{{ s1Walk }}">{{ mStep1 }}</div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">01</div>
+          <div style="font-size:20px;font-weight:600;margin-top:8px">Last opp</div>
+          <p style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">SAF-T fra Tripletex, PowerOffice, Fiken, Visma eller et annet system. Lønn som CSV for to perioder.</p>
+        </div>
+        <div>
+          <div style="height:200px;position:relative;display:flex;align-items:flex-end;justify-content:center">
+            <div style="position:absolute;left:calc(50% - 150px);top:22px;width:170px;height:168px;overflow:hidden;text-align:left;-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent)">
+              <div style="display:flex;flex-direction:column;gap:7px;animation:{{ scanAn }}">
+                <sc-for list="{{ scanRows }}" as="r" hint-placeholder-count="6">
+                  <div style="height:28px;flex-shrink:0;background:#fff linear-gradient(#F6DF6E,#F6DF6E) no-repeat;background-size:0% 100%;border:1px solid #E4DFD4;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 7px 0 9px;font-size:12px;font-weight:500;animation:{{ r.an }}">
+                    <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:{{ r.tan }}">{{ r.t }}</span>
+                    <span style="width:14px;height:14px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:{{ r.kan }}">{{ iTickS }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="position:absolute;left:calc(50% + 4px);top:52px;transform-origin:30% 90%;animation:{{ s2Lean }}">{{ mStep2 }}</div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">02</div>
+          <div style="font-size:20px;font-weight:600;margin-top:8px">Analyser</div>
+          <p style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">{{ nCtrl }} kontroller kjøres på sekunder. Det som stemmer, huker Rettført av. Det som ikke stemmer, markeres.</p>
+        </div>
+        <div>
+          <div style="height:200px;position:relative;display:flex;align-items:flex-end;justify-content:center">
+            <div style="position:absolute;left:calc(50% - 160px);top:46px;width:176px;background:#fff;border:1px solid #E4DFD4;border-radius:10px;padding:12px;text-align:left;box-shadow:0 14px 30px -18px rgba(11,37,69,.3)">
+              <div style="font-size:12px;font-weight:600">{{ ex3t }}</div>
+              <div style="font-size:11px;color:#586174;margin-top:4px;line-height:1.4">{{ ex3d }}</div>
+              <div style="font-size:10.5px;color:#8A909C;margin-top:6px">{{ ex3o }}</div>
+              <div style="margin-top:9px;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:#1F7D52;background:#E2F1E8;padding:3px 8px;border-radius:99px;animation:rfChip 5s ease infinite">{{ iTickS }}Avklart</div>
+            </div>
+            <div style="position:absolute;left:calc(50% + 24px);top:40px;transform-origin:20% 90%;animation:{{ s3Nod }}">{{ mStep3 }}</div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">03</div>
+          <div style="font-size:20px;font-weight:600;margin-top:8px">Vurder</div>
+          <p style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">Hvert funn viser hvorfor Rettført reagerte. Du merker det som avklart, med en kommentar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="kontroller" data-rf="sec" style="max-width:1240px;margin:0 auto;padding:120px 32px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:48px;align-items:end">
+      <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0;text-wrap:balance">{{ nCtrl }} kontroller med kjent regelgrunnlag.</h2>
+      <p style="font-size:17px;line-height:1.6;color:#3D4759;margin:0;max-width:480px">Hver kontroll har en fast terskel og en henvisning. Du ser alltid hva som ble sjekket, og hvorfor noe ble markert.</p>
+    </div>
+    <div style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px">
+      <sc-for list="{{ ctrlCards }}" as="g" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:24px;display:flex;flex-direction:column">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:18px;font-weight:600">{{ g.t }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#586174">{{ g.n }}</span></div>
+          <div style="font-size:14px;color:#586174;margin-top:6px;line-height:1.5">{{ g.d }}</div>
+          <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ g.ex }}" as="x" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;font-size:14.5px"><span style="width:18px;height:18px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span>{{ x.t }}</div></sc-for>
+          </div>
+          <div style="font-size:13px;color:#8A909C;margin-top:12px">{{ g.more }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <button onClick="{{ toControls }}" style="margin-top:28px;background:transparent;border:0;border-bottom:1px solid #0B2545;padding:0 0 2px;font-size:15px;font-weight:500;color:#0B2545;display:flex;align-items:center;gap:8px">Se alle kontroller med terskel og regelgrunnlag {{ iArrow }}</button>
+  </section>
+
+  <section style="padding:0 20px">
+    <div data-rf="dark" style="max-width:1320px;margin:0 auto;background:#0B2545;color:#fff;border-radius:28px;padding:88px clamp(24px,5vw,72px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:56px;align-items:center">
+      <div>
+        <h2 style="font-size:clamp(32px,3.8vw,48px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0;text-wrap:balance">Filene forlater aldri maskinen din.</h2>
+        <p style="font-size:17px;line-height:1.6;color:rgba(255,255,255,.72);margin:20px 0 0;max-width:480px">Rettført leser og analyserer filene i nettleseren. Ingenting lastes opp til en server, og ingenting lagres etter at du lukker siden.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.14);border-radius:14px;overflow:hidden">
+        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Lokal analyse</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Kontrollene kjører på din maskin.</div></div>
+        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Ingen innlogging i bank</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Du bruker eksporter du allerede har.</div></div>
+        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Regler, ikke gjetning</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Alle beregninger er vanlig kode med faste terskler.</div></div>
+        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Sporbare funn</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Hvert funn viser bilagene det bygger på.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="priser" data-rf="sec" style="max-width:1240px;margin:0 auto;padding:128px 32px 24px">
+    <div style="text-align:center">
+      <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0 auto;max-width:720px;text-wrap:balance">Planlagte priser.</h2>
+      <p style="font-size:17px;line-height:1.6;color:#3D4759;margin:18px auto 0;max-width:560px">Rettført er under utvikling. Demoen er åpen for alle. Meld deg på, så får du beskjed når du kan ta det i bruk med egne data.</p>
+    </div>
+    <div onMouseLeave="{{ planReset }}" style="margin-top:80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px;align-items:start">
+      <sc-for list="{{ plans }}" as="p" hint-placeholder-count="3">
+        <div style="position:relative;background:{{ p.bg }};color:{{ p.fg }};border:1px solid {{ p.bd }};border-radius:18px;padding:32px 28px 28px;box-shadow:{{ p.shadow }};transform:translateY({{ p.lift }});transition:transform .35s cubic-bezier(.3,.7,.2,1),box-shadow .35s ease,border-color .35s ease,background-color .35s ease,color .35s ease" onMouseEnter="{{ p.enter }}">
+          <sc-if value="{{ p.pop }}">
+            <div style="position:absolute;right:18px;top:-74px">{{ mPrice }}</div>
+            <div style="position:absolute;left:28px;top:-13px;background:#F6DF6E;color:#0B2545;font-size:12.5px;font-weight:600;padding:4px 11px;border-radius:99px">Mest valgt</div>
+          </sc-if>
+          <div style="font-size:21px;font-weight:600;letter-spacing:-0.015em">{{ p.k }}</div>
+          <div style="font-size:14.5px;line-height:1.5;color:{{ p.sub }};margin-top:6px;min-height:44px">{{ p.d }}</div>
+          <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-top:20px"><span style="font-size:clamp(38px,3.6vw,48px);font-weight:600;letter-spacing:-0.04em;line-height:1;white-space:nowrap">{{ p.price }}</span><span style="font-size:14.5px;color:{{ p.sub }};white-space:nowrap">{{ p.unit }}</span></div>
+          <div style="font-size:13px;color:{{ p.sub }};margin-top:8px">{{ p.note }}</div>
+          <button onClick="{{ p.fn }}" style="margin-top:22px;width:100%;background:{{ p.btnBg }};color:{{ p.btnFg }};border:0;border-radius:9px;padding:13px;font-size:15px;font-weight:500;transition:background-color .35s,color .35s" style-hover="opacity:.88">{{ p.cta }}</button>
+          <div style="margin-top:24px;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ p.limits }}" as="l" hint-placeholder-count="3"><div style="font-size:14.5px;font-weight:500">{{ l.l }}</div></sc-for>
+          </div>
+          <div style="height:1px;background:{{ p.line }};margin:22px 0"></div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ p.feats }}" as="f" hint-placeholder-count="11">
+              <div style="display:flex;align-items:center;gap:12px;font-size:14.5px;color:{{ f.txt }}">
+                <span style="width:20px;height:20px;border-radius:50%;background:{{ f.icBg }};color:{{ f.icFg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background-color .35s,color .35s">
+                  <sc-if value="{{ f.on }}" hint-placeholder-val="{{ true }}">{{ iTickS }}</sc-if>
+                  <sc-if value="{{ f.off }}">{{ iXs }}</sc-if>
+                </span>
+                <span>{{ f.l }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <p style="text-align:center;font-size:13.5px;color:#586174;margin:40px 0 0">Prisene gjelder fra lansering og er eks. MVA. Ingen binding. Byrå: 79 kr per ekstra kunde utover 15.</p>
+  </section>
+
+  <section data-rf="sec" style="max-width:1240px;margin:0 auto;padding:120px 32px 40px">
+    <div data-rf="card44" style="background:#fff;border:1px solid #E4DFD4;border-radius:20px;padding:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:40px;align-items:center">
+      <div>
+        <div style="font-size:14px;color:#586174">For arbeidsgivere</div>
+        <h3 style="font-size:30px;line-height:1.15;letter-spacing:-0.025em;font-weight:600;margin:10px 0 0;text-wrap:balance">Et prosjekt om regnskap, lønn og kontroll.</h3>
+        <p style="font-size:16px;line-height:1.6;color:#3D4759;margin:14px 0 0;max-width:520px">Hvorfor jeg laget Rettført, hvordan kontrollene er bygget, og hvilke regler de bygger på.</p>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><button onClick="{{ toAbout }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:14px 20px;font-size:15.5px;font-weight:500;display:flex;align-items:center;gap:10px">Les om prosjektet {{ iArrow }}</button></div>
+    </div>
+  </section>
+
+  <section data-rf="sec" style="max-width:1240px;margin:0 auto;padding:96px 32px 72px">
+    <h2 style="font-size:clamp(32px,4vw,52px);line-height:1.05;letter-spacing:-0.035em;font-weight:600;margin:0;max-width:680px;text-wrap:balance">Se hva en kontrollrapport finner i ditt regnskap.</h2>
+    <div data-rf="cta" style="position:relative;margin-top:104px;background:#E2F1E8;border-radius:20px;padding:28px 32px;display:flex;align-items:center;gap:16px 24px;flex-wrap:wrap">
+      <div data-rf="ctaM" style="position:absolute;right:40px;top:-128px;pointer-events:none">{{ mCta }}</div>
+      <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:15.5px;font-weight:500;padding:13px 20px;border-radius:9px" style-hover="background:#16345E">Prøv Rettført</button>
+      <span style="font-size:16px;color:#174F36;flex:1 1 260px;min-width:0">Ingen innlogging. En ferdig analysert demo med fiktive data.</span>
+      <sc-if value="{{ nfOpen }}" hint-placeholder-val="{{ true }}"><form onSubmit="{{ nfSubmit }}" style="display:flex;gap:8px;flex:1 1 300px;max-width:380px"><input type="email" value="{{ nfEmail }}" onChange="{{ nfType }}" placeholder="E-post" aria-label="E-post" style="flex:1;min-width:0;border:1px solid #B9DCC8;border-radius:9px;padding:12px 14px;font-size:15px;outline:none;color:#0B2545;background:#fff"><button type="submit" style="background:#fff;color:#0B2545;border:1px solid #0B2545;border-radius:9px;padding:12px 16px;font-size:15px;font-weight:500;white-space:nowrap">Varsle meg ved lansering</button></form></sc-if>
+      <sc-if value="{{ nfDone }}"><span style="font-size:15px;font-weight:500;color:#174F36;display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;border-radius:50%;background:#fff;color:#1F7D52;display:flex;align-items:center;justify-content:center">{{ iTickS }}</span>{{ nfMsg }}</span></sc-if>
+    </div>
+  </section>
+  <footer style="max-width:1240px;margin:0 auto;padding:40px 32px;border-top:1px solid #E4DFD4;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;font-size:14px;color:#586174">
+    <div style="width:79px;height:20px;overflow:hidden;position:relative"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;left:-11.2px;top:-6.4px;width:100.8px;height:33.6px"></div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap"><span>rettført.no</span><a onClick="{{ toAbout }}" style="cursor:pointer;color:#586174">Om prosjektet</a><a onClick="{{ toControls }}" style="cursor:pointer;color:#586174">Kontroller</a><span>Personvern</span></div>
+  </footer>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAbout }}">
+<div style="min-height:100vh">
+  <header style="position:sticky;top:0;z-index:20;background:rgba(244,241,234,.9);backdrop-filter:blur(10px);border-bottom:1px solid #E4DFD4">
+    <div data-rf="hdr" style="max-width:1240px;margin:0 auto;padding:0 32px;height:70px;display:flex;align-items:center;gap:24px">
+      <div onClick="{{ toLanding }}" style="width:103px;height:26px;overflow:hidden;position:relative;flex-shrink:0;cursor:pointer"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;left:-14.6px;top:-8.3px;width:131px;height:43.7px"></div>
+      <div style="flex:1"></div>
+      <a onClick="{{ toLanding }}" style="font-size:15px;cursor:pointer;color:#3D4759">← Til forsiden</a>
+      <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:15px;font-weight:500;padding:10px 16px;border-radius:8px">Prøv Rettført</button>
+    </div>
+  </header>
+  <article data-rf="sec" style="max-width:760px;margin:0 auto;padding:96px 32px 120px;animation:rfIn .5s ease both">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px">
+      <div>
+        <div style="font-size:15px;color:#586174">Om prosjektet</div>
+        <h1 style="font-size:clamp(38px,5vw,56px);line-height:1.04;letter-spacing:-0.035em;font-weight:600;margin:16px 0 0;text-wrap:balance">Et lite verktøy for et konkret problem.</h1>
+      </div>
+      <div data-rf="aboutM" style="flex-shrink:0">{{ mAbout }}</div>
+    </div>
+    <div style="margin-top:56px;display:flex;flex-direction:column;gap:48px;font-size:17px;line-height:1.7;color:#2A3547">
+      <section>
+        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Problemet</h2>
+        <p style="margin:12px 0 0">Før en periode lukkes, går regnskapsførere og lønnsmedarbeidere gjennom bilag, saldoer og lønnslister for å finne feil. Mye av dette er de samme sjekkene hver gang: dobbeltføringer, feil MVA, store endringer, lønn til noen som har sluttet. Det tar tid, og det er lett å overse noe.</p>
+      </section>
+      <section>
+        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Hva Rettført gjør</h2>
+        <p style="margin:12px 0 0">Rettført tar inn en SAF-T-fil eller to lønnsfiler, kjører {{ nCtrl }} faste kontroller og lager en rapport med funnene. Hvert funn viser bilagene det bygger på, hvorfor det ble markert, og hva som er et naturlig neste steg. Brukeren merker funnet som avklart, med en kommentar.</p>
+        <p style="margin:12px 0 0">Rettført fører ikke regnskap og kjører ikke lønn. Det er et kontrollag over systemene som allerede er i bruk.</p>
+      </section>
+      <section>
+        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Hvordan det er bygget</h2>
+        <div style="margin-top:16px;display:flex;flex-direction:column;border-top:1px solid #E4DFD4">
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Innlesing</span><span>SAF-T Financial (XML) leses med nettleserens XML-parser. Lønn leses som CSV med semikolon eller komma.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Kontroller</span><span>Hver kontroll er en regel med fast terskel, skrevet i vanlig JavaScript. Resultatet er det samme hver gang for samme fil.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">AI</span><span>Planlagt brukt kun til å oppsummere funn i vanlig språk. AI beregner ingenting og avgjør ingenting.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Personvern</span><span>All analyse skjer lokalt. Filene sendes ikke til noen server.</span></div>
+        </div>
+      </section>
+      <section>
+        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Regelgrunnlag</h2>
+        <p style="margin:12px 0 0">Kontrollene henviser blant annet til bokføringsloven §§ 4, 7 og 10, merverdiavgiftsloven § 8-3 om begrenset fradragsrett, arbeidsmiljøloven § 10-6 om overtid og a-opplysningsloven. Terskler og henvisninger for hver kontroll ligger i <a onClick="{{ toControls }}" style="cursor:pointer;border-bottom:1px solid #0B2545">kontrolloversikten</a>.</p>
+      </section>
+      <section>
+        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Videre arbeid</h2>
+        <p style="margin:12px 0 0">Egne terskler per kunde, sammenligning av flere perioder, eksport av rapport som PDF og støtte for a-meldingsfiler.</p>
+      </section>
+      <section id="om-meg" style="margin-top:24px;padding-top:56px;border-top:1px solid #E4DFD4">
+        <div style="font-size:15px;color:#586174">Om meg</div>
+        <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:36px;align-items:start">
+          <div style="aspect-ratio:4/5;border-radius:16px;overflow:hidden;background:#E9E5DC;max-width:320px">
+            <img src="assets/mohamad-web.jpg" alt="Mohamad Bokdasji" style="width:100%;height:100%;object-fit:cover;object-position:48% 30%;display:block">
+          </div>
+          <div data-rf="span2" style="grid-column:span 2;min-width:0">
+            <h2 style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin:0;color:#0B2545">Mohamad Bokdasji</h2>
+            <p style="margin:14px 0 0">Jeg har studert økonomi og administrasjon ved BI, og er opptatt av hvordan AI kan brukes i regnskap og finans.</p>
+            <p style="margin:14px 0 0">Rettført er et hobbyprosjekt ved siden av jobb. Det faglige grunnlaget kommer fra fagene på studiet, resten har jeg lært underveis. Målet er å vise at AI og automatisering kan gjøre hverdagen enklere for dem som jobber med regnskap og lønn: de faste kontrollene går av seg selv, og tiden kan brukes på vurderingene.</p>
+            <div style="margin-top:24px;display:grid;grid-template-columns:auto 1fr;gap:10px 24px;font-size:15.5px;border-top:1px solid #E4DFD4;padding-top:18px">
+              <span style="color:#586174">Utdanning</span><span>Økonomi og administrasjon, BI · 2023–2026</span>
+              <span style="color:#586174">Interesse</span><span>AI i regnskap og finans</span>
+              <span style="color:#586174">E-post</span><a href="mailto:mohbok04@hotmail.com" style="border-bottom:1px solid #0B2545;justify-self:start">mohbok04@hotmail.com</a>
+              <span style="color:#586174;display:flex;align-items:center" title="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="#586174" aria-label="LinkedIn" style="display:block"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"></path></svg></span><a href="https://www.linkedin.com/in/mohamad-bokdasji-99b0b5262/" target="_blank" rel="noopener" style="border-bottom:1px solid #0B2545;justify-self:start">Mohamad Bokdasji</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </article>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAuth }}">
+<div style="min-height:100vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));background:#fff">
+  <div style="display:flex;flex-direction:column;padding:32px 40px;animation:rfFade .4s ease both">
+    <div onClick="{{ toLanding }}" style="width:103px;height:26px;overflow:hidden;position:relative;cursor:pointer"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;left:-14.6px;top:-8.3px;width:131px;height:43.7px"></div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:48px 0">
+      <div style="width:100%;max-width:380px">
+        <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+          <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:0">Logg inn</h1>
+          <p style="font-size:15.5px;color:#586174;margin:10px 0 0;line-height:1.5">Innlogging for egne kunder åpner ved lansering. Nå logger du inn med demokontoen.</p>
+          <label style="font-size:13.5px;font-weight:500;display:block;margin-top:32px">E-post</label>
+          <input value="demo@rettfort.no" readOnly style="margin-top:8px;width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:12px 14px;font-size:15px;outline:none;color:#0B2545">
+          <div style="display:flex;justify-content:space-between;margin-top:18px"><label style="font-size:13.5px;font-weight:500">Passord</label><a onClick="{{ toReset }}" style="font-size:13.5px;color:#586174;cursor:pointer">Glemt passord?</a></div>
+          <input type="password" value="demodemo" readOnly style="margin-top:8px;width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:12px 14px;font-size:15px;outline:none">
+          <button onClick="{{ enterApp }}" style="margin-top:24px;width:100%;background:#0B2545;color:#fff;border:0;border-radius:8px;padding:14px;font-size:15px;font-weight:500">Logg inn med demokonto</button>
+          <p style="font-size:14.5px;color:#586174;margin:24px 0 0;text-align:center">Vil du bruke Rettført? <a onClick="{{ toSignup }}" style="color:#0B2545;font-weight:600;cursor:pointer">Meld interesse</a></p>
+        </sc-if>
+        <sc-if value="{{ isSignup }}">
+          <sc-if value="{{ suForm }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:12.5px;font-weight:600;color:#0B2545;background:#F6DF6E;padding:3px 10px;border-radius:99px">Tidlig versjon</span>
+            <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:16px 0 0">Meld interesse</h1>
+            <p style="font-size:15.5px;color:#586174;margin:10px 0 0;line-height:1.5">Rettført er under utvikling. Registrer deg, så får du beskjed når du kan bruke det med egne filer.</p>
+            <form onSubmit="{{ suSubmit }}">
+              <label style="font-size:13.5px;font-weight:500;display:block;margin-top:18px;margin-top:28px">Navn</label>
+              <input value="{{ suName }}" onChange="{{ suSetName }}" autoComplete="name" style="margin-top:8px;width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:12px 14px;font-size:15px;outline:none;color:#0B2545;background:#fff">
+              <label style="font-size:13.5px;font-weight:500;display:block;margin-top:18px">Jobb-e-post</label>
+              <input type="email" value="{{ suEmail }}" onChange="{{ suSetEmail }}" autoComplete="email" style="margin-top:8px;width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:12px 14px;font-size:15px;outline:none;color:#0B2545;background:#fff">
+              <label style="font-size:13.5px;font-weight:500;display:block;margin-top:18px">Rolle</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+                <sc-for list="{{ suRoles }}" as="r" hint-placeholder-count="4"><button type="button" onClick="{{ r.fn }}" style="background:{{ r.bg }};color:{{ r.fg }};border:1px solid {{ r.bd }};border-radius:99px;padding:7px 13px;font-size:14px">{{ r.l }}</button></sc-for>
+              </div>
+              <label style="font-size:13.5px;font-weight:500;display:block;margin-top:18px">Virksomhet <span style="color:#8A909C;font-weight:400">(valgfritt)</span></label>
+              <input value="{{ suOrg }}" onChange="{{ suSetOrg }}" autoComplete="organization" style="margin-top:8px;width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:12px 14px;font-size:15px;outline:none;color:#0B2545;background:#fff">
+              <label style="display:flex;align-items:flex-start;gap:10px;margin-top:18px;font-size:14.5px;line-height:1.45;cursor:pointer"><input type="checkbox" checked="{{ suNotify }}" onChange="{{ suToggle }}" style="width:17px;height:17px;margin-top:2px;flex-shrink:0">Varsle meg når Rettført lanseres</label>
+              <sc-if value="{{ suHasErr }}"><div style="margin-top:14px;background:#F6E3DD;color:#8A2E1F;border-radius:8px;padding:10px 12px;font-size:14px">{{ suErr }}</div></sc-if>
+              <button type="submit" disabled="{{ suBusy }}" style="margin-top:22px;width:100%;background:#0B2545;color:#fff;border:0;border-radius:8px;padding:14px;font-size:15px;font-weight:500">{{ suBtn }}</button>
+            </form>
+            <p style="font-size:13px;color:#8A909C;margin:14px 0 0;line-height:1.5">Vi bruker e-posten bare til å gi beskjed om Rettført.</p>
+            <p style="font-size:14.5px;color:#586174;margin:18px 0 0;text-align:center">Vil du se produktet først? <a onClick="{{ trySample }}" style="color:#0B2545;font-weight:600;cursor:pointer">Prøv demoen</a></p>
+          </sc-if>
+          <sc-if value="{{ suDone }}">
+            <span style="width:44px;height:44px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center">{{ iTick }}</span>
+            <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:18px 0 0">Takk, du står på listen.</h1>
+            <p style="font-size:15.5px;color:#586174;margin:10px 0 0;line-height:1.55">{{ suDoneTxt }}</p>
+            <button onClick="{{ trySample }}" style="margin-top:26px;width:100%;background:#0B2545;color:#fff;border:0;border-radius:8px;padding:14px;font-size:15px;font-weight:500">Prøv demoen</button>
+            <button onClick="{{ toLanding }}" style="margin-top:10px;width:100%;background:#fff;color:#0B2545;border:1px solid #D9D3C6;border-radius:8px;padding:13px;font-size:15px">Til forsiden</button>
+          </sc-if>
+        </sc-if>
+        <sc-if value="{{ isReset }}">
+          <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:0">Nytt passord</h1>
+          <p style="font-size:15.5px;color:#586174;margin:10px 0 0">Vi sender en lenke til e-postadressen din.</p>
+          <label style="font-size:13.5px;font-weight:500;display:block;margin-top:32px">E-post</label>
+          <input value="demo@rettfort.no" readOnly style="margin-top:8px;width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:12px 14px;font-size:15px;outline:none">
+          <button onClick="{{ resetSent }}" style="margin-top:24px;width:100%;background:#0B2545;color:#fff;border:0;border-radius:8px;padding:14px;font-size:15px;font-weight:500">Send lenke</button>
+          <p style="font-size:14.5px;margin:24px 0 0;text-align:center"><a onClick="{{ toLogin }}" style="font-weight:600;cursor:pointer">Tilbake til innlogging</a></p>
+        </sc-if>
+        <div style="margin-top:36px;font-size:13px;color:#8A909C;text-align:center">Demo: ingen passord kreves.</div>
+      </div>
+    </div>
+  </div>
+  <div style="background:#E2F1E8;padding:56px;display:flex;flex-direction:column;justify-content:flex-end;min-height:420px;position:relative;overflow:hidden">
+    <div style="position:absolute;right:64px;top:72px">{{ mAuth }}</div>
+    <div style="font-size:clamp(24px,2.4vw,32px);line-height:1.25;letter-spacing:-0.02em;font-weight:500;max-width:460px;color:#0B2545;text-wrap:pretty">«{{ heroLinesAll }} posteringer analysert. {{ heroOkS }} kontroller bestått. {{ heroOpenS }} forhold bør vurderes.»</div>
+    <div style="margin-top:16px;font-size:15px;color:#174F36">Demo, Nordhavn Drift AS</div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isApp }}">
+<div style="min-height:100vh;display:flex;flex-direction:column">
+  <header class="rf-noprint" style="position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #E4DFD4">
+    <div data-rf="apphdr" style="max-width:1280px;margin:0 auto;padding:0 28px;height:64px;display:flex;align-items:center;gap:32px">
+      <div onClick="{{ toLanding }}" style="width:79px;height:20px;overflow:hidden;position:relative;flex-shrink:0;cursor:pointer"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;left:-11.2px;top:-6.4px;width:100.8px;height:33.6px"></div>
+      <nav style="display:flex;gap:4px;flex:1;overflow-x:auto">
+        <sc-for list="{{ appNav }}" as="n" hint-placeholder-count="4">
+          <button onClick="{{ n.fn }}" style="background:{{ n.bg }};color:{{ n.col }};border:0;border-radius:7px;padding:8px 13px;font-size:14.5px;font-weight:{{ n.fw }};white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="background:#F1EDE4">{{ n.l }}<sc-if value="{{ n.hasBadge }}"><span style="font-size:11.5px;font-family:'IBM Plex Mono',monospace;background:#F6DF6E;color:#0B2545;border-radius:4px;padding:1px 6px">{{ n.badge }}</span></sc-if></button>
+        </sc-for>
+      </nav>
+      <sc-if value="{{ hasResult }}"><span data-rf="co" style="font-size:14px;color:#586174;white-space:nowrap">{{ rCompany }}</span></sc-if>
+      <button onClick="{{ logout }}" style="background:transparent;border:0;display:flex;align-items:center;gap:8px;font-size:14px;color:#586174;padding:6px" style-hover="color:#0B2545"><span style="width:28px;height:28px;border-radius:50%;background:#E2F1E8;color:#1F7D52;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center">DB</span>Logg ut</button>
+    </div>
+  </header>
+  <sc-if value="{{ isDemo }}">
+    <div class="rf-noprint" style="background:#F6DF6E;color:#0B2545">
+      <div style="max-width:1280px;margin:0 auto;padding:9px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:14px">
+        <span style="font-weight:700;letter-spacing:.08em;font-size:12px;background:#0B2545;color:#F6DF6E;padding:2px 8px;border-radius:4px">DEMO</span>
+        <span>Fiktive data · {{ demoLabel }}</span>
+        <span style="flex:1"></span>
+        <button onClick="{{ startTour }}" style="background:transparent;border:0;padding:0;font-size:14px;font-weight:600;color:#0B2545;border-bottom:1px solid #0B2545">Start guidet demo</button>
+        <button onClick="{{ openHow }}" style="background:transparent;border:0;padding:0;font-size:14px;color:#0B2545;border-bottom:1px solid #0B2545">Slik fungerer Rettført</button>
+      </div>
+    </div>
+  </sc-if>
+  <main data-rf="main" style="flex:1;max-width:1280px;width:100%;margin:0 auto;padding:40px 28px 96px">
+
+    <sc-if value="{{ pg_new }}" hint-placeholder-val="{{ true }}">
+      <div style="animation:rfIn .35s ease both;max-width:980px;margin:0 auto">
+        <h1 style="font-size:34px;font-weight:600;letter-spacing:-0.025em;margin:0">Ny analyse</h1>
+        <p style="font-size:16px;color:#3D4759;margin:10px 0 0;max-width:620px;line-height:1.55">Last opp en SAF-T-fil for regnskapskontroll, og/eller to lønnsfiler for lønnskontroll. Filene leses bare i nettleseren din.</p>
+        <div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap">
+          <button onClick="{{ useSamples }}" style="background:#F6DF6E;color:#0B2545;border:0;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:600">Bruk eksempelfiler</button>
+          <button onClick="{{ dlSamples }}" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;border-radius:8px;padding:10px 16px;font-size:14.5px">Last ned eksempelfiler</button>
+        </div>
+        <div style="margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px">
+          <sc-for list="{{ drops }}" as="z" hint-placeholder-count="3">
+            <label onDragOver="{{ z.over }}" onDragLeave="{{ z.leave }}" onDrop="{{ z.drop }}" style="display:flex;flex-direction:column;background:{{ z.bg }};border:1.5px dashed {{ z.bd }};border-radius:14px;padding:22px;cursor:pointer;min-height:190px;transition:background .15s,border-color .15s">
+              <input type="file" accept="{{ z.accept }}" onChange="{{ z.pick }}" style="display:none">
+              <div style="font-size:12.5px;color:#586174;font-family:'IBM Plex Mono',monospace">{{ z.tag }}</div>
+              <div style="font-size:17px;font-weight:600;margin-top:6px">{{ z.title }}</div>
+              <div style="font-size:14px;color:#586174;margin-top:4px;line-height:1.45">{{ z.sub }}</div>
+              <div style="flex:1"></div>
+              <sc-if value="{{ z.has }}">
+                <div style="display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E4DFD4;border-radius:9px;padding:10px 12px;margin-top:16px;animation:rfIn .25s ease both">
+                  <span style="width:22px;height:22px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span>
+                  <div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ z.name }}</div><div style="font-size:12px;color:#8A909C">{{ z.size }}</div></div>
+                  <button onClick="{{ z.clear }}" style="background:transparent;border:0;color:#8A909C;padding:4px;display:flex">{{ iX }}</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ z.empty }}" hint-placeholder-val="{{ true }}"><div style="margin-top:16px;font-size:14px;font-weight:500">Slipp fil her, eller <span style="border-bottom:1px solid #0B2545">velg fil</span></div></sc-if>
+            </label>
+          </sc-for>
+        </div>
+        <sc-if value="{{ hasErr }}"><div style="margin-top:16px;background:#F6E3DD;color:#8A2E1F;border-radius:9px;padding:12px 16px;font-size:14.5px">{{ err }}</div></sc-if>
+        <div style="margin-top:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <button onClick="{{ analyze }}" disabled="{{ cantAnalyze }}" style="background:{{ anBg }};color:#fff;border:0;border-radius:9px;padding:14px 24px;font-size:15.5px;font-weight:600;cursor:{{ anCur }}">Analyser</button>
+          <span style="font-size:14px;color:#586174">{{ anHint }}</span>
+        </div>
+        <div style="margin-top:48px;border-top:1px solid #E4DFD4">
+          <button onClick="{{ toggleFmt }}" style="width:100%;background:transparent;border:0;border-bottom:1px solid #E4DFD4;padding:16px 0;display:flex;justify-content:space-between;font-size:15px;font-weight:500;color:#0B2545">Format på lønnsfilen<span style="color:#8A909C">{{ fmtSign }}</span></button>
+          <sc-if value="{{ fmtOpen }}">
+            <div style="padding:18px 0;font-size:14.5px;line-height:1.6;color:#3D4759;animation:rfFade .25s ease both">
+              <p style="margin:0">CSV med semikolon eller komma, én rad per lønnslinje. Påkrevde kolonner er <b style="font-weight:600">ansattnr</b> og <b style="font-weight:600">beløp</b>. Resten brukes når de finnes.</p>
+              <div style="margin-top:12px;background:#fff;border:1px solid #E4DFD4;border-radius:9px;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;overflow-x:auto;white-space:pre">ansattnr;navn;periode;lonnsart;type;antall;sats;belop;startdato;sluttdato
+1004;Sara Hansen;2026-08;Fastlønn;fast;;;41200,00;2021-03-01;
+1004;Sara Hansen;2026-08;Overtid 50 %;variabel;19,5;431,79;8419,91;2021-03-01;</div>
+            </div>
+          </sc-if>
+          <div style="padding:16px 0;border-bottom:1px solid #E4DFD4;font-size:14.5px;color:#3D4759;line-height:1.6"><b style="font-weight:600;color:#0B2545">SAF-T:</b> Eksporter «SAF-T Financial» for ønsket periode fra regnskapssystemet. Versjon 1.30 og 1.20 støttes.</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pg_run }}">
+      <div style="max-width:560px;margin:40px auto 0;text-align:center;animation:rfFade .3s ease both">
+        <div style="display:flex;justify-content:center">{{ mRun }}</div>
+        <div style="font-size:26px;font-weight:600;letter-spacing:-0.02em;margin-top:18px">Analyserer…</div>
+        <div style="font-size:15px;color:#586174;margin-top:6px;min-height:22px">{{ runCur }}</div>
+        <div style="height:5px;background:#E4DFD4;border-radius:3px;margin-top:22px;overflow:hidden"><div style="height:100%;width:{{ runW }};background:#35AE74;transition:width .12s linear"></div></div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8A909C;margin-top:10px">{{ runN }}</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pg_report }}">
+      <sc-if value="{{ noResult }}"><div style="max-width:560px;margin:40px auto;text-align:center"><div style="font-size:24px;font-weight:600">Ingen analyse ennå</div><p style="font-size:15.5px;color:#586174">Last opp filer for å lage en kontrollrapport.</p><button onClick="{{ toNew }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:12px 20px;font-size:15px;font-weight:500">Ny analyse</button></div></sc-if>
+      <sc-if value="{{ hasResult }}">
+        <div style="animation:rfIn .35s ease both">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap">
+            <div style="min-width:0">
+              <div style="font-size:14px;color:#586174">Kontrollrapport · {{ rMeta }}</div>
+              <h1 style="font-size:clamp(26px,3vw,36px);line-height:1.2;font-weight:600;letter-spacing:-0.025em;margin:10px 0 0;max-width:820px;text-wrap:balance">{{ rHead }}</h1>
+              <p style="font-size:14px;color:#586174;margin:10px 0 0;font-family:'IBM Plex Mono',monospace">{{ rStats }}</p>
+            </div>
+            <div class="rf-noprint" style="display:flex;gap:8px">
+              <button onClick="{{ exportCsv }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:8px;padding:9px 14px;font-size:14px">Last ned CSV</button>
+              <button onClick="{{ printIt }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:8px;padding:9px 14px;font-size:14px">Skriv ut</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:#E4DFD4;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden;margin-top:28px">
+            <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="4">
+              <div onClick="{{ t.fn }}" style="background:{{ t.bg }};padding:18px 20px;cursor:pointer;transition:background .15s"><div style="font-size:12px;font-weight:600;letter-spacing:.08em;color:#586174">{{ t.l }}</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span style="font-size:30px;font-weight:600;letter-spacing:-0.02em;font-family:'IBM Plex Mono',monospace;color:{{ t.c }}">{{ t.v }}</span><span style="font-size:14px;color:#3D4759">{{ t.u }}</span></div><div style="font-size:13px;color:#8A909C;margin-top:2px">{{ t.d }}</div></div>
+            </sc-for>
+          </div>
+          <div class="rf-noprint" style="margin-top:16px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:18px 22px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+              <div style="min-width:0"><div style="font-size:16px;font-weight:600">Hva bør jeg se på først?</div><div style="font-size:13.5px;color:#586174;margin-top:2px">AI prioriterer bare funnene kontrollmotoren har laget. Den lager ikke egne funn.</div></div>
+              <sc-if value="{{ prNone }}" hint-placeholder-val="{{ true }}"><button onClick="{{ doPrio }}" style="background:#F6DF6E;color:#0B2545;border:0;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:600">Få hjelp til å prioritere</button></sc-if>
+              <sc-if value="{{ prLoading }}"><span style="font-size:14px;color:#586174">Vurderer funnene …</span></sc-if>
+            </div>
+            <sc-if value="{{ prHas }}">
+              <div style="margin-top:16px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">JEG VILLE STARTET HER</div>
+              <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ prItems }}" as="p" hint-placeholder-count="3"><div onClick="{{ p.fn }}" style="display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:12px 14px;border:1px solid #EFEBE2;border-radius:10px;cursor:pointer" style-hover="border-color:#A9A294"><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8A909C;padding-top:2px">{{ p.n }}</span><div style="min-width:0"><div style="font-size:15px;font-weight:600">{{ p.t }}</div><div style="font-size:14px;color:#586174;margin-top:2px;line-height:1.45">{{ p.g }}</div></div><span style="font-size:12px;font-weight:600;color:{{ p.sevC }};background:{{ p.sevBg }};padding:3px 9px;border-radius:5px">{{ p.sevL }}</span></div></sc-for>
+              </div>
+              <div style="margin-top:10px;font-size:12.5px;color:#8A909C">{{ prSrc }}</div>
+            </sc-if>
+          </div>
+          <sc-if value="{{ hasRecon }}">
+            <div style="margin-top:28px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden">
+              <div style="padding:18px 22px;border-bottom:1px solid #EFEBE2;display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap">
+                <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-size:18px;font-weight:600">Lønn × regnskap</span><span style="font-size:14.5px;color:#586174">{{ reconPeriod }}</span></div>
+                <a onClick="{{ toSettings }}" class="rf-noprint" style="font-size:13.5px;color:#586174;cursor:pointer">{{ reconSub }}</a>
+              </div>
+              <sc-if value="{{ reconSkipped }}"><div style="padding:18px 22px;font-size:14.5px;line-height:1.55;color:#3D4759">{{ reconReason }}</div></sc-if>
+              <sc-if value="{{ reconRan }}">
+                <div style="overflow-x:auto"><div style="min-width:680px">
+                  <div style="display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(120px,1fr) minmax(120px,1fr) minmax(110px,1fr) 170px;gap:16px;padding:10px 22px;font-size:12.5px;color:#8A909C;border-bottom:1px solid #EFEBE2"><span>Avstemming</span><span style="text-align:right">Forventet fra lønn</span><span style="text-align:right">Bokført</span><span style="text-align:right">Differanse</span><span style="text-align:right">Status</span></div>
+                  <sc-for list="{{ reconRows }}" as="r" hint-placeholder-count="4">
+                    <div onClick="{{ r.fn }}" style="display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(120px,1fr) minmax(120px,1fr) minmax(110px,1fr) 170px;gap:16px;padding:14px 22px;border-bottom:1px solid #F3F0E9;align-items:center;font-size:14.5px;cursor:pointer" style-hover="background:#FBFAF6">
+                      <span style="font-weight:600">{{ r.t }}</span>
+                      <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px">{{ r.expS }}</span>
+                      <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px">{{ r.bookS }}</span>
+                      <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:{{ r.dc }}">{{ r.diffS }}</span>
+                      <span style="justify-self:end;font-size:12.5px;font-weight:600;color:{{ r.sc }};background:{{ r.sb }};padding:3px 9px;border-radius:5px;white-space:nowrap">{{ r.stL }}</span>
+                    </div>
+                  </sc-for>
+                </div></div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:24px;margin-top:28px;align-items:start">
+            <div data-rf="span2" style="grid-column:span 2;min-width:0">
+              <div class="rf-noprint" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+                <div style="display:flex;gap:4px;background:#EAE5DA;border-radius:9px;padding:3px">
+                  <sc-for list="{{ areaTabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.fn }}" style="background:{{ t.bg }};border:0;border-radius:7px;padding:7px 13px;font-size:14px;color:#0B2545;font-weight:{{ t.fw }}">{{ t.l }} <span style="color:#8A909C;font-family:'IBM Plex Mono',monospace;font-size:12.5px">{{ t.n }}</span></button></sc-for>
+                </div>
+                <div style="display:flex;gap:16px">
+                  <sc-for list="{{ statusTabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.fn }}" style="background:transparent;border:0;border-bottom:1.5px solid {{ t.bd }};padding:6px 0;font-size:14px;color:{{ t.col }}">{{ t.l }}</button></sc-for>
+                </div>
+              </div>
+              <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ flist }}" as="f" hint-placeholder-count="6">
+                  <div data-rf="frow" onClick="{{ f.fn }}" style="background:#fff;border:1px solid #E4DFD4;border-radius:12px;padding:16px 20px;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 16px;align-items:center;opacity:{{ f.op }};transition:border-color .15s" style-hover="border-color:#A9A294">
+                    <span style="font-size:12px;font-weight:600;color:{{ f.sevC }};background:{{ f.sevBg }};padding:3px 9px;border-radius:5px;min-width:64px;text-align:center">{{ f.sevL }}</span>
+                    <div style="min-width:0"><div style="font-size:15.5px;font-weight:600">{{ f.title }}</div><div style="font-size:14px;color:#586174;margin-top:3px;line-height:1.45">{{ f.summary }}</div></div>
+                    <div style="text-align:right;white-space:nowrap"><div style="font-family:'IBM Plex Mono',monospace;font-size:14px">{{ f.amountS }}</div><div style="font-size:12.5px;color:#8A909C;margin-top:3px">{{ f.meta }}</div></div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ listEmpty }}">
+                  <div style="background:#fff;border:1px solid #E4DFD4;border-radius:12px;padding:40px 24px;display:flex;flex-direction:column;align-items:center;text-align:center">
+                    <div>{{ mEmpty }}</div>
+                    <div style="font-size:18px;font-weight:600;margin-top:12px">{{ emptyT }}</div>
+                    <div style="font-size:14.5px;color:#586174;margin-top:4px">{{ emptyS }}</div>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden">
+              <div style="padding:16px 20px;border-bottom:1px solid #EFEBE2;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15.5px;font-weight:600">Kontroller</span><a onClick="{{ toControls }}" style="font-size:13.5px;color:#586174;cursor:pointer">Detaljer</a></div>
+              <sc-for list="{{ ctrlSide }}" as="c" hint-placeholder-count="12">
+                <div style="display:flex;align-items:center;gap:10px;padding:9px 20px;border-bottom:1px solid #F3F0E9;font-size:14px">
+                  <span style="width:18px;height:18px;border-radius:50%;background:{{ c.icBg }};color:{{ c.icFg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">
+                    <sc-if value="{{ c.ok }}" hint-placeholder-val="{{ true }}">{{ iTickS }}</sc-if>
+                    <sc-if value="{{ c.bad }}">{{ c.count }}</sc-if>
+                  </span>
+                  <span style="flex:1;color:{{ c.col }}">{{ c.t }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ pg_finding }}">
+      <sc-if value="{{ hasF }}">
+        <div style="animation:rfIn .3s ease both">
+          <div class="rf-noprint" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+            <a onClick="{{ toReport }}" style="font-size:14.5px;color:#586174;cursor:pointer">← Kontrollrapport</a>
+            <div style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:#586174"><button onClick="{{ prevF }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:7px;padding:6px 10px;font-size:14px">←</button><span style="font-family:'IBM Plex Mono',monospace;padding:0 6px">{{ fPos }}</span><button onClick="{{ nextF }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:7px;padding:6px 10px;font-size:14px">→</button></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px;margin-top:22px;align-items:start">
+            <div data-rf="span2" style="grid-column:span 2;min-width:0;display:flex;flex-direction:column;gap:16px">
+              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:28px">
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="font-size:12px;font-weight:600;color:{{ F.sevC }};background:{{ F.sevBg }};padding:3px 9px;border-radius:5px">{{ F.sevL }}</span><span style="font-size:13.5px;color:#586174">{{ F.areaL }} · {{ F.ctrlT }}</span></div>
+                <h1 style="font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-0.02em;margin:14px 0 0;text-wrap:balance">{{ F.title }}</h1>
+                <p style="font-size:16.5px;line-height:1.55;color:#2A3547;margin:12px 0 0">{{ F.summary }}</p>
+                <div style="display:flex;gap:28px;margin-top:18px;flex-wrap:wrap">
+                  <sc-if value="{{ F.hasAmt }}"><div><div style="font-size:12.5px;color:#8A909C">Beløp</div><div style="font-family:'IBM Plex Mono',monospace;font-size:18px;margin-top:3px">{{ F.amountS }}</div></div></sc-if>
+                  <sc-if value="{{ F.hasDate }}"><div><div style="font-size:12.5px;color:#8A909C">Dato</div><div style="font-family:'IBM Plex Mono',monospace;font-size:18px;margin-top:3px">{{ F.dateS }}</div></div></sc-if>
+                </div>
+                <div class="rf-noprint" style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+                  <button onClick="{{ aiOpen }}" style="background:#F6DF6E;color:#0B2545;border:0;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:600">{{ aiBtnL }}</button>
+                  <sc-if value="{{ fHasRecon }}"><button onClick="{{ fToRecon }}" style="background:#0B2545;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:500;display:flex;align-items:center;gap:8px">Åpne avstemmingen {{ iArrow }}</button></sc-if>
+                </div>
+              </div>
+              <sc-if value="{{ aiShow }}">
+                <div style="background:#fff;border:1.5px solid #E9D98A;border-radius:14px;padding:24px 28px;animation:rfIn .3s ease both">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:16px;font-weight:600">Undersøkelse</span><span style="font-size:12px;font-weight:600;color:#0B2545;background:{{ aiSrcBg }};padding:3px 9px;border-radius:5px">{{ aiSrc }}</span></div>
+                  <sc-if value="{{ aiLoading }}"><div style="margin-top:14px;font-size:15px;color:#586174">Går gjennom datagrunnlaget for funnet …</div></sc-if>
+                  <sc-if value="{{ aiReady }}">
+                    <div style="margin-top:16px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">HVA SER RETTFØRT?</div>
+                    <p style="margin:6px 0 0;font-size:15px;line-height:1.55;color:#2A3547">{{ aiSer }}</p>
+                    <div style="margin-top:18px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">MULIG FORKLARING</div>
+                    <div style="margin-top:6px;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ aiForkl }}" as="w" hint-placeholder-count="1"><div style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:#2A3547"><span style="width:6px;height:6px;border-radius:50%;background:#0B2545;margin-top:9px;flex-shrink:0"></span><span>{{ w.t }}</span></div></sc-for></div>
+                    <div style="margin-top:18px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">DETTE VILLE JEG KONTROLLERT</div>
+                    <div style="margin-top:6px;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ aiKontr }}" as="w" hint-placeholder-count="2"><div style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:#2A3547"><span style="font-family:'IBM Plex Mono',monospace;color:#8A909C;font-size:13px;margin-top:2px">{{ w.n }}</span><span>{{ w.t }}</span></div></sc-for></div>
+                    <sc-if value="{{ aiHasNote }}"><div style="margin-top:16px;font-size:13.5px;color:#586174;background:#F4F1EA;border-radius:8px;padding:10px 12px">{{ aiNote }}</div></sc-if>
+                    <div style="margin-top:14px;font-size:12.5px;color:#8A909C">Tallene kommer fra kontrollmotoren. AI endrer dem ikke, og vurderingen er din.</div>
+                  </sc-if>
+                </div>
+              </sc-if>
+              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:24px 28px">
+                <div style="font-size:16px;font-weight:600">Hvorfor Rettført reagerte</div>
+                <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ fWhy }}" as="w" hint-placeholder-count="2"><div style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:#2A3547"><span style="width:6px;height:6px;border-radius:50%;background:#0B2545;margin-top:9px;flex-shrink:0"></span><span>{{ w.t }}</span></div></sc-for>
+                </div>
+              </div>
+              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden">
+                <div style="padding:18px 28px;border-bottom:1px solid #EFEBE2;font-size:16px;font-weight:600">Grunnlag</div>
+                <div style="overflow-x:auto">
+                  <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:560px">
+                    <thead><tr><sc-for list="{{ fCols }}" as="c" hint-placeholder-count="5"><th style="text-align:{{ c.al }};font-weight:500;color:#8A909C;font-size:12.5px;padding:10px 28px 10px 0;border-bottom:1px solid #EFEBE2;white-space:nowrap">{{ c.v }}</th></sc-for></tr></thead>
+                    <tbody><sc-for list="{{ fRows }}" as="r" hint-placeholder-count="3"><tr><sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5"><td style="text-align:{{ c.al }};padding:10px 28px 10px 0;border-bottom:1px solid #F3F0E9;font-family:{{ c.ff }};white-space:nowrap">{{ c.v }}</td></sc-for></tr></sc-for></tbody>
+                  </table>
+                </div>
+              </div>
+              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:24px 28px">
+                <div style="font-size:16px;font-weight:600">Forslag til neste steg</div>
+                <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ fNext }}" as="w" hint-placeholder-count="2"><div style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:#2A3547"><span style="font-family:'IBM Plex Mono',monospace;color:#8A909C;font-size:13px;margin-top:2px">{{ w.n }}</span><span>{{ w.t }}</span></div></sc-for>
+                </div>
+              </div>
+            </div>
+            <div data-rf="stick" style="display:flex;flex-direction:column;gap:16px;position:sticky;top:88px">
+              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
+                <div style="font-size:15.5px;font-weight:600">Vurdering</div>
+                <sc-if value="{{ fOpen }}" hint-placeholder-val="{{ true }}">
+                  <div style="font-size:13.5px;color:#586174;margin-top:4px">Hvordan vurderer du forholdet?</div>
+                  <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+                    <sc-for list="{{ outcomes }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.fn }}" style="display:flex;align-items:center;gap:10px;background:{{ o.bg }};border:1px solid {{ o.bd }};border-radius:8px;padding:9px 12px;font-size:14.5px;color:#0B2545;text-align:left"><span style="width:16px;height:16px;border-radius:50%;border:1.5px solid {{ o.rc }};display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="width:8px;height:8px;border-radius:50%;background:{{ o.dot }}"></span></span>{{ o.l }}</button></sc-for>
+                  </div>
+                  <label style="font-size:13.5px;font-weight:500;display:block;margin-top:16px">Kommentar</label>
+                  <textarea value="{{ note }}" onChange="{{ noteType }}" placeholder="Hva undersøkte du, og hva var konklusjonen?" style="margin-top:8px;width:100%;min-height:84px;border:1px solid #D9D3C6;border-radius:9px;padding:11px 12px;font-size:14.5px;line-height:1.5;resize:vertical;outline:none;color:#0B2545"></textarea>
+                  <button onClick="{{ resolveF }}" disabled="{{ cantResolve }}" style="margin-top:12px;width:100%;background:{{ resBg }};color:#fff;border:0;border-radius:9px;padding:12px;font-size:15px;font-weight:500;cursor:{{ resCur }}">Godkjenn vurdering</button>
+                </sc-if>
+                <sc-if value="{{ fDone }}">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:18px;font-weight:600;margin-top:8px;color:{{ fOutC }}"><span style="width:22px;height:22px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center">{{ iTickS }}</span>{{ fOutL }}</div>
+                  <div style="font-size:13px;color:#8A909C;margin-top:6px">{{ fDoneAt }}</div>
+                  <sc-if value="{{ fHasNote }}"><div style="margin-top:12px;background:#F4F1EA;border-radius:9px;padding:12px;font-size:14.5px;line-height:1.5">{{ fNote }}</div></sc-if>
+                  <button onClick="{{ reopenF }}" style="margin-top:12px;width:100%;background:#fff;border:1px solid #D9D3C6;border-radius:9px;padding:11px;font-size:14.5px">Endre vurdering</button>
+                </sc-if>
+              </div>
+              <sc-if value="{{ fHasHist }}">
+                <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:22px;font-size:14px">
+                  <div style="font-size:15.5px;font-weight:600">Historikk</div>
+                  <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><sc-for list="{{ fHist }}" as="e" hint-placeholder-count="2"><div style="display:grid;grid-template-columns:44px 1fr;gap:10px;line-height:1.45"><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;padding-top:1px">{{ e.t }}</span><span style="color:#2A3547">{{ e.x }}</span></div></sc-for></div>
+                </div>
+              </sc-if>
+              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:22px;font-size:14px">
+                <div style="font-size:15.5px;font-weight:600">{{ F.ctrlT }}</div>
+                <div style="color:#586174;margin-top:6px;line-height:1.5">{{ F.ctrlD }}</div>
+                <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 14px;margin-top:14px"><span style="color:#8A909C">Terskel</span><span>{{ F.ctrlTh }}</span><span style="color:#8A909C">Grunnlag</span><span>{{ F.ctrlRule }}</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ pg_payroll }}">
+      <div style="animation:rfIn .35s ease both">
+        <h1 style="font-size:34px;font-weight:600;letter-spacing:-0.025em;margin:0">Lønnssammenligning</h1>
+        <sc-if value="{{ noPay }}"><div style="margin-top:20px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:32px;font-size:15.5px;color:#3D4759">Last opp to lønnsfiler i <a onClick="{{ toNew }}" style="cursor:pointer;border-bottom:1px solid #0B2545">Ny analyse</a> for å sammenligne periodene.</div></sc-if>
+        <sc-if value="{{ hasPay }}">
+          <p style="font-size:16px;color:#3D4759;margin:10px 0 0">{{ payHead }}</p>
+          <div style="margin-top:24px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden"><div style="overflow-x:auto"><div style="min-width:720px">
+            <div style="display:grid;grid-template-columns:minmax(180px,1.4fr) 130px 130px 130px 90px minmax(140px,1fr);gap:16px;padding:12px 22px;font-size:12.5px;color:#8A909C;border-bottom:1px solid #EFEBE2"><span>Ansatt</span><span style="text-align:right">{{ payP0 }}</span><span style="text-align:right">{{ payP1 }}</span><span style="text-align:right">Endring</span><span style="text-align:right">%</span><span>Funn</span></div>
+            <sc-for list="{{ payRows }}" as="r" hint-placeholder-count="10">
+              <div onClick="{{ r.fn }}" style="display:grid;grid-template-columns:minmax(180px,1.4fr) 130px 130px 130px 90px minmax(140px,1fr);gap:16px;padding:13px 22px;font-size:14.5px;border-bottom:1px solid #F3F0E9;align-items:center;cursor:{{ r.cur }}" style-hover="background:#FBFAF6">
+                <span style="font-weight:500">{{ r.name }}</span>
+                <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#586174">{{ r.prevS }}</span>
+                <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px">{{ r.currS }}</span>
+                <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:{{ r.col }}">{{ r.diffS }}</span>
+                <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:{{ r.col }}">{{ r.pctS }}</span>
+                <span style="font-size:13px;color:{{ r.fC }}">{{ r.fS }}</span>
+              </div>
+            </sc-for>
+          </div></div></div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pg_recon }}">
+      <sc-if value="{{ hasRR }}">
+        <div style="animation:rfIn .3s ease both">
+          <a onClick="{{ toReport }}" class="rf-noprint" style="font-size:14.5px;color:#586174;cursor:pointer">← Kontrollrapport</a>
+          <div style="margin-top:22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:12px;font-weight:600;color:{{ RR.sc }};background:{{ RR.sb }};padding:3px 9px;border-radius:5px">{{ RR.stL }}</span><span style="font-size:13.5px;color:#586174">Lønn × regnskap · {{ RR.periodL }}</span></div>
+          <h1 style="font-size:clamp(26px,3vw,34px);font-weight:600;letter-spacing:-0.025em;margin:12px 0 0">{{ RR.title }}</h1>
+          <p style="font-size:16px;line-height:1.55;color:#3D4759;margin:10px 0 0;max-width:760px">{{ RR.method }}</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:#E4DFD4;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden;margin-top:24px">
+            <sc-for list="{{ rrKpi }}" as="t" hint-placeholder-count="5">
+              <div style="background:#fff;padding:18px 20px"><div style="font-size:13.5px;color:#586174">{{ t.l }}</div><div style="font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-top:6px;font-family:'IBM Plex Mono',monospace;color:{{ t.c }}">{{ t.v }}</div></div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px;margin-top:24px;align-items:start">
+            <div data-rf="span2" style="grid-column:span 2;min-width:0;display:flex;flex-direction:column;gap:16px">
+              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:24px 28px">
+                <div style="font-size:16px;font-weight:600">Beregning</div>
+                <div style="margin-top:12px;display:flex;flex-direction:column">
+                  <sc-for list="{{ rrCalc }}" as="c" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid #F3F0E9;font-size:15px"><span style="color:#3D4759">{{ c.l }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;white-space:nowrap">{{ c.v }}</span></div></sc-for>
+                </div>
+                <sc-if value="{{ rrHasNotes }}"><div style="margin-top:14px;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ rrNotes }}" as="w" hint-placeholder-count="1"><div style="display:flex;gap:12px;font-size:14.5px;line-height:1.55;color:#3D4759"><span style="width:6px;height:6px;border-radius:50%;background:#0B2545;margin-top:9px;flex-shrink:0"></span><span>{{ w.t }}</span></div></sc-for></div></sc-if>
+              </div>
+              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden">
+                <div style="padding:18px 28px;border-bottom:1px solid #EFEBE2;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><span style="font-size:16px;font-weight:600">Posteringer i regnskapet</span><span style="font-size:13.5px;color:#586174">{{ rrPostN }}</span></div>
+                <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px;min-width:560px">
+                    <thead><tr><sc-for list="{{ rrPCols }}" as="c" hint-placeholder-count="5"><th style="text-align:{{ c.al }};font-weight:500;color:#8A909C;font-size:12.5px;padding:10px 0 10px 28px;border-bottom:1px solid #EFEBE2;white-space:nowrap">{{ c.v }}</th></sc-for></tr></thead>
+                    <tbody><sc-for list="{{ rrPRows }}" as="r" hint-placeholder-count="3"><tr><sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5"><td style="text-align:{{ c.al }};padding:10px 0 10px 28px;border-bottom:1px solid #F3F0E9;font-family:{{ c.ff }};font-weight:{{ c.fw }};white-space:nowrap">{{ c.v }}</td></sc-for></tr></sc-for></tbody>
+                  </table></div>
+              </div>
+              <sc-if value="{{ rrHasExcl }}">
+                <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden">
+                  <div style="padding:18px 28px;border-bottom:1px solid #EFEBE2"><div style="font-size:16px;font-weight:600">Holdt utenfor</div><div style="font-size:13.5px;color:#586174;margin-top:3px">Posteringer i perioden som ikke inngår i avstemmingen.</div></div>
+                  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px;min-width:560px">
+                    <thead><tr><sc-for list="{{ rrXCols }}" as="c" hint-placeholder-count="5"><th style="text-align:{{ c.al }};font-weight:500;color:#8A909C;font-size:12.5px;padding:10px 0 10px 28px;border-bottom:1px solid #EFEBE2;white-space:nowrap">{{ c.v }}</th></sc-for></tr></thead>
+                    <tbody><sc-for list="{{ rrXRows }}" as="r" hint-placeholder-count="3"><tr><sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5"><td style="text-align:{{ c.al }};padding:10px 0 10px 28px;border-bottom:1px solid #F3F0E9;font-family:{{ c.ff }};font-weight:{{ c.fw }};white-space:nowrap">{{ c.v }}</td></sc-for></tr></sc-for></tbody>
+                  </table></div>
+                </div>
+              </sc-if>
+              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden">
+                <div style="padding:18px 28px;border-bottom:1px solid #EFEBE2;font-size:16px;font-weight:600">Lønnsfilen</div>
+                <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px;min-width:560px">
+                    <thead><tr><sc-for list="{{ rrECols }}" as="c" hint-placeholder-count="5"><th style="text-align:{{ c.al }};font-weight:500;color:#8A909C;font-size:12.5px;padding:10px 0 10px 28px;border-bottom:1px solid #EFEBE2;white-space:nowrap">{{ c.v }}</th></sc-for></tr></thead>
+                    <tbody><sc-for list="{{ rrERows }}" as="r" hint-placeholder-count="3"><tr><sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5"><td style="text-align:{{ c.al }};padding:10px 0 10px 28px;border-bottom:1px solid #F3F0E9;font-family:{{ c.ff }};font-weight:{{ c.fw }};white-space:nowrap">{{ c.v }}</td></sc-for></tr></sc-for></tbody>
+                  </table></div>
+              </div>
+            </div>
+            <div data-rf="stick" style="display:flex;flex-direction:column;gap:16px;position:sticky;top:88px">
+              <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:22px;font-size:14px">
+                <div style="font-size:15.5px;font-weight:600">Grunnlag</div>
+                <div style="display:grid;grid-template-columns:auto 1fr;gap:9px 14px;margin-top:14px"><sc-for list="{{ rrMeta }}" as="m" hint-placeholder-count="5"><span style="color:#8A909C">{{ m.l }}</span><span>{{ m.v }}</span></sc-for></div>
+                <a onClick="{{ toSettings }}" class="rf-noprint" style="display:inline-block;margin-top:16px;font-size:13.5px;color:#586174;cursor:pointer;border-bottom:1px solid #C9C2B3">Endre sone, toleranse eller kontoer</a>
+              </div>
+              <sc-if value="{{ rrHasF }}"><button onClick="{{ rrToF }}" class="rf-noprint" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:12px;font-size:15px;font-weight:500">Åpne funnet og merk som avklart</button></sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ pg_history }}">
+      <div style="animation:rfIn .35s ease both;max-width:920px">
+        <h1 style="font-size:34px;font-weight:600;letter-spacing:-0.025em;margin:0">Historikk</h1>
+        <p style="font-size:16px;color:#3D4759;margin:10px 0 0;max-width:640px;line-height:1.55">Alt som skjer med funnene blir logget: hva Rettført fant, hva som ble undersøkt og hvem som vurderte.</p>
+        <sc-if value="{{ noHist }}"><div style="margin-top:24px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:32px;font-size:15.5px;color:#3D4759">Ingen hendelser ennå. Kjør en analyse for å starte historikken.</div></sc-if>
+        <div style="margin-top:24px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden">
+          <sc-for list="{{ hist }}" as="e" hint-placeholder-count="6">
+            <div data-rf="hist" onClick="{{ e.fn }}" style="display:grid;grid-template-columns:110px 96px minmax(0,1fr);gap:16px;padding:13px 22px;border-bottom:1px solid #F3F0E9;font-size:14.5px;align-items:start;cursor:{{ e.cur }}" style-hover="background:#FBFAF6">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8A909C;padding-top:2px">{{ e.date }} {{ e.time }}</span>
+              <span style="justify-self:start;font-size:12px;font-weight:600;color:{{ e.whoC }};background:{{ e.whoBg }};padding:3px 8px;border-radius:5px;white-space:nowrap">{{ e.who }}</span>
+              <span style="line-height:1.5;color:#2A3547">{{ e.text }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pg_settings }}">
+      <div style="animation:rfIn .35s ease both;max-width:880px">
+        <h1 style="font-size:34px;font-weight:600;letter-spacing:-0.025em;margin:0">Innstillinger</h1>
+        <p style="font-size:16px;color:#3D4759;margin:10px 0 0;max-width:640px;line-height:1.55">Innstillingene brukes av avstemmingene mellom lønn og regnskap. Endringer gjelder siste analyse med en gang.</p>
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:24px 28px;margin-top:28px">
+          <div style="font-size:17px;font-weight:600">Arbeidsgiveravgift</div>
+          <div style="font-size:14px;color:#586174;margin-top:4px">Sonen virksomheten er registrert i. Satser for 2026, generelle næringer.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
+            <sc-for list="{{ zones }}" as="z" hint-placeholder-count="7"><button onClick="{{ z.fn }}" style="background:{{ z.bg }};color:{{ z.fg }};border:1px solid {{ z.bd }};border-radius:9px;padding:9px 14px;font-size:14.5px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:92px"><span style="font-weight:600">{{ z.l }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;opacity:.8">{{ z.p }}</span></button></sc-for>
+          </div>
+          <sc-if value="{{ isIa }}"><label style="display:flex;align-items:center;gap:10px;margin-top:16px;font-size:14.5px;cursor:pointer"><input type="checkbox" checked="{{ fribBrukt }}" onChange="{{ toggleFrib }}" style="width:17px;height:17px">Fribeløpet på 850 000 kr er brukt opp</label></sc-if>
+        </div>
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:24px 28px;margin-top:16px">
+          <div style="font-size:17px;font-weight:600">Toleranse</div>
+          <div style="font-size:14px;color:#586174;margin-top:4px">Differanser innenfor toleransen vises som «Innenfor toleranse» og gir ikke funn.</div>
+          <div style="margin-top:12px;display:flex;flex-direction:column">
+            <sc-for list="{{ tolRows }}" as="t" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid #F3F0E9;font-size:15px"><span>{{ t.l }}</span><span style="display:flex;align-items:center;gap:8px"><input value="{{ t.v }}" onChange="{{ t.ch }}" onBlur="{{ t.bl }}" inputMode="decimal" style="width:96px;border:1px solid #D9D3C6;border-radius:8px;padding:7px 10px;font-size:14.5px;text-align:right;font-family:'IBM Plex Mono',monospace;color:#0B2545;outline:none"><span style="color:#586174;font-size:14px">kr</span></span></div></sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:24px 28px;margin-top:16px">
+          <div style="font-size:17px;font-weight:600">Kontomapping</div>
+          <div style="font-size:14px;color:#586174;margin-top:4px">Kontonummer eller intervaller, skilt med komma. Standard følger norsk standard kontoplan.</div>
+          <div style="margin-top:12px;display:flex;flex-direction:column">
+            <sc-for list="{{ mapRows }}" as="m" hint-placeholder-count="8"><div data-rf="kv2" style="display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,1.4fr);align-items:center;gap:16px;padding:9px 0;border-bottom:1px solid #F3F0E9;font-size:15px"><span>{{ m.l }}</span><input value="{{ m.v }}" onChange="{{ m.ch }}" onBlur="{{ m.bl }}" style="width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:7px 10px;font-size:14px;font-family:'IBM Plex Mono',monospace;color:#0B2545;outline:none"></div></sc-for>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+          <button onClick="{{ resetSettings }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:8px;padding:10px 16px;font-size:14.5px;color:#0B2545">Tilbakestill til standard</button>
+          <sc-if value="{{ hasResult }}"><button onClick="{{ toReport }}" style="background:#0B2545;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:500">Til rapporten</button></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pg_controls }}">
+      <div style="animation:rfIn .35s ease both">
+        <h1 style="font-size:34px;font-weight:600;letter-spacing:-0.025em;margin:0">Kontroller</h1>
+        <p style="font-size:16px;color:#3D4759;margin:10px 0 0;max-width:640px;line-height:1.55">Alle kontroller Rettført kjører, med terskel og regelgrunnlag. Status viser resultatet fra siste analyse.</p>
+        <sc-for list="{{ ctrlGroups }}" as="g" hint-placeholder-count="2">
+          <div style="margin-top:28px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden">
+            <div style="padding:18px 22px;border-bottom:1px solid #EFEBE2;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:18px;font-weight:600">{{ g.t }}</span><span style="font-size:13.5px;color:#586174">{{ g.s }}</span></div>
+            <div style="overflow-x:auto"><div style="min-width:760px">
+              <sc-for list="{{ g.items }}" as="c" hint-placeholder-count="9">
+                <div style="display:grid;grid-template-columns:minmax(200px,1.2fr) minmax(220px,1.6fr) minmax(170px,1fr) minmax(170px,1fr) 110px;gap:16px;padding:14px 22px;border-bottom:1px solid #F3F0E9;font-size:14px;align-items:center">
+                  <span style="font-weight:600;font-size:14.5px">{{ c.t }}</span><span style="color:#3D4759">{{ c.d }}</span><span style="color:#586174">{{ c.th }}</span><span style="color:#586174">{{ c.rule }}</span>
+                  <span style="justify-self:end;font-size:12.5px;font-weight:600;color:{{ c.stC }};background:{{ c.stBg }};padding:3px 9px;border-radius:5px;white-space:nowrap">{{ c.stL }}</span>
+                </div>
+              </sc-for>
+            </div></div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</sc-if>
+
+<sc-if value="{{ showIntro }}">
+  <div class="rf-noprint" style="position:fixed;inset:0;background:rgba(11,37,69,.45);z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;animation:rfFade .2s ease both">
+    <div style="background:#fff;border-radius:18px;padding:36px;max-width:580px;width:100%;max-height:calc(100vh - 40px);overflow:auto;box-shadow:0 30px 60px -20px rgba(11,37,69,.5)">
+      <span style="font-weight:700;letter-spacing:.08em;font-size:12px;background:#F6DF6E;color:#0B2545;padding:3px 9px;border-radius:4px">DEMO · FIKTIVE DATA</span>
+      <h2 style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin:18px 0 0">{{ introCo }}</h2>
+      <div style="font-size:14px;color:#586174;margin-top:6px;font-family:'IBM Plex Mono',monospace">{{ introSub }}</div>
+      <p style="font-size:16px;line-height:1.6;color:#3D4759;margin:18px 0 0">Rettført har allerede analysert regnskapet og lønnen. Følg en guidet gjennomgang på omtrent to minutter, eller utforsk rapporten selv.</p>
+      <div style="display:flex;gap:10px;margin-top:26px;flex-wrap:wrap">
+        <button onClick="{{ startTour }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 20px;font-size:15px;font-weight:500">Start guidet demo</button>
+        <button onClick="{{ exploreSelf }}" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;border-radius:9px;padding:13px 20px;font-size:15px">Utforsk selv</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ showHow }}">
+  <div class="rf-noprint" onClick="{{ closeHow }}" style="position:fixed;inset:0;background:rgba(11,37,69,.45);z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;animation:rfFade .2s ease both">
+    <div onClick="{{ stop }}" style="background:#fff;border-radius:18px;padding:36px;max-width:580px;width:100%;max-height:calc(100vh - 40px);overflow:auto;box-shadow:0 30px 60px -20px rgba(11,37,69,.5)">
+      <h2 style="font-size:26px;font-weight:600;letter-spacing:-0.02em;margin:0">Slik fungerer Rettført</h2>
+      <div style="margin-top:20px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">1</span><div><div style="font-size:15.5px;font-weight:600">SAF-T og lønnsdata</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Filene leses lokalt i nettleseren.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">2</span><div><div style="font-size:15.5px;font-weight:600">Regelbasert kontrollmotor</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Faste regler, terskler og kontomapping.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">3</span><div><div style="font-size:15.5px;font-weight:600">Avvik og krysskontroller</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Regnskap, lønn og avstemming mellom dem.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#F6DF6E;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">4</span><div><div style="font-size:15.5px;font-weight:600">AI hjelper med forklaring og prioritering</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Får bare strukturerte data om funnene.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#E2F1E8;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">5</span><div><div style="font-size:15.5px;font-weight:600">Menneskelig vurdering</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Rettet, forventet avvik, oppfølging eller ikke relevant.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#E2F1E8;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">6</span><div><div style="font-size:15.5px;font-weight:600">Dokumentert konklusjon</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Alt logges i historikken.</div></div></div>
+      </div>
+      <div style="margin-top:22px;background:#F4F1EA;border-radius:12px;padding:18px 20px;font-size:15px;line-height:1.6;color:#0B2545"><div>Beregninger og kontroller gjøres deterministisk.</div><div>AI brukes til forklaring, prioritering og støtte i undersøkelsen.</div><div style="font-weight:600">Mennesket har alltid siste ord.</div></div>
+      <button onClick="{{ closeHow }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 20px;font-size:15px;font-weight:500;margin-top:22px">Lukk</button>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ showEnd }}">
+  <div class="rf-noprint" style="position:fixed;inset:0;background:rgba(11,37,69,.45);z-index:70;display:flex;align-items:center;justify-content:center;padding:20px;animation:rfFade .2s ease both">
+    <div style="background:#fff;border-radius:18px;padding:36px;max-width:580px;width:100%;max-height:calc(100vh - 40px);overflow:auto;box-shadow:0 30px 60px -20px rgba(11,37,69,.5)">
+      <div style="font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">GUIDET DEMO FULLFØRT</div>
+      <h2 style="font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-0.025em;margin:12px 0 0;text-wrap:balance">Fra tusenvis av datapunkter til noen få faglige vurderinger.</h2>
+      <div style="margin-top:22px;background:#F4F1EA;border-radius:12px;padding:18px 20px;font-size:15px;line-height:1.6;color:#0B2545"><div>Beregninger og kontroller gjøres deterministisk.</div><div>AI brukes til forklaring, prioritering og støtte i undersøkelsen.</div><div style="font-weight:600">Mennesket har alltid siste ord.</div></div>
+      <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
+        <button onClick="{{ exploreSelf }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 20px;font-size:15px;font-weight:500">Utforsk rapporten selv</button>
+        <button onClick="{{ openHow }}" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;border-radius:9px;padding:13px 20px;font-size:15px">Slik fungerer Rettført</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ inTour }}">
+  <div class="rf-noprint" style="position:fixed;right:24px;bottom:24px;z-index:65;width:min(380px,calc(100vw - 48px));background:#0B2545;color:#fff;border-radius:16px;padding:22px 22px 18px;box-shadow:0 24px 50px -16px rgba(11,37,69,.6);animation:rfIn .3s ease both">
+    <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#F6DF6E">{{ tourN }}</span><button onClick="{{ tourStop }}" style="background:transparent;border:0;color:rgba(255,255,255,.7);font-size:13px;padding:0">Avslutt</button></div>
+    <div style="font-size:18px;font-weight:600;margin-top:10px;letter-spacing:-0.01em">{{ tourT }}</div>
+    <p style="font-size:14.5px;line-height:1.55;color:rgba(255,255,255,.86);margin:8px 0 0">{{ tourX }}</p>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <sc-if value="{{ tourHasPrev }}"><button onClick="{{ tourPrev }}" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:9px 14px;font-size:14px">Tilbake</button></sc-if>
+      <button onClick="{{ tourNext }}" style="background:#F6DF6E;color:#0B2545;border:0;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:600">{{ tourNextL }}</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ hasToast }}">
+  <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#0B2545;color:#fff;font-size:14.5px;padding:12px 18px;border-radius:10px;z-index:60;display:flex;align-items:center;gap:10px;box-shadow:0 14px 30px -12px rgba(11,37,69,.5);animation:rfIn .25s ease both;white-space:nowrap"><span style="color:#8FDDB5">{{ iTickS }}</span>{{ toast }}</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const h = React.createElement;
+// Sett adressen til Formspree-skjemaet her, f.eks. 'https://formspree.io/f/abcdwxyz'. Tom verdi = påmeldingen vises bare som bekreftelse på siden.
+const FORM_ENDPOINT = '';
+const INK = '#0B2545';
+const C = { ink: INK, mut: '#586174', faint: '#8A909C', line: '#E4DFD4', grn: '#1F7D52', grnBg: '#E2F1E8' };
+const SEV = { hoy: { l: 'Høy', c: '#A63A28', bg: '#F6E3DD', o: 0 }, middels: { l: 'Middels', c: '#8E5A0F', bg: '#FAEDD3', o: 1 }, lav: { l: 'Lav', c: '#586174', bg: '#ECE8DF', o: 2 } };
+
+const ICONS = { x: [['path', { d: 'M6 6l12 12M18 6L6 18' }]], arrow: [['path', { d: 'M5 12h14M13 6l6 6-6 6' }]], tick: [['path', { d: 'M5 12.5l4.5 4.5L19 7.5' }]] };
+const icon = (n, s = 16, sw = 1.8) => h('svg', { width: s, height: s, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: sw, strokeLinecap: 'round', strokeLinejoin: 'round', style: { display: 'block', flexShrink: 0 } }, ICONS[n].map((p, i) => h(p[0], { key: i, ...p[1] })));
+
+const M = ({ s = 130, lx = 0, ly = 0, smile = true, wave = false, hold = false, bob = false, ground = true, scan = false, think = false, tired = false, d = 0, fidget = false }) => {
+  const an = (n, dur) => ({ animation: `${n} ${dur}s ease-in-out ${-d}s infinite` });
+  const st = { stroke: INK, strokeWidth: 3, fill: 'none', strokeLinecap: 'round' };
+  const face = h('g', { style: { transform: `translate(${lx}px,${ly}px)`, transition: 'transform .55s cubic-bezier(.3,.7,.2,1)' } },
+    h('g', { style: scan ? { animation: 'rfScan 2.2s ease-in-out infinite' } : undefined },
+      h('path', { d: think ? 'M85 53 Q91 47 97 51' : tired ? 'M86 56 Q92 55 98 58' : 'M86 57 Q92 53 98 56', ...st }),
+      h('path', { d: think ? 'M102 57 Q108 57 114 60' : tired ? 'M102 58 Q108 55 114 56' : 'M102 56 Q108 53 114 57', ...st }),
+      h('g', { style: { animation: 'rfBlink 5.2s infinite', transformOrigin: '100px 66px' } },
+        h('ellipse', { cx: 93, cy: tired ? 67 : 66, rx: 4.2, ry: tired ? 3.8 : 5.4, fill: INK, style: { transition: 'all .6s' } }), h('ellipse', { cx: 107, cy: tired ? 67 : 66, rx: 4.2, ry: tired ? 3.8 : 5.4, fill: INK, style: { transition: 'all .6s' } }),
+        h('circle', { cx: 94.3, cy: 64, r: 1.3, fill: '#fff' }), h('circle', { cx: 108.3, cy: 64, r: 1.3, fill: '#fff' })),
+      smile ? h('path', { d: 'M94 75 Q100 81 106 75', ...st }) : h('path', { d: think ? 'M95 77 q2.5 -2.2 5 0 t5 0' : 'M96 76.5 L104 76.5', ...st })));
+  return h('div', { style: { width: s, height: s, animation: bob ? 'rfBob 3.6s ease-in-out infinite' : undefined } },
+    h('svg', { width: s, height: s, viewBox: '0 0 170 170', style: { display: 'block', overflow: 'visible' } },
+      ground ? h('ellipse', { cx: 70, cy: 158, rx: 44, ry: 5, fill: 'rgba(11,37,69,.10)' }) : null,
+      h('g', { style: { animation: fidget ? 'rfKickL 2.2s ease-in-out 1' : 'none', transformOrigin: '58px 116px' } }, h('rect', { x: 54, y: 114, width: 8, height: 36, rx: 3, fill: INK }), h('ellipse', { cx: 55, cy: 152, rx: 11, ry: 6.5, fill: INK })),
+      h('g', { style: { animation: fidget ? 'rfKickR 2.2s ease-in-out 1' : 'none', transformOrigin: '75px 116px' } }, h('rect', { x: 71, y: 114, width: 8, height: 36, rx: 3, fill: INK }), h('ellipse', { cx: 80, cy: 152, rx: 11, ry: 6.5, fill: INK })),
+      h('g', { style: { ...an(tired ? 'rfShiftT' : 'rfShift', 13), transformOrigin: '66px 118px' } },
+      h('g', { style: wave ? { animation: 'rfWave 3s ease-in-out infinite', transformOrigin: '120px 74px' } : undefined },
+        h('path', { d: wave ? 'M120 74 C138 66 146 50 142 36' : 'M120 74 C140 80 146 96 136 106', stroke: INK, strokeWidth: 6.5, fill: 'none', strokeLinecap: 'round' }),
+        h('circle', { cx: wave ? 142 : 135, cy: wave ? 33 : 108, r: 7.5, fill: INK })),
+      hold ? h('g', { style: { animation: 'rfSway 5.5s cubic-bezier(.45,0,.55,1) infinite', transformOrigin: '30px 76px' } },
+        h('g', { transform: 'rotate(-10 22 50)' },
+          h('rect', { x: 0, y: 20, width: 40, height: 52, rx: 5, fill: '#fff', stroke: '#D9D3C6', strokeWidth: 1.2 }),
+          h('rect', { x: 7, y: 28, width: 18, height: 3.6, rx: 1.8, fill: INK }),
+          h('rect', { x: 7, y: 36, width: 26, height: 3, rx: 1.5, fill: '#DDD7CA' }), h('rect', { x: 7, y: 43, width: 21, height: 3, rx: 1.5, fill: '#DDD7CA' }),
+          h('rect', { x: 7, y: 50, width: 24, height: 5, rx: 1.5, fill: '#F6DF6E' }))) : null,
+      h('path', { d: 'M30 72 L64 108 L136 28', stroke: '#1F7D52', strokeWidth: 40, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round', transform: 'translate(0 4)' }),
+      h('path', { d: 'M30 72 L64 108 L136 28', stroke: '#35AE74', strokeWidth: 40, fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' }),
+      h('path', { d: 'M106 43 L121 26', stroke: 'rgba(255,255,255,.35)', strokeWidth: 5, strokeLinecap: 'round' }),
+      h('path', { d: 'M20 62 L32 75', stroke: 'rgba(255,255,255,.3)', strokeWidth: 4.5, strokeLinecap: 'round' }),
+      face,
+      think ? h('g', { style: { animation: 'rfAsk 4s ease-in-out infinite', transformOrigin: '152px 18px' } }, h('text', { x: 142, y: 24, fontSize: 30, fontWeight: 700, fill: INK, fontFamily: 'Schibsted Grotesk, sans-serif' }, '?')) : null)));
+};
+
+class Component extends DCLogic {
+  state = { screen: 'landing', page: 'new', authMode: 'login', heroStep: 0, ready: false, files: { saft: null, prev: null, curr: null }, drag: null, err: null, runIdx: 0, runList: [], pending: null, result: null, resolved: {}, fArea: 'alle', fStatus: 'apne', fid: null, note: '', toast: null, fmtOpen: false, planHover: 1, tired: false, fidget: null, ex: 0, su: { name: '', email: '', role: '', org: '', notify: true, plan: '' }, suState: 'form', suErr: '', nfEmail: '', nfDone: false, slikSeen: false, demo: false, showIntro: false, showHow: false, showEnd: false, tour: null, hist: [], ai: {}, prio: null, outcome: null, settings: null, rid: null, mapDraft: {}, tolDraft: {} };
+  timers = [];
+  componentDidMount() {
+    try { const s = JSON.parse(localStorage.getItem('rettfort_nav') || '{}'); if (s.screen) this.setState({ screen: s.screen, page: s.page === 'controls' || s.page === 'settings' ? s.page : 'new' }); } catch (e) {}
+    try { const st = JSON.parse(localStorage.getItem('rettfort_settings') || 'null'); if (st) this.setState({ settings: st }); } catch (e) {}
+    import('./rettfort-engine.js').then(E => { this.E = E; try { const p = E.samplePayroll(); this.sample = E.analyze({ saft: E.sampleSaft(), prev: p.prev, curr: p.curr }); } catch (e) { console.error(e); } this.setState({ ready: true }); }).catch(e => { console.error(e); this.setState({ err: 'Kunne ikke laste kontrollmotoren.' }); });
+    this.startHero();
+    this.slikRef = el => { if (!el || this.slikIO) return; this.slikIO = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { this.setState({ slikSeen: true }); this.slikIO.disconnect(); } }, { threshold: 0.35 }); this.slikIO.observe(el); };
+    this.exT = setInterval(() => { if (this.state.screen === 'landing') this.setState(s => ({ ex: (s.ex + 1) % 5 })); }, 3000);
+    this.tiredT = setTimeout(() => this.setState({ tired: true }), 25000);
+    const KEYS = ['s1', 's2', 's3', 'cta', 'about', 'auth', 'empty'];
+    const next = () => { if (this.state.tired) { const k = KEYS[Math.floor(Math.random() * KEYS.length)]; this.setState({ fidget: k }); this.later(() => this.setState({ fidget: null }), 2400); } this.fidT = setTimeout(next, 16000 + Math.random() * 14000); };
+    this.fidT = setTimeout(next, 30000);
+  }
+  componentDidUpdate(pp, ps) {
+    if (ps.screen !== this.state.screen || ps.page !== this.state.page || ps.fid !== this.state.fid) {
+      try { localStorage.setItem('rettfort_nav', JSON.stringify({ screen: this.state.screen, page: this.state.page })); } catch (e) {}
+      window.scrollTo(0, 0);
+      if (ps.screen !== this.state.screen) { clearTimeout(this.tiredT); if (this.state.tired) this.setState({ tired: false }); this.tiredT = setTimeout(() => this.setState({ tired: true }), 25000); }
+      if (this.state.screen === 'landing' && ps.screen !== 'landing') this.startHero();
+    }
+  }
+  componentWillUnmount() { clearTimeout(this.tiredT); clearTimeout(this.fidT); clearInterval(this.exT); if (this.slikIO) this.slikIO.disconnect(); this.timers.forEach(clearTimeout); clearInterval(this.iv); clearInterval(this.hiv); }
+  later(fn, ms) { this.timers.push(setTimeout(fn, ms)); }
+  startHero() { clearInterval(this.hiv); this.setState({ heroStep: 0 }); this.hiv = setInterval(() => this.setState(s => { if (s.heroStep >= 12) { clearInterval(this.hiv); return null; } return { heroStep: s.heroStep + 1 }; }), 360); }
+  toast(t) { this.setState({ toast: t }); clearTimeout(this.tt); this.tt = setTimeout(() => this.setState({ toast: null }), 3000); }
+  scrollTo(id) { const el = document.getElementById(id); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 76, behavior: 'smooth' }); }
+  setFile(key, file) { if (!file) return; file.text().then(text => this.setState(s => ({ err: null, files: { ...s.files, [key]: { name: file.name, size: file.size, text } } }))); }
+  samples() { if (!this.E) return null; const p = this.E.samplePayroll(); const x = this.E.sampleSaft(); return { saft: { name: 'nordhavn-drift-saft-2026.xml', size: x.length, text: x, demo: true }, prev: { name: 'lonn-2026-08.csv', size: p.prev.length, text: p.prev }, curr: { name: 'lonn-2026-09.csv', size: p.curr.length, text: p.curr } }; }
+  download(name, text, type) { const url = URL.createObjectURL(new Blob([text], { type })); const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
+  now() { const d = new Date(); const p = n => String(n).padStart(2, '0'); return { time: `${p(d.getHours())}:${p(d.getMinutes())}`, date: `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}` }; }
+  log(who, text, fid) { const t = this.now(); this.setState(s => ({ hist: [...s.hist, { ...t, who, text, fid: fid || null, k: s.hist.length }] })); }
+  rawF(id) { const r = this.state.result; return r ? r.findings.find(f => f.id === id) : null; }
+  callAi(prompt) { const c = window.claude; if (!c || typeof c.complete !== 'function') return Promise.reject(new Error('AI ikke tilgjengelig')); return Promise.race([c.complete(prompt), new Promise((_, rej) => setTimeout(() => rej(new Error('Tidsavbrudd')), 20000))]); }
+  async runAi(id) {
+    const f = this.rawF(id); if (!f || !this.E || this.state.ai[id]) return;
+    this.setState(s => ({ ai: { ...s.ai, [id]: { loading: true } } }));
+    this.log('AI', `Undersøkelse åpnet for «${f.title}».`, id);
+    const E = this.E, fb = E.explain(f); let out = null, src = 'regel', note = 'AI er ikke tilgjengelig akkurat nå. Rettført viser den regelbaserte forklaringen.';
+    try {
+      const j = E.parseAiJson(await this.callAi(E.aiFindingPrompt(f)));
+      if (j && typeof j.ser === 'string' && Array.isArray(j.forklaring) && Array.isArray(j.kontroller)) {
+        if (E.numbersGrounded([j.ser, ...j.forklaring, ...j.kontroller].join(' '), JSON.stringify(f.facts))) { out = { ser: j.ser, forklaring: j.forklaring.slice(0, 2).map(String), kontroller: j.kontroller.slice(0, 3).map(String) }; src = 'ai'; note = ''; }
+        else note = 'AI-svaret inneholdt tall som ikke finnes i grunnlaget. Rettført viser derfor den regelbaserte forklaringen.';
+      }
+    } catch (e) {}
+    this.setState(s => ({ ai: { ...s.ai, [id]: { loading: false, data: out || fb, src, note } } }));
+  }
+  async doPrio() {
+    const r = this.state.result; if (!r || !this.E) return; const R = this.state.resolved;
+    const open = r.findings.filter(f => !R[f.id] || R[f.id].outcome === 'oppfolging'); if (!open.length) return;
+    this.setState({ prio: { loading: true } });
+    let items = null, src = 'regel';
+    try { const j = this.E.parseAiJson(await this.callAi(this.E.aiPriorityPrompt(open))); const ids = new Set(open.map(f => f.id)); if (Array.isArray(j) && j.length && j.every(x => x && ids.has(x.id) && typeof x.grunn === 'string') && this.E.numbersGrounded(j.map(x => x.grunn).join(' '), JSON.stringify(open.map(f => f.facts)))) { items = j.slice(0, 3); src = 'ai'; } } catch (e) {}
+    if (!items) items = this.E.fallbackPriority(open);
+    this.setState({ prio: { loading: false, items, src } });
+    this.log(src === 'ai' ? 'AI' : 'Rettført', `Foreslo å starte med ${items.map(x => `«${(this.rawF(x.id) || {}).title}»`).join(', ')}.`);
+  }
+  finishRun() {
+    const res = this.state.pending; if (!res) return; const t = this.now(), demo = !!this.demoRun;
+    const what = [res.stats.lines ? `${this.E.fmt(res.stats.lines)} posteringer` : '', res.stats.emps ? `lønn for ${res.stats.emps} ansatte` : ''].filter(Boolean).join(' og ');
+    const hist = [{ ...t, who: 'Rettført', text: `Analyserte ${what} med ${res.controls.filter(c => c.status !== 'ikke').length} kontroller.`, fid: null, k: 0 }].concat(res.findings.map((f, i) => ({ ...t, who: 'Rettført', text: `Identifiserte: ${f.title}.`, fid: f.id, k: i + 1 })));
+    this.setState({ result: res, pending: null, resolved: {}, page: 'report', fArea: 'alle', fStatus: 'apne', hist, ai: {}, prio: null, outcome: null, demo, showIntro: demo, tour: null });
+  }
+  tourGo(n) {
+    const r = this.state.result; if (!r) return;
+    const fOf = id => (r.findings.find(f => f.controlId === id) || {}).id;
+    const base = { showIntro: false, showEnd: false, showHow: false, note: '', outcome: null };
+    if (n === 0) this.setState({ ...base, tour: 0, page: 'report', fArea: 'alle', fStatus: 'apne' });
+    else if (n === 1) this.setState({ ...base, tour: 1, page: 'finding', fid: fOf('duplikat') || (r.findings[0] || {}).id });
+    else if (n === 2) this.setState({ ...base, tour: 2, page: r.recon && !r.recon.reason ? 'recon' : 'report', rid: 'aga' });
+    else if (n === 3) { const id = fOf('avst-aga') || fOf('fordel') || (r.findings[0] || {}).id; this.setState({ ...base, tour: 3, page: 'finding', fid: id }); this.runAi(id); }
+    else this.setState({ ...base, tour: null, showEnd: true, page: 'report' });
+  }
+  async sendForm(data) { if (!FORM_ENDPOINT) { await new Promise(r => setTimeout(r, 500)); return true; } const r = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) }); return r.ok; }
+  trySample() { const x = this.samples(); if (!x) { this.setState({ screen: 'app', page: 'new' }); return; } this.setState({ screen: 'app' }); this.analyze(x); }
+  applySettings(ns) { try { localStorage.setItem('rettfort_settings', JSON.stringify(ns)); } catch (e) {} const up = { settings: ns }; const f = this.state.files; if (this.E && this.state.result) { try { up.result = this.E.analyze({ saft: f.saft && f.saft.text, prev: f.prev && f.prev.text, curr: f.curr && f.curr.text, settings: ns }); } catch (e) { console.error(e); } } this.setState(up); }
+  analyze(files) {
+    const f = files || this.state.files; if (!this.E) return; this.demoRun = !!(f.saft && f.saft.demo);
+    let res; try { res = this.E.analyze({ saft: f.saft && f.saft.text, prev: f.prev && f.prev.text, curr: f.curr && f.curr.text, settings: this.state.settings }); } catch (e) { this.setState({ err: e.message }); return; }
+    const list = res.controls.filter(c => c.status !== 'ikke').map(c => c.t);
+    this.setState({ err: null, page: 'run', runIdx: 0, runList: list, pending: res, ...(files ? { files } : {}) });
+    clearInterval(this.iv); let i = 0;
+    this.iv = setInterval(() => { i++; if (i >= list.length) { clearInterval(this.iv); this.setState({ runIdx: list.length }); this.later(() => this.finishRun(), 450); } else this.setState({ runIdx: i }); }, 110);
+  }
+
+  renderVals() {
+    const s = this.state, E = this.E, set = o => () => this.setState(o);
+    const kr = E ? E.kr : (n => Math.round(n) + ' kr'), nd = E ? E.nd : (x => x), fmt = E ? E.fmt : (n => String(Math.round(n))), monthName = E ? E.monthName : (x => x);
+    const res = s.result, R = s.resolved;
+    const smp = this.sample;
+
+    // hero
+    const hs = s.heroStep;
+    const hLines = smp ? smp.stats.lines : 3006, hOk = smp ? smp.controls.filter(c => c.status === 'ok').length : 4, hOpen = smp ? smp.findings.length : 18;
+    const hTop = smp ? [...smp.findings].sort((a, b) => SEV[a.sev].o - SEV[b.sev].o).slice(0, 4) : [];
+    const heroFinds = (hTop.length ? hTop : Array.from({ length: 4 }, () => ({ sev: 'lav', title: '', amount: null }))).map((f, i) => ({ sev: SEV[f.sev].l, c: SEV[f.sev].c, bg: SEV[f.sev].bg, t: f.title, a: f.amount != null ? kr(Math.abs(f.amount)) : '', op: hs > 7 + i ? 1 : 0, y: hs > 7 + i ? '0px' : '8px', w: hs > 8 + i ? '100%' : '0%' }));
+
+    // files
+    const dropDef = [
+      { key: 'saft', tag: 'SAF-T · XML', title: 'Regnskap', sub: 'SAF-T Financial for perioden du vil kontrollere.', accept: '.xml,text/xml' },
+      { key: 'prev', tag: 'CSV', title: 'Lønn · forrige periode', sub: 'Lønnsgrunnlag for perioden du sammenligner med.', accept: '.csv,text/csv,.txt' },
+      { key: 'curr', tag: 'CSV', title: 'Lønn · denne perioden', sub: 'Lønnsgrunnlag for perioden som skal kontrolleres.', accept: '.csv,text/csv,.txt' }
+    ];
+    const drops = dropDef.map(d => { const f = s.files[d.key]; const on = s.drag === d.key; return { ...d, has: !!f, empty: !f, name: f ? f.name : '', size: f ? (f.size > 1e6 ? fmt(f.size / 1e6, 1) + ' MB' : fmt(f.size / 1e3) + ' kB') : '', bg: on ? '#FBF3C8' : f ? '#F1F8F3' : '#fff', bd: on ? '#C9A92A' : f ? '#8FCBAA' : '#CFC8B8',
+      pick: e => { this.setFile(d.key, e.target.files && e.target.files[0]); e.target.value = ''; },
+      over: e => { e.preventDefault(); if (s.drag !== d.key) this.setState({ drag: d.key }); }, leave: () => this.setState({ drag: null }),
+      drop: e => { e.preventDefault(); this.setState({ drag: null }); this.setFile(d.key, e.dataTransfer.files && e.dataTransfer.files[0]); },
+      clear: e => { e.preventDefault(); e.stopPropagation(); this.setState(st => ({ files: { ...st.files, [d.key]: null } })); } }; });
+    const F0 = s.files, hasS = !!F0.saft, hasP = !!(F0.prev && F0.curr), halfP = !!(F0.prev || F0.curr) && !hasP;
+    const can = s.ready && (hasS || hasP);
+    const CAT = E ? E.CONTROLS : []; const nBy = a => CAT.filter(c => c.area === a).length;
+    const anHint = !s.ready ? 'Laster kontrollmotoren…' : halfP ? 'Lønnskontroll trenger begge lønnsfilene.' : hasS && hasP ? `Regnskap, lønn og lønn × regnskap: ${CAT.length} kontroller.` : hasS ? `Regnskapskontroll med ${nBy('regnskap')} kontroller.` : hasP ? `Lønnskontroll med ${nBy('lonn')} kontroller. Legg til SAF-T for avstemming mot regnskapet.` : 'Legg til minst én fil.';
+
+    // report
+    const ctrls = res ? res.controls : (E ? E.CONTROLS.map(c => ({ ...c, status: 'ikke', count: 0 })) : []);
+    const cById = {}; ctrls.forEach(c => cById[c.id] = c);
+    const AREA_L = { regnskap: 'Regnskap', lonn: 'Lønn', kryss: 'Lønn × regnskap', revisjon: 'Revisjonsblikk' };
+    const OUT_L = { rettet: 'Rettet', forventet: 'Forventet avvik', oppfolging: 'Krever oppfølging', irrelevant: 'Ikke relevant' };
+    const fAll = res ? res.findings.map(f => { const c = cById[f.controlId] || {}; const signed = f.controlId.startsWith('avst-') || f.controlId === 'endring-lonn' || f.controlId === 'fastlonn' || f.controlId === 'beregning'; const amountS = f.amount == null ? '' : signed ? (f.amount >= 0 ? '+' : '−') + kr(Math.abs(f.amount)) : kr(Math.abs(f.amount)); const rec = R[f.id]; const done = !!rec && rec.outcome !== 'oppfolging'; return { ...f, ...SEV[f.sev], sevL: SEV[f.sev].l, sevC: SEV[f.sev].c, sevBg: SEV[f.sev].bg, areaL: AREA_L[f.area] || 'Regnskap', ctrlT: c.t, ctrlD: c.d, ctrlTh: c.th, ctrlRule: c.rule, amountS, hasAmt: !!amountS, dateS: f.date ? nd(f.date) : '', hasDate: !!f.date, done, op: done ? 0.6 : 1, meta: rec ? OUT_L[rec.outcome] : (AREA_L[f.area] || 'Regnskap'), fn: () => this.setState({ page: 'finding', fid: f.id, note: (R[f.id] || {}).note || '', outcome: null }) }; }).sort((a, b) => (a.done - b.done) || (a.o - b.o)) : [];
+    const inArea = f => s.fArea === 'alle' || f.area === s.fArea;
+    const flist = fAll.filter(inArea).filter(f => s.fStatus === 'alle' || (s.fStatus === 'apne' ? !f.done : f.done));
+    const openN = fAll.filter(f => !f.done).length, doneN = fAll.length - openN;
+    const okN = ctrls.filter(c => c.status === 'ok').length;
+    let rHead = '';
+    const ranN0 = ctrls.filter(c => c.status !== 'ikke').length;
+    if (res) rHead = openN ? `${okN >= ranN0 * 0.6 ? 'Det meste ser riktig ut. ' : ''}${openN} forhold fortjener oppmerksomhet.` : 'Alt er gjennomgått. Ingen forhold trenger vurdering.';
+    const rStats = res ? [res.stats.lines ? `${fmt(res.stats.lines)} posteringer analysert` : '', res.stats.emps ? `${res.stats.emps} ansatte kontrollert` : '', `${ranN0} automatiske kontroller`].filter(Boolean).join(' · ') : '';
+    const rMeta = res ? [res.company, res.start ? `${nd(res.start)}–${nd(res.end)}` : '', res.payPeriods ? `lønn ${monthName(res.payPeriods[0])} → ${monthName(res.payPeriods[1])}` : ''].filter(Boolean).join(' · ') : '';
+    const areaTabs = [['alle', 'Alle'], ['regnskap', 'Regnskap'], ['lonn', 'Lønn']].concat(ctrls.some(c => c.area === 'kryss' && c.status !== 'ikke') ? [['kryss', 'Lønn × regnskap']] : []).concat(ctrls.some(c => c.area === 'revisjon' && c.status !== 'ikke') ? [['revisjon', 'Revisjonsblikk']] : []).map(([k, l]) => ({ l, n: String(fAll.filter(f => (k === 'alle' || f.area === k) && !f.done).length), fn: set({ fArea: k }), bg: s.fArea === k ? '#fff' : 'transparent', fw: s.fArea === k ? 600 : 400 }));
+    const statusTabs = [['apne', 'Åpne'], ['avklart', 'Avklarte'], ['alle', 'Alle']].map(([k, l]) => ({ l, fn: set({ fStatus: k }), bd: s.fStatus === k ? INK : 'transparent', col: s.fStatus === k ? INK : C.mut }));
+    const ctrlSide = ctrls.filter(c => c.status !== 'ikke').map(c => { const open = fAll.filter(f => f.controlId === c.id && !f.done).length; const bad = open > 0; return { t: c.t, ok: !bad, bad, count: String(open), icBg: bad ? '#FAEDD3' : C.grnBg, icFg: bad ? '#8E5A0F' : C.grn, col: bad ? INK : C.mut }; });
+    const AREAS = [['regnskap', 'REGNSKAP', 'Bilag, MVA og perioder'], ['lonn', 'LØNN', 'Endringer mellom perioder'], ['kryss', 'LØNN × REGNSKAP', 'Avstemming mot hovedboken'], ['revisjon', 'REVISJONSBLIKK', 'Kan fortjene nærmere kontroll']];
+    const tiles = res ? AREAS.map(([k, l, d]) => { const ran = ctrls.some(c => c.area === k && c.status !== 'ikke'); const n = fAll.filter(f => f.area === k && !f.done).length; const on = s.fArea === k; return { l, v: ran ? String(n) : '—', u: ran ? (n === 1 ? 'forhold' : 'forhold') : 'ikke kjørt', d, c: !ran ? C.faint : n ? '#8E5A0F' : C.grn, bg: on ? '#FBF6E3' : '#fff', fn: set({ fArea: on ? 'alle' : k }) }; }) : [];
+
+    // finding
+    const idx = fAll.findIndex(f => f.id === s.fid); const F = idx >= 0 ? fAll[idx] : null;
+    const go = d => () => { if (!fAll.length) return; const n = fAll[(idx + d + fAll.length) % fAll.length]; this.setState({ fid: n.id, note: (R[n.id] || {}).note || '', outcome: null }); };
+    const rightCol = v => /kr$|^[−+]?[\d\s ,.]+$/.test(v || '');
+    const fCols = F ? F.ev.cols.map((v, i) => ({ v, al: 'left' })) : [];
+    const fRows = F ? F.ev.rows.map(r => ({ cells: r.map(v => ({ v, al: rightCol(v) ? 'right' : 'left', ff: rightCol(v) ? "'IBM Plex Mono',monospace" : 'inherit' })) })) : [];
+    if (F) F.ev.cols.forEach((c, i) => { if (F.ev.rows.length && F.ev.rows.every(r => !r[i] || rightCol(r[i]))) fCols[i].al = 'right'; });
+    const fr = F ? R[F.id] : null;
+
+    // lønn × regnskap
+    const rc = res && res.recon;
+    const RST = { stemmer: [C.grn, C.grnBg], innenfor: [C.grn, C.grnBg], avvik: ['#8E5A0F', '#FAEDD3'], ikke: [C.mut, '#ECE8DF'] };
+    const sgn = v => (v > 0 ? '+' : v < 0 ? '−' : '') + kr(Math.abs(v));
+    const reconRows = rc && !rc.reason ? rc.rows.map(r => { const c = RST[r.status], no = r.status === 'ikke'; return { t: r.t, expS: no ? '—' : kr(r.expected), bookS: no ? '—' : kr(r.booked), diffS: no ? '' : sgn(r.diff), dc: r.status === 'avvik' ? '#8E5A0F' : C.mut, stL: r.statusL, sc: c[0], sb: c[1], fn: set({ page: 'recon', rid: r.key }) }; }).concat(rc.fordel ? [(() => { const n = fAll.filter(f => f.controlId === 'fordel' && !f.done).length; return { t: 'Mulige fordeler', expS: '', bookS: '', diffS: '', dc: C.mut, stL: n ? `${n} bør vurderes` : 'Ingen funn', sc: n ? '#8E5A0F' : C.grn, sb: n ? '#FAEDD3' : C.grnBg, fn: set({ fArea: 'kryss', fStatus: 'apne' }) }; })()] : []) : [];
+    const ar = rc && rc.agaRate;
+    const mkT = (cols, rows) => { const al = cols.map((_, i) => rows.length && rows.every(r => !r[i] || rightCol(r[i])) ? 'right' : 'left'); return { cols: cols.map((v, i) => ({ v, al: al[i] })), rows: rows.map((r, j) => ({ cells: r.map((v, i) => ({ v, al: al[i], ff: al[i] === 'right' ? "'IBM Plex Mono',monospace" : 'inherit', fw: r.bold ? 600 : 400 })) })) }; };
+    const rr = rc && rc.rows ? rc.rows.find(r => r.key === s.rid) : null;
+    const pRows = rr ? rr.postings.map(p => [p.bilag, nd(p.date), p.accName, p.text, kr(p.amount)]) : [];
+    if (rr && pRows.length) { const t = ['Sum', '', '', '', kr(rr.postings.reduce((a, p) => a + p.amount, 0))]; t.bold = true; pRows.push(t); }
+    const PT = mkT(['Bilag', 'Dato', 'Konto', 'Tekst', 'Beløp'], pRows.length ? pRows : [['—', '', '', 'Ingen posteringer i perioden', '']]);
+    const XT = mkT(['Bilag', 'Dato', 'Konto', 'Tekst', 'Beløp', 'Årsak'], rr ? rr.excluded.map(p => [p.bilag, nd(p.date), p.accName, p.text, kr(p.amount), p.reason]) : []);
+    const ET = mkT(rr ? rr.emp.cols : [], rr ? rr.emp.rows : []);
+    const RR = rr ? { title: `${rr.t} · ${rr.periodL}`, periodL: rr.periodL, method: rr.method, stL: rr.statusL, sc: RST[rr.status][0], sb: RST[rr.status][1] } : {};
+    const rrKpi = rr && rr.status !== 'ikke' ? [{ l: rr.payrollL, v: kr(rr.payroll), c: INK }, { l: 'Forventet', v: kr(rr.expected), c: INK }, { l: 'Bokført', v: kr(rr.booked), c: INK }, { l: 'Differanse', v: sgn(rr.diff), c: rr.status === 'avvik' ? '#8E5A0F' : C.grn }, { l: 'Toleranse', v: kr(rr.tol), c: C.mut }] : [];
+    const rrMeta = rr ? [['Periode', `${nd(rr.periodFrom)}–${nd(rr.periodTo)}`], ['Kontoer', rr.accounts.join(', ')], ['Kilde i lønnsfilen', rr.source]].concat(rr.key === 'aga' ? [['AGA-sone', rr.zoneL], ['Sats brukt', rr.rateUsed]] : []).concat([['Toleranse', kr(rr.tol)]]).map(([l, v]) => ({ l, v })) : [];
+
+    // innstillinger
+    const cfg = E ? E.mergeSettings(s.settings) : null;
+    const curS = () => this.state.settings || {};
+    const zones = E ? E.AGA_ZONES.map(z => { const on = cfg.agaZone === z.id; return { l: z.l, p: z.reduced != null ? `${fmt(z.reduced, 1)} / ${fmt(z.pct, 1)} %` : `${fmt(z.pct, 1)} %`, bg: on ? INK : '#fff', fg: on ? '#fff' : INK, bd: on ? INK : '#D9D3C6', fn: () => this.applySettings({ ...curS(), agaZone: z.id }) }; }) : [];
+    const tolRows = E ? ['avst-brutto', 'avst-skatt', 'avst-aga'].map(id => ({ l: (CAT.find(c => c.id === id) || {}).t, v: s.tolDraft[id] != null ? s.tolDraft[id] : fmt(cfg.tolerance[id], 2).replace(/,00$/, ''), ch: e => this.setState({ tolDraft: { ...this.state.tolDraft, [id]: e.target.value } }), bl: () => { const d = this.state.tolDraft[id]; if (d == null) return; const v = Math.max(0, parseFloat(d.replace(/\s/g, '').replace(',', '.')) || 0); const td = { ...this.state.tolDraft }; delete td[id]; this.setState({ tolDraft: td }); this.applySettings({ ...curS(), tolerance: { ...(curS().tolerance || {}), [id]: v } }); } })) : [];
+    const mapRows = E ? Object.keys(E.MAPPING_LABELS).map(k => ({ l: E.MAPPING_LABELS[k], v: s.mapDraft[k] != null ? s.mapDraft[k] : cfg.mapping[k].join(', '), ch: e => this.setState({ mapDraft: { ...this.state.mapDraft, [k]: e.target.value } }), bl: () => { const d = this.state.mapDraft[k]; if (d == null) return; const md = { ...this.state.mapDraft }; delete md[k]; this.setState({ mapDraft: md }); this.applySettings({ ...curS(), mapping: { ...(curS().mapping || {}), [k]: d.split(',').map(x => x.trim()).filter(Boolean) } }); } })) : [];
+
+
+    // demo, AI, vurdering, historikk
+    const OUT = [['rettet', 'Rettet'], ['forventet', 'Forventet avvik'], ['oppfolging', 'Krever oppfølging'], ['irrelevant', 'Ikke relevant']];
+    const outcomes = OUT.map(([k, l]) => { const on = s.outcome === k; return { l, fn: set({ outcome: k }), bg: on ? '#F4F1EA' : '#fff', bd: on ? INK : '#D9D3C6', rc: on ? INK : '#A9A294', dot: on ? INK : 'transparent' }; });
+    const aiS = F ? s.ai[F.id] : null, aiD = aiS && aiS.data;
+    const fHist = F ? s.hist.filter(e => e.fid === F.id) : [];
+    const histList = [...s.hist].reverse().map(e => ({ ...e, whoC: e.who === 'AI' ? '#6B4E00' : e.who === 'Rettført' ? C.grn : INK, whoBg: e.who === 'AI' ? '#FBF3C8' : e.who === 'Rettført' ? C.grnBg : '#ECE8DF', cur: e.fid ? 'pointer' : 'default', fn: e.fid ? () => this.setState({ page: 'finding', fid: e.fid, note: '', outcome: null }) : () => {} }));
+    const pr = s.prio;
+    const prItems = pr && pr.items ? pr.items.map((x, i) => { const f = fAll.find(y => y.id === x.id); return f ? { n: String(i + 1).padStart(2, '0'), t: f.title, g: x.grunn, sevL: f.sevL, sevC: f.sevC, sevBg: f.sevBg, fn: f.fn } : null; }).filter(Boolean) : [];
+    const agaRow = rc && rc.rows ? rc.rows.find(r => r.key === 'aga') : null;
+    const okRows = rc && rc.rows ? rc.rows.filter(r => r.status === 'stemmer' || r.status === 'innenfor').map(r => r.t.toLowerCase()) : [];
+    const okTxt = okRows.length ? `${okRows.join(' og ').replace(/^./, c => c.toUpperCase())} stemmer. ` : '';
+    const TOUR = res ? [
+      ['Rettført viser bare det som bør undersøkes', `${rStats}. Det meste stemmer. Rapporten viser de ${openN} forholdene som fortjener oppmerksomhet, fordelt på fire fagområder.`],
+      ['Mulig dobbeltføring', 'Samme leverandør, fakturanummer og beløp er bokført to ganger. Rettført viser begge bilagene, hvorfor kontrollen reagerte og hva du bør sjekke.'],
+      ['Lønn × regnskap', agaRow ? `Rettført kobler lønnsfilen mot hovedboken. ${okTxt}Arbeidsgiveravgiften avviker med ${kr(Math.abs(agaRow.diff))}, og du ser posteringene og lønnsdataene bak begge tallene.` : 'Rettført kobler lønnsfilen mot hovedboken og viser posteringene bak tallene.'],
+      ['Undersøk med AI, og vurder selv', 'AI får bare de strukturerte dataene for dette funnet og foreslår hva du bør kontrollere. Tallene kommer fra kontrollmotoren. Til slutt velger du en vurdering til høyre, og den lagres i historikken.']
+    ] : [];
+    const inTour = s.tour != null && !!TOUR[s.tour];
+
+    // payroll
+    const pay = res && res.pay;
+    const payRows = pay ? pay.map(r => { const fs = fAll.filter(f => f.emp === r.id); const first = fs[0]; return { name: r.name, prevS: r.prev == null ? '—' : kr(r.prev), currS: r.curr == null ? '—' : kr(r.curr), diffS: r.prev == null || r.curr == null ? '' : r.diff === 0 ? '0 kr' : (r.diff > 0 ? '+' : '−') + kr(Math.abs(r.diff)), pctS: r.pct == null ? (r.prev == null ? 'Ny' : 'Mangler') : (r.pct >= 0 ? '+' : '−') + fmt(Math.abs(r.pct), 1), col: r.diff > 0 ? '#8E5A0F' : r.diff < 0 ? '#A63A28' : C.mut, fS: fs.length ? fs.map(f => f.ctrlT).join(', ') : '—', fC: fs.length ? INK : C.faint, cur: first ? 'pointer' : 'default', fn: first ? first.fn : () => {} }; }) : [];
+    const payTot = pay ? pay.reduce((a, r) => [a[0] + (r.prev || 0), a[1] + (r.curr || 0)], [0, 0]) : [0, 0];
+
+    // controls catalogue
+    const stMap = { ok: ['Bestått', C.grn, C.grnBg], avvik: ['Avvik', '#8E5A0F', '#FAEDD3'], ikke: ['Ikke kjørt', C.mut, '#ECE8DF'] };
+    const ctrlGroups = [['regnskap', 'Regnskap', 'SAF-T Financial'], ['lonn', 'Lønn', 'To lønnsperioder'], ['kryss', 'Lønn × regnskap', 'SAF-T og lønn for samme måned'], ['revisjon', 'Revisjonsblikk', 'Risikobasert utvelgelse']].map(([a, t, sub]) => ({ t, s: sub, items: ctrls.filter(c => c.area === a).map(c => { const m = stMap[c.status] || stMap.ikke; const rw = rc && rc.rows ? rc.rows.find(x => x.id === c.id) : null; return { ...c, stL: c.status === 'avvik' ? `${c.count} avvik` : rw && rw.status === 'innenfor' ? 'Innenfor toleranse' : m[0], stC: m[1], stBg: m[2] }; }) }));
+
+    // plans
+    const PF = [['Regnskapskontroll via SAF-T', [1, 1, 1]], ['Kontrollrapport med forklaring per funn', [1, 1, 1]], ['Analyse lokalt i nettleseren', [1, 1, 1]], ['Lønnskontroll mellom perioder', [0, 1, 1]], ['Merk funn som avklart med kommentar', [0, 1, 1]], ['Eksport av rapport (CSV og PDF)', [0, 1, 1]], ['AI-oppsummering av funn', [0, 1, 1]], ['Historikk mellom analyser', [0, 1, 1]], ['Flere kunder i én oversikt', [0, 0, 1]], ['Egne terskler per kunde', [0, 0, 1]], ['Prioritert support', [0, 0, 1]]];
+    const plans = [
+      { k: 'Gratis', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
+      { k: 'Pro', d: 'For bedrifter og regnskapsførere med lønn.', price: '249', unit: 'kr / mnd per selskap', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 AI-oppsummeringer per måned'], pop: true },
+      { k: 'Byrå', d: 'For regnskapskontorer med mange kunder.', price: '1 490', unit: 'kr / mnd inkl. 15 kunder', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 AI-oppsummeringer per måned'] }
+    ].map((p, i) => { const dk = s.planHover === i; return { ...p, dark: dk, bg: dk ? INK : '#fff', fg: dk ? '#fff' : INK, sub: dk ? 'rgba(255,255,255,.68)' : C.mut, bd: dk ? INK : C.line, line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2', btnBg: dk ? '#F6DF6E' : INK, btnFg: dk ? INK : '#fff', shadow: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', lift: dk ? '-12px' : '0px', limits: p.lim.map(l => ({ l })), feats: PF.map(f => { const on = !!f[1][i]; return { l: f[0], on, off: !on, txt: on ? (dk ? '#fff' : INK) : (dk ? 'rgba(255,255,255,.4)' : '#A4A8B0'), icBg: on ? (dk ? '#35AE74' : C.grnBg) : (dk ? 'rgba(255,255,255,.08)' : '#EFEBE2'), icFg: on ? (dk ? '#fff' : C.grn) : (dk ? 'rgba(255,255,255,.42)' : '#A4A8B0') }; }), enter: () => { if (s.planHover !== i) this.setState({ planHover: i }); }, fn: i === 0 ? () => this.trySample() : () => this.setState(st => ({ screen: 'auth', authMode: 'signup', su: { ...st.su, plan: p.k } })) }; });
+
+    const cat = E ? E.CONTROLS : [];
+    const appNav = [['new', 'Ny analyse'], ['report', 'Rapport'], ['payroll', 'Lønn'], ['controls', 'Kontroller'], ['history', 'Historikk'], ['settings', 'Innstillinger']].map(([k, l]) => { const on = s.page === k || (k === 'report' && (s.page === 'finding' || s.page === 'recon')) || (k === 'new' && s.page === 'run'); return { l, fn: set({ page: k }), bg: on ? '#F1EDE4' : 'transparent', col: on ? INK : C.mut, fw: on ? 600 : 400, hasBadge: k === 'report' && openN > 0, badge: String(openN) }; });
+
+    return {
+      isLanding: s.screen === 'landing', isAbout: s.screen === 'about', isAuth: s.screen === 'auth', isApp: s.screen === 'app',
+      isLogin: s.authMode === 'login', isSignup: s.authMode === 'signup', isReset: s.authMode === 'reset',
+      toLanding: set({ screen: 'landing' }), toAbout: set({ screen: 'about' }), toLogin: set({ screen: 'auth', authMode: 'login' }), toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
+      enterApp: set({ screen: 'app', page: 'new' }), toUpload: set({ screen: 'app', page: 'new' }), toControls: set({ screen: 'app', page: 'controls' }),
+      trySample: () => this.trySample(),
+      resetSent: () => this.toast('Lenke sendt (demo)'), logout: set({ screen: 'landing' }),
+      goHow: () => this.scrollTo('slik'), goCtrl: () => this.scrollTo('kontroller'), goPrice: () => this.scrollTo('priser'),
+      iArrow: icon('arrow', 15), iTick: icon('tick', 22, 2.4), iX: icon('x', 15), iXs: icon('x', 11, 2.4), iTickS: icon('tick', 12, 2.6),
+      mHero: M({ s: 132, lx: -9, ly: hs < 7 ? 4 : 6, smile: hs >= 7, wave: hs >= 12, ground: false }),
+      mStep1: M({ s: 150, hold: true, lx: 6, ly: 3, tired: s.tired, d: 0, fidget: s.fidget === 's1' }), mStep2: M({ s: 132, lx: -9, ly: 6, smile: false, scan: true, tired: s.tired, d: 2.3, fidget: s.fidget === 's2' }), mStep3: M({ s: 140, lx: -8, ly: 5, wave: true, tired: s.tired, d: 4.6, fidget: s.fidget === 's3' }),
+      mCta: M({ s: 140, lx: -5, ly: 4, wave: true, ground: false, tired: s.tired, d: 1.2, fidget: s.fidget === 'cta' }), mPrice: M({ s: 90, lx: -4, ly: 5, ground: false, bob: true }), mAbout: M({ s: 150, hold: true, lx: -4, ly: 2, tired: s.tired, d: 3, fidget: s.fidget === 'about' }),
+      mAuth: M({ s: 190, lx: -5, ly: 4, wave: true, tired: s.tired, d: 1.7, fidget: s.fidget === 'auth' }), mRun: M({ s: 150, smile: false, scan: true, bob: true }), mEmpty: M({ s: 110, wave: true, tired: s.tired, fidget: s.fidget === 'empty' }),
+      heroLinesS: fmt(Math.min(hLines, Math.round(hLines * hs / 6))), heroOkS: String(hOk), heroOpenS: String(hOpen), heroSumOp: hs >= 7 ? 1 : 0, heroW: Math.min(100, hs / 6 * 100) + '%', heroBusy: hs < 7, heroDone: hs >= 7, heroFinds,
+      planReset: () => { if (s.planHover !== 1) this.setState({ planHover: 1 }); }, ctrlR: cat.filter(c => c.area === 'regnskap'), ctrlL: cat.filter(c => c.area === 'lonn'), ctrlK: cat.filter(c => c.area === 'kryss'), ctrlV: cat.filter(c => c.area === 'revisjon'), nV: E ? String(nBy('revisjon')) : '', stop: e => e.stopPropagation(), plans,
+      ...(() => { const su = s.su, upd = k => e => { const v = e.target.value; this.setState(st => ({ su: { ...st.su, [k]: v }, suErr: '' })); }; const okMail = x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.trim());
+        return { suForm: s.suState !== 'done', suDone: s.suState === 'done', suName: su.name, suEmail: su.email, suOrg: su.org, suNotify: su.notify, suSetName: upd('name'), suSetEmail: upd('email'), suSetOrg: upd('org'), suToggle: () => this.setState(st => ({ su: { ...st.su, notify: !st.su.notify } })),
+          suRoles: ['Regnskapsfører', 'Revisor', 'Økonomi / lønn', 'Annet'].map(l => { const on = su.role === l; return { l, fn: () => this.setState(st => ({ su: { ...st.su, role: on ? '' : l } })), bg: on ? INK : '#fff', fg: on ? '#fff' : INK, bd: on ? INK : '#D9D3C6' }; }),
+          suHasErr: !!s.suErr, suErr: s.suErr, suBusy: s.suState === 'busy', suBtn: s.suState === 'busy' ? 'Sender …' : 'Meld interesse',
+          suDoneTxt: su.notify ? `Vi gir beskjed til ${su.email.trim()} når Rettført lanseres. Frem til da kan du prøve demoen med fiktive data.` : 'Frem til lansering kan du prøve demoen med fiktive data.',
+          suSubmit: async e => { e.preventDefault(); if (!su.name.trim()) return this.setState({ suErr: 'Skriv inn navnet ditt.' }); if (!okMail(su.email)) return this.setState({ suErr: 'Skriv inn en gyldig e-postadresse.' }); this.setState({ suState: 'busy', suErr: '' }); let ok = false; try { ok = await this.sendForm({ type: 'interesse', navn: su.name.trim(), epost: su.email.trim(), rolle: su.role, virksomhet: su.org.trim(), varsle: su.notify, plan: su.plan }); } catch (x) {} this.setState(ok ? { suState: 'done' } : { suState: 'form', suErr: 'Kunne ikke sende akkurat nå. Prøv igjen om litt.' }); },
+          nfOpen: !s.nfDone, nfDone: s.nfDone, nfEmail: s.nfEmail, nfType: e => this.setState({ nfEmail: e.target.value }), nfMsg: 'Takk. Du får beskjed når Rettført lanseres.',
+          nfSubmit: async e => { e.preventDefault(); if (!okMail(s.nfEmail)) { this.toast('Skriv inn en gyldig e-postadresse'); return; } let ok = false; try { ok = await this.sendForm({ type: 'varsel', epost: s.nfEmail.trim() }); } catch (x) {} if (ok) this.setState({ nfDone: true }); else this.toast('Kunne ikke sende akkurat nå'); } }; })(), slikRef: this.slikRef || (() => {}),
+      s1Walk: s.slikSeen ? 'rfWalk 2.2s ease-out both' : 'none', s1Tray: s.slikSeen ? 'rfTray 2.2s ease both' : 'none', s2Lean: s.slikSeen ? 'rfLean 6s ease-in-out infinite' : 'none', s3Nod: s.slikSeen ? 'rfNod 5s ease-in-out infinite' : 'none',
+      scanRows: [0, 1, 2, 3, 4, 5].map(i => { const EX = ['Mulig dobbeltføring', 'Lønn etter sluttdato', 'AGA-differanse', 'Uvanlig stort beløp', 'Endret bankkonto']; const b = s.ex % 2 ? 'B' : '', D = ' 3s ease both'; if (i === 3) return { t: EX[s.ex], an: `rfIn2${b}${D}`, tan: `rfTin${b}${D}`, kan: 'rfKno 1s both' }; if (i === 2) return { t: EX[(s.ex + 4) % 5], an: `rfOut2${b}${D}`, tan: `rfTout${b}${D}`, kan: `rfKin${b}${D}` }; return { t: '', an: 'none', tan: 'none', kan: 'none' }; }), scanAn: `rfScrl${s.ex % 2 ? 'B' : ''} 3s ease both`,
+      ex3t: ['Mulig dobbeltføring', 'Lønn etter sluttdato', 'Arbeidsgiveravgift', 'Programvare 950 000 kr', 'Endret bankkonto'][s.ex], ex3d: ['Faktura 48213 ført to ganger. Bilag 1211 kreditert.', 'Sluttoppgjør avtalt 12.08. Avtale lagt ved.', 'Fri bil manglet i grunnlaget. Korrigert i oktober.', 'Årslisens 2026–2027. Periodiseres over 12 mnd.', 'Ringt Amir Khalil 24.09. Ny konto er riktig.'][s.ex], ex3o: ['Rettet', 'Forventet avvik', 'Rettet', 'Krever oppfølging', 'Forventet avvik'][s.ex],
+      ctrlCards: [['regnskap', 'Regnskap', 'Bilag, MVA og perioder i SAF-T.', ['balanse', 'duplikat', 'mvaber']], ['lonn', 'Lønn', 'Endringer mellom to lønnsperioder.', ['sluttdato', 'bankkonto', 'endring-lonn']], ['kryss', 'Lønn × regnskap', 'Lønnsfilen avstemt mot hovedboken.', ['avst-brutto', 'avst-skatt', 'avst-aga']], ['revisjon', 'Revisjonsblikk', 'Poster som kan fortjene nærmere kontroll.', ['uvanlig', 'runde', 'tekst']]].map(([a, t, d, ids]) => { const all = cat.filter(c => c.area === a); const ex = ids.map(id => all.find(c => c.id === id)).filter(Boolean); return { t, d, n: E ? `${all.length} kontroller` : '', ex: ex.map(c => ({ t: c.t })), more: all.length > ex.length ? `og ${all.length - ex.length} til` : '' }; }),
+      nCtrl: E ? String(cat.length) : '', nR: E ? String(nBy('regnskap')) : '', nL: E ? String(nBy('lonn')) : '', nK: E ? String(nBy('kryss')) : '', heroLinesAll: fmt(hLines),
+      pg_recon: s.page === 'recon', pg_settings: s.page === 'settings', toSettings: set({ screen: 'app', page: 'settings' }),
+      hasRecon: !!rc, reconSkipped: !!(rc && rc.reason), reconRan: !!(rc && !rc.reason), reconReason: rc ? rc.reason : '', reconPeriod: rc ? rc.periodL : '', reconRows,
+      reconSub: ar ? `${ar.zoneL} · ${fmt(ar.pct, 1)} % · Innstillinger` : '',
+      fHasRecon: !!(F && F.recon), fToRecon: F && F.recon ? set({ page: 'recon', rid: F.recon }) : () => {},
+      hasRR: !!rr, RR, rrKpi, rrCalc: rr && rr.calc ? rr.calc.map(([l, v]) => ({ l, v })) : [], rrNotes: rr ? rr.notes.map(t => ({ t })) : [], rrHasNotes: !!(rr && rr.notes.length), rrPostN: rr ? `${rr.postings.length} posteringer · konto ${rr.accounts.join(', ')}` : '',
+      rrPCols: PT.cols, rrPRows: PT.rows, rrXCols: XT.cols, rrXRows: XT.rows, rrHasExcl: !!(rr && rr.excluded.length), rrECols: ET.cols, rrERows: ET.rows, rrMeta,
+      rrHasF: !!(rr && rr.findingId), rrToF: rr && rr.findingId ? () => this.setState({ page: 'finding', fid: rr.findingId, note: (R[rr.findingId] || {}).note || '' }) : () => {},
+      zones, isIa: !!cfg && cfg.agaZone === 'Ia', fribBrukt: !!(cfg && cfg.agaFribelopBrukt), toggleFrib: () => this.applySettings({ ...curS(), agaFribelopBrukt: !(cfg && cfg.agaFribelopBrukt) }), tolRows, mapRows,
+      resetSettings: () => { this.setState({ mapDraft: {}, tolDraft: {} }); this.applySettings({}); this.toast('Standardinnstillinger er brukt'); },
+      appNav, pg_new: s.page === 'new', pg_run: s.page === 'run', pg_report: s.page === 'report', pg_finding: s.page === 'finding', pg_payroll: s.page === 'payroll', pg_controls: s.page === 'controls',
+      drops, useSamples: () => { const x = this.samples(); if (x) { this.setState({ files: x, err: null }); this.toast('Eksempelfiler lagt til'); } },
+      dlSamples: () => { const x = this.samples(); if (!x) return; this.download(x.saft.name, x.saft.text, 'application/xml'); setTimeout(() => this.download(x.prev.name, x.prev.text, 'text/csv'), 300); setTimeout(() => this.download(x.curr.name, x.curr.text, 'text/csv'), 600); },
+      analyze: () => can && this.analyze(), cantAnalyze: !can, anBg: can ? INK : '#A9AEB8', anCur: can ? 'pointer' : 'not-allowed', anHint, err: s.err, hasErr: !!s.err,
+      toggleFmt: set({ fmtOpen: !s.fmtOpen }), fmtOpen: s.fmtOpen, fmtSign: s.fmtOpen ? '−' : '+',
+      runCur: s.runList[Math.min(s.runIdx, s.runList.length - 1)] || '', runW: (s.runList.length ? s.runIdx / s.runList.length * 100 : 0) + '%', runN: `${Math.min(s.runIdx + 1, s.runList.length)} / ${s.runList.length} kontroller`,
+      hasResult: !!res, noResult: !res, rCompany: res ? res.company : '', rHead, rMeta, tiles, areaTabs, statusTabs, flist, listEmpty: !!res && flist.length === 0, ctrlSide,
+      emptyT: openN === 0 ? 'Alle forhold er avklart.' : 'Ingen funn her.', emptyS: openN === 0 ? 'Rapporten er klar til å lagres eller skrives ut.' : 'Prøv et annet filter.',
+      exportCsv: () => { const rows = [['Alvorlighet', 'Område', 'Kontroll', 'Funn', 'Beløp', 'Dato', 'Status', 'Kommentar']].concat(fAll.map(f => [f.sevL, f.areaL, f.ctrlT, f.title, f.amountS, f.dateS, R[f.id] ? OUT_L[R[f.id].outcome] : 'Åpen', (R[f.id] || {}).note || ''])); this.download('rettfort-kontrollrapport.csv', '\uFEFF' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n'), 'text/csv'); },
+      printIt: () => window.print(), toReport: set({ page: 'report' }), toNew: set({ page: 'new' }),
+      hasF: !!F, F: F || {}, fWhy: F ? F.why.map(t => ({ t })) : [], fNext: F ? F.next.map((t, i) => ({ t, n: String(i + 1).padStart(2, '0') })) : [], fCols, fRows, fPos: F ? `${idx + 1} / ${fAll.length}` : '', prevF: go(-1), nextF: go(1),
+      fOpen: !fr, fDone: !!fr, note: s.note, noteType: e => this.setState({ note: e.target.value }), fNote: fr ? fr.note : '', fHasNote: !!(fr && fr.note), fDoneAt: fr ? `Vurdert av ${fr.who} · ${fr.at}` : '',
+      resolveF: () => { if (!F || !s.outcome) return; const t = this.now(), lbl = OUT_L[s.outcome], nt = s.note.trim(); this.setState(st => ({ resolved: { ...st.resolved, [F.id]: { outcome: st.outcome, note: nt, at: `${t.date} kl. ${t.time}`, who: 'Daniel Berg' } }, outcome: null })); this.log('Daniel Berg', `Vurderte «${F.title}» som «${lbl}».${nt ? ` Kommentar: ${nt}` : ''}`, F.id); this.toast('Vurderingen er lagret'); if (s.tour === 3) this.later(() => this.tourGo(4), 900); },
+      reopenF: () => { if (!F) return; this.setState(st => { const r = { ...st.resolved }; delete r[F.id]; return { resolved: r, note: (fr && fr.note) || '' }; }); this.log('Daniel Berg', `Åpnet vurderingen av «${F.title}» igjen.`, F.id); },
+      cantResolve: !s.outcome, resBg: s.outcome ? INK : '#A9AEB8', resCur: s.outcome ? 'pointer' : 'not-allowed', outcomes,
+      fOutL: fr ? OUT_L[fr.outcome] : '', fOutC: fr && fr.outcome === 'oppfolging' ? '#8E5A0F' : C.grn,
+      pg_history: s.page === 'history', hist: histList, noHist: !histList.length,
+      fHist: fHist.map(e => ({ t: e.time, x: `${e.who}: ${e.text}` })), fHasHist: !!fHist.length,
+      aiOpen: () => F && this.runAi(F.id), aiShow: !!(F && aiS), aiLoading: !!(aiS && aiS.loading), aiReady: !!aiD, aiSer: aiD ? aiD.ser : '', aiForkl: aiD ? aiD.forklaring.map(t => ({ t })) : [], aiKontr: aiD ? aiD.kontroller.map((t, i) => ({ t, n: String(i + 1).padStart(2, '0') })) : [],
+      aiSrc: aiS && aiS.src === 'ai' ? 'AI' : 'Regelbasert', aiSrcBg: aiS && aiS.src === 'ai' ? '#FBF3C8' : '#ECE8DF', aiNote: aiS ? aiS.note || '' : '', aiHasNote: !!(aiS && aiS.note), aiBtnL: aiS ? 'Undersøkelse åpnet' : 'Undersøk med AI',
+      doPrio: () => this.doPrio(), prNone: !pr, prLoading: !!(pr && pr.loading), prHas: prItems.length > 0, prItems, prSrc: pr && pr.src === 'ai' ? 'Forslag fra AI, basert på funnene fra kontrollmotoren.' : 'Regelbasert prioritering. AI er ikke tilgjengelig akkurat nå.',
+      isDemo: !!(s.demo && res), demoLabel: res ? `${res.company} · ${res.payPeriods ? monthName(res.payPeriods[1]) : ''}` : '', rStats,
+      showIntro: !!(s.showIntro && res), showHow: !!s.showHow, showEnd: !!s.showEnd, introCo: res ? res.company : '', introSub: res ? `${res.payPeriods ? monthName(res.payPeriods[1]).replace(/^./, c => c.toUpperCase()) : ''} · ${rStats}` : '',
+      startTour: () => this.tourGo(0), exploreSelf: () => this.setState({ showIntro: false, showEnd: false, tour: null, page: 'report' }), openHow: set({ showHow: true }), closeHow: set({ showHow: false }),
+      inTour, tourN: inTour ? `Steg ${s.tour + 1} av ${TOUR.length}` : '', tourT: inTour ? TOUR[s.tour][0] : '', tourX: inTour ? TOUR[s.tour][1] : '', tourNext: () => this.tourGo(s.tour + 1), tourPrev: () => this.tourGo(Math.max(0, s.tour - 1)), tourNextL: s.tour === 3 ? 'Fullfør' : 'Neste', tourHasPrev: !!s.tour, tourStop: set({ tour: null }),
+      hasPay: !!pay, noPay: !pay, payRows, payP0: res && res.payPeriods ? monthName(res.payPeriods[0]) : '', payP1: res && res.payPeriods ? monthName(res.payPeriods[1]) : '',
+      payHead: pay ? `${pay.length} ansatte. Bruttolønn ${kr(payTot[0])} → ${kr(payTot[1])} (${payTot[1] - payTot[0] >= 0 ? '+' : '−'}${kr(Math.abs(payTot[1] - payTot[0]))}).${res.payInfo && res.payInfo.ignored.length ? ` Kolonner som ikke brukes i beregningene: ${res.payInfo.ignored.join(', ')}.` : ''}` : '',
+      ctrlGroups, toast: s.toast, hasToast: !!s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>
