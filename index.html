@@ -18,7 +18,7 @@ body{position:relative;min-width:0}
 x-dc{display:block;width:100%;max-width:100%;min-width:0;overflow-x:clip}
 *{box-sizing:border-box}
 main,section,article,header,footer,nav,div{min-width:0}
-img,svg{max-width:100%} [data-rf=mobmenu]{display:none}
+img,svg{max-width:100%} [data-rf=mobmenu]{display:none}[data-rf=ctrlToggle]{display:none}
 a{color:#0B2545;text-decoration:none}a:hover{color:#1F7D52}
 button{font-family:inherit;cursor:pointer}
 input,textarea{font-family:inherit}
@@ -63,7 +63,7 @@ input,textarea{font-family:inherit}
 @media print{.rf-noprint{display:none !important}}
 @media (max-width:1080px){[data-rf=cta]{padding-right:200px !important}}
 @media (max-width:900px){[data-rf=nav]{display:none !important}[data-rf=deskact]{display:none !important}[data-rf=mobmenu]{display:flex !important}[data-rf=sec]{padding-top:72px !important;padding-bottom:56px !important}[data-rf=hero]{padding-top:56px !important;padding-bottom:64px !important;gap:48px !important}[data-rf=dark]{padding-top:56px !important;padding-bottom:56px !important}[data-rf=co]{display:none !important}[data-rf=stick]{position:static !important}}
-@media (max-width:760px){body{width:100%;max-width:100%;overflow-x:hidden}[data-rf=span2]{grid-column:auto !important}[data-rf=cta]{padding:24px !important;margin-top:24px !important}[data-rf=ctaM]{display:none !important}[data-rf=card44]{padding:28px 24px !important}[data-rf=kv]{grid-template-columns:1fr !important}[data-rf=aboutM]{display:none !important}[data-rf=apphdr]{gap:14px !important;padding:0 16px !important}[data-rf=main]{padding:24px 16px 72px !important}[data-rf=hist]{grid-template-columns:1fr auto !important;gap:6px 12px !important}[data-rf=hist]>span:last-child{grid-column:1 / -1}[data-rf=kv2]{grid-template-columns:1fr !important;gap:6px !important}[data-rf=frow]{grid-template-columns:auto minmax(0,1fr) !important}[data-rf=frow]>div:last-child{grid-column:1 / -1;text-align:left !important;display:flex;gap:10px}}
+@media (max-width:760px){body{width:100%;max-width:100%;overflow-x:hidden}.rf-ctrl-extra{display:none !important}.rf-ctrl-expanded .rf-ctrl-extra{display:flex !important;animation:rfIn .28s ease both}[data-rf=ctrlToggle]{display:flex !important}[data-rf=span2]{grid-column:auto !important}[data-rf=cta]{padding:24px !important;margin-top:24px !important}[data-rf=ctaM]{display:none !important}[data-rf=card44]{padding:28px 24px !important}[data-rf=kv]{grid-template-columns:1fr !important}[data-rf=aboutM]{display:none !important}[data-rf=apphdr]{gap:14px !important;padding:0 16px !important}[data-rf=main]{padding:24px 16px 72px !important}[data-rf=hist]{grid-template-columns:1fr auto !important;gap:6px 12px !important}[data-rf=hist]>span:last-child{grid-column:1 / -1}[data-rf=kv2]{grid-template-columns:1fr !important;gap:6px !important}[data-rf=frow]{grid-template-columns:auto minmax(0,1fr) !important}[data-rf=frow]>div:last-child{grid-column:1 / -1;text-align:left !important;display:flex;gap:10px}}
 @media (max-width:520px){[data-rf=hdr]{padding:0 18px !important;gap:12px !important}[data-rf=login]{display:none !important}[data-rf=sec]{padding-left:18px !important;padding-right:18px !important}[data-rf=hero]{padding-left:18px !important;padding-right:18px !important}[data-rf=steps]{gap:48px !important}}
 </style>
 </helmet>
@@ -193,14 +193,14 @@ input,textarea{font-family:inherit}
     </div>
   </section>
 
-  <section id="kontroller" data-rf="sec" style="max-width:1240px;margin:0 auto;padding:120px 32px">
+  <section id="kontroller" data-rf="sec" class="{{ ctrlSectionClass }}" style="max-width:1240px;margin:0 auto;padding:120px 32px">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:48px;align-items:end">
       <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0;text-wrap:balance">{{ nCtrl }} kontroller med kjent regelgrunnlag.</h2>
       <p style="font-size:17px;line-height:1.6;color:#3D4759;margin:0;max-width:480px">Hver kontroll har en fast terskel og en henvisning. Du ser alltid hva som ble sjekket, og hvorfor noe ble markert.</p>
     </div>
     <div style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px">
       <sc-for list="{{ ctrlCards }}" as="g" hint-placeholder-count="4">
-        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:24px;display:flex;flex-direction:column">
+        <div class="{{ g.mobileClass }}" style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:24px;display:flex;flex-direction:column">
           <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:18px;font-weight:600">{{ g.t }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#586174">{{ g.n }}</span></div>
           <div style="font-size:14px;color:#586174;margin-top:6px;line-height:1.5">{{ g.d }}</div>
           <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
@@ -210,6 +210,7 @@ input,textarea{font-family:inherit}
         </div>
       </sc-for>
     </div>
+    <button data-rf="ctrlToggle" onClick="{{ ctrlToggle }}" aria-expanded="{{ ctrlExpanded }}" style="margin-top:16px;width:100%;background:#fff;border:1px solid #D9D3C6;border-radius:10px;padding:12px 14px;font-size:14.5px;font-weight:600;color:#0B2545;align-items:center;justify-content:center;gap:8px">{{ ctrlToggleLabel }} <span aria-hidden="true">{{ ctrlToggleArrow }}</span></button>
     <button onClick="{{ toControls }}" style="margin-top:28px;background:transparent;border:0;border-bottom:1px solid #0B2545;padding:0 0 2px;font-size:15px;font-weight:500;color:#0B2545;display:flex;align-items:center;gap:8px">Se alle kontroller med terskel og regelgrunnlag {{ iArrow }}</button>
   </section>
 
@@ -975,7 +976,7 @@ const M = ({ s = 130, lx = 0, ly = 0, smile = true, wave = false, hold = false, 
 };
 
 class Component extends DCLogic {
-  state = { screen: 'landing', page: 'new', authMode: 'login', heroStep: 0, mobileMenu: false, ready: false, files: { saft: null, prev: null, curr: null }, drag: null, err: null, runIdx: 0, runList: [], pending: null, result: null, resolved: {}, fArea: 'alle', fStatus: 'apne', fid: null, note: '', toast: null, fmtOpen: false, planHover: 1, tired: false, fidget: null, ex: 0, su: { name: '', email: '', role: '', org: '', notify: true, plan: '' }, suState: 'form', suErr: '', nfEmail: '', nfDone: false, slikSeen: false, demo: false, showIntro: false, showHow: false, showEnd: false, tour: null, hist: [], ai: {}, prio: null, outcome: null, settings: null, rid: null, mapDraft: {}, tolDraft: {} };
+  state = { screen: 'landing', page: 'new', authMode: 'login', heroStep: 0, mobileMenu: false, ctrlExpanded: false, ready: false, files: { saft: null, prev: null, curr: null }, drag: null, err: null, runIdx: 0, runList: [], pending: null, result: null, resolved: {}, fArea: 'alle', fStatus: 'apne', fid: null, note: '', toast: null, fmtOpen: false, planHover: 1, tired: false, fidget: null, ex: 0, su: { name: '', email: '', role: '', org: '', notify: true, plan: '' }, suState: 'form', suErr: '', nfEmail: '', nfDone: false, slikSeen: false, demo: false, showIntro: false, showHow: false, showEnd: false, tour: null, hist: [], ai: {}, prio: null, outcome: null, settings: null, rid: null, mapDraft: {}, tolDraft: {} };
   timers = [];
   componentDidMount() {
     try { const s = JSON.parse(localStorage.getItem('rettfort_nav') || '{}'); if (s.screen) this.setState({ screen: s.screen, page: s.page === 'controls' || s.page === 'settings' ? s.page : 'new' }); } catch (e) {}
@@ -1239,7 +1240,8 @@ class Component extends DCLogic {
       s1Walk: s.slikSeen ? 'rfWalk 2.2s ease-out both' : 'none', s1Tray: s.slikSeen ? 'rfTray 2.2s ease both' : 'none', s2Lean: s.slikSeen ? 'rfLean 6s ease-in-out infinite' : 'none', s3Nod: s.slikSeen ? 'rfNod 5s ease-in-out infinite' : 'none',
       scanRows: [0, 1, 2, 3, 4, 5].map(i => { const EX = ['Mulig dobbeltføring', 'Lønn etter sluttdato', 'AGA-differanse', 'Uvanlig stort beløp', 'Endret bankkonto']; const b = s.ex % 2 ? 'B' : '', D = ' 3s ease both'; if (i === 3) return { t: EX[s.ex], an: `rfIn2${b}${D}`, tan: `rfTin${b}${D}`, kan: 'rfKno 1s both' }; if (i === 2) return { t: EX[(s.ex + 4) % 5], an: `rfOut2${b}${D}`, tan: `rfTout${b}${D}`, kan: `rfKin${b}${D}` }; return { t: '', an: 'none', tan: 'none', kan: 'none' }; }), scanAn: `rfScrl${s.ex % 2 ? 'B' : ''} 3s ease both`,
       ex3t: ['Mulig dobbeltføring', 'Lønn etter sluttdato', 'Arbeidsgiveravgift', 'Programvare 950 000 kr', 'Endret bankkonto'][s.ex], ex3d: ['Faktura 48213 ført to ganger. Bilag 1211 kreditert.', 'Sluttoppgjør avtalt 12.08. Avtale lagt ved.', 'Fri bil manglet i grunnlaget. Korrigert i oktober.', 'Årslisens 2026–2027. Periodiseres over 12 mnd.', 'Ringt Amir Khalil 24.09. Ny konto er riktig.'][s.ex], ex3o: ['Rettet', 'Forventet avvik', 'Rettet', 'Krever oppfølging', 'Forventet avvik'][s.ex],
-      ctrlCards: [['regnskap', 'Regnskap', 'Bilag, MVA og perioder i SAF-T.', ['balanse', 'duplikat', 'mvaber']], ['lonn', 'Lønn', 'Endringer mellom to lønnsperioder.', ['sluttdato', 'bankkonto', 'endring-lonn']], ['kryss', 'Lønn × regnskap', 'Lønnsfilen avstemt mot hovedboken.', ['avst-brutto', 'avst-skatt', 'avst-aga']], ['revisjon', 'Revisjonsblikk', 'Poster som kan fortjene nærmere kontroll.', ['uvanlig', 'runde', 'tekst']]].map(([a, t, d, ids]) => { const all = cat.filter(c => c.area === a); const ex = ids.map(id => all.find(c => c.id === id)).filter(Boolean); return { t, d, n: E ? `${all.length} kontroller` : '', ex: ex.map(c => ({ t: c.t })), more: all.length > ex.length ? `og ${all.length - ex.length} til` : '' }; }),
+      ctrlCards: [['regnskap', 'Regnskap', 'Bilag, MVA og perioder i SAF-T.', ['balanse', 'duplikat', 'mvaber']], ['lonn', 'Lønn', 'Endringer mellom to lønnsperioder.', ['sluttdato', 'bankkonto', 'endring-lonn']], ['kryss', 'Lønn × regnskap', 'Lønnsfilen avstemt mot hovedboken.', ['avst-brutto', 'avst-skatt', 'avst-aga']], ['revisjon', 'Revisjonsblikk', 'Poster som kan fortjene nærmere kontroll.', ['uvanlig', 'runde', 'tekst']]].map(([a, t, d, ids], i) => { const all = cat.filter(c => c.area === a); const ex = ids.map(id => all.find(c => c.id === id)).filter(Boolean); return { t, d, n: E ? `${all.length} kontroller` : '', ex: ex.map(c => ({ t: c.t })), more: all.length > ex.length ? `og ${all.length - ex.length} til` : '', mobileClass: i ? 'rf-ctrl-extra' : '' }; }),
+      ctrlSectionClass: s.ctrlExpanded ? 'rf-ctrl-expanded' : '', ctrlExpanded: !!s.ctrlExpanded, ctrlToggle: () => this.setState(st => ({ ctrlExpanded: !st.ctrlExpanded })), ctrlToggleLabel: s.ctrlExpanded ? 'Vis færre' : 'Vis alle kontrollområder', ctrlToggleArrow: s.ctrlExpanded ? '↑' : '↓',
       nCtrl: E ? String(cat.length) : '', nR: E ? String(nBy('regnskap')) : '', nL: E ? String(nBy('lonn')) : '', nK: E ? String(nBy('kryss')) : '', heroLinesAll: fmt(hLines),
       pg_recon: s.page === 'recon', pg_settings: s.page === 'settings', toSettings: set({ screen: 'app', page: 'settings' }),
       hasRecon: !!rc, reconSkipped: !!(rc && rc.reason), reconRan: !!(rc && !rc.reason), reconReason: rc ? rc.reason : '', reconPeriod: rc ? rc.periodL : '', reconRows,
