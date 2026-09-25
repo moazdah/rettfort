@@ -1003,7 +1003,7 @@ class Component extends DCLogic {
     try { const j = this.E.parseAiJson(await this.callAi(this.E.aiPriorityPrompt(open))); const ids = new Set(open.map(f => f.id)); if (Array.isArray(j) && j.length && j.every(x => x && ids.has(x.id) && typeof x.grunn === 'string') && this.E.numbersGrounded(j.map(x => x.grunn).join(' '), JSON.stringify(open.map(f => f.facts)))) { items = j.slice(0, 3); src = 'ai'; } } catch (e) {}
     if (!items) items = this.E.fallbackPriority(open);
     this.setState({ prio: { loading: false, items, src } });
-    this.log(src === 'ai' ? 'AI' : 'Rettført', `Foreslo å starte med ${items.map(x => `«${(this.rawF(x.id) || {}).title}»`).join(', ')}.`);
+    this.log('Rettført', `Foreslo å starte med ${items.map(x => `«${(this.rawF(x.id) || {}).title}»`).join(', ')}.`);
   }
   finishRun() {
     const res = this.state.pending; if (!res) return; const t = this.now(), demo = !!this.demoRun;
@@ -1116,12 +1116,12 @@ class Component extends DCLogic {
     const mapRows = E ? Object.keys(E.MAPPING_LABELS).map(k => ({ l: E.MAPPING_LABELS[k], v: s.mapDraft[k] != null ? s.mapDraft[k] : cfg.mapping[k].join(', '), ch: e => this.setState({ mapDraft: { ...this.state.mapDraft, [k]: e.target.value } }), bl: () => { const d = this.state.mapDraft[k]; if (d == null) return; const md = { ...this.state.mapDraft }; delete md[k]; this.setState({ mapDraft: md }); this.applySettings({ ...curS(), mapping: { ...(curS().mapping || {}), [k]: d.split(',').map(x => x.trim()).filter(Boolean) } }); } })) : [];
 
 
-    // demo, AI, vurdering, historikk
+    // demo, forklaring, vurdering, historikk
     const OUT = [['rettet', 'Rettet'], ['forventet', 'Forventet avvik'], ['oppfolging', 'Krever oppfølging'], ['irrelevant', 'Ikke relevant']];
     const outcomes = OUT.map(([k, l]) => { const on = s.outcome === k; return { l, fn: set({ outcome: k }), bg: on ? '#F4F1EA' : '#fff', bd: on ? INK : '#D9D3C6', rc: on ? INK : '#A9A294', dot: on ? INK : 'transparent' }; });
     const aiS = F ? s.ai[F.id] : null, aiD = aiS && aiS.data;
     const fHist = F ? s.hist.filter(e => e.fid === F.id) : [];
-    const histList = [...s.hist].reverse().map(e => ({ ...e, whoC: e.who === 'AI' ? '#6B4E00' : e.who === 'Rettført' ? C.grn : INK, whoBg: e.who === 'AI' ? '#FBF3C8' : e.who === 'Rettført' ? C.grnBg : '#ECE8DF', cur: e.fid ? 'pointer' : 'default', fn: e.fid ? () => this.setState({ page: 'finding', fid: e.fid, note: '', outcome: null }) : () => {} }));
+    const histList = [...s.hist].reverse().map(e => ({ ...e, whoC: e.who === 'Rettført' ? C.grn : INK, whoBg: e.who === 'Rettført' ? C.grnBg : '#ECE8DF', cur: e.fid ? 'pointer' : 'default', fn: e.fid ? () => this.setState({ page: 'finding', fid: e.fid, note: '', outcome: null }) : () => {} }));
     const pr = s.prio;
     const prItems = pr && pr.items ? pr.items.map((x, i) => { const f = fAll.find(y => y.id === x.id); return f ? { n: String(i + 1).padStart(2, '0'), t: f.title, g: x.grunn, sevL: f.sevL, sevC: f.sevC, sevBg: f.sevBg, fn: f.fn } : null; }).filter(Boolean) : [];
     const agaRow = rc && rc.rows ? rc.rows.find(r => r.key === 'aga') : null;
