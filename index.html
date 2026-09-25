@@ -323,13 +323,14 @@ input,textarea{font-family:inherit}
         <p style="margin:12px 0 0">Rettført erstatter ikke fagsystemene. Det fungerer som et kontrollag over dataene som allerede finnes der.</p>
       </section>
       <section>
-        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Hvordan det er bygget</h2>
+        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Slik fungerer det</h2>
         <div style="margin-top:16px;display:flex;flex-direction:column;border-top:1px solid #E4DFD4">
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Innlesing</span><span>SAF-T Financial (XML) leses med nettleserens XML-parser. Lønn leses som CSV med semikolon eller komma.</span></div>
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Kontroller</span><span>Hver kontroll er en regel med fast terskel, skrevet i vanlig JavaScript. Resultatet er det samme hver gang for samme fil.</span></div>
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">AI-støtte</span><span>I demoen simuleres språkmodellens rolle: å forklare funn og prioritere hva som bør undersøkes videre. Beregningene og funnene kommer fortsatt fra kontrollmotoren.</span></div>
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Personvern</span><span>Kontrollmotoren kjører lokalt i nettleseren. Selve SAF-T- og CSV-filene sendes ikke til noen server. I denne demoen er AI-støtten simulert uten eksternt API.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Innlesing</span><span>Rettført leser strukturerte filer fra systemene du allerede bruker, blant annet SAF-T Financial og CSV.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Kontrollmotor</span><span>Faste regler går gjennom dataene og finner avvik, uvanlige mønstre og forhold som bør undersøkes nærmere.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">AI-støtte</span><span>AI brukes til å forklare funn, foreslå hva som bør kontrolleres videre og hjelpe med prioritering. Den endrer ikke tallene eller selve kontrollresultatet.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Menneskelig vurdering</span><span>Brukeren ser grunnlaget bak hvert funn, velger hvordan det skal avklares og kan dokumentere vurderingen med en kommentar.</span></div>
         </div>
+        <p style="margin:12px 0 0;font-size:14.5px;color:#586174">Den publiserte versjonen er fortsatt under utvikling, og AI-funksjonen er foreløpig simulert.</p>
       </section>
       <section>
         <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Regelgrunnlag</h2>
