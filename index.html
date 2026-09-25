@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <helmet>
-<title>Rettført – kontroll av regnskap og lønn</title>
+<title>Rettført – kontroll før godkjenning</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -82,14 +82,14 @@ input,textarea{font-family:inherit}
 
   <section data-rf="hero" style="max-width:1240px;margin:0 auto;padding:104px 32px 96px;overflow-x:clip;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:72px;align-items:center">
     <div style="animation:rfIn .7s ease both">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:15px;color:#586174"><span style="font-size:12.5px;font-weight:600;color:#0B2545;background:#F6DF6E;padding:3px 10px;border-radius:99px">Tidlig versjon</span>Kontroll av SAF-T og lønnsfiler</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:15px;color:#586174"><span style="font-size:12.5px;font-weight:600;color:#0B2545;background:#F6DF6E;padding:3px 10px;border-radius:99px">Tidlig versjon</span>Et ekstra kontrollag før godkjenning</div>
       <h1 style="font-size:clamp(42px,5.4vw,70px);line-height:1.02;letter-spacing:-0.035em;font-weight:600;margin:22px 0 0;text-wrap:balance">Se det som fortjener <span style="background:linear-gradient(transparent 60%,#F6DF6E 60%,#F6DF6E 92%,transparent 92%)">en ekstra vurdering.</span></h1>
-      <p style="font-size:19px;line-height:1.55;color:#3D4759;margin:26px 0 0;max-width:520px;text-wrap:pretty">Last opp en SAF-T-fil eller lønnsfil fra systemet du allerede bruker. Rettført kjører kontrollene og viser deg hva som bør undersøkes.</p>
+      <p style="font-size:19px;line-height:1.55;color:#3D4759;margin:26px 0 0;max-width:520px;text-wrap:pretty">Importer data fra systemene du allerede bruker. Rettført kjører faste kontroller, kobler informasjon på tvers og viser hvilke forhold som bør undersøkes nærmere.</p>
       <div style="display:flex;gap:10px;margin-top:38px;flex-wrap:wrap">
         <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:16px;font-weight:500;padding:14px 22px;border-radius:9px;display:flex;align-items:center;gap:10px" style-hover="background:#16345E">Prøv Rettført {{ iArrow }}</button>
         <button onClick="{{ toUpload }}" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;font-size:16px;padding:14px 22px;border-radius:9px" style-hover="border-color:#A9A294">Last opp egen fil</button>
       </div>
-      <div style="margin-top:40px;display:flex;gap:28px;font-size:14px;color:#586174;flex-wrap:wrap"><span>SAF-T Financial 1.30</span><span>Lønn som CSV</span><span>Filene lastes ikke opp</span></div>
+      <div style="margin-top:40px;display:flex;gap:28px;font-size:14px;color:#586174;flex-wrap:wrap"><span>SAF-T Financial 1.30</span><span>CSV-støtte</span><span>Filene lastes ikke opp</span></div>
     </div>
 
     <div style="position:relative;animation:rfIn .9s .15s ease both">
@@ -246,7 +246,7 @@ input,textarea{font-family:inherit}
     <div data-rf="card44" style="background:#fff;border:1px solid #E4DFD4;border-radius:20px;padding:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:40px;align-items:center">
       <div>
         <div style="font-size:14px;color:#586174">For arbeidsgivere</div>
-        <h3 style="font-size:30px;line-height:1.15;letter-spacing:-0.025em;font-weight:600;margin:10px 0 0;text-wrap:balance">Et prosjekt om regnskap, lønn og kontroll.</h3>
+        <h3 style="font-size:30px;line-height:1.15;letter-spacing:-0.025em;font-weight:600;margin:10px 0 0;text-wrap:balance">Et prosjekt om kontroll, sporbarhet og vurdering.</h3>
         <p style="font-size:16px;line-height:1.6;color:#3D4759;margin:14px 0 0;max-width:520px">Hvorfor jeg laget Rettført, hvordan kontrollene er bygget, og hvilke regler de bygger på.</p>
       </div>
       <div style="display:flex;justify-content:flex-end"><button onClick="{{ toAbout }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:14px 20px;font-size:15.5px;font-weight:500;display:flex;align-items:center;gap:10px">Les om prosjektet {{ iArrow }}</button></div>
@@ -291,19 +291,19 @@ input,textarea{font-family:inherit}
     <div style="margin-top:56px;display:flex;flex-direction:column;gap:48px;font-size:17px;line-height:1.7;color:#2A3547">
       <section>
         <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Problemet</h2>
-        <p style="margin:12px 0 0">Før en periode lukkes, går regnskapsførere og lønnsmedarbeidere gjennom bilag, saldoer og lønnslister for å finne feil. Mye av dette er de samme sjekkene hver gang: dobbeltføringer, feil MVA, store endringer, lønn til noen som har sluttet. Det tar tid, og det er lett å overse noe.</p>
+        <p style="margin:12px 0 0">Før en periode lukkes, blir bilag, saldoer og andre underlag kontrollert på nytt. Mange av sjekkene er de samme hver gang: mulige dobbeltføringer, MVA-avvik, store endringer og poster som ikke passer med resten. Det tar tid å lete gjennom alt når bare noen få forhold faktisk trenger en nærmere vurdering.</p>
       </section>
       <section>
         <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Hva Rettført gjør</h2>
-        <p style="margin:12px 0 0">Rettført tar inn en SAF-T-fil eller to lønnsfiler, kjører {{ nCtrl }} faste kontroller og lager en rapport med funnene. Hvert funn viser bilagene det bygger på, hvorfor det ble markert, og hva som er et naturlig neste steg. Brukeren merker funnet som avklart, med en kommentar.</p>
-        <p style="margin:12px 0 0">Rettført fører ikke regnskap og kjører ikke lønn. Det er et kontrollag over systemene som allerede er i bruk.</p>
+        <p style="margin:12px 0 0">Rettført tar inn strukturerte underlag – i dag SAF-T Financial og CSV – kjører {{ nCtrl }} faste kontroller og lager en rapport med funnene. Hvert funn viser datagrunnlaget det bygger på, hvorfor det ble markert, og hva som er et naturlig neste steg. Brukeren kan avklare funnet og dokumentere vurderingen med en kommentar.</p>
+        <p style="margin:12px 0 0">Rettført erstatter ikke fagsystemene. Det fungerer som et kontrollag over dataene som allerede finnes der.</p>
       </section>
       <section>
         <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Hvordan det er bygget</h2>
         <div style="margin-top:16px;display:flex;flex-direction:column;border-top:1px solid #E4DFD4">
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Innlesing</span><span>SAF-T Financial (XML) leses med nettleserens XML-parser. Lønn leses som CSV med semikolon eller komma.</span></div>
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Kontroller</span><span>Hver kontroll er en regel med fast terskel, skrevet i vanlig JavaScript. Resultatet er det samme hver gang for samme fil.</span></div>
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">AI</span><span>Planlagt brukt kun til å oppsummere funn i vanlig språk. AI beregner ingenting og avgjør ingenting.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Forklaring</span><span>Forklaringer og prioritering tar utgangspunkt i funnene fra kontrollmotoren. De endrer ikke beregningene eller konklusjonen.</span></div>
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Personvern</span><span>All analyse skjer lokalt. Filene sendes ikke til noen server.</span></div>
         </div>
       </section>
@@ -323,11 +323,11 @@ input,textarea{font-family:inherit}
           </div>
           <div data-rf="span2" style="grid-column:span 2;min-width:0">
             <h2 style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin:0;color:#0B2545">Mohamad Bokdasji</h2>
-            <p style="margin:14px 0 0">Jeg har studert økonomi og administrasjon ved BI, og er opptatt av hvordan AI kan brukes i regnskap og finans.</p>
-            <p style="margin:14px 0 0">Rettført er et hobbyprosjekt ved siden av jobb. Det faglige grunnlaget kommer fra fagene på studiet, resten har jeg lært underveis. Målet er å vise at AI og automatisering kan gjøre hverdagen enklere for dem som jobber med regnskap og lønn: de faste kontrollene går av seg selv, og tiden kan brukes på vurderingene.</p>
+            <p style="margin:14px 0 0">Jeg har studert økonomi og administrasjon ved BI og er interessert i hvordan teknologi kan brukes på praktiske problemer i økonomifaget.</p>
+            <p style="margin:14px 0 0">Rettført er et hobbyprosjekt ved siden av jobb. Ideen var å bygge et lite kontrollverktøy fra bunnen av: først forstå datagrunnlaget, deretter lage faste kontroller, og til slutt gjøre resultatene enkle å undersøke og dokumentere. Det faglige grunnlaget kommer fra studiet; resten har jeg lært underveis.</p>
             <div style="margin-top:24px;display:grid;grid-template-columns:auto 1fr;gap:10px 24px;font-size:15.5px;border-top:1px solid #E4DFD4;padding-top:18px">
               <span style="color:#586174">Utdanning</span><span>Økonomi og administrasjon, BI · 2023–2026</span>
-              <span style="color:#586174">Interesse</span><span>AI i regnskap og finans</span>
+              <span style="color:#586174">Interesse</span><span>Økonomi × teknologi</span>
               <span style="color:#586174">E-post</span><a href="mailto:mohbok04@hotmail.com" style="border-bottom:1px solid #0B2545;justify-self:start">mohbok04@hotmail.com</a>
               <span style="color:#586174;display:flex;align-items:center" title="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="#586174" aria-label="LinkedIn" style="display:block"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"></path></svg></span><a href="https://www.linkedin.com/in/mohamad-bokdasji-99b0b5262/" target="_blank" rel="noopener" style="border-bottom:1px solid #0B2545;justify-self:start">Mohamad Bokdasji</a>
             </div>
@@ -512,7 +512,7 @@ input,textarea{font-family:inherit}
           </div>
           <div class="rf-noprint" style="margin-top:16px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:18px 22px">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-              <div style="min-width:0"><div style="font-size:16px;font-weight:600">Hva bør jeg se på først?</div><div style="font-size:13.5px;color:#586174;margin-top:2px">AI prioriterer bare funnene kontrollmotoren har laget. Den lager ikke egne funn.</div></div>
+              <div style="min-width:0"><div style="font-size:16px;font-weight:600">Hva bør jeg se på først?</div><div style="font-size:13.5px;color:#586174;margin-top:2px">Prioriteringen bygger bare på funnene kontrollmotoren har laget. Den lager ikke nye funn.</div></div>
               <sc-if value="{{ prNone }}" hint-placeholder-val="{{ true }}"><button onClick="{{ doPrio }}" style="background:#F6DF6E;color:#0B2545;border:0;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:600">Få hjelp til å prioritere</button></sc-if>
               <sc-if value="{{ prLoading }}"><span style="font-size:14px;color:#586174">Vurderer funnene …</span></sc-if>
             </div>
@@ -625,7 +625,7 @@ input,textarea{font-family:inherit}
                     <div style="margin-top:18px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">DETTE VILLE JEG KONTROLLERT</div>
                     <div style="margin-top:6px;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ aiKontr }}" as="w" hint-placeholder-count="2"><div style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:#2A3547"><span style="font-family:'IBM Plex Mono',monospace;color:#8A909C;font-size:13px;margin-top:2px">{{ w.n }}</span><span>{{ w.t }}</span></div></sc-for></div>
                     <sc-if value="{{ aiHasNote }}"><div style="margin-top:16px;font-size:13.5px;color:#586174;background:#F4F1EA;border-radius:8px;padding:10px 12px">{{ aiNote }}</div></sc-if>
-                    <div style="margin-top:14px;font-size:12.5px;color:#8A909C">Tallene kommer fra kontrollmotoren. AI endrer dem ikke, og vurderingen er din.</div>
+                    <div style="margin-top:14px;font-size:12.5px;color:#8A909C">Tallene kommer fra kontrollmotoren. Forklaringen endrer dem ikke, og vurderingen er din.</div>
                   </sc-if>
                 </div>
               </sc-if>
@@ -863,11 +863,11 @@ input,textarea{font-family:inherit}
             <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">1</span><div><div style="font-size:15.5px;font-weight:600">SAF-T og lønnsdata</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Filene leses lokalt i nettleseren.</div></div></div>
             <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">2</span><div><div style="font-size:15.5px;font-weight:600">Regelbasert kontrollmotor</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Faste regler, terskler og kontomapping.</div></div></div>
             <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">3</span><div><div style="font-size:15.5px;font-weight:600">Avvik og krysskontroller</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Regnskap, lønn og avstemming mellom dem.</div></div></div>
-            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#F6DF6E;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">4</span><div><div style="font-size:15.5px;font-weight:600">AI hjelper med forklaring og prioritering</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Får bare strukturerte data om funnene.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#F6DF6E;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">4</span><div><div style="font-size:15.5px;font-weight:600">Forklaring og prioritering</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Bygger bare på funnene kontrollmotoren allerede har laget.</div></div></div>
             <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#E2F1E8;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">5</span><div><div style="font-size:15.5px;font-weight:600">Menneskelig vurdering</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Rettet, forventet avvik, oppfølging eller ikke relevant.</div></div></div>
             <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#E2F1E8;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">6</span><div><div style="font-size:15.5px;font-weight:600">Dokumentert konklusjon</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Alt logges i historikken.</div></div></div>
       </div>
-      <div style="margin-top:22px;background:#F4F1EA;border-radius:12px;padding:18px 20px;font-size:15px;line-height:1.6;color:#0B2545"><div>Beregninger og kontroller gjøres deterministisk.</div><div>AI brukes til forklaring, prioritering og støtte i undersøkelsen.</div><div style="font-weight:600">Mennesket har alltid siste ord.</div></div>
+      <div style="margin-top:22px;background:#F4F1EA;border-radius:12px;padding:18px 20px;font-size:15px;line-height:1.6;color:#0B2545"><div>Beregninger og kontroller følger faste regler.</div><div>Forklaringer og prioritering bygger på de samme funnene.</div><div style="font-weight:600">Den faglige vurderingen gjøres alltid av brukeren.</div></div>
       <button onClick="{{ closeHow }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 20px;font-size:15px;font-weight:500;margin-top:22px">Lukk</button>
     </div>
   </div>
@@ -877,7 +877,7 @@ input,textarea{font-family:inherit}
     <div style="background:#fff;border-radius:18px;padding:36px;max-width:580px;width:100%;max-height:calc(100vh - 40px);overflow:auto;box-shadow:0 30px 60px -20px rgba(11,37,69,.5)">
       <div style="font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">GUIDET DEMO FULLFØRT</div>
       <h2 style="font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-0.025em;margin:12px 0 0;text-wrap:balance">Fra tusenvis av datapunkter til noen få faglige vurderinger.</h2>
-      <div style="margin-top:22px;background:#F4F1EA;border-radius:12px;padding:18px 20px;font-size:15px;line-height:1.6;color:#0B2545"><div>Beregninger og kontroller gjøres deterministisk.</div><div>AI brukes til forklaring, prioritering og støtte i undersøkelsen.</div><div style="font-weight:600">Mennesket har alltid siste ord.</div></div>
+      <div style="margin-top:22px;background:#F4F1EA;border-radius:12px;padding:18px 20px;font-size:15px;line-height:1.6;color:#0B2545"><div>Beregninger og kontroller følger faste regler.</div><div>Forklaringer og prioritering bygger på de samme funnene.</div><div style="font-weight:600">Den faglige vurderingen gjøres alltid av brukeren.</div></div>
       <div style="display:flex;gap:10px;margin-top:24px;flex-wrap:wrap">
         <button onClick="{{ exploreSelf }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 20px;font-size:15px;font-weight:500">Utforsk rapporten selv</button>
         <button onClick="{{ openHow }}" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;border-radius:9px;padding:13px 20px;font-size:15px">Slik fungerer Rettført</button>
@@ -980,17 +980,17 @@ class Component extends DCLogic {
   now() { const d = new Date(); const p = n => String(n).padStart(2, '0'); return { time: `${p(d.getHours())}:${p(d.getMinutes())}`, date: `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}` }; }
   log(who, text, fid) { const t = this.now(); this.setState(s => ({ hist: [...s.hist, { ...t, who, text, fid: fid || null, k: s.hist.length }] })); }
   rawF(id) { const r = this.state.result; return r ? r.findings.find(f => f.id === id) : null; }
-  callAi(prompt) { const c = window.claude; if (!c || typeof c.complete !== 'function') return Promise.reject(new Error('AI ikke tilgjengelig')); return Promise.race([c.complete(prompt), new Promise((_, rej) => setTimeout(() => rej(new Error('Tidsavbrudd')), 20000))]); }
+  callAi(prompt) { const c = window.claude; if (!c || typeof c.complete !== 'function') return Promise.reject(new Error('Utvidet forklaring ikke tilgjengelig')); return Promise.race([c.complete(prompt), new Promise((_, rej) => setTimeout(() => rej(new Error('Tidsavbrudd')), 20000))]); }
   async runAi(id) {
     const f = this.rawF(id); if (!f || !this.E || this.state.ai[id]) return;
     this.setState(s => ({ ai: { ...s.ai, [id]: { loading: true } } }));
-    this.log('AI', `Undersøkelse åpnet for «${f.title}».`, id);
-    const E = this.E, fb = E.explain(f); let out = null, src = 'regel', note = 'AI er ikke tilgjengelig akkurat nå. Rettført viser den regelbaserte forklaringen.';
+    this.log('Rettført', `Undersøkelse åpnet for «${f.title}».`, id);
+    const E = this.E, fb = E.explain(f); let out = null, src = 'regel', note = 'Utvidet forklaring er ikke tilgjengelig akkurat nå. Rettført viser den regelbaserte forklaringen.';
     try {
       const j = E.parseAiJson(await this.callAi(E.aiFindingPrompt(f)));
       if (j && typeof j.ser === 'string' && Array.isArray(j.forklaring) && Array.isArray(j.kontroller)) {
         if (E.numbersGrounded([j.ser, ...j.forklaring, ...j.kontroller].join(' '), JSON.stringify(f.facts))) { out = { ser: j.ser, forklaring: j.forklaring.slice(0, 2).map(String), kontroller: j.kontroller.slice(0, 3).map(String) }; src = 'ai'; note = ''; }
-        else note = 'AI-svaret inneholdt tall som ikke finnes i grunnlaget. Rettført viser derfor den regelbaserte forklaringen.';
+        else note = 'Den utvidede forklaringen inneholdt tall som ikke finnes i grunnlaget. Rettført viser derfor den regelbaserte forklaringen.';
       }
     } catch (e) {}
     this.setState(s => ({ ai: { ...s.ai, [id]: { loading: false, data: out || fb, src, note } } }));
@@ -1131,7 +1131,7 @@ class Component extends DCLogic {
       ['Rettført viser bare det som bør undersøkes', `${rStats}. Det meste stemmer. Rapporten viser de ${openN} forholdene som fortjener oppmerksomhet, fordelt på fire fagområder.`],
       ['Mulig dobbeltføring', 'Samme leverandør, fakturanummer og beløp er bokført to ganger. Rettført viser begge bilagene, hvorfor kontrollen reagerte og hva du bør sjekke.'],
       ['Lønn × regnskap', agaRow ? `Rettført kobler lønnsfilen mot hovedboken. ${okTxt}Arbeidsgiveravgiften avviker med ${kr(Math.abs(agaRow.diff))}, og du ser posteringene og lønnsdataene bak begge tallene.` : 'Rettført kobler lønnsfilen mot hovedboken og viser posteringene bak tallene.'],
-      ['Undersøk med AI, og vurder selv', 'AI får bare de strukturerte dataene for dette funnet og foreslår hva du bør kontrollere. Tallene kommer fra kontrollmotoren. Til slutt velger du en vurdering til høyre, og den lagres i historikken.']
+      ['Undersøk funnet, og vurder selv', 'Forklaringen bygger bare på de strukturerte dataene for dette funnet og foreslår hva som kan kontrolleres videre. Tallene kommer fra kontrollmotoren. Til slutt velger du en vurdering til høyre, og den lagres i historikken.']
     ] : [];
     const inTour = s.tour != null && !!TOUR[s.tour];
 
@@ -1145,11 +1145,11 @@ class Component extends DCLogic {
     const ctrlGroups = [['regnskap', 'Regnskap', 'SAF-T Financial'], ['lonn', 'Lønn', 'To lønnsperioder'], ['kryss', 'Lønn × regnskap', 'SAF-T og lønn for samme måned'], ['revisjon', 'Revisjonsblikk', 'Risikobasert utvelgelse']].map(([a, t, sub]) => ({ t, s: sub, items: ctrls.filter(c => c.area === a).map(c => { const m = stMap[c.status] || stMap.ikke; const rw = rc && rc.rows ? rc.rows.find(x => x.id === c.id) : null; return { ...c, stL: c.status === 'avvik' ? `${c.count} avvik` : rw && rw.status === 'innenfor' ? 'Innenfor toleranse' : m[0], stC: m[1], stBg: m[2] }; }) }));
 
     // plans
-    const PF = [['Regnskapskontroll via SAF-T', [1, 1, 1]], ['Kontrollrapport med forklaring per funn', [1, 1, 1]], ['Analyse lokalt i nettleseren', [1, 1, 1]], ['Lønnskontroll mellom perioder', [0, 1, 1]], ['Merk funn som avklart med kommentar', [0, 1, 1]], ['Eksport av rapport (CSV og PDF)', [0, 1, 1]], ['AI-oppsummering av funn', [0, 1, 1]], ['Historikk mellom analyser', [0, 1, 1]], ['Flere kunder i én oversikt', [0, 0, 1]], ['Egne terskler per kunde', [0, 0, 1]], ['Prioritert support', [0, 0, 1]]];
+    const PF = [['Regnskapskontroll via SAF-T', [1, 1, 1]], ['Kontrollrapport med forklaring per funn', [1, 1, 1]], ['Analyse lokalt i nettleseren', [1, 1, 1]], ['Lønnskontroll mellom perioder', [0, 1, 1]], ['Merk funn som avklart med kommentar', [0, 1, 1]], ['Eksport av rapport (CSV og PDF)', [0, 1, 1]], ['Utvidet forklaring av funn', [0, 1, 1]], ['Historikk mellom analyser', [0, 1, 1]], ['Flere kunder i én oversikt', [0, 0, 1]], ['Egne terskler per kunde', [0, 0, 1]], ['Prioritert support', [0, 0, 1]]];
     const plans = [
       { k: 'Gratis', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
-      { k: 'Pro', d: 'For bedrifter og regnskapsførere med lønn.', price: '249', unit: 'kr / mnd per selskap', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 AI-oppsummeringer per måned'], pop: true },
-      { k: 'Byrå', d: 'For regnskapskontorer med mange kunder.', price: '1 490', unit: 'kr / mnd inkl. 15 kunder', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 AI-oppsummeringer per måned'] }
+      { k: 'Pro', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '249', unit: 'kr / mnd per selskap', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 utvidede forklaringer per måned'], pop: true },
+      { k: 'Byrå', d: 'For miljøer som følger opp flere virksomheter.', price: '1 490', unit: 'kr / mnd inkl. 15 kunder', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 utvidede forklaringer per måned'] }
     ].map((p, i) => { const dk = s.planHover === i; return { ...p, dark: dk, bg: dk ? INK : '#fff', fg: dk ? '#fff' : INK, sub: dk ? 'rgba(255,255,255,.68)' : C.mut, bd: dk ? INK : C.line, line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2', btnBg: dk ? '#F6DF6E' : INK, btnFg: dk ? INK : '#fff', shadow: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', lift: dk ? '-12px' : '0px', limits: p.lim.map(l => ({ l })), feats: PF.map(f => { const on = !!f[1][i]; return { l: f[0], on, off: !on, txt: on ? (dk ? '#fff' : INK) : (dk ? 'rgba(255,255,255,.4)' : '#A4A8B0'), icBg: on ? (dk ? '#35AE74' : C.grnBg) : (dk ? 'rgba(255,255,255,.08)' : '#EFEBE2'), icFg: on ? (dk ? '#fff' : C.grn) : (dk ? 'rgba(255,255,255,.42)' : '#A4A8B0') }; }), enter: () => { if (s.planHover !== i) this.setState({ planHover: i }); }, fn: i === 0 ? () => this.trySample() : () => this.setState(st => ({ screen: 'auth', authMode: 'signup', su: { ...st.su, plan: p.k } })) }; });
 
     const cat = E ? E.CONTROLS : [];
@@ -1172,7 +1172,7 @@ class Component extends DCLogic {
       planReset: () => { if (s.planHover !== 1) this.setState({ planHover: 1 }); }, ctrlR: cat.filter(c => c.area === 'regnskap'), ctrlL: cat.filter(c => c.area === 'lonn'), ctrlK: cat.filter(c => c.area === 'kryss'), ctrlV: cat.filter(c => c.area === 'revisjon'), nV: E ? String(nBy('revisjon')) : '', stop: e => e.stopPropagation(), plans,
       ...(() => { const su = s.su, upd = k => e => { const v = e.target.value; this.setState(st => ({ su: { ...st.su, [k]: v }, suErr: '' })); }; const okMail = x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.trim());
         return { suForm: s.suState !== 'done', suDone: s.suState === 'done', suName: su.name, suEmail: su.email, suOrg: su.org, suNotify: su.notify, suSetName: upd('name'), suSetEmail: upd('email'), suSetOrg: upd('org'), suToggle: () => this.setState(st => ({ su: { ...st.su, notify: !st.su.notify } })),
-          suRoles: ['Regnskapsfører', 'Revisor', 'Økonomi / lønn', 'Annet'].map(l => { const on = su.role === l; return { l, fn: () => this.setState(st => ({ su: { ...st.su, role: on ? '' : l } })), bg: on ? INK : '#fff', fg: on ? '#fff' : INK, bd: on ? INK : '#D9D3C6' }; }),
+          suRoles: ['Økonomi', 'Kontroll / revisjon', 'Lønn / HR', 'Annet'].map(l => { const on = su.role === l; return { l, fn: () => this.setState(st => ({ su: { ...st.su, role: on ? '' : l } })), bg: on ? INK : '#fff', fg: on ? '#fff' : INK, bd: on ? INK : '#D9D3C6' }; }),
           suHasErr: !!s.suErr, suErr: s.suErr, suBusy: s.suState === 'busy', suBtn: s.suState === 'busy' ? 'Sender …' : 'Meld interesse',
           suDoneTxt: su.notify ? `Vi gir beskjed til ${su.email.trim()} når Rettført lanseres. Frem til da kan du prøve demoen med fiktive data.` : 'Frem til lansering kan du prøve demoen med fiktive data.',
           suSubmit: async e => { e.preventDefault(); if (!su.name.trim()) return this.setState({ suErr: 'Skriv inn navnet ditt.' }); if (!okMail(su.email)) return this.setState({ suErr: 'Skriv inn en gyldig e-postadresse.' }); this.setState({ suState: 'busy', suErr: '' }); let ok = false; try { ok = await this.sendForm({ type: 'interesse', navn: su.name.trim(), epost: su.email.trim(), rolle: su.role, virksomhet: su.org.trim(), varsle: su.notify, plan: su.plan }); } catch (x) {} this.setState(ok ? { suState: 'done' } : { suState: 'form', suErr: 'Kunne ikke sende akkurat nå. Prøv igjen om litt.' }); },
@@ -1211,8 +1211,8 @@ class Component extends DCLogic {
       pg_history: s.page === 'history', hist: histList, noHist: !histList.length,
       fHist: fHist.map(e => ({ t: e.time, x: `${e.who}: ${e.text}` })), fHasHist: !!fHist.length,
       aiOpen: () => F && this.runAi(F.id), aiShow: !!(F && aiS), aiLoading: !!(aiS && aiS.loading), aiReady: !!aiD, aiSer: aiD ? aiD.ser : '', aiForkl: aiD ? aiD.forklaring.map(t => ({ t })) : [], aiKontr: aiD ? aiD.kontroller.map((t, i) => ({ t, n: String(i + 1).padStart(2, '0') })) : [],
-      aiSrc: aiS && aiS.src === 'ai' ? 'AI' : 'Regelbasert', aiSrcBg: aiS && aiS.src === 'ai' ? '#FBF3C8' : '#ECE8DF', aiNote: aiS ? aiS.note || '' : '', aiHasNote: !!(aiS && aiS.note), aiBtnL: aiS ? 'Undersøkelse åpnet' : 'Undersøk med AI',
-      doPrio: () => this.doPrio(), prNone: !pr, prLoading: !!(pr && pr.loading), prHas: prItems.length > 0, prItems, prSrc: pr && pr.src === 'ai' ? 'Forslag fra AI, basert på funnene fra kontrollmotoren.' : 'Regelbasert prioritering. AI er ikke tilgjengelig akkurat nå.',
+      aiSrc: aiS && aiS.src === 'ai' ? 'Utvidet' : 'Regelbasert', aiSrcBg: aiS && aiS.src === 'ai' ? '#FBF3C8' : '#ECE8DF', aiNote: aiS ? aiS.note || '' : '', aiHasNote: !!(aiS && aiS.note), aiBtnL: aiS ? 'Undersøkelse åpnet' : 'Undersøk nærmere',
+      doPrio: () => this.doPrio(), prNone: !pr, prLoading: !!(pr && pr.loading), prHas: prItems.length > 0, prItems, prSrc: pr && pr.src === 'ai' ? 'Prioriteringsforslaget bygger på funnene fra kontrollmotoren.' : 'Prioritering basert på kontrollmotorens funn.',
       isDemo: !!(s.demo && res), demoLabel: res ? `${res.company} · ${res.payPeriods ? monthName(res.payPeriods[1]) : ''}` : '', rStats,
       showIntro: !!(s.showIntro && res), showHow: !!s.showHow, showEnd: !!s.showEnd, introCo: res ? res.company : '', introSub: res ? `${res.payPeriods ? monthName(res.payPeriods[1]).replace(/^./, c => c.toUpperCase()) : ''} · ${rStats}` : '',
       startTour: () => this.tourGo(0), exploreSelf: () => this.setState({ showIntro: false, showEnd: false, tour: null, page: 'report' }), openHow: set({ showHow: true }), closeHow: set({ showHow: false }),
