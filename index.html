@@ -31,6 +31,7 @@ input,textarea{font-family:inherit}
 @keyframes rfKickR{0%,50%,100%{transform:none}64%{transform:translateY(-6px) rotate(13deg)}76%{transform:translateY(-1px) rotate(-3deg)}88%{transform:translateY(-5px) rotate(9deg)}}
 @keyframes rfScan{0%,100%{transform:translate(-7px,3px)}50%{transform:translate(6px,3px)}}
 @keyframes rfAsk{0%,20%{opacity:0;transform:translateY(6px) scale(.8)}35%,80%{opacity:1;transform:none}95%,100%{opacity:0}}
+@keyframes rfPulseDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-2px)}}
 @keyframes rfSweep{0%,30%{background-size:0% 100%}55%,90%{background-size:100% 100%}100%{background-size:0% 100%}}
 @keyframes rfRow1{0%,8%{opacity:0;transform:scale(.4)}14%,100%{opacity:1;transform:scale(1)}}
 @keyframes rfRow2{0%,18%{opacity:0;transform:scale(.4)}24%,100%{opacity:1;transform:scale(1)}}
@@ -303,8 +304,8 @@ input,textarea{font-family:inherit}
         <div style="margin-top:16px;display:flex;flex-direction:column;border-top:1px solid #E4DFD4">
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Innlesing</span><span>SAF-T Financial (XML) leses med nettleserens XML-parser. Lønn leses som CSV med semikolon eller komma.</span></div>
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Kontroller</span><span>Hver kontroll er en regel med fast terskel, skrevet i vanlig JavaScript. Resultatet er det samme hver gang for samme fil.</span></div>
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Forklaring</span><span>Forklaringer og prioritering tar utgangspunkt i funnene fra kontrollmotoren. De endrer ikke beregningene eller konklusjonen.</span></div>
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Personvern</span><span>Kontrollmotoren kjører lokalt i nettleseren. Selve SAF-T- og CSV-filene sendes ikke til noen server.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">AI-støtte</span><span>I demoen simuleres språkmodellens rolle: å forklare funn og prioritere hva som bør undersøkes videre. Beregningene og funnene kommer fortsatt fra kontrollmotoren.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Personvern</span><span>Kontrollmotoren kjører lokalt i nettleseren. Selve SAF-T- og CSV-filene sendes ikke til noen server. I denne demoen er AI-støtten simulert uten eksternt API.</span></div>
         </div>
       </section>
       <section>
@@ -323,7 +324,7 @@ input,textarea{font-family:inherit}
           </div>
           <div data-rf="span2" style="grid-column:span 2;min-width:0">
             <h2 style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin:0;color:#0B2545">Mohamad Bokdasji</h2>
-            <p style="margin:14px 0 0">Jeg har studert økonomi og administrasjon ved BI og er interessert i hvordan teknologi kan brukes på praktiske problemer i økonomifaget.</p>
+            <p style="margin:14px 0 0">Jeg har studert økonomi og administrasjon ved BI og er interessert i hvordan teknologi, automatisering og språkmodeller kan brukes på praktiske problemer i økonomifaget.</p>
             <p style="margin:14px 0 0">Rettført er et hobbyprosjekt ved siden av jobb. Ideen var å bygge et lite kontrollverktøy fra bunnen av: først forstå datagrunnlaget, deretter lage faste kontroller, og til slutt gjøre resultatene enkle å undersøke og dokumentere. Det faglige grunnlaget kommer fra studiet; resten har jeg lært underveis.</p>
             <div style="margin-top:24px;display:grid;grid-template-columns:auto 1fr;gap:10px 24px;font-size:15.5px;border-top:1px solid #E4DFD4;padding-top:18px">
               <span style="color:#586174">Utdanning</span><span>Økonomi og administrasjon, BI · 2023–2026</span>
@@ -514,7 +515,7 @@ input,textarea{font-family:inherit}
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
               <div style="min-width:0"><div style="font-size:16px;font-weight:600">Hva bør jeg se på først?</div><div style="font-size:13.5px;color:#586174;margin-top:2px">Prioriteringen bygger bare på funnene kontrollmotoren har laget. Den lager ikke nye funn.</div></div>
               <sc-if value="{{ prNone }}" hint-placeholder-val="{{ true }}"><button onClick="{{ doPrio }}" style="background:#F6DF6E;color:#0B2545;border:0;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:600">Få hjelp til å prioritere</button></sc-if>
-              <sc-if value="{{ prLoading }}"><span style="font-size:14px;color:#586174">Vurderer funnene …</span></sc-if>
+              <sc-if value="{{ prLoading }}"><span style="font-size:14px;color:#586174;display:flex;align-items:center;gap:8px"><span style="width:14px;height:14px;border:2px solid #E4DFD4;border-top-color:#C2A52B;border-radius:50%;animation:rfSpin .8s linear infinite"></span>{{ prStage }} …</span></sc-if>
             </div>
             <sc-if value="{{ prHas }}">
               <div style="margin-top:16px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">JEG VILLE STARTET HER</div>
@@ -616,7 +617,7 @@ input,textarea{font-family:inherit}
               <sc-if value="{{ aiShow }}">
                 <div style="background:#fff;border:1.5px solid #E9D98A;border-radius:14px;padding:24px 28px;animation:rfIn .3s ease both">
                   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:16px;font-weight:600">Undersøkelse</span><span style="font-size:12px;font-weight:600;color:#0B2545;background:{{ aiSrcBg }};padding:3px 9px;border-radius:5px">{{ aiSrc }}</span></div>
-                  <sc-if value="{{ aiLoading }}"><div style="margin-top:14px;font-size:15px;color:#586174">Går gjennom datagrunnlaget for funnet …</div></sc-if>
+                  <sc-if value="{{ aiLoading }}"><div style="margin-top:16px;display:flex;align-items:center;gap:10px;color:#586174;font-size:15px"><span style="width:16px;height:16px;border:2px solid #E4DFD4;border-top-color:#C2A52B;border-radius:50%;animation:rfSpin .8s linear infinite;flex-shrink:0"></span><span>{{ aiStage }}</span><span style="display:inline-flex;gap:3px;margin-left:2px"><i style="width:4px;height:4px;border-radius:50%;background:#8A909C;animation:rfPulseDot 1.2s 0s infinite"></i><i style="width:4px;height:4px;border-radius:50%;background:#8A909C;animation:rfPulseDot 1.2s .18s infinite"></i><i style="width:4px;height:4px;border-radius:50%;background:#8A909C;animation:rfPulseDot 1.2s .36s infinite"></i></span></div></sc-if>
                   <sc-if value="{{ aiReady }}">
                     <div style="margin-top:16px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">HVA SER RETTFØRT?</div>
                     <p style="margin:6px 0 0;font-size:15px;line-height:1.55;color:#2A3547">{{ aiSer }}</p>
@@ -980,30 +981,40 @@ class Component extends DCLogic {
   now() { const d = new Date(); const p = n => String(n).padStart(2, '0'); return { time: `${p(d.getHours())}:${p(d.getMinutes())}`, date: `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()}` }; }
   log(who, text, fid) { const t = this.now(); this.setState(s => ({ hist: [...s.hist, { ...t, who, text, fid: fid || null, k: s.hist.length }] })); }
   rawF(id) { const r = this.state.result; return r ? r.findings.find(f => f.id === id) : null; }
-  callAi(prompt) { const c = window.claude; if (!c || typeof c.complete !== 'function') return Promise.reject(new Error('Utvidet forklaring ikke tilgjengelig')); return Promise.race([c.complete(prompt), new Promise((_, rej) => setTimeout(() => rej(new Error('Tidsavbrudd')), 20000))]); }
   async runAi(id) {
     const f = this.rawF(id); if (!f || !this.E || this.state.ai[id]) return;
-    this.setState(s => ({ ai: { ...s.ai, [id]: { loading: true } } }));
-    this.log('Rettført', `Undersøkelse åpnet for «${f.title}».`, id);
-    const E = this.E, fb = E.explain(f); let out = null, src = 'regel', note = 'Utvidet forklaring er ikke tilgjengelig akkurat nå. Rettført viser den regelbaserte forklaringen.';
-    try {
-      const j = E.parseAiJson(await this.callAi(E.aiFindingPrompt(f)));
-      if (j && typeof j.ser === 'string' && Array.isArray(j.forklaring) && Array.isArray(j.kontroller)) {
-        if (E.numbersGrounded([j.ser, ...j.forklaring, ...j.kontroller].join(' '), JSON.stringify(f.facts))) { out = { ser: j.ser, forklaring: j.forklaring.slice(0, 2).map(String), kontroller: j.kontroller.slice(0, 3).map(String) }; src = 'ai'; note = ''; }
-        else note = 'Den utvidede forklaringen inneholdt tall som ikke finnes i grunnlaget. Rettført viser derfor den regelbaserte forklaringen.';
-      }
-    } catch (e) {}
-    this.setState(s => ({ ai: { ...s.ai, [id]: { loading: false, data: out || fb, src, note } } }));
+    const setStage = stage => this.setState(st => ({ ai: { ...st.ai, [id]: { ...(st.ai[id] || {}), loading: true, stage } } }));
+    setStage('Leser funnet og kontrollgrunnlaget');
+    this.log('Rettført', `AI-demo åpnet for «${f.title}».`, id);
+
+    // Simulert AI-flyt for demoen. Ingen ekstern modell eller API brukes i denne versjonen.
+    await new Promise(r => setTimeout(r, 650));
+    setStage('Sammenholder tall og regelgrunnlag');
+    await new Promise(r => setTimeout(r, 850));
+    setStage('Formulerer mulige forklaringer');
+    await new Promise(r => setTimeout(r, 900));
+    setStage('Foreslår hva som bør kontrolleres');
+    await new Promise(r => setTimeout(r, 700));
+
+    const out = this.E.explain(f);
+    const note = 'Simulert AI-støtte i denne demoen. Tall, funn og kontrollgrunnlag kommer fra kontrollmotoren.';
+    this.setState(st => ({ ai: { ...st.ai, [id]: { loading: false, data: out, src: 'demo', note, stage: '' } } }));
   }
   async doPrio() {
     const r = this.state.result; if (!r || !this.E) return; const R = this.state.resolved;
     const open = r.findings.filter(f => !R[f.id] || R[f.id].outcome === 'oppfolging'); if (!open.length) return;
-    this.setState({ prio: { loading: true } });
-    let items = null, src = 'regel';
-    try { const j = this.E.parseAiJson(await this.callAi(this.E.aiPriorityPrompt(open))); const ids = new Set(open.map(f => f.id)); if (Array.isArray(j) && j.length && j.every(x => x && ids.has(x.id) && typeof x.grunn === 'string') && this.E.numbersGrounded(j.map(x => x.grunn).join(' '), JSON.stringify(open.map(f => f.facts)))) { items = j.slice(0, 3); src = 'ai'; } } catch (e) {}
-    if (!items) items = this.E.fallbackPriority(open);
-    this.setState({ prio: { loading: false, items, src } });
-    this.log('Rettført', `Foreslo å starte med ${items.map(x => `«${(this.rawF(x.id) || {}).title}»`).join(', ')}.`);
+
+    const setStage = stage => this.setState(st => ({ prio: { ...(st.prio || {}), loading: true, stage } }));
+    setStage('Leser de åpne funnene');
+    await new Promise(r => setTimeout(r, 650));
+    setStage('Sammenligner alvorlighet og beløp');
+    await new Promise(r => setTimeout(r, 850));
+    setStage('Vurderer hva som bør undersøkes først');
+    await new Promise(r => setTimeout(r, 900));
+
+    const items = this.E.fallbackPriority(open).slice(0, 3);
+    this.setState({ prio: { loading: false, items, src: 'demo', stage: '' } });
+    this.log('Rettført', `AI-demo foreslo å starte med ${items.map(x => `«${(this.rawF(x.id) || {}).title}»`).join(', ')}.`);
   }
   finishRun() {
     const res = this.state.pending; if (!res) return; const t = this.now(), demo = !!this.demoRun;
@@ -1210,9 +1221,9 @@ class Component extends DCLogic {
       fOutL: fr ? OUT_L[fr.outcome] : '', fOutC: fr && fr.outcome === 'oppfolging' ? '#8E5A0F' : C.grn,
       pg_history: s.page === 'history', hist: histList, noHist: !histList.length,
       fHist: fHist.map(e => ({ t: e.time, x: `${e.who}: ${e.text}` })), fHasHist: !!fHist.length,
-      aiOpen: () => F && this.runAi(F.id), aiShow: !!(F && aiS), aiLoading: !!(aiS && aiS.loading), aiReady: !!aiD, aiSer: aiD ? aiD.ser : '', aiForkl: aiD ? aiD.forklaring.map(t => ({ t })) : [], aiKontr: aiD ? aiD.kontroller.map((t, i) => ({ t, n: String(i + 1).padStart(2, '0') })) : [],
-      aiSrc: aiS && aiS.src === 'ai' ? 'Utvidet' : 'Regelbasert', aiSrcBg: aiS && aiS.src === 'ai' ? '#FBF3C8' : '#ECE8DF', aiNote: aiS ? aiS.note || '' : '', aiHasNote: !!(aiS && aiS.note), aiBtnL: aiS ? 'Undersøkelse åpnet' : 'Undersøk nærmere',
-      doPrio: () => this.doPrio(), prNone: !pr, prLoading: !!(pr && pr.loading), prHas: prItems.length > 0, prItems, prSrc: pr && pr.src === 'ai' ? 'Prioriteringsforslaget bygger på funnene fra kontrollmotoren.' : 'Prioritering basert på kontrollmotorens funn.',
+      aiOpen: () => F && this.runAi(F.id), aiShow: !!(F && aiS), aiLoading: !!(aiS && aiS.loading), aiStage: aiS ? aiS.stage || 'Analyserer funnet' : '', aiReady: !!aiD, aiSer: aiD ? aiD.ser : '', aiForkl: aiD ? aiD.forklaring.map(t => ({ t })) : [], aiKontr: aiD ? aiD.kontroller.map((t, i) => ({ t, n: String(i + 1).padStart(2, '0') })) : [],
+      aiSrc: aiS && aiS.src === 'demo' ? 'AI-demo' : 'Regelbasert', aiSrcBg: aiS && aiS.src === 'demo' ? '#FBF3C8' : '#ECE8DF', aiNote: aiS ? aiS.note || '' : '', aiHasNote: !!(aiS && aiS.note), aiBtnL: aiS ? 'AI-undersøkelse åpnet' : 'Undersøk med AI',
+      doPrio: () => this.doPrio(), prNone: !pr, prLoading: !!(pr && pr.loading), prStage: pr ? pr.stage || 'Vurderer funnene' : '', prHas: prItems.length > 0, prItems, prSrc: pr && pr.src === 'demo' ? 'Simulert AI-prioritering basert på funnene fra kontrollmotoren.' : 'Prioritering basert på kontrollmotorens funn.',
       isDemo: !!(s.demo && res), demoLabel: res ? `${res.company} · ${res.payPeriods ? monthName(res.payPeriods[1]) : ''}` : '', rStats,
       showIntro: !!(s.showIntro && res), showHow: !!s.showHow, showEnd: !!s.showEnd, introCo: res ? res.company : '', introSub: res ? `${res.payPeriods ? monthName(res.payPeriods[1]).replace(/^./, c => c.toUpperCase()) : ''} · ${rStats}` : '',
       startTour: () => this.tourGo(0), exploreSelf: () => this.setState({ showIntro: false, showEnd: false, tour: null, page: 'report' }), openHow: set({ showHow: true }), closeHow: set({ showHow: false }),
