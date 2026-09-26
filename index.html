@@ -99,6 +99,8 @@ input,textarea{font-family:inherit}
 .rf-acc-b{padding:0 22px 24px}
 @media (max-width:520px){.rf-acc summary{padding:16px 18px}.rf-acc-b{padding:0 18px 20px}.rf-acc-t{font-size:18px}}
 @media print{.rf-noprint{display:none !important}}
+.rf-dup{display:none}
+@media (max-width:760px){[data-rf=marq]{display:flex !important;overflow-x:auto;gap:12px !important;margin-left:-24px;margin-right:-24px;padding:0 24px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}[data-rf=marq]::-webkit-scrollbar{display:none}[data-rf=marq]>div{flex:0 0 76%;min-width:0}[data-rf=marq]>.rf-dup{display:block}}
 @media (max-width:1080px){[data-rf=cta]{padding-right:200px !important}}
 @media (max-width:900px){[data-rf=nav]{display:none !important}[data-rf=deskact]{display:none !important}[data-rf=mobmenu]{display:flex !important}[data-rf=sec]{padding-top:72px !important;padding-bottom:56px !important}[data-rf=hero]{padding-top:56px !important;padding-bottom:64px !important;gap:48px !important}[data-rf=dark]{padding-top:56px !important;padding-bottom:56px !important}[data-rf=co]{display:none !important}[data-rf=stick]{position:static !important}}
 @media (max-width:760px){body{width:100%;max-width:100%;overflow-x:hidden}.rf-ctrl-extra{display:none !important}.rf-ctrl-expanded .rf-ctrl-extra{display:flex !important;animation:rfIn .28s ease both}[data-rf=ctrlToggle]{display:flex !important}[data-rf=span2]{grid-column:auto !important}[data-rf=cta]{padding:24px !important;margin-top:24px !important;width:100% !important;max-width:100% !important;overflow:hidden !important;display:flex !important;flex-direction:column !important;align-items:stretch !important;gap:12px !important}[data-rf=cta]>button{width:100% !important}[data-rf=ctaText]{width:100% !important;flex:0 0 auto !important}[data-rf=ctaForm]{width:100% !important;max-width:none !important;min-width:0 !important;flex:0 0 auto !important;display:grid !important;grid-template-columns:minmax(0,1fr) !important;gap:8px !important}[data-rf=ctaForm] input,[data-rf=ctaForm] button{width:100% !important;max-width:100% !important;min-width:0 !important}[data-rf=ctaM]{display:none !important}[data-rf=card44]{padding:28px 24px !important}[data-rf=kv]{grid-template-columns:1fr !important}[data-rf=aboutM]{display:none !important}[data-rf=apphdr]{gap:14px !important;padding:0 18px !important}[data-rf=main]{padding:24px 16px 72px !important}[data-rf=hist]{grid-template-columns:1fr auto !important;gap:6px 12px !important}[data-rf=hist]>span:last-child{grid-column:1 / -1}[data-rf=kv2]{grid-template-columns:1fr !important;gap:6px !important}[data-rf=frow]{grid-template-columns:auto minmax(0,1fr) !important}[data-rf=frow]>div:last-child{grid-column:1 / -1;text-align:left !important;display:flex;gap:10px}}
@@ -267,7 +269,7 @@ input,textarea{font-family:inherit}
         </div>
         <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 20px;font-size:15px;font-weight:500;display:flex;align-items:center;gap:10px" style-hover="background:#16345E">Se det i demoen {{ iArrow }}</button>
       </div>
-      <div style="margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px">
+      <div data-rf="marq" style="margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px">
         <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
           <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Gjennomgang med sporing</span></div>
           <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Arbeidsliste over funn. Hvert funn viser hva, hvorfor og mulig effekt, med sporing til kilde, grunnlag og bilagsleser.</p>
@@ -281,6 +283,22 @@ input,textarea{font-family:inherit}
           <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Oppsummering av perioden, vurderte forhold, aktivitetslogg og signering som låser perioden.</p>
         </div>
         <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Portefølje</span></div>
+          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Flere klienter i én oversikt, på tvers av fem regnskapssystemer.</p>
+        </div>
+        <div class="rf-dup" aria-hidden="true" style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Gjennomgang med sporing</span></div>
+          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Arbeidsliste over funn. Hvert funn viser hva, hvorfor og mulig effekt, med sporing til kilde, grunnlag og bilagsleser.</p>
+        </div>
+        <div class="rf-dup" aria-hidden="true" style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Assistent med kilder</span></div>
+          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Forklarer funnet, foreslår hva du bør sjekke og skriver utkast til e-post til kunden. Den endrer aldri tallene.</p>
+        </div>
+        <div class="rf-dup" aria-hidden="true" style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Kontrollbevis</span></div>
+          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Oppsummering av perioden, vurderte forhold, aktivitetslogg og signering som låser perioden.</p>
+        </div>
+        <div class="rf-dup" aria-hidden="true" style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
           <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Portefølje</span></div>
           <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Flere klienter i én oversikt, på tvers av fem regnskapssystemer.</p>
         </div>
@@ -1620,6 +1638,44 @@ class Component extends DCLogic {
   var hideTeaser = false; try { hideTeaser = sessionStorage.getItem('rfc_teaser') === '0'; } catch (x) {}
   teaser.hidden = hideTeaser;
   intro();
+})();
+</script>
+<script>
+// «Nytt i demoen» på mobil: kortene ruller sidelengs av seg selv. Berører man
+// raden, stopper den, og etter noen sekunder uten berøring ruller den videre.
+(function () {
+  var mq = window.matchMedia('(max-width:760px)');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var SPEED = 28, RESUME = 3000;
+  var el = null, pos = 0, last = 0, holdUntil = 0, touching = false;
+  function hold() { holdUntil = Date.now() + RESUME; }
+  function bind(n) {
+    el = n; pos = n.scrollLeft;
+    n.addEventListener('touchstart', function () { touching = true; hold(); }, { passive: true });
+    n.addEventListener('touchend', function () { touching = false; hold(); }, { passive: true });
+    n.addEventListener('touchcancel', function () { touching = false; hold(); }, { passive: true });
+    n.addEventListener('pointerdown', hold);
+    n.addEventListener('wheel', hold, { passive: true });
+    n.addEventListener('mouseenter', function () { touching = true; });
+    n.addEventListener('mouseleave', function () { touching = false; hold(); });
+  }
+  function tick(t) {
+    var dt = last ? Math.min(0.1, (t - last) / 1000) : 0; last = t;
+    var n = document.querySelector('[data-rf=marq]');
+    if (n && n !== el) bind(n);
+    if (el && mq.matches && !reduce.matches && !document.hidden) {
+      var dup = el.querySelector('.rf-dup'), first = el.firstElementChild;
+      var loop = dup && first ? dup.offsetLeft - first.offsetLeft : 0;
+      if (touching || Date.now() < holdUntil) pos = el.scrollLeft;
+      else if (loop > 0) {
+        pos += SPEED * dt;
+        if (pos >= loop) pos -= loop;
+        el.scrollLeft = pos;
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
 })();
 </script>
 </body>
