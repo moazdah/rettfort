@@ -108,6 +108,16 @@ input,textarea{font-family:inherit}
 .rf-spark{position:absolute;color:#F2C94C;font-size:16px;animation:rfSpark 2.6s var(--d) ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.rf-tag,.rf-spark{animation:none}}
 .rf-pd summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:16px 0 2px;font-size:15px;font-weight:600}.rf-pd summary::-webkit-details-marker{display:none}.rf-pd-c{font-size:14px;transition:transform .2s}.rf-pd[open] .rf-pd-c{transform:rotate(180deg)}.rf-pd[open] .rf-pd-b{animation:rfIn .3s ease both;margin-top:14px}
+.rf-rail{position:absolute;left:29px;top:6px;bottom:6px;width:3px;background:#E4DFD4;border-radius:3px}
+.rf-rail-fill{position:absolute;left:0;top:0;width:100%;height:0;background:#35AE74;border-radius:3px;transition:height .12s linear}
+.rf-walker{position:absolute;left:0;top:0;width:62px;height:62px;z-index:2;will-change:transform;transition:transform .12s linear}
+.rf-w{position:absolute;inset:0;opacity:0;transform-origin:50% 90%;transition:opacity .3s}
+.rf-walker[data-s="1"] .rf-w1,.rf-walker[data-s="2"] .rf-w2,.rf-walker[data-s="3"] .rf-w3{opacity:1}
+.rf-walker.moving .rf-w{animation:rfWaddle .42s ease-in-out infinite}
+@keyframes rfWaddle{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(6deg) translateY(-4px)}}
+.rf-drop{position:absolute;left:calc(50% + var(--x) - 22px);top:0;background:#0B2545;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 8px;border-radius:4px;opacity:0;animation:rfDrop 2.7s var(--d) ease-in infinite}
+@keyframes rfDrop{0%{opacity:0;transform:translateY(-10px) rotate(-6deg)}15%{opacity:1}55%{opacity:1;transform:translateY(96px) rotate(4deg)}70%,100%{opacity:0;transform:translateY(118px) rotate(0)}}
+@media (prefers-reduced-motion:reduce){.rf-walker.moving .rf-w,.rf-drop{animation:none}.rf-drop{opacity:1}}
 @media (max-width:1080px){[data-rf=cta]{padding-right:200px !important}}
 @media (max-width:900px){[data-rf=nav]{display:none !important}[data-rf=deskact]{display:none !important}[data-rf=mobmenu]{display:flex !important}[data-rf=sec]{padding-top:72px !important;padding-bottom:56px !important}[data-rf=hero]{padding-top:56px !important;padding-bottom:64px !important;gap:48px !important}[data-rf=dark]{padding-top:56px !important;padding-bottom:56px !important}[data-rf=co]{display:none !important}[data-rf=stick]{position:static !important}}
 @media (max-width:760px){body{width:100%;max-width:100%;overflow-x:hidden}.rf-ctrl-extra{display:none !important}.rf-ctrl-expanded .rf-ctrl-extra{display:flex !important;animation:rfIn .28s ease both}[data-rf=ctrlToggle]{display:flex !important}[data-rf=span2]{grid-column:auto !important}[data-rf=cta]{padding:24px !important;margin-top:24px !important;width:100% !important;max-width:100% !important;overflow:hidden !important;display:flex !important;flex-direction:column !important;align-items:stretch !important;gap:12px !important}[data-rf=cta]>button{width:100% !important}[data-rf=ctaText]{width:100% !important;flex:0 0 auto !important}[data-rf=ctaForm]{width:100% !important;max-width:none !important;min-width:0 !important;flex:0 0 auto !important;display:grid !important;grid-template-columns:minmax(0,1fr) !important;gap:8px !important}[data-rf=ctaForm] input,[data-rf=ctaForm] button{width:100% !important;max-width:100% !important;min-width:0 !important}[data-rf=ctaM]{display:none !important}[data-rf=card44]{padding:28px 24px !important}[data-rf=kv]{grid-template-columns:1fr !important}[data-rf=aboutM]{display:none !important}[data-rf=apphdr]{gap:14px !important;padding:0 18px !important}[data-rf=main]{padding:24px 16px 72px !important}[data-rf=hist]{grid-template-columns:1fr auto !important;gap:6px 12px !important}[data-rf=hist]>span:last-child{grid-column:1 / -1}[data-rf=kv2]{grid-template-columns:1fr !important;gap:6px !important}[data-rf=frow]{grid-template-columns:auto minmax(0,1fr) !important}[data-rf=frow]>div:last-child{grid-column:1 / -1;text-align:left !important;display:flex;gap:10px}}
@@ -115,7 +125,7 @@ input,textarea{font-family:inherit}
 [data-rf=hero]{text-align:center;padding-top:40px !important;padding-bottom:40px !important}[data-rf=hero] h1{font-size:37px !important}[data-rf=hero]>div>div:first-child{justify-content:center}
 [data-rf=heroBtns]{margin-top:28px !important}[data-rf=heroBtns]>button{width:100%;justify-content:center;font-size:17px !important;padding:17px 22px !important;border-radius:12px !important}
 [data-rf=plans]{display:flex !important;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px !important;padding:84px 18px 18px;gap:14px !important;scrollbar-width:none;align-items:stretch !important}[data-rf=plans]::-webkit-scrollbar{display:none}[data-rf=plans]>div{flex:0 0 86%;scroll-snap-align:center;min-width:0}
-.rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=mobmenu]{margin-left:2px !important;margin-right:-8px}[data-rf=mlogin]{display:inline-flex !important}#slik{background:transparent !important;border:0 !important}#slik>[data-rf=sec]{padding-top:32px !important}[data-rf=hero]{padding-bottom:8px !important}#kontroller{padding-top:64px !important}}
+.rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=mobmenu]{margin-left:2px !important;margin-right:-8px}[data-rf=mlogin]{display:inline-flex !important}[data-rf=steps]{position:relative;padding-left:66px;text-align:left !important;gap:56px !important}[data-rf=steps] p{margin-left:0 !important}[data-rf=tray]{left:calc(50% - 54px) !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=s3card]{left:calc(50% - 88px) !important}#slik{background:transparent !important;border:0 !important}#slik>[data-rf=sec]{padding-top:32px !important}[data-rf=hero]{padding-bottom:8px !important}#kontroller{padding-top:64px !important}}
 @media (max-width:520px){[data-rf=hdr]{padding:0 18px !important;gap:12px !important}[data-rf=login]{display:none !important}[data-rf=sec]{padding-left:18px !important;padding-right:18px !important}[data-rf=hero]{padding-left:18px !important;padding-right:18px !important}[data-rf=steps]{gap:48px !important}}
 </style>
 </helmet>
@@ -210,13 +220,16 @@ input,textarea{font-family:inherit}
     <div data-rf="sec" style="max-width:1240px;margin:0 auto;padding:120px 32px 112px">
       <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0 auto;max-width:760px;text-align:center;text-wrap:balance">Last opp. Analyser. Vurder.</h2>
       <div data-rf="steps" style="margin-top:80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:64px 40px;text-align:center">
+        <div class="rf-mob rf-rail" aria-hidden="true"><div class="rf-rail-fill"></div></div>
+        <div class="rf-mob rf-walker" data-s="1" aria-hidden="true"><div class="rf-w rf-w1">{{ mTrail1 }}</div><div class="rf-w rf-w2">{{ mTrail2 }}</div><div class="rf-w rf-w3">{{ mTrail3 }}</div></div>
         <div>
           <div style="height:200px;position:relative">
-            <div style="position:absolute;left:calc(50% + 34px);bottom:14px;width:108px;height:62px;background:#fff;border:1px solid #D9D3C6;border-radius:8px 8px 10px 10px;box-shadow:0 14px 26px -18px rgba(11,37,69,.35);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9px;animation:{{ s1Tray }}">
+            <div data-rf="tray" style="position:absolute;left:calc(50% + 34px);bottom:14px;width:108px;height:62px;background:#fff;border:1px solid #D9D3C6;border-radius:8px 8px 10px 10px;box-shadow:0 14px 26px -18px rgba(11,37,69,.35);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9px;animation:{{ s1Tray }}">
               <div style="position:absolute;top:-7px;left:10px;right:10px;height:7px;background:#EAE5DA;border-radius:4px 4px 0 0"></div>
               <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#586174">SAF-T · CSV</div>
             </div>
-            <div style="position:absolute;left:calc(50% - 150px);bottom:0;animation:{{ s1Walk }}">{{ mStep1 }}</div>
+            <div class="rf-desk" style="position:absolute;left:calc(50% - 150px);bottom:0;animation:{{ s1Walk }}">{{ mStep1 }}</div>
+            <span class="rf-mob rf-drop" style="--x:-62px;--d:0s">SAF-T</span><span class="rf-mob rf-drop" style="--x:-10px;--d:.9s">Bank</span><span class="rf-mob rf-drop" style="--x:38px;--d:1.8s">Bilag</span>
           </div>
           <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">01</div>
           <div style="font-size:20px;font-weight:600;margin-top:8px">Last opp</div>
@@ -244,13 +257,13 @@ input,textarea{font-family:inherit}
         </div>
         <div>
           <div style="height:200px;position:relative;display:flex;align-items:flex-end;justify-content:center">
-            <div style="position:absolute;left:calc(50% - 160px);top:46px;width:176px;background:#fff;border:1px solid #E4DFD4;border-radius:10px;padding:12px;text-align:left;box-shadow:0 14px 30px -18px rgba(11,37,69,.3)">
+            <div data-rf="s3card" style="position:absolute;left:calc(50% - 160px);top:46px;width:176px;background:#fff;border:1px solid #E4DFD4;border-radius:10px;padding:12px;text-align:left;box-shadow:0 14px 30px -18px rgba(11,37,69,.3)">
               <div style="font-size:12px;font-weight:600">{{ ex3t }}</div>
               <div style="font-size:11px;color:#586174;margin-top:4px;line-height:1.4">{{ ex3d }}</div>
               <div style="font-size:10.5px;color:#8A909C;margin-top:6px">{{ ex3o }}</div>
               <div style="margin-top:9px;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:#1F7D52;background:#E2F1E8;padding:3px 8px;border-radius:99px;animation:rfChip 5s ease infinite">{{ iTickS }}Avklart</div>
             </div>
-            <div style="position:absolute;left:calc(50% + 24px);top:40px;transform-origin:20% 90%;animation:{{ s3Nod }}">{{ mStep3 }}</div>
+            <div class="rf-desk" style="position:absolute;left:calc(50% + 24px);top:40px;transform-origin:20% 90%;animation:{{ s3Nod }}">{{ mStep3 }}</div>
           </div>
           <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">03</div>
           <div style="font-size:20px;font-weight:600;margin-top:8px">Vurder</div>
@@ -395,7 +408,7 @@ input,textarea{font-family:inherit}
         </div>
       </sc-for>
     </div>
-    <p style="text-align:center;font-size:13.5px;color:#586174;margin:40px 0 0">Prisene gjelder fra lansering. Store tall er eks. MVA, med pris inkl. 25 % MVA under. Ingen binding. Byrå: 79 kr (98,75 kr inkl. MVA) per ekstra kunde utover 15.</p>
+    <p style="text-align:center;font-size:13.5px;color:#586174;margin:40px 0 0">Prisene gjelder fra lansering og er inkl. 25 % MVA. Ingen binding. Byrå: 99 kr (79,20 kr eks. MVA) per ekstra kunde utover 15.</p>
   </section>
 
   <section data-rf="sec" class="rf-desk" style="max-width:1240px;margin:0 auto;padding:120px 32px 40px">
@@ -1341,9 +1354,9 @@ class Component extends DCLogic {
     // plans
     const PF = [['Regnskapskontroll via SAF-T', [1, 1, 1]], ['Funn med sporing til kilde', [1, 1, 1]], ['Analyse lokalt i nettleseren', [1, 1, 1]], ['Bankavstemming og bilagsleser', [0, 1, 1]], ['Lønn mot regnskap', [0, 1, 1]], ['Vurdering med kommentar per funn', [0, 1, 1]], ['Assistent med kilder', [0, 1, 1]], ['Kontrollbevis med signering', [0, 1, 1]], ['Eksport av rapport (CSV og PDF)', [0, 1, 1]], ['Portefølje med flere klienter', [0, 0, 1]], ['Egne terskler per kunde', [0, 0, 1]], ['Prioritert support', [0, 0, 1]]];
     const plans = [
-      { k: 'Start', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', vat: '0 kr inkl. MVA', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
-      { k: 'Selskap', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '249', unit: 'kr / mnd per selskap', vat: '311,25 kr inkl. MVA', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 assistentsvar per måned'], pop: true },
-      { k: 'Byrå', d: 'For miljøer som følger opp flere virksomheter.', price: '1 490', unit: 'kr / mnd inkl. 15 kunder', vat: '1 862,50 kr inkl. MVA', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 assistentsvar per måned'] }
+      { k: 'Start', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', vat: '', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
+      { k: 'Selskap', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '299', unit: 'kr / mnd per selskap', vat: 'inkl. MVA (239,20 kr eks. MVA)', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 assistentsvar per måned'], pop: true },
+      { k: 'Byrå', d: 'For miljøer som følger opp flere virksomheter.', price: '1 890', unit: 'kr / mnd inkl. 15 kunder', vat: 'inkl. MVA (1 512 kr eks. MVA)', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 assistentsvar per måned'] }
     ].map((p, i) => { const dk = s.planHover === i; return { ...p, dark: dk, bg: dk ? INK : '#fff', fg: dk ? '#fff' : INK, sub: dk ? 'rgba(255,255,255,.68)' : C.mut, bd: dk ? INK : C.line, line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2', btnBg: dk ? '#F6DF6E' : INK, btnFg: dk ? INK : '#fff', shadow: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', lift: dk ? '-12px' : '0px', limits: p.lim.map(l => ({ l })), feats: PF.map(f => { const on = !!f[1][i]; return { l: f[0], on, off: !on, txt: on ? (dk ? '#fff' : INK) : (dk ? 'rgba(255,255,255,.4)' : '#A4A8B0'), icBg: on ? (dk ? '#35AE74' : C.grnBg) : (dk ? 'rgba(255,255,255,.08)' : '#EFEBE2'), icFg: on ? (dk ? '#fff' : C.grn) : (dk ? 'rgba(255,255,255,.42)' : '#A4A8B0') }; }), enter: () => { if (s.planHover !== i) this.setState({ planHover: i }); }, fn: i === 0 ? () => this.trySample() : () => this.setState(st => ({ screen: 'auth', authMode: 'signup', su: { ...st.su, plan: p.k } })) }; });
 
     const cat = E ? E.CONTROLS : [];
@@ -1367,7 +1380,7 @@ class Component extends DCLogic {
       goHow: () => this.scrollTo('slik'), goCtrl: () => this.scrollTo('kontroller'), goPrice: () => this.scrollTo('priser'),
       iArrow: icon('arrow', 15), iTick: icon('tick', 22, 2.4), iX: icon('x', 15), iXs: icon('x', 11, 2.4), iTickS: icon('tick', 12, 2.6),
       mHero: M({ s: 132, lx: -9, ly: hs < 7 ? 4 : 6, smile: hs >= 7, wave: hs >= 12, ground: false }),
-      mHero: M({ s: 150, wave: true, bob: true, lx: -5, ly: 3 }), mStep1: M({ s: 150, hold: true, lx: 6, ly: 3, tired: s.tired, d: 0, fidget: s.fidget === 's1' }), mStep2: M({ s: 132, lx: -9, ly: 6, smile: false, scan: true, tired: s.tired, d: 2.3, fidget: s.fidget === 's2' }), mStep3: M({ s: 140, lx: -8, ly: 5, wave: true, tired: s.tired, d: 4.6, fidget: s.fidget === 's3' }),
+      mHero: M({ s: 150, wave: true, bob: true, lx: -5, ly: 3 }), mTrail1: M({ s: 62, hold: true, ground: false, lx: 5, ly: 3 }), mTrail2: M({ s: 62, scan: true, smile: false, ground: false }), mTrail3: M({ s: 62, wave: true, ground: false, lx: 4, ly: 2 }), mStep1: M({ s: 150, hold: true, lx: 6, ly: 3, tired: s.tired, d: 0, fidget: s.fidget === 's1' }), mStep2: M({ s: 132, lx: -9, ly: 6, smile: false, scan: true, tired: s.tired, d: 2.3, fidget: s.fidget === 's2' }), mStep3: M({ s: 140, lx: -8, ly: 5, wave: true, tired: s.tired, d: 4.6, fidget: s.fidget === 's3' }),
       mCta: M({ s: 140, lx: -5, ly: 4, wave: true, ground: false, tired: s.tired, d: 1.2, fidget: s.fidget === 'cta' }), mPrice: M({ s: 90, lx: -4, ly: 5, ground: false, bob: true }), mAbout: M({ s: 150, hold: true, lx: -4, ly: 2, tired: s.tired, d: 3, fidget: s.fidget === 'about' }),
       mAuth: M({ s: 190, lx: -5, ly: 4, wave: true, tired: s.tired, d: 1.7, fidget: s.fidget === 'auth' }), mRun: M({ s: 150, smile: false, scan: true, bob: true }), mEmpty: M({ s: 110, wave: true, tired: s.tired, fidget: s.fidget === 'empty' }),
       heroLinesS: fmt(Math.min(hLines, Math.round(hLines * hs / 6))), heroOkS: String(hOk), heroOpenS: String(hOpen), heroSumOp: hs >= 7 ? 1 : 0, heroW: Math.min(100, hs / 6 * 100) + '%', heroBusy: hs < 7, heroDone: hs >= 7, heroFinds,
@@ -1687,6 +1700,29 @@ class Component extends DCLogic {
     }
   }
   setInterval(center, 400);
+})();
+</script>
+<script>
+// «Slik fungerer det» på mobil: figuren går nedover linjen mens man scroller,
+// og bytter positur ved hvert steg (holder fil, leser liste, vinker).
+(function () {
+  var mq = window.matchMedia('(max-width:760px)'), last = -1, t;
+  function upd() {
+    if (!mq.matches) return;
+    var st = document.querySelector('[data-rf=steps]'); if (!st) return;
+    var w = st.querySelector('.rf-walker'), f = st.querySelector('.rf-rail-fill'); if (!w || !f) return;
+    var r = st.getBoundingClientRect(), mh = 62, a = window.innerHeight * 0.45;
+    var y = Math.max(0, Math.min(r.height - mh, a - r.top - mh / 2));
+    w.style.transform = 'translateY(' + y + 'px)'; f.style.height = (y + mh / 2) + 'px';
+    var n = 1, k = 0;
+    for (var i = 0; i < st.children.length; i++) { var c = st.children[i]; if (c.classList.contains('rf-mob')) continue; k++; if (c.getBoundingClientRect().top - r.top <= y + mh) n = k; }
+    if (w.getAttribute('data-s') !== String(n)) w.setAttribute('data-s', n);
+    if (last >= 0 && Math.abs(y - last) > 0.5) { w.classList.add('moving'); clearTimeout(t); t = setTimeout(function () { w.classList.remove('moving'); }, 200); }
+    last = y;
+  }
+  document.addEventListener('scroll', upd, { passive: true, capture: true });
+  window.addEventListener('resize', upd);
+  setInterval(upd, 400);
 })();
 </script>
 </body>
