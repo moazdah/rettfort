@@ -1093,7 +1093,7 @@ class Component extends DCLogic {
     else this.setState({ ...base, tour: null, showEnd: true, page: 'report' });
   }
   async sendForm(data) { if (!FORM_ENDPOINT) { await new Promise(r => setTimeout(r, 500)); return true; } const r = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) }); return r.ok; }
-  trySample() { const x = this.samples(); if (!x) { this.setState({ screen: 'app', page: 'new' }); return; } this.setState({ screen: 'app' }); this.analyze(x); }
+  trySample() { window.location.href = '/demo.html'; }
   applySettings(ns) { try { localStorage.setItem('rettfort_settings', JSON.stringify(ns)); } catch (e) {} const up = { settings: ns }; const f = this.state.files; if (this.E && this.state.result) { try { up.result = this.E.analyze({ saft: f.saft && f.saft.text, prev: f.prev && f.prev.text, curr: f.curr && f.curr.text, settings: ns }); } catch (e) { console.error(e); } } this.setState(up); }
   analyze(files) {
     const f = files || this.state.files; if (!this.E) return; this.demoRun = !!(f.saft && f.saft.demo);
@@ -1245,7 +1245,7 @@ class Component extends DCLogic {
       mobLogin: () => this.setState({ mobileMenu: false, screen: 'auth', authMode: 'login' }),
       mobTry: () => { this.setState({ mobileMenu: false }); this.trySample(); },
       toLanding: set({ screen: 'landing', mobileMenu: false }), toAbout: set({ screen: 'about', mobileMenu: false }), toLogin: set({ screen: 'auth', authMode: 'login', mobileMenu: false }), toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
-      enterApp: set({ screen: 'app', page: 'new' }), toUpload: set({ screen: 'app', page: 'new' }), toControls: set({ screen: 'app', page: 'controls' }),
+      enterApp: () => { window.location.href = '/demo.html'; }, toUpload: () => { window.location.href = '/demo.html'; }, toControls: set({ screen: 'app', page: 'controls' }),
       trySample: () => this.trySample(),
       resetSent: () => this.toast('Lenke sendt (demo)'), logout: set({ screen: 'landing' }),
       goHow: () => this.scrollTo('slik'), goCtrl: () => this.scrollTo('kontroller'), goPrice: () => this.scrollTo('priser'),
