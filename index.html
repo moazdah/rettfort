@@ -114,7 +114,7 @@ input,textarea{font-family:inherit}
 [data-rf=hero]{text-align:center;padding-top:40px !important;padding-bottom:40px !important}[data-rf=hero] h1{font-size:37px !important}[data-rf=hero]>div>div:first-child{justify-content:center}
 [data-rf=heroBtns]{margin-top:28px !important}[data-rf=heroBtns]>button{width:100%;justify-content:center;font-size:17px !important;padding:17px 22px !important;border-radius:12px !important}
 [data-rf=plans]{display:flex !important;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px !important;padding:84px 18px 18px;gap:14px !important;scrollbar-width:none;align-items:stretch !important}[data-rf=plans]::-webkit-scrollbar{display:none}[data-rf=plans]>div{flex:0 0 86%;scroll-snap-align:center;min-width:0}
-.rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}}
+.rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=mobmenu]{margin-left:2px !important;margin-right:-8px}[data-rf=mlogin]{display:inline-flex !important}}
 @media (max-width:520px){[data-rf=hdr]{padding:0 18px !important;gap:12px !important}[data-rf=login]{display:none !important}[data-rf=sec]{padding-left:18px !important;padding-right:18px !important}[data-rf=hero]{padding-left:18px !important;padding-right:18px !important}[data-rf=steps]{gap:48px !important}}
 </style>
 </helmet>
@@ -134,10 +134,11 @@ input,textarea{font-family:inherit}
         <button data-rf="login" onClick="{{ toLogin }}" style="background:transparent;border:0;font-size:15px;color:#0B2545;padding:9px 14px;border-radius:8px" style-hover="background:#EAE5DA">Logg inn</button>
         <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:15px;font-weight:500;padding:10px 16px;border-radius:8px" style-hover="background:#16345E">Prøv Rettført</button>
       </div>
-      <button data-rf="mobmenu" onClick="{{ mobToggle }}" aria-label="Åpne meny" aria-expanded="{{ mobMenuOpen }}" style="margin-left:auto;width:44px;height:44px;border:1px solid #D9D3C6;border-radius:10px;background:#fff;align-items:center;justify-content:center;flex-direction:column;gap:5px;padding:0">
-        <span style="display:block;width:20px;height:2px;border-radius:2px;background:#0B2545;transform:{{ mobLine1 }};transition:transform .2s"></span>
-        <span style="display:block;width:20px;height:2px;border-radius:2px;background:#0B2545;opacity:{{ mobLine2Op }};transition:opacity .15s"></span>
-        <span style="display:block;width:20px;height:2px;border-radius:2px;background:#0B2545;transform:{{ mobLine3 }};transition:transform .2s"></span>
+      <button class="rf-mobi" data-rf="mlogin" onClick="{{ toLogin }}" style="margin-left:auto;background:transparent;border:1.5px solid #0B2545;border-radius:99px;padding:8px 18px;font-size:15px;font-weight:600;color:#0B2545;white-space:nowrap">Logg inn</button>
+      <button data-rf="mobmenu" onClick="{{ mobToggle }}" aria-label="Åpne meny" aria-expanded="{{ mobMenuOpen }}" style="margin-left:auto;width:44px;height:44px;border:0;border-radius:10px;background:transparent;align-items:center;justify-content:center;flex-direction:column;gap:5px;padding:0">
+        <span style="display:block;width:24px;height:2.5px;border-radius:2px;background:#0B2545;transform:{{ mobLine1 }};transition:transform .2s"></span>
+        <span style="display:block;width:24px;height:2.5px;border-radius:2px;background:#0B2545;opacity:{{ mobLine2Op }};transition:opacity .15s"></span>
+        <span style="display:block;width:24px;height:2.5px;border-radius:2px;background:#0B2545;transform:{{ mobLine3 }};transition:transform .2s"></span>
       </button>
     </div>
     <sc-if value="{{ mobMenuOpen }}">
@@ -223,7 +224,7 @@ input,textarea{font-family:inherit}
         </div>
         <div>
           <div style="height:200px;position:relative;display:flex;align-items:flex-end;justify-content:center">
-            <div style="position:absolute;left:calc(50% - 150px);top:22px;width:170px;height:168px;overflow:hidden;text-align:left;-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent)">
+            <div data-rf="scan" style="position:absolute;left:calc(50% - 150px);top:22px;width:170px;height:168px;overflow:hidden;text-align:left;-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent)">
               <div style="display:flex;flex-direction:column;gap:7px;animation:{{ scanAn }}">
                 <sc-for list="{{ scanRows }}" as="r" hint-placeholder-count="6">
                   <div style="height:28px;flex-shrink:0;background:#fff linear-gradient(#F6DF6E,#F6DF6E) no-repeat;background-size:0% 100%;border:1px solid #E4DFD4;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 7px 0 9px;font-size:12px;font-weight:500;animation:{{ r.an }}">
@@ -233,7 +234,7 @@ input,textarea{font-family:inherit}
                 </sc-for>
               </div>
             </div>
-            <div style="position:absolute;left:calc(50% + 4px);top:52px;transform-origin:30% 90%;animation:{{ s2Lean }}">{{ mStep2 }}</div>
+            <div class="rf-desk" style="position:absolute;left:calc(50% + 4px);top:52px;transform-origin:30% 90%;animation:{{ s2Lean }}">{{ mStep2 }}</div>
           </div>
           <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">02</div>
           <div style="font-size:20px;font-weight:600;margin-top:8px">Analyser</div>
@@ -1336,7 +1337,7 @@ class Component extends DCLogic {
       isLanding: s.screen === 'landing', isAbout: s.screen === 'about', isAuth: s.screen === 'auth', isApp: s.screen === 'app',
       isLogin: s.authMode === 'login', isSignup: s.authMode === 'signup', isReset: s.authMode === 'reset',
       mobMenuOpen: !!s.mobileMenu, mobToggle: () => this.setState(st => ({ mobileMenu: !st.mobileMenu })), mobClose: () => this.setState({ mobileMenu: false }),
-      mobLine1: s.mobileMenu ? 'translateY(7px) rotate(45deg)' : 'none', mobLine2Op: s.mobileMenu ? 0 : 1, mobLine3: s.mobileMenu ? 'translateY(-7px) rotate(-45deg)' : 'none',
+      mobLine1: s.mobileMenu ? 'translateY(7.5px) rotate(45deg)' : 'none', mobLine2Op: s.mobileMenu ? 0 : 1, mobLine3: s.mobileMenu ? 'translateY(-7.5px) rotate(-45deg)' : 'none',
       mobHow: () => { this.setState({ mobileMenu: false }); this.scrollTo('slik'); },
       mobCtrl: () => { this.setState({ mobileMenu: false }); this.scrollTo('kontroller'); },
       mobPrice: () => { this.setState({ mobileMenu: false }); this.scrollTo('priser'); },
