@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Personvern – Rettført</title>
-<meta name="description" content="Hvordan Rettført behandler filer, e-post og spørsmål til assistenten.">
+<title>Personvernerklæring – Rettført</title>
+<meta name="description" content="Slik behandler Rettført personopplysninger: regnskapsfiler, påmelding, assistenten og dine rettigheter.">
 <link rel="canonical" href="https://xn--rettfrt-u1a.no/personvern.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,50 +12,221 @@
   *{box-sizing:border-box}
   html,body{margin:0;background:#F4F1EA;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
   a{color:#0B2545}
-  header{position:sticky;top:0;background:rgba(244,241,234,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #E4DFD4}
+  header{position:sticky;top:0;z-index:5;background:rgba(244,241,234,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #E4DFD4}
   .bar{max-width:1240px;margin:0 auto;padding:0 clamp(18px,2.5vw,32px);height:70px;display:flex;align-items:center;gap:24px}
   .logo{width:103px;height:26px;overflow:hidden;position:relative;flex-shrink:0;display:block}
   .logo img{position:absolute;max-width:none;left:-14.6px;top:-8.3px;width:131px;height:43.7px}
   .back{margin-left:auto;font-size:15px;color:#3D4759;text-decoration:none}
-  article{max-width:760px;margin:0 auto;padding:80px clamp(18px,4vw,32px) 120px;font-size:17px;line-height:1.7;color:#2A3547}
-  h1{font-size:clamp(36px,5vw,52px);line-height:1.05;letter-spacing:-0.035em;font-weight:600;margin:12px 0 0;color:#0B2545}
-  h2{font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:44px 0 0;color:#0B2545}
-  p{margin:12px 0 0}
-  ul{margin:12px 0 0;padding-left:22px}
-  li{margin-top:6px}
+  main{max-width:800px;margin:0 auto;padding:72px clamp(16px,4vw,32px) 120px}
   .eyebrow{font-size:15px;color:#586174}
-  .note{font-size:14.5px;color:#586174;margin-top:48px;padding-top:20px;border-top:1px solid #E4DFD4}
+  h1{font-size:clamp(36px,5vw,52px);line-height:1.05;letter-spacing:-0.035em;font-weight:600;margin:12px 0 0}
+  .lead{font-size:18px;line-height:1.6;color:#3D4759;margin:18px 0 0}
+  .meta{font-size:14px;color:#8A909C;margin-top:14px}
+  .short{margin-top:36px;background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:24px clamp(18px,3vw,28px)}
+  .short h2{font-size:18px;font-weight:600;margin:0}
+  .short ul{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:10px}
+  .short li{display:flex;gap:12px;font-size:15.5px;line-height:1.5;color:#2A3547}
+  .short li::before{content:"";flex-shrink:0;width:18px;height:18px;margin-top:2px;border-radius:50%;background:#E2F1E8 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' stroke='%231F7D52' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:44px 0 12px}
+  .toolbar h2{font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0}
+  .toolbar button{background:transparent;border:0;border-bottom:1px solid #0B2545;padding:0 0 2px;font:500 14.5px 'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;cursor:pointer}
+  details,.card{scroll-margin-top:86px}
+  details{background:#fff;border:1px solid #E4DFD4;border-radius:14px;margin-top:10px;overflow:hidden}
+  details[open]{border-color:#D9D3C6;box-shadow:0 14px 30px -24px rgba(11,37,69,.35)}
+  summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:18px 20px;font-size:17px;font-weight:600;min-height:60px}
+  summary::-webkit-details-marker{display:none}
+  summary .n{font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12.5px;font-weight:500;color:#8A909C;width:22px;flex-shrink:0}
+  summary .t{flex:1}
+  summary .chev{width:28px;height:28px;border-radius:50%;background:#F1EDE4;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s}
+  details[open] summary .chev{transform:rotate(180deg)}
+  summary:hover .chev{background:#EAE5DA}
+  summary:focus-visible{outline:2px solid #0B2545;outline-offset:-2px;border-radius:14px}
+  .body{padding:0 20px 22px 56px;font-size:15.5px;line-height:1.65;color:#2A3547}
+  .body p{margin:0 0 12px}
+  .body ul{margin:0 0 12px;padding-left:20px}
+  .body li{margin-top:6px}
+  .body h3{font-size:15.5px;font-weight:600;margin:18px 0 6px;color:#0B2545}
+  .tbl{width:100%;border-collapse:collapse;font-size:14.5px;margin:4px 0 12px}
+  .tbl th,.tbl td{text-align:left;vertical-align:top;padding:10px 10px 10px 0;border-top:1px solid #EFEBE2}
+  .tbl th{font-weight:600;color:#586174;font-size:13px;border-top:0;padding-top:0}
+  .card{border:1px solid #EFEBE2;border-radius:10px;padding:14px 16px;margin:0 0 10px;background:#FBFAF6}
+  .card b{display:block;font-size:15px;color:#0B2545}
+  .card dl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:6px 14px;margin:10px 0 0;font-size:14.5px}
+  .card dt{color:#586174}
+  .card dd{margin:0}
+  .contact{margin-top:40px;background:#0B2545;color:#fff;border-radius:18px;padding:28px clamp(20px,4vw,32px)}
+  .contact h2{font-size:22px;font-weight:600;margin:0}
+  .contact p{color:rgba(255,255,255,.75);font-size:15.5px;line-height:1.6;margin:10px 0 0}
+  .contact a{color:#F6DF6E}
+  @media (max-width:560px){.body{padding:0 18px 20px}.card dl{grid-template-columns:1fr;gap:2px}.card dd{margin-bottom:8px}.tbl thead{display:none}.tbl tr{display:block;border-top:1px solid #EFEBE2;padding:10px 0}.tbl td{display:block;border:0;padding:2px 0}}
 </style>
 </head>
 <body>
 <header><div class="bar"><a class="logo" href="/" aria-label="Til Rettført-forsiden"><img src="assets/rettfort-logo.png" alt="Rettført"></a><a class="back" href="/">← Til forsiden</a></div></header>
-<article>
-  <div class="eyebrow">Personvern</div>
-  <h1>Hva som skjer med dataene dine.</h1>
+<main>
+  <div class="eyebrow">Personvernerklæring</div>
+  <h1>Slik tar vi vare på opplysningene dine.</h1>
+  <p class="lead">Rettført er bygget for å behandle så lite som mulig. Regnskapsfilene dine blir i nettleseren, og vi ber bare om det vi trenger for å gi deg beskjed og svare på spørsmål.</p>
+  <div class="meta">Sist oppdatert 26. september 2026</div>
 
-  <h2>Regnskapsfiler</h2>
-  <p>SAF-T-, CSV- og andre filer du velger i Rettført, leses i nettleseren din. Kontrollmotoren kjører lokalt, og filene lastes ikke opp til oss eller til andre.</p>
+  <section class="short" aria-label="Kort oppsummert">
+    <h2>Kort oppsummert</h2>
+    <ul>
+      <li>Regnskapsfiler (SAF-T, CSV, bank, lønn og bilag) leses og kontrolleres i nettleseren din. De lastes ikke opp til oss.</li>
+      <li>Påmelding til lanseringsvarsel lagrer bare det du selv fyller inn, og du kan når som helst be om sletting.</li>
+      <li>Assistenten får bare spørsmålet ditt og, i demoen, opplysningene fra funnet du ser på – aldri hele filer.</li>
+      <li>Vi bruker ingen informasjonskapsler til sporing eller annonsering.</li>
+      <li>Du har rett til innsyn, retting, sletting og mer. Send en e-post, så svarer vi innen 30 dager.</li>
+    </ul>
+  </section>
 
-  <h2>Assistenten</h2>
-  <p>Assistenten i demoen og chatten på forsiden bruker en språkmodell fra DeepSeek. Når du stiller et spørsmål, skjer dette:</p>
-  <ul>
-    <li>Spørsmålet ditt, og i demoen opplysningene fra funnet du ser på, sendes via vår server til DeepSeek, som lager svaret.</li>
-    <li>Råfilene sendes aldri. Bare utdraget som trengs for å svare, går videre.</li>
-    <li>Vi lagrer ikke samtalene. DeepSeek behandler dem etter sine egne vilkår, og behandlingen kan skje utenfor EU/EØS.</li>
-    <li>Demoen bruker fiktive data. Ikke skriv personopplysninger eller ekte kundedata i chatten.</li>
-  </ul>
-  <p>Assistenten endrer aldri tall eller kontrollresultater, og svarene kan være feil. Den faglige vurderingen er alltid din.</p>
+  <div class="toolbar"><h2>Hele erklæringen</h2><button type="button" id="toggle-all">Åpne alle</button></div>
 
-  <h2>Påmelding</h2>
-  <p>Melder du deg på for å få beskjed om lansering, bruker vi e-postadressen bare til det. Du kan når som helst be om å bli slettet.</p>
+  <details id="ansvarlig">
+    <summary><span class="n">01</span><span class="t">Hvem som er ansvarlig</span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="body">
+      <p>Behandlingsansvarlig for personopplysninger som behandles gjennom rettført.no er Mohamad Bokdasji, som utvikler og driver Rettført.</p>
+      <p>Kontakt: <a href="mailto:mohbok04@hotmail.com">mohbok04@hotmail.com</a></p>
+      <p>Rettført er under utvikling og tilbys foreløpig som en åpen demo med fiktive data. Erklæringen oppdateres før tjenesten tas i bruk med egne kundedata.</p>
+    </div>
+  </details>
 
-  <h2>Drift</h2>
-  <p>Nettsiden driftes hos Vercel. Som på de fleste nettsider logges tekniske opplysninger som IP-adresse og tidspunkt kortvarig for drift og for å hindre misbruk.</p>
+  <details id="opplysninger">
+    <summary><span class="n">02</span><span class="t">Hvilke opplysninger vi behandler, og hvorfor</span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="body">
+      <div class="card"><b>Besøk på nettsiden</b><dl>
+        <dt>Opplysninger</dt><dd>IP-adresse, nettlesertype, tidspunkt og hvilken side som ble åpnet.</dd>
+        <dt>Formål</dt><dd>Levere nettsiden, holde den sikker og hindre misbruk.</dd>
+        <dt>Rettslig grunnlag</dt><dd>Berettiget interesse i en sikker og fungerende nettside (personvernforordningen art. 6 nr. 1 bokstav f).</dd>
+        <dt>Lagringstid</dt><dd>Tekniske logger slettes automatisk etter kort tid, i tråd med driftsleverandørens rutiner.</dd>
+      </dl></div>
+      <div class="card"><b>Regnskapsfiler i demoen og appen</b><dl>
+        <dt>Opplysninger</dt><dd>Innholdet i filene du velger, for eksempel SAF-T, lønn og bilag.</dd>
+        <dt>Hvor</dt><dd>Filene leses og kontrolleres lokalt i nettleseren din. De sendes ikke til oss, og vi har ikke tilgang til dem.</dd>
+        <dt>Lagringstid</dt><dd>Lagres ikke av oss. Innholdet forsvinner når du lukker eller laster siden på nytt.</dd>
+      </dl></div>
+      <div class="card"><b>Påmelding og lanseringsvarsel</b><dl>
+        <dt>Opplysninger</dt><dd>E-postadresse, og ved full påmelding også navn, rolle og virksomhet hvis du oppgir det.</dd>
+        <dt>Formål</dt><dd>Gi deg beskjed når Rettført lanseres, og forstå hvem tjenesten passer for.</dd>
+        <dt>Rettslig grunnlag</dt><dd>Samtykke (art. 6 nr. 1 bokstav a). Du kan trekke samtykket når som helst.</dd>
+        <dt>Lagringstid</dt><dd>Til lanseringsvarselet er sendt, eller til du ber om sletting.</dd>
+      </dl></div>
+      <div class="card" id="assistent"><b>Assistenten og chatten</b><dl>
+        <dt>Opplysninger</dt><dd>Det du skriver i chatten. I demoen også opplysningene fra funnet du ser på, for eksempel beløp, konto og bilagsnummer fra de fiktive dataene.</dd>
+        <dt>Formål</dt><dd>Lage et svar på spørsmålet ditt.</dd>
+        <dt>Rettslig grunnlag</dt><dd>Berettiget interesse i å svare på spørsmål du selv stiller (art. 6 nr. 1 bokstav f).</dd>
+        <dt>Lagringstid</dt><dd>Vi lagrer ikke samtalene. Samtalen forsvinner når du lukker siden.</dd>
+      </dl></div>
+      <div class="card"><b>Lokal lagring i nettleseren</b><dl>
+        <dt>Opplysninger</dt><dd>Hvilken side du sist var på og egne innstillinger for avstemming.</dd>
+        <dt>Formål</dt><dd>Huske valgene dine mellom besøk. Opplysningene blir i nettleseren og sendes ikke til oss.</dd>
+        <dt>Lagringstid</dt><dd>Til du sletter nettleserdata.</dd>
+      </dl></div>
+    </div>
+  </details>
 
-  <h2>Kontakt</h2>
-  <p>Spørsmål om personvern kan sendes til <a href="mailto:mohbok04@hotmail.com">mohbok04@hotmail.com</a>.</p>
+  <details id="mottakere">
+    <summary><span class="n">03</span><span class="t">Leverandører som behandler opplysninger for oss</span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="body">
+      <p>Vi selger aldri personopplysninger og deler dem ikke med andre for markedsføring. For å drive nettsiden bruker vi disse leverandørene:</p>
+      <table class="tbl">
+        <thead><tr><th>Leverandør</th><th>Hva de gjør</th><th>Opplysninger</th><th>Land</th></tr></thead>
+        <tbody>
+          <tr><td>Vercel</td><td>Drift av nettsiden og serveren som videresender spørsmål til assistenten</td><td>Tekniske data, spørsmål til assistenten</td><td>USA</td></tr>
+          <tr><td>DeepSeek</td><td>Språkmodellen som lager svarene fra assistenten</td><td>Spørsmålet og utdraget fra funnet</td><td>Kina</td></tr>
+          <tr><td>Formspree</td><td>Mottak av påmeldinger</td><td>Opplysningene du fyller inn</td><td>USA</td></tr>
+          <tr><td>Google Fonts og unpkg</td><td>Levering av skrifttyper og programbiblioteker til nettleseren</td><td>IP-adresse og nettleserdata</td><td>USA</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
 
-  <p class="note">Rettført er under utvikling. Denne siden oppdateres når tjenesten tas i bruk med egne data.</p>
-</article>
+  <details id="overforing">
+    <summary><span class="n">04</span><span class="t">Overføring utenfor EU/EØS</span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="body">
+      <p>Flere av leverandørene holder til utenfor EU/EØS. Overføring til USA skjer på grunnlag av overføringsmekanismene leverandørene har etablert, som EUs standardkontraktsbestemmelser eller EU–US Data Privacy Framework.</p>
+      <h3>Assistenten</h3>
+      <p>Svarene fra assistenten lages av DeepSeek, som behandler opplysningene i Kina. EU-kommisjonen har ikke vurdert Kina som et land med tilsvarende beskyttelsesnivå som i EØS. Derfor har vi lagt opp assistenten slik:</p>
+      <ul>
+        <li>Opplysninger sendes bare når du selv velger å stille et spørsmål, etter at du har fått denne informasjonen (art. 49 nr. 1 bokstav a).</li>
+        <li>Bare spørsmålet og det nødvendige utdraget går videre – aldri hele regnskapsfiler.</li>
+        <li>Demoen bruker fiktive data, og vi ber deg ikke skrive personopplysninger i chatten.</li>
+      </ul>
+      <p>Vil du ikke at noe skal overføres, kan du bruke Rettført uten assistenten. Alle kontrollene virker likt uten den.</p>
+    </div>
+  </details>
+
+  <details id="sikkerhet">
+    <summary><span class="n">05</span><span class="t">Sikkerhet</span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="body">
+      <ul>
+        <li>All trafikk til og fra nettsiden er kryptert med HTTPS.</li>
+        <li>Kontrollmotoren kjører i nettleseren, så regnskapsdata forlater ikke maskinen din.</li>
+        <li>Nøkler til eksterne tjenester ligger bare på serveren og er aldri synlige i nettleseren.</li>
+        <li>Assistenten har begrensninger på lengde og antall spørsmål for å hindre misbruk.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details id="rettigheter">
+    <summary><span class="n">06</span><span class="t">Dine rettigheter</span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="body">
+      <p>Du har rett til å:</p>
+      <ul>
+        <li>få innsyn i hvilke opplysninger vi har om deg</li>
+        <li>få rettet feil eller ufullstendige opplysninger</li>
+        <li>få opplysningene slettet</li>
+        <li>kreve at behandlingen begrenses</li>
+        <li>protestere mot behandling som bygger på berettiget interesse</li>
+        <li>få utlevert opplysninger du har gitt oss, i et maskinlesbart format (dataportabilitet)</li>
+        <li>trekke tilbake samtykke, uten at det påvirker behandlingen før du trakk det</li>
+      </ul>
+      <p>Send en e-post til <a href="mailto:mohbok04@hotmail.com">mohbok04@hotmail.com</a>. Vi svarer uten ugrunnet opphold og senest innen 30 dager. Det er gratis.</p>
+    </div>
+  </details>
+
+  <details id="klage">
+    <summary><span class="n">07</span><span class="t">Klage til Datatilsynet</span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="body">
+      <p>Vi setter pris på om du tar kontakt med oss først, så vi kan rydde opp. Du har uansett rett til å klage til Datatilsynet hvis du mener behandlingen ikke følger regelverket. Se <a href="https://www.datatilsynet.no" target="_blank" rel="noopener">datatilsynet.no</a>.</p>
+    </div>
+  </details>
+
+  <details id="cookies">
+    <summary><span class="n">08</span><span class="t">Informasjonskapsler</span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="body">
+      <p>Vi bruker ikke informasjonskapsler til analyse, sporing eller annonsering. Nettsiden bruker bare lokal lagring i nettleseren for å huske navigasjon og innstillinger, som beskrevet under punkt 2. Du kan slette dette når som helst i nettleserens innstillinger.</p>
+    </div>
+  </details>
+
+  <details id="endringer">
+    <summary><span class="n">09</span><span class="t">Endringer i erklæringen</span><span class="chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+    <div class="body">
+      <p>Vi oppdaterer erklæringen når tjenesten endres, blant annet før Rettført tas i bruk med egne kundedata. Datoen øverst viser når den sist ble endret. Ved vesentlige endringer gir vi beskjed til dem som har meldt seg på.</p>
+    </div>
+  </details>
+
+  <section class="contact">
+    <h2>Spørsmål om personvern?</h2>
+    <p>Send en e-post til <a href="mailto:mohbok04@hotmail.com">mohbok04@hotmail.com</a>, så svarer vi så raskt vi kan.</p>
+  </section>
+</main>
+<script>
+  (function () {
+    var all = Array.prototype.slice.call(document.querySelectorAll('details'));
+    var btn = document.getElementById('toggle-all');
+    function sync() { btn.textContent = all.every(function (d) { return d.open; }) ? 'Lukk alle' : 'Åpne alle'; }
+    btn.onclick = function () { var open = !all.every(function (d) { return d.open; }); all.forEach(function (d) { d.open = open; }); sync(); };
+    all.forEach(function (d) { d.addEventListener('toggle', sync); });
+    // Lenker som #assistent åpner riktig seksjon.
+    function openHash() {
+      var el = location.hash && document.getElementById(location.hash.slice(1));
+      if (!el) return;
+      var d = el.tagName === 'DETAILS' ? el : el.closest('details');
+      if (d) { d.open = true; sync(); setTimeout(function () { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 30); }
+    }
+    window.addEventListener('hashchange', openHash); openHash();
+  })();
+</script>
 </body>
 </html>

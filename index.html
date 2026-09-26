@@ -1378,12 +1378,20 @@ class Component extends DCLogic {
 </script>
 <!-- Chat om Rettført. Står utenfor x-dc slik at den ligger fast nederst på alle skjermer på forsiden. -->
 <style>
-#rf-chat-btn{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;align-items:center;gap:10px;background:#0B2545;color:#fff;border:0;border-radius:99px;padding:13px 18px 13px 14px;font:500 15px 'Schibsted Grotesk',system-ui,sans-serif;box-shadow:0 14px 34px -14px rgba(11,37,69,.6);cursor:pointer;min-height:48px}
+#rf-chat-btn{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;align-items:center;gap:10px;background:#0B2545;color:#fff;border:0;border-radius:99px;padding:6px 18px 6px 6px;font:500 15px 'Schibsted Grotesk',system-ui,sans-serif;box-shadow:0 14px 34px -14px rgba(11,37,69,.6);cursor:pointer;min-height:48px}
 #rf-chat-btn:hover{background:#16345E}
-#rf-chat-btn .dot{width:26px;height:26px;border-radius:50%;background:#F6DF6E;color:#0B2545;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+#rf-chat-btn .av{width:44px;height:44px;border-radius:50%;background:#F4F1EA;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:rfBob 3.6s ease-in-out infinite}
+#rf-chat-btn .av svg{width:34px;height:34px;margin-top:2px}
+.rf-av{width:40px;height:40px;border-radius:50%;background:#E2F1E8;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rf-av svg{width:30px;height:30px;margin-top:2px}
+.rf-av.sm{width:28px;height:28px;background:#F1EDE4}
+.rf-av.sm svg{width:22px;height:22px;margin-top:1px}
+.rf-eyes{animation:rfBlink 5.2s infinite;transform-origin:100px 66px;transform-box:view-box}
+#rf-chat .row{display:flex;gap:8px;align-items:flex-end}
+#rf-chat .row.me{justify-content:flex-end}
 #rf-chat{position:fixed;right:20px;bottom:20px;z-index:61;width:min(380px,calc(100vw - 32px));height:min(560px,calc(100dvh - 40px));background:#fff;border:1px solid #E1DBCE;border-radius:18px;box-shadow:0 30px 70px -30px rgba(11,37,69,.55);display:none;flex-direction:column;overflow:hidden;font-family:'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;animation:rfIn .22s ease both}
 #rf-chat.open{display:flex}
-#rf-chat .hd{padding:14px 16px;border-bottom:1px solid #EFEBE2;display:flex;align-items:center;gap:10px}
+#rf-chat .hd{padding:12px 14px;border-bottom:1px solid #EFEBE2;display:flex;align-items:center;gap:10px}
 #rf-chat .hd b{font-size:16px;font-weight:600}
 #rf-chat .hd span{font-size:12.5px;color:#586174;display:flex;align-items:center;gap:6px}
 #rf-chat .hd span i{width:7px;height:7px;border-radius:50%;background:#35AE74;display:inline-block}
@@ -1403,33 +1411,38 @@ class Component extends DCLogic {
 #rf-chat form button:disabled{opacity:.5;cursor:default}
 #rf-chat .ft{font-size:11.5px;color:#8A909C;padding:0 14px 10px;background:#fff}
 #rf-chat .ft a{color:#586174;text-decoration:underline}
-@media (max-width:520px){#rf-chat{right:0;bottom:0;width:100vw;height:min(88dvh,640px);border-radius:18px 18px 0 0}#rf-chat-btn{right:14px;bottom:14px}#rf-chat-btn .lbl{display:none}#rf-chat-btn{padding:11px}}
+@media (max-width:520px){#rf-chat{right:0;bottom:0;width:100vw;height:min(88dvh,640px);border-radius:18px 18px 0 0}#rf-chat-btn{right:14px;bottom:14px;padding:5px}#rf-chat-btn .lbl{display:none}}
 @media print{#rf-chat,#rf-chat-btn{display:none !important}}
 </style>
-<button id="rf-chat-btn" type="button" aria-controls="rf-chat" aria-expanded="false"><span class="dot">?</span><span class="lbl">Spør om Rettført</span></button>
+<button id="rf-chat-btn" type="button" aria-controls="rf-chat" aria-expanded="false"><span class="av" data-rf-av></span><span class="lbl">Spør om Rettført</span></button>
 <section id="rf-chat" role="dialog" aria-label="Chat om Rettført">
-  <div class="hd"><div><b>Spør om Rettført</b><span><i></i>Svarer med en gang</span></div><button class="x" type="button" aria-label="Lukk chatten">×</button></div>
+  <div class="hd"><span class="rf-av" data-rf-av></span><div><b>Rettført-assistenten</b><span><i></i>Svarer på spørsmål om Rettført</span></div><button class="x" type="button" aria-label="Lukk chatten">×</button></div>
   <div class="log" aria-live="polite"></div>
   <form><textarea rows="1" maxlength="1000" placeholder="Skriv et spørsmål …" aria-label="Spørsmål"></textarea><button type="submit">Send</button></form>
-  <div class="ft">Svarene lages av en språkmodell (DeepSeek) og kan være feil. Ikke skriv personopplysninger. <a href="/personvern.html">Personvern</a></div>
+  <div class="ft">Spørsmålene besvares av en språkmodell (DeepSeek). Skriv ikke personopplysninger i chatten. <a href="/personvern.html#assistent">Les mer</a></div>
 </section>
 <script>
 (function () {
   var btn = document.getElementById('rf-chat-btn'), box = document.getElementById('rf-chat');
   var log = box.querySelector('.log'), form = box.querySelector('form'), ta = form.querySelector('textarea'), send = form.querySelector('button');
   var msgs = [], busy = false, started = false;
+  // Den grønne haken fra forsiden, uten bein, som avatar.
+  var AV = '<svg viewBox="6 0 158 136" aria-hidden="true"><path d="M30 72 L64 108 L136 28" stroke="#1F7D52" stroke-width="40" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 4)"/><path d="M30 72 L64 108 L136 28" stroke="#35AE74" stroke-width="40" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M112 36 L123 23" stroke="rgba(255,255,255,.35)" stroke-width="5" stroke-linecap="round"/><path d="M20 62 L32 75" stroke="rgba(255,255,255,.3)" stroke-width="4.5" stroke-linecap="round"/><g transform="translate(100 67) scale(1.4) translate(-100 -67)"><g stroke="#0B2545" stroke-width="3" fill="none" stroke-linecap="round"><path d="M86 57 Q92 53 98 56"/><path d="M102 56 Q108 53 114 57"/><path d="M94 75 Q100 81 106 75"/></g><g class="rf-eyes"><ellipse cx="93" cy="66" rx="4.2" ry="5.4" fill="#0B2545"/><ellipse cx="107" cy="66" rx="4.2" ry="5.4" fill="#0B2545"/><circle cx="94.3" cy="64" r="1.3" fill="#fff"/><circle cx="108.3" cy="64" r="1.3" fill="#fff"/></g></g></svg>';
+  document.querySelectorAll('[data-rf-av]').forEach(function (el) { el.innerHTML = AV; });
   var CHIPS = ['Hva løser Rettført?', 'Hvordan fungerer kontrollene?', 'Hva skjer med filene mine?', 'Hva koster det?'];
 
   function add(role, text, cls) {
-    var d = document.createElement('div');
+    var row = document.createElement('div'), d = document.createElement('div');
+    row.className = 'row' + (role === 'user' ? ' me' : '');
+    if (role !== 'user') { var a = document.createElement('span'); a.className = 'rf-av sm'; a.innerHTML = AV; row.appendChild(a); }
     d.className = 'm ' + (role === 'user' ? 'me' : 'bot') + (cls ? ' ' + cls : '');
     d.textContent = text;
-    log.appendChild(d); log.scrollTop = log.scrollHeight;
+    row.appendChild(d); log.appendChild(row); log.scrollTop = log.scrollHeight;
     return d;
   }
   function start() {
     if (started) return; started = true;
-    add('assistant', 'Hei! Jeg svarer på spørsmål om Rettført – hva det løser, hvordan kontrollene virker, personvern og priser.');
+    add('assistant', 'Hei! Jeg er Rettført-assistenten. Spør meg om hva Rettført løser, hvordan kontrollene virker, personvern eller priser.');
     var c = document.createElement('div'); c.className = 'chips';
     CHIPS.forEach(function (q) { var b = document.createElement('button'); b.type = 'button'; b.textContent = q; b.onclick = function () { c.remove(); ask(q); }; c.appendChild(b); });
     log.appendChild(c);
