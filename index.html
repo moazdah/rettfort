@@ -408,7 +408,7 @@ input,textarea{font-family:inherit}
         </div>
       </sc-for>
     </div>
-    <p style="text-align:center;font-size:13.5px;color:#586174;margin:40px 0 0">Prisene gjelder fra lansering og er inkl. 25 % MVA. Ingen binding. Byrå: 99 kr (79,20 kr eks. MVA) per ekstra kunde utover 15.</p>
+    <p style="text-align:center;font-size:13.5px;color:#586174;margin:40px 0 0">Prisene gjelder fra lansering. Store tall er eks. MVA, med pris inkl. 25 % MVA under. Ingen binding. Byrå: 79 kr (98,75 kr inkl. MVA) per ekstra kunde utover 15.</p>
   </section>
 
   <section data-rf="sec" class="rf-desk" style="max-width:1240px;margin:0 auto;padding:120px 32px 40px">
@@ -1354,9 +1354,9 @@ class Component extends DCLogic {
     // plans
     const PF = [['Regnskapskontroll via SAF-T', [1, 1, 1]], ['Funn med sporing til kilde', [1, 1, 1]], ['Analyse lokalt i nettleseren', [1, 1, 1]], ['Bankavstemming og bilagsleser', [0, 1, 1]], ['Lønn mot regnskap', [0, 1, 1]], ['Vurdering med kommentar per funn', [0, 1, 1]], ['Assistent med kilder', [0, 1, 1]], ['Kontrollbevis med signering', [0, 1, 1]], ['Eksport av rapport (CSV og PDF)', [0, 1, 1]], ['Portefølje med flere klienter', [0, 0, 1]], ['Egne terskler per kunde', [0, 0, 1]], ['Prioritert support', [0, 0, 1]]];
     const plans = [
-      { k: 'Start', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', vat: '', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
-      { k: 'Selskap', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '299', unit: 'kr / mnd per selskap', vat: 'inkl. MVA (239,20 kr eks. MVA)', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 assistentsvar per måned'], pop: true },
-      { k: 'Byrå', d: 'For miljøer som følger opp flere virksomheter.', price: '1 890', unit: 'kr / mnd inkl. 15 kunder', vat: 'inkl. MVA (1 512 kr eks. MVA)', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 assistentsvar per måned'] }
+      { k: 'Start', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', vat: '0 kr inkl. MVA', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
+      { k: 'Selskap', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '249', unit: 'kr / mnd per selskap', vat: '311,25 kr inkl. MVA', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 assistentsvar per måned'], pop: true },
+      { k: 'Byrå', d: 'For miljøer som følger opp flere virksomheter.', price: '1 490', unit: 'kr / mnd inkl. 15 kunder', vat: '1 862,50 kr inkl. MVA', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 assistentsvar per måned'] }
     ].map((p, i) => { const dk = s.planHover === i; return { ...p, dark: dk, bg: dk ? INK : '#fff', fg: dk ? '#fff' : INK, sub: dk ? 'rgba(255,255,255,.68)' : C.mut, bd: dk ? INK : C.line, line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2', btnBg: dk ? '#F6DF6E' : INK, btnFg: dk ? INK : '#fff', shadow: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', lift: dk ? '-12px' : '0px', limits: p.lim.map(l => ({ l })), feats: PF.map(f => { const on = !!f[1][i]; return { l: f[0], on, off: !on, txt: on ? (dk ? '#fff' : INK) : (dk ? 'rgba(255,255,255,.4)' : '#A4A8B0'), icBg: on ? (dk ? '#35AE74' : C.grnBg) : (dk ? 'rgba(255,255,255,.08)' : '#EFEBE2'), icFg: on ? (dk ? '#fff' : C.grn) : (dk ? 'rgba(255,255,255,.42)' : '#A4A8B0') }; }), enter: () => { if (s.planHover !== i) this.setState({ planHover: i }); }, fn: i === 0 ? () => this.trySample() : () => this.setState(st => ({ screen: 'auth', authMode: 'signup', su: { ...st.su, plan: p.k } })) }; });
 
     const cat = E ? E.CONTROLS : [];
