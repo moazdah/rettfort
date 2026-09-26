@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Rettført kontrollerer regnskapet før du godkjenner perioden. SAF-T, bank, lønn og bilag går gjennom 32 faste kontroller. Du vurderer de få funnene som gjenstår og signerer et kontrollbevis.">
+<meta name="description" content="Rettført kontrollerer regnskapet før du godkjenner perioden. SAF-T, bank, lønn og bilag går gjennom 36 faste kontroller. Du vurderer de få funnene som gjenstår og signerer et kontrollbevis.">
 <link rel="canonical" href="https://xn--rettfrt-u1a.no/">
 <script type="application/ld+json">
 {
@@ -14,7 +14,7 @@
       "@id": "https://xn--rettfrt-u1a.no/#website",
       "url": "https://xn--rettfrt-u1a.no/",
       "name": "Rettført",
-      "description": "Rettført kontrollerer regnskapet før du godkjenner perioden. SAF-T, bank, lønn og bilag går gjennom 32 faste kontroller. Du vurderer de få funnene som gjenstår og signerer et kontrollbevis.",
+      "description": "Rettført kontrollerer regnskapet før du godkjenner perioden. SAF-T, bank, lønn og bilag går gjennom 36 faste kontroller. Du vurderer de få funnene som gjenstår og signerer et kontrollbevis.",
       "creator": {
         "@id": "https://xn--rettfrt-u1a.no/#mohamad-bokdasji"
       }
@@ -135,12 +135,12 @@ input,textarea{font-family:inherit}
     <div style="animation:rfIn .7s ease both">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:15px;color:#586174"><span style="font-size:12.5px;font-weight:600;color:#0B2545;background:#F6DF6E;padding:3px 10px;border-radius:99px">Tidlig versjon</span>Et ekstra kontrollag før godkjenning</div>
       <h1 style="font-size:clamp(42px,5.4vw,70px);line-height:1.02;letter-spacing:-0.035em;font-weight:600;margin:22px 0 0;text-wrap:balance">Se det som fortjener <span style="background:linear-gradient(transparent 60%,#F6DF6E 60%,#F6DF6E 92%,transparent 92%)">en ekstra vurdering.</span></h1>
-      <p style="font-size:19px;line-height:1.55;color:#3D4759;margin:26px 0 0;max-width:540px;text-wrap:pretty">Før en periode lukkes, må tusenvis av posteringer sjekkes på nytt. Rettført leser SAF-T, bank, lønn og bilag, kjører 32 faste kontroller og viser bare de få forholdene som trenger din vurdering. Du vurderer, dokumenterer og signerer i ett kontrollbevis.</p>
+      <p style="font-size:19px;line-height:1.55;color:#3D4759;margin:26px 0 0;max-width:540px;text-wrap:pretty">Før en periode lukkes, må tusenvis av posteringer sjekkes på nytt. Rettført leser SAF-T, bank, lønn og bilag, kjører 36 faste kontroller og viser bare de få forholdene som trenger din vurdering. Du vurderer, dokumenterer og signerer i ett kontrollbevis.</p>
       <div style="display:flex;gap:10px;margin-top:38px;flex-wrap:wrap">
         <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:16px;font-weight:500;padding:14px 22px;border-radius:9px;display:flex;align-items:center;gap:10px" style-hover="background:#16345E">Prøv Rettført {{ iArrow }}</button>
         <button onClick="{{ toUpload }}" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;font-size:16px;padding:14px 22px;border-radius:9px" style-hover="border-color:#A9A294">Last opp egen fil</button>
       </div>
-      <div style="margin-top:40px;display:flex;gap:28px;font-size:14px;color:#586174;flex-wrap:wrap"><span>SAF-T fra fem regnskapssystemer</span><span>32 faste kontroller</span><span>Kontrollbevis med signering</span><span>Råfilene lastes ikke opp</span></div>
+      <div style="margin-top:40px;display:flex;gap:28px;font-size:14px;color:#586174;flex-wrap:wrap"><span>SAF-T fra fem regnskapssystemer</span><span>36 faste kontroller</span><span>Kontrollbevis med signering</span><span>Råfilene lastes ikke opp</span></div>
     </div>
 
     <div style="position:relative;animation:rfIn .9s .15s ease both">
@@ -1277,7 +1277,7 @@ class Component extends DCLogic {
 
     // controls catalogue
     const stMap = { ok: ['Bestått', C.grn, C.grnBg], avvik: ['Avvik', '#8E5A0F', '#FAEDD3'], ikke: ['Ikke kjørt', C.mut, '#ECE8DF'] };
-    const ctrlGroups = [['regnskap', 'Regnskap', 'SAF-T Financial'], ['lonn', 'Lønn', 'To lønnsperioder'], ['kryss', 'Lønn × regnskap', 'SAF-T og lønn for samme måned'], ['revisjon', 'Revisjonsblikk', 'Risikobasert utvelgelse']].map(([a, t, sub]) => ({ t, s: sub, items: ctrls.filter(c => c.area === a).map(c => { const m = stMap[c.status] || stMap.ikke; const rw = rc && rc.rows ? rc.rows.find(x => x.id === c.id) : null; return { ...c, stL: c.status === 'avvik' ? `${c.count} avvik` : rw && rw.status === 'innenfor' ? 'Innenfor toleranse' : m[0], stC: m[1], stBg: m[2] }; }) }));
+    const ctrlGroups = [['bank', 'Bank', 'Kontoutskrift og SAF-T'], ['bilag', 'Bilag', 'PDF, bilder og EHF'], ['regnskap', 'Regnskap', 'SAF-T Financial'], ['lonn', 'Lønn', 'To lønnsperioder'], ['kryss', 'Lønn × regnskap', 'SAF-T og lønn for samme måned'], ['revisjon', 'Revisjonsblikk', 'Risikobasert utvelgelse']].map(([a, t, sub]) => ({ t, s: sub, items: ctrls.filter(c => c.area === a).map(c => { const m = stMap[c.status] || stMap.ikke; const rw = rc && rc.rows ? rc.rows.find(x => x.id === c.id) : null; return { ...c, stL: c.status === 'avvik' ? `${c.count} avvik` : rw && rw.status === 'innenfor' ? 'Innenfor toleranse' : m[0], stC: m[1], stBg: m[2] }; }) }));
 
     // plans
     const PF = [['Regnskapskontroll via SAF-T', [1, 1, 1]], ['Funn med sporing til kilde', [1, 1, 1]], ['Analyse lokalt i nettleseren', [1, 1, 1]], ['Bankavstemming og bilagsleser', [0, 1, 1]], ['Lønn mot regnskap', [0, 1, 1]], ['Vurdering med kommentar per funn', [0, 1, 1]], ['Assistent med kilder', [0, 1, 1]], ['Kontrollbevis med signering', [0, 1, 1]], ['Eksport av rapport (CSV og PDF)', [0, 1, 1]], ['Portefølje med flere klienter', [0, 0, 1]], ['Egne terskler per kunde', [0, 0, 1]], ['Prioritert support', [0, 0, 1]]];
@@ -1324,7 +1324,7 @@ class Component extends DCLogic {
       s1Walk: s.slikSeen ? 'rfWalk 2.2s ease-out both' : 'none', s1Tray: s.slikSeen ? 'rfTray 2.2s ease both' : 'none', s2Lean: s.slikSeen ? 'rfLean 6s ease-in-out infinite' : 'none', s3Nod: s.slikSeen ? 'rfNod 5s ease-in-out infinite' : 'none',
       scanRows: [0, 1, 2, 3, 4, 5].map(i => { const EX = ['Mulig dobbeltføring', 'Lønn etter sluttdato', 'AGA-differanse', 'Uvanlig stort beløp', 'Endret bankkonto']; const b = s.ex % 2 ? 'B' : '', D = ' 3s ease both'; if (i === 3) return { t: EX[s.ex], an: `rfIn2${b}${D}`, tan: `rfTin${b}${D}`, kan: 'rfKno 1s both' }; if (i === 2) return { t: EX[(s.ex + 4) % 5], an: `rfOut2${b}${D}`, tan: `rfTout${b}${D}`, kan: `rfKin${b}${D}` }; return { t: '', an: 'none', tan: 'none', kan: 'none' }; }), scanAn: `rfScrl${s.ex % 2 ? 'B' : ''} 3s ease both`,
       ex3t: ['Mulig dobbeltføring', 'Lønn etter sluttdato', 'Arbeidsgiveravgift', 'Programvare 950 000 kr', 'Endret bankkonto'][s.ex], ex3d: ['Faktura 48213 ført to ganger. Bilag 1211 kreditert.', 'Sluttoppgjør avtalt 12.08. Avtale lagt ved.', 'Fri bil manglet i grunnlaget. Korrigert i oktober.', 'Årslisens 2026–2027. Periodiseres over 12 mnd.', 'Ringt Amir Khalil 24.09. Ny konto er riktig.'][s.ex], ex3o: ['Rettet', 'Forventet avvik', 'Rettet', 'Krever oppfølging', 'Forventet avvik'][s.ex],
-      ctrlCards: [['regnskap', 'Regnskap', 'Bilag, MVA og perioder i SAF-T.', ['balanse', 'duplikat', 'mvaber']], ['lonn', 'Lønn', 'Endringer mellom to lønnsperioder.', ['sluttdato', 'bankkonto', 'endring-lonn']], ['kryss', 'Lønn × regnskap', 'Lønnsfilen avstemt mot hovedboken.', ['avst-brutto', 'avst-skatt', 'avst-aga']], ['revisjon', 'Revisjonsblikk', 'Poster som kan fortjene nærmere kontroll.', ['uvanlig', 'runde', 'tekst']]].map(([a, t, d, ids], i) => { const all = cat.filter(c => c.area === a); const ex = ids.map(id => all.find(c => c.id === id)).filter(Boolean); return { t, d, n: E ? `${all.length} kontroller` : '', ex: ex.map(c => ({ t: c.t })), more: all.length > ex.length ? `og ${all.length - ex.length} til` : '', mobileClass: i ? 'rf-ctrl-extra' : '' }; }),
+      ctrlCards: [['regnskap', 'Regnskap', 'Bilag, MVA og perioder i SAF-T.', ['balanse', 'duplikat', 'mvaber']], ['lonn', 'Lønn', 'Endringer mellom to lønnsperioder.', ['sluttdato', 'bankkonto', 'endring-lonn']], ['kryss', 'Lønn × regnskap', 'Lønnsfilen avstemt mot hovedboken.', ['avst-brutto', 'avst-skatt', 'avst-aga']], ['revisjon', 'Revisjonsblikk', 'Poster som kan fortjene nærmere kontroll.', ['uvanlig', 'runde', 'tekst']], ['bank', 'Bank', 'Kontoutskriften avstemt mot hovedboken.', ['bank-saldo', 'bank-poster']], ['bilag', 'Bilag', 'PDF, bilder og EHF sammenlignet med bokføringen.', ['bilag-bokforing', 'bilag-innhold']]].map(([a, t, d, ids], i) => { const all = cat.filter(c => c.area === a); const ex = ids.map(id => all.find(c => c.id === id)).filter(Boolean); return { t, d, n: E ? `${all.length} kontroller` : '', ex: ex.map(c => ({ t: c.t })), more: all.length > ex.length ? `og ${all.length - ex.length} til` : '', mobileClass: i ? 'rf-ctrl-extra' : '' }; }),
       ctrlSectionClass: s.ctrlExpanded ? 'rf-ctrl-expanded' : '', ctrlExpanded: !!s.ctrlExpanded, ctrlToggle: () => this.setState(st => ({ ctrlExpanded: !st.ctrlExpanded })), ctrlToggleLabel: s.ctrlExpanded ? 'Vis færre' : 'Vis alle kontrollområder', ctrlToggleArrow: s.ctrlExpanded ? '↑' : '↓',
       nCtrl: E ? String(cat.length) : '', nR: E ? String(nBy('regnskap')) : '', nL: E ? String(nBy('lonn')) : '', nK: E ? String(nBy('kryss')) : '', heroLinesAll: fmt(hLines),
       pg_recon: s.page === 'recon', pg_settings: s.page === 'settings', toSettings: set({ screen: 'app', page: 'settings' }),
@@ -1484,7 +1484,7 @@ class Component extends DCLogic {
   var STARTERS = ['Hva gjør Rettført?', 'Hvilke regnskapssystemer støttes?', 'Lastes filene mine opp?', 'Hvordan prøver jeg demoen?'];
   // Brukes bare hvis assistenten ikke svarer.
   var CANNED = {
-    'Hva gjør Rettført?': 'Rettført er et kontrollag du bruker før du godkjenner en periode. Det leser SAF-T, bank, lønn og bilag, kjører 32 faste kontroller og viser de få forholdene som bør vurderes. Du ser hvorfor hvert funn ble flagget, tar selv den endelige vurderingen og signerer et kontrollbevis.',
+    'Hva gjør Rettført?': 'Rettført er et kontrollag du bruker før du godkjenner en periode. Det leser SAF-T, bank, lønn og bilag, kjører 36 faste kontroller og viser de få forholdene som bør vurderes. Du ser hvorfor hvert funn ble flagget, tar selv den endelige vurderingen og signerer et kontrollbevis.',
     'Hvilke regnskapssystemer støttes?': 'Alle som kan eksportere SAF-T Financial (1.30 eller 1.20). Det gjelder blant annet Tripletex, PowerOffice Go, Fiken, Visma og Xledger. Lønn leses som CSV.',
     'Lastes filene mine opp?': 'Nei. SAF-T- og CSV-filene leses i nettleseren din og lastes ikke opp. Bruker du assistenten i demoen, sendes bare opplysningene fra funnet du ser på.',
     'Hvordan prøver jeg demoen?': 'Trykk «Prøv Rettført». Demoen åpner uten innlogging, med fiktive data for Nordhavn Drift AS. Det finnes også en guidet omvisning på omtrent to minutter.'

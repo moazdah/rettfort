@@ -44,7 +44,7 @@ for (const c of CASES) {
   if (filter && !c.id.includes(filter) && !c.group.includes(filter)) continue;
   let input;
   try { input = c.build(); } catch (e) { results.push({ ...meta(c), status: 'FEIL I TEST', notes: ['build: ' + e.message] }); continue; }
-  const payload = { saft: input.saft, prev: input.prev, curr: input.curr, settings: input.settings, grounded: input.grounded };
+  const payload = { saft: input.saft, prev: input.prev, curr: input.curr, settings: input.settings, grounded: input.grounded, bank: input.bank, docs: input.docs };
   if (input.saftBytes) payload.saftB64 = b64(input.saftBytes);
   if (input.prevBytes) payload.prevB64 = b64(input.prevBytes);
   if (input.currBytes) payload.currB64 = b64(input.currBytes);

@@ -128,3 +128,46 @@ export function toCsv(rows, period, f = {}) {
   const line = e => { const g = e.grossOverride ?? empGross(e), t = e.taxOverride ?? empTax(e); return [e.id, e.name, e.period || period, e.pct, dt(e.start), dt(e.end || ''), e.bank, N(e.fast), N(e.ot_t), N(e.ot), N(e.bonus || 0), N(t), N(g), N(e.netOverride ?? r2(g - t))].map(q).join(D); };
   return [(f.pre || []).join('\n'), H.join(D), ...rows.map(line), ...(f.extraRows || [])].filter(x => x !== '').join(f.eol || '\n');
 }
+
+// ── Bank ───────────────────────────────────────────────────────────────
+// Banklinjer ut fra bokføringen: netto per bilag på bankkontoen.
+export function bankLines(M, acc = '1920', from = M.start, to = M.end) {
+  return M.txs.filter(t => t.date >= from && t.date <= to).map(t => ({ date: t.date, text: t.desc, amount: Math.round(t.lines.filter(l => l.acc === acc).reduce((a, l) => a + (l.d || 0) - (l.c || 0), 0) * 100) / 100 })).filter(x => Math.abs(x.amount) > 0.004).sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+}
+export const openingAt = (M, acc, date) => Math.round(((M.open || {})[acc] || 0) * 100 + M.txs.filter(t => t.date < date).reduce((a, t) => a + t.lines.filter(l => l.acc === acc).reduce((x, l) => x + ((l.d || 0) - (l.c || 0)) * 100, 0), 0)) / 100;
+const nok = n => Number(n).toLocaleString('nb-NO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/ | /g, ' ');
+const ddmm = s => `${s.slice(8, 10)}.${s.slice(5, 7)}.${s.slice(0, 4)}`;
+// DNB: nyeste først, uttak og innskudd i hver sin kolonne.
+export function bankCsvDnb(lines) {
+  return ['"Dato";"Forklaring";"Rentedato";"Uttak";"Innskudd"', ...lines.slice().reverse().map(l => [ddmm(l.date), l.text, ddmm(l.vdate || l.date), l.amount < 0 ? nok(-l.amount) : '', l.amount > 0 ? nok(l.amount) : ''].map(v => `"${v}"`).join(';'))].join('\r\n');
+}
+// Nordea: fortegn på beløp, saldo per linje.
+export function bankCsvNordea(lines, opening) {
+  let bal = opening;
+  return ['Bokføringsdato;Beløp;Avsender;Mottaker;Navn;Tittel;Saldo;Valuta', ...lines.map(l => { bal = Math.round((bal + l.amount) * 100) / 100; return [l.date.replace(/-/g, '/'), String(l.amount).replace('.', ','), '', '', '', l.text, String(bal).replace('.', ','), 'NOK'].join(';'); })].join('\n');
+}
+export function camt053(lines, { opening, from, to, account = 'NO9315031234561' }) {
+  const closing = Math.round((opening + lines.reduce((a, l) => a + l.amount, 0)) * 100) / 100;
+  const bal = (cd, a, d) => `<Bal><Tp><CdOrPrtry><Cd>${cd}</Cd></CdOrPrtry></Tp><Amt Ccy="NOK">${Math.abs(a).toFixed(2)}</Amt><CdtDbtInd>${a < 0 ? 'DBIT' : 'CRDT'}</CdtDbtInd><Dt><Dt>${d}</Dt></Dt></Bal>`;
+  const ntry = l => `<Ntry><Amt Ccy="NOK">${Math.abs(l.amount).toFixed(2)}</Amt><CdtDbtInd>${l.amount < 0 ? 'DBIT' : 'CRDT'}</CdtDbtInd><Sts><Cd>BOOK</Cd></Sts><BookgDt><Dt>${l.date}</Dt></BookgDt><ValDt><Dt>${l.date}</Dt></ValDt><AddtlNtryInf>${l.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</AddtlNtryInf><NtryDtls><TxDtls><RmtInf><Ustrd>${l.text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</Ustrd></RmtInf></TxDtls></NtryDtls></Ntry>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02"><BkToCstmrStmt><GrpHdr><MsgId>1</MsgId><CreDtTm>${to}T23:59:00</CreDtTm></GrpHdr><Stmt><Id>1</Id><FrToDt><FrDtTm>${from}T00:00:00</FrDtTm><ToDtTm>${to}T23:59:59</ToDtTm></FrToDt><Acct><Id><IBAN>${account}</IBAN></Id><Ccy>NOK</Ccy></Acct>${bal('OPBD', opening, from)}${bal('CLBD', closing, to)}${lines.map(ntry).join('')}</Stmt></BkToCstmrStmt></Document>`;
+}
+
+// ── Bilag ──────────────────────────────────────────────────────────────
+// Faktura-felt ut fra en bokført leverandørfaktura.
+export function invoiceOf(M, t) {
+  const ap = t.lines.find(l => /^24/.test(l.acc)), vat = t.lines.filter(l => l.acc === '2710').reduce((a, l) => a + (l.d || 0), 0);
+  const sup = (M.suppliers.find(s => s[0] === ap.sup) || [ap.sup, ap.sup])[1];
+  return { invoiceNo: ap.ref, date: t.date, dueDate: t.date, supplier: sup, orgNo: '9' + String(8000000 + (ap.sup || 'X').charCodeAt(1) * 1111).padStart(8, '0').slice(0, 8), total: ap.c, vat: Math.round(vat * 100) / 100, net: Math.round((ap.c - vat) * 100) / 100, description: t.desc, kid: '00' + ap.ref + '7' };
+}
+export function ehf(f, { credit = false } = {}) {
+  const tag = credit ? 'CreditNote' : 'Invoice';
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<${tag} xmlns="urn:oasis:names:specification:ubl:schema:xsd:${tag}-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"><cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID><cbc:ID>${f.invoiceNo}</cbc:ID><cbc:IssueDate>${f.date}</cbc:IssueDate>${credit ? '' : `<cbc:DueDate>${f.dueDate}</cbc:DueDate>`}<cbc:DocumentCurrencyCode>NOK</cbc:DocumentCurrencyCode><cac:AccountingSupplierParty><cac:Party><cac:PartyName><cbc:Name>${f.supplier}</cbc:Name></cac:PartyName><cac:PartyTaxScheme><cbc:CompanyID>NO${f.orgNo}MVA</cbc:CompanyID><cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:PartyTaxScheme><cac:PartyLegalEntity><cbc:RegistrationName>${f.supplier}</cbc:RegistrationName><cbc:CompanyID>${f.orgNo}</cbc:CompanyID></cac:PartyLegalEntity></cac:Party></cac:AccountingSupplierParty><cac:AccountingCustomerParty><cac:Party><cac:PartyLegalEntity><cbc:RegistrationName>Stresstest Drift AS</cbc:RegistrationName></cac:PartyLegalEntity></cac:Party></cac:AccountingCustomerParty><cac:PaymentMeans><cbc:PaymentMeansCode>30</cbc:PaymentMeansCode><cbc:PaymentID>${f.kid}</cbc:PaymentID><cac:PayeeFinancialAccount><cbc:ID>15031234599</cbc:ID></cac:PayeeFinancialAccount></cac:PaymentMeans><cac:TaxTotal><cbc:TaxAmount currencyID="NOK">${f.vat.toFixed(2)}</cbc:TaxAmount></cac:TaxTotal><cac:LegalMonetaryTotal><cbc:TaxExclusiveAmount currencyID="NOK">${f.net.toFixed(2)}</cbc:TaxExclusiveAmount><cbc:TaxInclusiveAmount currencyID="NOK">${f.total.toFixed(2)}</cbc:TaxInclusiveAmount><cbc:PayableAmount currencyID="NOK">${f.total.toFixed(2)}</cbc:PayableAmount></cac:LegalMonetaryTotal><cac:${tag}Line><cbc:ID>1</cbc:ID><cac:Item><cbc:Name>${f.description}</cbc:Name></cac:Item></cac:${tag}Line></${tag}>`;
+}
+// Fakturatekst slik den kommer ut av en PDF eller bildegjenkjenning.
+export function invoiceText(f, o = {}) {
+  const L = [f.supplier, 'Havnegata 12, 5003 Bergen', o.noOrg ? '' : `Org.nr: NO ${f.orgNo.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3')} MVA`, '', 'FAKTURA', o.noNo ? '' : `Fakturanummer: ${f.invoiceNo}`, `Fakturadato: ${ddmm(f.date)}`, `Forfallsdato: ${ddmm(f.dueDate)}`, 'Kunde: Stresstest Drift AS', '', `${f.description}   ${nok(f.net)}`, `Sum eks. mva   ${nok(f.net)}`, `MVA 25 %   ${nok(f.vat)}`, `Å betale   ${nok(f.total)}`, '', `KID: ${f.kid}`, 'Kontonummer: 1503 12 34599'].filter(x => x !== null);
+  let t = L.join('\n');
+  if (o.ocr) t = t.replace(/0/g, (m, i) => i % 7 === 0 ? 'O' : m).replace(/Fakturanummer/, 'Fakturanurnmer');
+  return t;
+}

@@ -79,7 +79,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 6,
+    "ms": 7,
     "error": null,
     "fails": [],
     "passes": [
@@ -103,7 +103,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 4,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -128,7 +128,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 4,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -226,7 +226,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -251,7 +251,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 4,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -276,7 +276,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 4,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -300,7 +300,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 4,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -324,7 +324,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -348,7 +348,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 4,
+    "ms": 6,
     "error": null,
     "fails": [],
     "passes": [
@@ -372,7 +372,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 4,
+    "ms": 7,
     "error": null,
     "fails": [],
     "passes": [
@@ -397,7 +397,7 @@
     "severity": "lav",
     "accepted": "Beløp delelig med 500 gir for mange falske alarmer. Fanges i stedet av «store endringer» når beløpet er stort nok.",
     "status": "AKSEPTERT",
-    "ms": 3,
+    "ms": 5,
     "error": null,
     "fails": [
       {
@@ -421,7 +421,7 @@
     "severity": "lav",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 6,
     "error": null,
     "fails": [],
     "passes": [
@@ -445,7 +445,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 6,
     "error": null,
     "fails": [],
     "passes": [
@@ -469,7 +469,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -493,7 +493,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 6,
     "error": null,
     "fails": [],
     "passes": [
@@ -517,7 +517,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 6,
     "error": null,
     "fails": [],
     "passes": [
@@ -637,7 +637,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -710,7 +710,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -735,7 +735,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -762,7 +762,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -962,7 +962,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 4,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1034,7 +1034,7 @@
     "severity": "lav",
     "accepted": "Kobling på bare etternavn er for usikker: mange ansatte og leverandører deler etternavn.",
     "status": "AKSEPTERT",
-    "ms": 3,
+    "ms": 4,
     "error": null,
     "fails": [
       {
@@ -1173,7 +1173,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -1254,7 +1254,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 5,
+    "ms": 6,
     "error": null,
     "fails": [],
     "passes": [
@@ -1582,14 +1582,14 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 4,
+    "ms": 6,
     "error": null,
     "fails": [],
     "passes": [
       {
         "kind": "survives",
         "label": "Tåler ikke filen",
-        "detail": "4 ms, analysert"
+        "detail": "6 ms, analysert"
       }
     ],
     "invariants": [],
@@ -1626,7 +1626,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 4,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -1651,14 +1651,14 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 608,
+    "ms": 646,
     "error": null,
     "fails": [],
     "passes": [
       {
         "kind": "survives",
         "label": "Tåler ikke filen",
-        "detail": "608 ms, analysert"
+        "detail": "646 ms, analysert"
       }
     ],
     "invariants": [],
@@ -1700,14 +1700,14 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 5049,
+    "ms": 5200,
     "error": null,
     "fails": [],
     "passes": [
       {
         "kind": "survives",
         "label": "Tåler ikke filen",
-        "detail": "5049 ms, analysert"
+        "detail": "5200 ms, analysert"
       }
     ],
     "invariants": [],
@@ -1749,14 +1749,14 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 404,
+    "ms": 374,
     "error": null,
     "fails": [],
     "passes": [
       {
         "kind": "survives",
         "label": "Tåler ikke filen",
-        "detail": "404 ms, analysert"
+        "detail": "374 ms, analysert"
       }
     ],
     "invariants": [],
@@ -1775,7 +1775,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 7,
     "error": null,
     "fails": [],
     "passes": [
@@ -1819,7 +1819,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -1841,7 +1841,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 3,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -1925,6 +1925,540 @@
         "kind": "none",
         "label": "Falskt funn",
         "detail": ""
+      }
+    ],
+    "invariants": [],
+    "nFindings": 0,
+    "findings": []
+  },
+  {
+    "id": "BK00",
+    "group": "bank",
+    "title": "Kontoutskrift fra DNB (CSV) som stemmer",
+    "planted": "Ingen feil. Nyeste først, uttak og innskudd i hver sin kolonne, norske tall.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 4,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "custom",
+        "label": "Falske funn",
+        "detail": "ingen bankfunn"
+      },
+      {
+        "kind": "status",
+        "label": "Feil status",
+        "detail": "bank-poster: ok (forventet ok)"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 0,
+    "findings": []
+  },
+  {
+    "id": "BK01",
+    "group": "bank",
+    "title": "Kontoutskrift fra Nordea (CSV) med saldo",
+    "planted": "Ingen feil. Fortegn på beløp, saldo per linje, dato med skråstrek.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 3,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "custom",
+        "label": "Falske funn",
+        "detail": "ingen bankfunn"
+      },
+      {
+        "kind": "status",
+        "label": "Feil status",
+        "detail": "bank-saldo: ok (forventet ok)"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 0,
+    "findings": []
+  },
+  {
+    "id": "BK02",
+    "group": "bank",
+    "title": "CAMT.053 som stemmer",
+    "planted": "Ingen feil. Bankenes XML-standard med inngående og utgående saldo.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 3,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "custom",
+        "label": "Falske funn",
+        "detail": "ingen bankfunn"
+      },
+      {
+        "kind": "status",
+        "label": "Feil status",
+        "detail": "bank-saldo: ok (forventet ok)"
+      },
+      {
+        "kind": "status",
+        "label": "Feil status",
+        "detail": "bank-poster: ok (forventet ok)"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 0,
+    "findings": []
+  },
+  {
+    "id": "BK03",
+    "group": "bank",
+    "title": "Bankgebyr som ikke er bokført",
+    "planted": "Banken har trukket 350 kr i gebyr 29.09. Det er ikke bokført.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "1 transaksjon i banken er ikke bokført"
+      },
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "Bank og hovedbok stemmer ikke per 30.09.2026"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 2,
+    "findings": [
+      "[bank-poster] 1 transaksjon i banken er ikke bokført",
+      "[bank-saldo] Bank og hovedbok stemmer ikke per 30.09.2026"
+    ]
+  },
+  {
+    "id": "BK04",
+    "group": "bank",
+    "title": "Bokført betaling som ikke er i banken",
+    "planted": "En utbetaling på 10 000 kr er bokført på bank, men finnes ikke i kontoutskriften.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "1 bokførte bankposteringer finnes ikke i banken"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 2,
+    "findings": [
+      "[bank-poster] 1 bokførte bankposteringer finnes ikke i banken",
+      "[bank-saldo] Bank og hovedbok stemmer ikke per 30.09.2026"
+    ]
+  },
+  {
+    "id": "BK05",
+    "group": "bank",
+    "title": "Betaling med feil beløp",
+    "planted": "Én betaling er 100 kr høyere i banken enn i regnskapet.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "1 transaksjon i banken er ikke bokført"
+      },
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "1 bokførte bankposteringer finnes ikke i banken"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 3,
+    "findings": [
+      "[bank-poster] 1 transaksjon i banken er ikke bokført",
+      "[bank-poster] 1 bokførte bankposteringer finnes ikke i banken",
+      "[bank-saldo] Bank og hovedbok stemmer ikke per 30.09.2026"
+    ]
+  },
+  {
+    "id": "BK06",
+    "group": "bank",
+    "title": "Banken bokfører 3 dager senere",
+    "planted": "Alle banktransaksjoner har dato 3 dager etter bokføringen. Ingen feil.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 3,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "custom",
+        "label": "Falske funn",
+        "detail": "1 bokførte bankposteringer finnes ikke i banken"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 2,
+    "findings": [
+      "[bank-poster] 1 bokførte bankposteringer finnes ikke i banken",
+      "[bank-saldo] Bank og hovedbok stemmer ikke per 30.09.2026"
+    ]
+  },
+  {
+    "id": "BK07",
+    "group": "bank",
+    "title": "Kontoutskrift bare for september",
+    "planted": "Regnskapet dekker juli–september, kontoutskriften bare september. Ingen feil.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "custom",
+        "label": "Falske funn",
+        "detail": "ingen bankfunn"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 0,
+    "findings": []
+  },
+  {
+    "id": "BK08",
+    "group": "bank",
+    "title": "Feil inngående saldo i banken",
+    "planted": "Postene stemmer, men banken har 5 000 kr mer i saldo enn hovedboken.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "Bank og hovedbok stemmer ikke per 30.09.2026"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 1,
+    "findings": [
+      "[bank-saldo] Bank og hovedbok stemmer ikke per 30.09.2026"
+    ]
+  },
+  {
+    "id": "BK09",
+    "group": "bank",
+    "title": "Lønnsfil valgt som kontoutskrift",
+    "planted": "Brukeren har valgt lønnsfilen under «Bankutskrift».",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": "Bank: Fant ikke kolonnene for dato og beløp. Er dette en kontoutskrift fra nettbanken? Første linje: «ansattnummer,navn,periode,stillingsprosent,startdato,sluttdato,bankkonto,fastlon».",
+    "fails": [],
+    "passes": [
+      {
+        "kind": "throws",
+        "label": "Mangler tydelig feilmelding",
+        "detail": "Melding: «Bank: Fant ikke kolonnene for dato og beløp. Er dette en kontoutskrift fra nettbanken? Første linje: «ansattnummer,navn,periode,stillingsprosent,startdato,sluttdato,bankkonto,fastlon».»"
+      }
+    ],
+    "invariants": [],
+    "nFindings": null,
+    "findings": []
+  },
+  {
+    "id": "BK10",
+    "group": "bank",
+    "title": "Bank på 5-sifret konto",
+    "planted": "Kontoplanen bruker 19200. Ingen feil.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "custom",
+        "label": "Falske funn",
+        "detail": "ok"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 0,
+    "findings": []
+  },
+  {
+    "id": "BI00",
+    "group": "bilag",
+    "title": "EHF-fakturaer som stemmer med bokføringen",
+    "planted": "Alle leverandørfakturaer i september som EHF. Ingen feil.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 5,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "custom",
+        "label": "Falske funn",
+        "detail": "ingen bilagsfunn"
+      },
+      {
+        "kind": "status",
+        "label": "Feil status",
+        "detail": "bilag-bokforing: ok (forventet ok)"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 0,
+    "findings": []
+  },
+  {
+    "id": "BI01",
+    "group": "bilag",
+    "title": "Faktura med høyere beløp enn bokført",
+    "planted": "EHF-fakturaen er på 2 000 kr mer enn det som er bokført.",
+    "severity": "hoy",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "Beløpet på bilaget avviker fra bokføringen · bilag 60"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 1,
+    "findings": [
+      "[bilag-bokforing] Beløpet på bilaget avviker fra bokføringen · bilag 60"
+    ]
+  },
+  {
+    "id": "BI02",
+    "group": "bilag",
+    "title": "Faktura som ikke er bokført",
+    "planted": "En EHF-faktura fra september finnes ikke i regnskapet.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "Bilaget finnes ikke i regnskapet · ny.xml"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 1,
+    "findings": [
+      "[bilag-bokforing] Bilaget finnes ikke i regnskapet · ny.xml"
+    ]
+  },
+  {
+    "id": "BI03",
+    "group": "bilag",
+    "title": "PDF-fakturaer (tekst) som stemmer",
+    "planted": "Fakturaene som tekst slik pdf.js henter den ut. Ingen feil.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 5,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "custom",
+        "label": "Falske funn",
+        "detail": "ingen bilagsfunn"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 0,
+    "findings": []
+  },
+  {
+    "id": "BI04",
+    "group": "bilag",
+    "title": "Bildegjenkjenning med typiske OCR-feil",
+    "planted": "Fakturaen er fotografert: «0» leses som «O» i tall, «m» som «rn». Ingen feil i selve fakturaen.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "none",
+        "label": "Falskt funn",
+        "detail": ""
+      },
+      {
+        "kind": "none",
+        "label": "Falskt funn",
+        "detail": ""
+      }
+    ],
+    "invariants": [],
+    "nFindings": 0,
+    "findings": []
+  },
+  {
+    "id": "BI05",
+    "group": "bilag",
+    "title": "Faktura uten org.nr. og fakturanummer",
+    "planted": "PDF-fakturaen mangler organisasjonsnummer og fakturanummer.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 3,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "Mangler pliktige opplysninger · mangler.pdf"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 1,
+    "findings": [
+      "[bilag-innhold] Mangler pliktige opplysninger · mangler.pdf"
+    ]
+  },
+  {
+    "id": "BI06",
+    "group": "bilag",
+    "title": "MVA på fakturaen avviker fra bokført MVA",
+    "planted": "Fakturaen har 25 % MVA, men det er bokført 20 % (MVA regnet av beløp inkl. MVA).",
+    "severity": "hoy",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "Beløpet på bilaget avviker fra bokføringen · bilag 75"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 3,
+    "findings": [
+      "[mvaber] MVA stemmer ikke med grunnlaget · bilag 75",
+      "[endring] 4300 Innkjøp varer økte 55 % i september 2026",
+      "[bilag-bokforing] Beløpet på bilaget avviker fra bokføringen · bilag 75"
+    ]
+  },
+  {
+    "id": "BI07",
+    "group": "bilag",
+    "title": "Tomt eller uleselig bilag",
+    "planted": "Et skannet bilde der gjenkjenningen ikke fant tekst.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "custom",
+        "label": "Uleselig bilag uten beskjed",
+        "detail": "Bilaget «svart.jpg» kunne ikke leses. Last opp PDF med tekst, et tydeligere bilde eller EHF."
+      }
+    ],
+    "invariants": [],
+    "nFindings": 0,
+    "findings": []
+  },
+  {
+    "id": "BI08",
+    "group": "bilag",
+    "title": "Bilag uten SAF-T",
+    "planted": "Brukeren laster bare opp bilag. Innholdet skal kontrolleres, sammenligning med bokføring står som «ikke kjørt».",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 0,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "status",
+        "label": "Feil status",
+        "detail": "bilag-bokforing: ikke (forventet ikke)"
+      },
+      {
+        "kind": "find",
+        "label": "Ikke oppdaget",
+        "detail": "Mangler pliktige opplysninger · f.pdf"
+      }
+    ],
+    "invariants": [],
+    "nFindings": 1,
+    "findings": [
+      "[bilag-innhold] Mangler pliktige opplysninger · f.pdf"
+    ]
+  },
+  {
+    "id": "BI09",
+    "group": "bilag",
+    "title": "Kreditnota i EHF",
+    "planted": "Kreditnota for en bokført faktura, bokført som debet på leverandørgjeld. Ingen feil.",
+    "severity": "middels",
+    "accepted": null,
+    "status": "OK",
+    "ms": 2,
+    "error": null,
+    "fails": [],
+    "passes": [
+      {
+        "kind": "custom",
+        "label": "Falske funn",
+        "detail": "ingen"
       }
     ],
     "invariants": [],

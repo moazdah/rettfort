@@ -1,5 +1,9 @@
 # Stresstest av kontrollmotoren – rapport
 
+> **Bank og bilag (nytt):** 21 nye tilfeller (BK00–BK10, BI00–BI09): **alle OK**. Totalt 104 tilfeller: 102 OK, 2 akseptert, 0 avvik.
+> Kontoutskrifter leses som CSV (DNB, Nordea, SpareBank 1, Handelsbanken m.fl.) og CAMT.053. Bilag leses som EHF, PDF (pdf.js) og bilder/skannede PDF-er (Tesseract, norsk), alt i nettleseren.
+> Tekstgjenkjenning testet på realistiske mobilfoto (2–6° skjevhet, skygge, støy, 50 % oppløsning): alle fakturafelt lest riktig på 1–3 s etter at skjevhetsretting og skyggefjerning ble lagt inn (før: 100 s og feil).
+>
 > **Trinn 5 (koblet til demoen):** Opplastede filer analyseres nå av motoren i en egen tråd (`rettfort-worker.js`). Motoren har fått sin egen XML-leser fordi `DOMParser` ikke finnes i Web Workers; 190 000 linjer tar nå ca. 5 s (før 10 s). Bank, bilag og forrige periodes SAF-T er merket «Kommer senere» og brukes ikke.
 >
 > **Status etter retting (trinn 1–4):** 83 tilfeller: **81 OK, 2 akseptert, 0 avvik.** Motorens egne 21 tester er grønne. Rapporten under beskriver avvikene slik de var før retting.

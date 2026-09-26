@@ -3,7 +3,7 @@
 // nettleseren og forlater aldri maskinen.
 import * as E from './rettfort-engine.js';
 
-const AREA_L = { regnskap: 'Regnskap', revisjon: 'Revisjonsblikk', lonn: 'Lønn', kryss: 'Lønn × regnskap' };
+const AREA_L = { regnskap: 'Regnskap', revisjon: 'Revisjonsblikk', lonn: 'Lønn', kryss: 'Lønn × regnskap', bank: 'Bank', bilag: 'Bilag' };
 const SEV = { hoy: 'Høy', middels: 'Middels', lav: 'Lav' };
 const S = x => E.safeText(String(x ?? ''));
 const uniq = a => [...new Set(a.filter(Boolean))];
@@ -48,22 +48,23 @@ self.onmessage = ({ data }) => {
     let pay = (data.lonn || []).map(f => ({ name: f.name, text: dec(f, 'csv', 'Lønn') }));
     pay = pay.map(p => ({ ...p, period: periodOf(p.text) })).sort((a, b) => (a.period || '').localeCompare(b.period || ''));
     const curr = pay.length ? pay[pay.length - 1].text : undefined, prev = pay.length > 1 ? pay[0].text : undefined;
-    const r = E.analyze({ saft, prev, curr });
+    const bank = (data.bank || []).map((f, i) => dec(f, 'bank', 'Kontoutskrift'));
+    const r = E.analyze({ saft, prev, curr, bank, docs: data.docs || [] });
     const co = r.company || 'selskapet';
     const per = r.payPeriods ? r.payPeriods[1] : (r.end || '').slice(0, 7);
     const byArea = a => r.controls.filter(c => c.area === a);
     const own = {
-      company: r.company || (pay.length ? 'Lønnskontroll' : 'Eget selskap'), org: r.org || '',
+      company: r.company || (pay.length ? 'Lønnskontroll' : (data.docs || []).length ? 'Bilagskontroll' : 'Eget selskap'), org: r.org || '',
       start: r.start, end: r.end, periodL: E.monthName(per), monthL: E.monthName(per).split(' ')[0] || '',
       lines: r.stats.lines, emps: r.stats.emps,
       total: r.controls.length,
       ok: r.controls.filter(c => c.status === 'ok').length,
       notRun: r.controls.filter(c => c.status === 'ikke').length,
-      areas: ['regnskap', 'revisjon', 'lonn', 'kryss'].map(a => ({ t: AREA_L[a], n: byArea(a).length, ok: byArea(a).filter(c => c.status === 'ok').length, ikke: byArea(a).filter(c => c.status === 'ikke').length, okNames: byArea(a).filter(c => c.status === 'ok').map(c => c.t), ikkeNames: byArea(a).filter(c => c.status === 'ikke').map(c => c.t) })),
+      areas: ['regnskap', 'revisjon', 'lonn', 'kryss', 'bank', 'bilag'].map(a => ({ t: AREA_L[a], n: byArea(a).length, ok: byArea(a).filter(c => c.status === 'ok').length, ikke: byArea(a).filter(c => c.status === 'ikke').length, okNames: byArea(a).filter(c => c.status === 'ok').map(c => c.t), ikkeNames: byArea(a).filter(c => c.status === 'ikke').map(c => c.t) })),
       findings: r.findings.map((f, i) => mapFinding(f, i, r, co)),
       warnings: (r.warnings || []).map(w => `${w.fil}: ${w.tekst}${w.antall > 1 ? ` (${w.antall} tilfeller)` : ''}`),
       reconReason: r.recon && r.recon.reason ? r.recon.reason : '',
-      files: { saft: data.saft ? data.saft.name : '', lonn: pay.map(p => p.name) }
+      files: { saft: data.saft ? data.saft.name : '', lonn: pay.map(p => p.name), bank: (data.bank || []).map(f => f.name), bilag: (data.docs || []).length }
     };
     self.postMessage({ ok: true, own });
   } catch (e) {

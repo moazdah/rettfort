@@ -72,6 +72,10 @@ export const CONTROLS = [
   { id: 'avst-brutto', area: 'kryss', t: 'Avstemming av bruttolønn', d: 'Bruttolønn i lønnsfilen mot bokført lønn i SAF-T for samme måned. Feriepenger og periodiseringer holdes utenfor.', rule: 'Bokføringsloven § 4 og a-opplysningsloven § 4', th: 'Toleranse i innstillingene, standard 1 kr' },
   { id: 'avst-skatt', area: 'kryss', t: 'Avstemming av forskuddstrekk', d: 'Skatt i lønnsfilen mot kreditposteringer på forskuddstrekkontoen i lønnsbilagene. Betalinger til Skatteetaten holdes utenfor.', rule: 'Skattebetalingsloven kap. 5 (forskuddstrekk)', th: 'Toleranse i innstillingene, standard 1 kr' },
   { id: 'avst-aga', area: 'kryss', t: 'Avstemming av arbeidsgiveravgift', d: 'Arbeidsgiveravgift fra lønnsfilen, eller beregnet med valgt sone, mot bokført arbeidsgiveravgift.', rule: 'Folketrygdloven § 23-2', th: 'Toleranse i innstillingene, standard 5 kr' },
+  { id: 'bank-saldo', area: 'bank', t: 'Bank mot hovedbok', d: 'Saldoen på bankkontoen i hovedboken er lik saldoen i kontoutskriften på samme dag.', rule: 'Bokføringsloven § 4 og god bokføringsskikk (avstemming)', th: 'Differanse over 1 kr' },
+  { id: 'bank-poster', area: 'bank', t: 'Bankposter uten motpost', d: 'Transaksjoner i banken som ikke er bokført, og bokførte bankposteringer som ikke finnes i banken.', rule: 'Bokføringsloven § 4 (fullstendighet)', th: 'Samme beløp innen 10 dager' },
+  { id: 'bilag-bokforing', area: 'bilag', t: 'Bilag mot bokføring', d: 'Beløp, MVA og dato på fakturaen stemmer med det som er bokført, og fakturaen er bokført.', rule: 'Bokføringsloven § 10 (dokumentasjon)', th: 'Avvik over 1 kr' },
+  { id: 'bilag-innhold', area: 'bilag', t: 'Pliktige opplysninger på bilag', d: 'Fakturaen har nummer, dato, selger, organisasjonsnummer, beløp og MVA.', rule: 'Bokføringsforskriften § 5-1-1', th: 'Alle mangler, og felt lest med lav sikkerhet' },
   { id: 'fordel', area: 'kryss', t: 'Mulige skattepliktige fordeler', d: 'Kostnader med en ansatts navn og en mulig fordelstype i bilagsteksten, uten tilsvarende lønnsart i lønnsfilen samme måned.', rule: 'Skatteloven § 5-1 og a-opplysningsloven § 4', th: 'Fornavn, etternavn og fordelsord i teksten, ingen tilsvarende lønnsart' }
 ];
 
@@ -153,8 +157,8 @@ const all = (el, n) => el ? Array.from(el.getElementsByTagNameNS('*', n)) : [];
 
 // Kjenner igjen filer som ikke er tekst, og gir en melding brukeren forstår.
 const sniff = (t, kind) => {
-  const h = String(t).slice(0, 8), what = kind === 'csv' ? 'lønnsfilen (CSV)' : 'SAF-T-filen (.xml)';
-  if (/^PK\u0003\u0004/.test(h)) throw new Error(kind === 'csv' ? 'Dette er en Excel-fil (.xlsx), ikke CSV. Åpne den i Excel og velg Lagre som → CSV.' : 'Dette er en ZIP- eller Excel-fil. Velg SAF-T-filen (.xml). Er den pakket i en ZIP-fil, pakk den ut først.');
+  const h = String(t).slice(0, 8), what = kind === 'csv' ? 'lønnsfilen (CSV)' : kind === 'bank' ? 'kontoutskriften (CSV eller CAMT.053)' : 'SAF-T-filen (.xml)';
+  if (/^PK\u0003\u0004/.test(h)) throw new Error(kind === 'csv' || kind === 'bank' ? 'Dette er en Excel-fil (.xlsx), ikke CSV. Åpne den i Excel og velg Lagre som → CSV.' : 'Dette er en ZIP- eller Excel-fil. Velg SAF-T-filen (.xml). Er den pakket i en ZIP-fil, pakk den ut først.');
   if (/^%PDF/.test(h)) throw new Error(`Dette er en PDF-fil. Velg ${what}.`);
   if (/^(\u0089|\ufffd)PNG|^\u00ff\u00d8\u00ff|^GIF8/.test(h)) throw new Error(`Dette er et bilde. Velg ${what}.`);
   if (/\u0000/.test(String(t).slice(0, 4000))) throw new Error(`Filen inneholder binærdata og kan ikke leses. Velg ${what}.`);
@@ -164,7 +168,7 @@ export function decodeFile(buf, kind) {
   const b = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
   if (!b.length) throw new Error('Filen er tom.');
   const at = (...x) => x.every((v, i) => b[i] === v);
-  const what = kind === 'csv' ? 'lønnsfilen (CSV)' : 'SAF-T-filen (.xml)';
+  const what = kind === 'csv' ? 'lønnsfilen (CSV)' : kind === 'bank' ? 'kontoutskriften (CSV eller CAMT.053)' : 'SAF-T-filen (.xml)';
   if (at(0x50, 0x4b, 3, 4)) sniff('PK\u0003\u0004', kind);
   if (at(0x25, 0x50, 0x44, 0x46)) sniff('%PDF', kind);
   if (at(0x89, 0x50, 0x4e, 0x47) || at(0xff, 0xd8, 0xff) || at(0x47, 0x49, 0x46)) throw new Error(`Dette er et bilde. Velg ${what}.`);
@@ -378,6 +382,259 @@ function runPayroll(A, B, F, st, ck) {
   return ids.map(id => { const a = A.emps.get(id), b = B.emps.get(id); const pg = a ? a.gross : 0, cg = b ? b.gross : 0; return { id, name: (b || a).name, prev: a ? pg : null, curr: b ? cg : null, diff: cg - pg, pct: a && pg ? (cg - pg) / pg * 100 : null }; }).sort((x, y) => Math.abs(y.diff) - Math.abs(x.diff));
 }
 
+// ── Bank ────────────────────────────────────────────────────────────────
+// Kontoutskrift som CAMT.053 (bankenes XML-standard) eller CSV fra nettbanken
+// (DNB, Nordea, SpareBank 1, Handelsbanken m.fl.). Beløp: positivt = inn på konto.
+const BANKF = [['date', n => /^(bokforingsdato|bokfort|bokfortdato|dato|date|bookingdate|transaksjonsdato|reskontrodato|utfortdato)$/.test(n)], ['vdate', n => /^(rentedato|valuteringsdato|valutadato|valuedate)$/.test(n)], ['amount', n => /^(belop|belopnok|amount|sum|belopinnut)$/.test(n)], ['in', n => /^(inn|innskudd|innpakonto|inngaende|kredit|credit|innbetaling)$/.test(n)], ['out', n => /^(ut|uttak|utfrakonto|utgaende|debet|debit|utbetaling)$/.test(n)], ['balance', n => /^(saldo|balance|bokfortsaldo|disponibeltbelop)$/.test(n)], ['ref', n => /^(kid|referanse|ref|arkivreferanse|arkivref|reference)$/.test(n)], ['text', n => /forklaring|beskrivelse|tekst|tittel|melding|description|^text$|navn|mottaker|avsender/.test(n)]];
+export function parseBank(text) {
+  if (!String(text).trim()) throw new Error('Filen er tom.');
+  sniff(text, 'bank');
+  const head = String(text).slice(0, 2000);
+  if (/<Document[\s>]|BkToCstmrStmt/.test(head)) return parseCamt(text);
+  if (/<\?xml|<AuditFile/.test(head)) throw new Error('Dette ser ut som en SAF-T-fil, ikke en kontoutskrift. Velg filen under «SAF-T Financial».');
+  return parseBankCsv(text);
+}
+function parseCamt(xml) {
+  let doc; try { doc = parseXml(xml); } catch (e) { throw new Error(`Kontoutskriften er ikke gyldig XML (${e.message}).`); }
+  const stmts = doc.getElementsByTagNameNS('*', 'Stmt').concat(doc.getElementsByTagNameNS('*', 'Rpt'));
+  if (!stmts.length) throw new Error('Fant ingen kontoutskrift (Stmt) i CAMT-filen.');
+  const lines = []; let account = '', opening = null, closing = null, closingDate = '', from = '', to = '';
+  const path = (el, ...ns) => ns.reduce((e, n) => e && kid(e, n), el);
+  stmts.forEach(st => {
+    const acc = path(st, 'Acct', 'Id'); if (acc && !account) account = (txt(acc, 'IBAN') || txt(kid(acc, 'Othr'), 'Id')).replace(/\s/g, '');
+    const fr = kid(st, 'FrToDt'); if (fr) { from = from || isoDate(txt(fr, 'FrDtTm') || txt(fr, 'FrDt')); to = isoDate(txt(fr, 'ToDtTm') || txt(fr, 'ToDt')) || to; }
+    st.children.filter(c => c.localName === 'Bal').forEach(b => {
+      const cd = txt(path(b, 'Tp', 'CdOrPrtry'), 'Cd'), a = num(txt(b, 'Amt')) * (txt(b, 'CdtDbtInd') === 'DBIT' ? -1 : 1), d = isoDate(txt(kid(b, 'Dt'), 'Dt') || txt(kid(b, 'Dt'), 'DtTm'));
+      if (/^(OPBD|PRCD)$/.test(cd) && opening == null) opening = a;
+      if (/^(CLBD)$/.test(cd)) { closing = a; closingDate = d; }
+    });
+    st.children.filter(c => c.localName === 'Ntry').forEach(n => {
+      if (txt(n, 'RvslInd') === 'true') warn('camt-rev', 'Kontoutskriften har reverserte transaksjoner. De er tatt med som vanlige poster.');
+      const a = numW(txt(n, 'Amt'), false, 'Kontoutskrift') * (txt(n, 'CdtDbtInd') === 'DBIT' ? -1 : 1);
+      const d = isoDate(txt(kid(n, 'BookgDt'), 'Dt') || txt(kid(n, 'BookgDt'), 'DtTm')), vd = isoDate(txt(kid(n, 'ValDt'), 'Dt'));
+      const tx = n.getElementsByTagNameNS('*', 'TxDtls')[0];
+      const party = tx ? (txt(path(tx, 'RltdPties', a < 0 ? 'Cdtr' : 'Dbtr'), 'Nm') || txt(path(tx, 'RltdPties', a < 0 ? 'Cdtr' : 'Dbtr', 'Pty'), 'Nm')) : '';
+      const ustrd = tx ? tx.getElementsByTagNameNS('*', 'Ustrd').map(u => u.textContent.trim()).join(' ') : '';
+      const ref = tx ? (tx.getElementsByTagNameNS('*', 'Ref').map(u => u.textContent.trim())[0] || '') : '';
+      lines.push({ date: d || vd, vdate: vd, amount: a, text: [txt(n, 'AddtlNtryInf'), party, ustrd].filter(Boolean).join(' · ').slice(0, 160), ref });
+    });
+  });
+  if (!lines.length) throw new Error('Kontoutskriften har ingen transaksjoner.');
+  return { kind: 'camt', account, opening, closing, closingDate: closingDate || to, from, to, lines };
+}
+function parseBankCsv(text) {
+  const raw = text.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim());
+  if (raw.length < 2) throw new Error('Kontoutskriften har ingen transaksjoner.');
+  const split = (l, d) => { const out = []; let cur = '', q = false; for (let i = 0; i < l.length; i++) { const ch = l[i]; if (ch === '"') { if (q && l[i + 1] === '"') { cur += '"'; i++; } else q = !q; } else if (ch === d && !q) { out.push(cur); cur = ''; } else cur += ch; } out.push(cur); return out.map(x => x.trim()); };
+  const norm = s => normTxt(s).replace(/[^a-z0-9]/g, '');
+  let hi = -1, delim = ';', col = {};
+  for (let i = 0; i < Math.min(raw.length, 15) && hi < 0; i++) for (const d of [';', '\t', ',', '|']) {
+    const h = split(raw[i], d).map(norm); if (h.length < 2) continue; const c = {}, used = new Set();
+    BANKF.forEach(([k, t]) => { const j = h.findIndex((n, x) => !used.has(x) && t(n)); if (j >= 0) { c[k] = j; used.add(j); } });
+    if (c.date != null && (c.amount != null || c.in != null || c.out != null)) { hi = i; delim = d; col = c; break; }
+  }
+  if (hi < 0) throw new Error(`Fant ikke kolonnene for dato og beløp. Er dette en kontoutskrift fra nettbanken? Første linje: «${raw[0].slice(0, 80)}».`);
+  const G = (r, k) => col[k] != null ? (r[col[k]] || '').trim() : '';
+  const lines = [];
+  raw.slice(hi + 1).forEach((l, i) => {
+    const r = split(l, delim), w = `Kontoutskrift, linje ${hi + 2 + i}`, d = dateW(G(r, 'date') || G(r, 'vdate'), w);
+    if (!d) return;
+    let a;
+    if (col.amount != null) a = numW(G(r, 'amount'), true, w);
+    else { const inn = numW(G(r, 'in'), true, w), ut = numW(G(r, 'out'), true, w); a = Math.abs(inn) - Math.abs(ut); }
+    lines.push({ date: d, vdate: isoDate(G(r, 'vdate')), amount: a, text: G(r, 'text').slice(0, 160), ref: G(r, 'ref'), balance: col.balance != null && G(r, 'balance') ? numW(G(r, 'balance'), true, w) : null });
+  });
+  if (!lines.length) throw new Error('Kontoutskriften har ingen transaksjoner med gyldig dato.');
+  // Saldo: fra saldokolonnen når den finnes (siste linje etter dato).
+  let closing = null, closingDate = '', opening = null;
+  const withBal = lines.map((l, i) => ({ l, i })).filter(x => x.l.balance != null);
+  if (withBal.length) {
+    const byDate = withBal.slice().sort((a, b) => a.l.date < b.l.date ? -1 : a.l.date > b.l.date ? 1 : a.i - b.i);
+    // Nettbanker lister enten eldste eller nyeste først; saldoen etter siste postering er den som stemmer med dato-rekkefølgen.
+    const asc = lines[0].date <= lines[lines.length - 1].date;
+    const last = asc ? withBal[withBal.length - 1] : withBal[0], first = asc ? withBal[0] : withBal[withBal.length - 1];
+    closing = last.l.balance; closingDate = byDate[byDate.length - 1].l.date; opening = r2b(first.l.balance - first.l.amount);
+  }
+  const ds = lines.map(l => l.date).sort();
+  return { kind: 'csv', account: '', opening, closing, closingDate, from: ds[0], to: ds[ds.length - 1], lines };
+}
+const r2b = x => Math.round(x * 100) / 100;
+
+function runBank(S, banks, F, st, ck) {
+  const run = (id, fn) => { const b = F.length, r = fn(mk(F, 'bank', id)); ck[id] = r || 0; st[id] = r === null ? 'ikke' : F.length > b ? 'avvik' : 'ok'; };
+  const accName = id => { const a = S.accounts.get(id); return a && a.name ? `${id} ${a.name}` : id; };
+  const bankAccs = [...new Set(S.txs.flatMap(t => t.lines.map(l => l.acc)).filter(a => acc4(a) >= 1900 && acc4(a) < 1960))];
+  if (!bankAccs.length) { warn('bank-konto', 'SAF-T-filen har ingen bankkonto (19xx) å avstemme mot.'); st['bank-saldo'] = st['bank-poster'] = 'ikke'; return; }
+  // Hovedboken: netto per bilag på bankkontoen (et bilag kan ha flere linjer på banken).
+  const ledgerFor = acc => S.txs.map(t => { const ls = t.lines.filter(l => l.acc === acc); return ls.length ? { tx: t, date: t.date, amount: r2b(ls.reduce((a, l) => a + l.d - l.c, 0)) } : null; }).filter(x => x && Math.abs(x.amount) > 0.004);
+  const match = (bl, ll) => {
+    const B = bl.map(x => ({ ...x, m: null })), L = ll.map(x => ({ ...x, m: null }));
+    const byAmt = new Map(); L.forEach(x => { const k = Math.round(x.amount * 100); if (!byAmt.has(k)) byAmt.set(k, []); byAmt.get(k).push(x); });
+    for (const tol of [0, 2, 5, 10]) B.forEach(b => { if (b.m) return; const c = (byAmt.get(Math.round(b.amount * 100)) || []).filter(x => !x.m && Math.abs(days(x.date, b.date)) <= tol); if (c.length) { c.sort((a, z) => Math.abs(days(a.date, b.date)) - Math.abs(days(z.date, b.date))); b.m = c[0]; c[0].m = b; } });
+    return { B, L };
+  };
+  banks.forEach((bank, bi) => {
+    const label = banks.length > 1 ? ` (kontoutskrift ${bi + 1})` : '';
+    const from = [S.start, bank.from].filter(Boolean).sort().pop(), to = [S.end, bank.to].filter(Boolean).sort()[0];
+    if (!from || !to || from > to) { warn('bank-periode' + bi, `Kontoutskriften${label} gjelder ${nd(bank.from)}–${nd(bank.to)}, som ikke overlapper med regnskapet (${nd(S.start)}–${nd(S.end)}).`); return; }
+    const bl = bank.lines.filter(l => l.date >= from && l.date <= to);
+    // Velg bankkontoen i hovedboken som passer best med utskriften.
+    let best = null; bankAccs.forEach(acc => { const r = match(bl, ledgerFor(acc).filter(x => x.date >= addDays(from, -10) && x.date <= addDays(to, 10))); const hit = r.B.filter(x => x.m).length; if (!best || hit > best.hit) best = { acc, hit, ...r }; });
+    const { acc } = best;
+    const inP = x => x.date >= from && x.date <= to;
+    const unB = best.B.filter(x => !x.m), unL = best.L.filter(x => !x.m && inP(x));
+    const shown = `${nd(from)}–${nd(to)}`;
+    run('bank-poster', add => {
+      if (unB.length) add({ sev: unB.some(x => Math.abs(x.amount) >= 10000) ? 'hoy' : 'middels', title: `${unB.length} ${unB.length === 1 ? 'transaksjon' : 'transaksjoner'} i banken er ikke bokført${label}`, amount: r2b(unB.reduce((a, x) => a + Math.abs(x.amount), 0)), date: to,
+        summary: `Kontoutskriften har ${unB.length} ${unB.length === 1 ? 'post' : 'poster'} i perioden ${shown} som ikke finnes på ${accName(acc)} med samme beløp innen 10 dager.`,
+        why: ['Transaksjoner i banken som mangler i regnskapet gir feil bankbeholdning og kan bety manglende kostnader eller inntekter.', 'Rettført sammenligner beløp og dato. Poster som er bokført med et annet beløp, vises også her.'],
+        ev: { cols: ['Dato', 'Tekst', 'Referanse', 'Beløp'], rows: unB.slice(0, 40).map(x => [nd(x.date), x.text || '—', x.ref || '—', kr(x.amount)]) }, next: ['Finn bilagene til postene, eller be kunden sende dem.', 'Bokfør postene og kjør avstemmingen på nytt.'] });
+      if (unL.length) add({ sev: unL.some(x => Math.abs(x.amount) >= 10000) ? 'hoy' : 'middels', title: `${unL.length} bokførte bankposteringer finnes ikke i banken${label}`, amount: r2b(unL.reduce((a, x) => a + Math.abs(x.amount), 0)), date: to,
+        summary: `${unL.length} ${unL.length === 1 ? 'bilag' : 'bilag'} på ${accName(acc)} i perioden ${shown} har ingen transaksjon med samme beløp i kontoutskriften.`,
+        why: ['Bokførte bankposteringer som ikke finnes i banken kan være feilført, bokført med feil beløp, eller gjelde en annen konto.', 'Betalinger som er registrert, men ikke gjennomført ennå, vises også her.'],
+        ev: { cols: ['Bilag', 'Dato', 'Tekst', 'Beløp'], rows: unL.slice(0, 40).map(x => [x.tx.id, nd(x.date), x.tx.desc || '—', kr(x.amount)]) }, next: ['Kontroller bilagene mot kontoutskriften.', 'Sjekk om betalingen er ført på feil bankkonto eller med feil beløp.'] });
+      return bl.length;
+    });
+    run('bank-saldo', add => {
+      if (bank.closing == null || !bank.closingDate) { warn('bank-saldo' + bi, `Kontoutskriften${label} har ingen saldo. Rettført avstemmer postene, men ikke saldoen.`); return null; }
+      const d = bank.closingDate; if (S.start && d < S.start || S.end && d > S.end) return null;
+      const a = S.accounts.get(acc) || {}, led = r2b((a.open || 0) + S.txs.filter(t => t.date && t.date <= d).reduce((s, t) => s + t.lines.filter(l => l.acc === acc).reduce((x, l) => x + l.d - l.c, 0), 0));
+      const diff = r2b(led - bank.closing);
+      if (Math.abs(diff) > 1) {
+        const expl = r2b(unL.filter(x => x.date <= d).reduce((s, x) => s + x.amount, 0) - unB.filter(x => x.date <= d).reduce((s, x) => s + x.amount, 0));
+        add({ sev: 'hoy', title: `Bank og hovedbok stemmer ikke per ${nd(d)}${label}`, amount: Math.abs(diff), date: d,
+          summary: `${accName(acc)} viser ${kr(led)} i hovedboken, mens banken viser ${kr(bank.closing)}. Differansen er ${kr(diff)}.`,
+          why: ['Bankkontoen i hovedboken skal stemme med kontoutskriften på samme dag.', Math.abs(expl - diff) <= 1 ? 'Hele differansen forklares av postene som bare finnes på den ene siden.' : 'Differansen forklares ikke fullt av enkeltposter. Sjekk inngående saldo og om alle bankkontoer er tatt med.'],
+          ev: { cols: ['Kilde', 'Saldo'], rows: [['Hovedbok ' + accName(acc), kr(led)], ['Kontoutskrift', kr(bank.closing)], ['Differanse', kr(diff)]] }, next: ['Avstem postene som bare finnes på den ene siden.', 'Dokumenter avstemmingen med kontoutskriften.'] });
+      }
+      return 1;
+    });
+  });
+}
+
+// ── Bilag ───────────────────────────────────────────────────────────────
+// Et bilag er en EHF-faktura (XML) eller tekst hentet fra PDF/bilde. Feltene
+// får en sikkerhet mellom 0 og 1: EHF er 1, tekst fra PDF er høy, bildegjenkjenning lavere.
+export function parseEhf(xml) {
+  const doc = parseXml(xml);
+  const root = doc.children[0];
+  if (!root || !/^(Invoice|CreditNote)$/.test(root.localName)) throw new Error('Dette er ikke en EHF-faktura eller kreditnota.');
+  const cn = root.localName === 'CreditNote', T = (el, ...ns) => { let e = el; for (const n of ns) { e = e && kid(e, n); } return e ? e.textContent.trim() : ''; };
+  const sup = kid(root, 'AccountingSupplierParty'), party = sup && kid(sup, 'Party'), cus = kid(root, 'AccountingCustomerParty');
+  const le = party && kid(party, 'PartyLegalEntity'), pm = kid(root, 'PaymentMeans'), mt = kid(root, 'LegalMonetaryTotal'), tt = kid(root, 'TaxTotal');
+  const orgRaw = T(le, 'CompanyID') || T(party, 'PartyTaxScheme', 'CompanyID') || T(party, 'EndpointID');
+  const lines = root.children.filter(c => /InvoiceLine|CreditNoteLine/.test(c.localName));
+  const f = { invoiceNo: T(root, 'ID'), date: isoDate(T(root, 'IssueDate')), dueDate: isoDate(T(root, 'DueDate') || T(pm, 'PaymentDueDate')), supplier: T(le, 'RegistrationName') || T(party, 'PartyName', 'Name'), orgNo: (orgRaw.match(/\d{9}/) || [''])[0], mvaReg: /MVA/i.test(T(party, 'PartyTaxScheme', 'CompanyID') || orgRaw),
+    total: num(T(mt, 'PayableAmount') || T(mt, 'TaxInclusiveAmount')), net: num(T(mt, 'TaxExclusiveAmount')), vat: num(T(tt, 'TaxAmount')), kid: T(pm, 'PaymentID'), account: T(pm, 'PayeeFinancialAccount', 'ID').replace(/\D/g, ''), buyer: T(cus, 'Party', 'PartyLegalEntity', 'RegistrationName') || T(cus, 'Party', 'PartyName', 'Name'), description: lines.map(l => T(l, 'Item', 'Name')).filter(Boolean).slice(0, 3).join(', '), credit: cn };
+  const conf = {}; Object.keys(f).forEach(k => conf[k] = 1);
+  return { kind: 'ehf', fields: f, conf };
+}
+const AMT = String.raw`(-?\d{1,3}(?:[ . ]\d{3})*(?:,\d{2})|-?\d+(?:[.,]\d{2}))`;
+const DT = String.raw`(\d{1,2}[./-]\d{1,2}[./-]\d{2,4}|\d{4}-\d{2}-\d{2})`;
+// Leser fakturafelt fra fritekst (PDF-tekst eller bildegjenkjenning). conf = gjennomsnittlig gjenkjenningssikkerhet (0–1).
+export function parseInvoiceText(text, conf = 1) {
+  let t = String(text || '').replace(/\r/g, '');
+  // Typiske OCR-feil i tall: O→0, l/I→1 når de står mellom sifre.
+  const tn = t.replace(/(?<=\d)[Oo](?=[\d,. ])|(?<=[\d ])[Oo](?=\d)/g, '0').replace(/(?<=\d)[lI](?=\d)/g, '1');
+  const find = (res, s = tn) => { for (const re of res) { const m = s.match(re); if (m) return m; } return null; };
+  const all = (re, s = tn) => [...s.matchAll(re)];
+  const fields = {}, c = {};
+  const set = (k, v, q) => { if (v == null || v === '' || (typeof v === 'number' && isNaN(v))) return; fields[k] = v; c[k] = Math.round(Math.min(1, conf * q) * 100) / 100; };
+  // Tåler vanlige OCR-feil i feltnavnet: «rn» for «m», «0» for «o».
+  let m = find([/(?:faktura|invoice|fakt\.)\s*[-.]?\s*(?:nu(?:m|rn)m?er|n[r0o]\.?|number|no\.?|#)\s*[:#]?\s*([A-Z0-9][A-Z0-9\-\/]{1,24})/i, /fakturanr\.?\s*[:#]?\s*([A-Z0-9][A-Z0-9\-\/]{1,24})/i]);
+  if (m) set('invoiceNo', m[1], 1);
+  m = find([new RegExp(String.raw`(?:faktura\s*dato|fakturadato|invoice\s*date|utstedt|dato)\s*:?\s*` + DT, 'i')]); if (m) set('date', isoDate(m[1]), 1);
+  m = find([new RegExp(String.raw`(?:forfalls?\s*dato|forfall|betalingsfrist|due\s*date|betales\s*innen)\s*:?\s*` + DT, 'i')]); if (m) set('dueDate', isoDate(m[1]), 1);
+  m = find([/(?:org\.?\s*(?:nr|nummer)\.?|organisasjonsnummer|foretaksregisteret|org\.?\s*no\.?)\s*:?\s*(?:NO\s*)?(\d{3}\s?\d{3}\s?\d{3})/i, /\bNO\s?(\d{3}\s?\d{3}\s?\d{3})\s?MVA\b/i]); if (m) set('orgNo', m[1].replace(/\s/g, ''), 1);
+  fields.mvaReg = /\bMVA\b|merverdiavgift|foretaksregisteret/i.test(tn);
+  const amt = (labels, q) => { const r = all(new RegExp(String.raw`(?:${labels})[^\n\d-]{0,30}` + AMT, 'gi')); if (!r.length) return null; const v = r.map(x => parseNum(x[1], true)).filter(x => !isNaN(x)); return v.length ? v[v.length - 1] : null; };
+  set('total', amt('å\\s*betale|til\\s*betaling|beløp\\s*å\\s*betale|å\\s*betale\\s*kr|sum\\s*inkl\\.?\\s*mva|totalt\\s*inkl\\.?\\s*mva|total\\s*inkl|totalbeløp|total\\s*å\\s*betale|amount\\s*due|total', 1), 1);
+  set('net', amt('sum\\s*eks\\.?\\s*mva|beløp\\s*eks\\.?\\s*mva|netto|grunnlag|total\\s*eks', 1), 0.95);
+  const vr = all(new RegExp(String.raw`(?:mva|merverdiavgift|vat)(?:\s*\d{1,2}(?:[.,]\d+)?\s*%)?[^\n\d-]{0,20}` + AMT, 'gi')).map(x => parseNum(x[1], true)).filter(x => !isNaN(x));
+  if (vr.length) set('vat', vr[vr.length - 1], 0.9);
+  m = find([/KID\s*(?:nr|nummer)?\.?\s*:?\s*(\d[\d ]{1,30}\d)/i]); if (m) set('kid', m[1].replace(/\s/g, ''), 1);
+  m = find([/(?:konto\s*(?:nr|nummer)?|bankkonto|kontonummer|betales\s*til)\.?\s*:?\s*(\d{4}[ .]?\d{2}[ .]?\d{5})/i]); if (m) set('account', m[1].replace(/\D/g, ''), 1);
+  // Leverandør: linjen med selskapsform nær toppen, ellers første linje med bokstaver.
+  const ls = t.split('\n').map(x => x.trim()).filter(Boolean);
+  const sup = ls.slice(0, 12).find(x => /\b(AS|ASA|ANS|DA|ENK|SA)\b/.test(x) && !/faktura|kunde|kjøper|til:/i.test(x)) || ls.find(x => /[A-Za-zÆØÅæøå]{3}/.test(x));
+  if (sup) set('supplier', sup.replace(/\s{2,}/g, ' ').slice(0, 80), /\b(AS|ASA|ANS|DA|ENK|SA)\b/.test(sup) ? 0.9 : 0.5);
+  if (/kreditnota|credit\s*note/i.test(tn)) fields.credit = true;
+  return { kind: 'tekst', fields, conf: c, textLen: t.length };
+}
+
+function runDocs(S, docs, F, st, ck) {
+  const run = (id, fn) => { const b = F.length, r = fn(mk(F, 'bilag', id)); ck[id] = r || 0; st[id] = r === null ? 'ikke' : F.length > b ? 'avvik' : 'ok'; };
+  const nref = r => String(r || '').replace(/\D/g, '').replace(/^0+/, '');
+  const nname = x => normTxt(x).replace(/\b(as|asa|ans|da|ab|ltd|inc|sa)\b/g, '').replace(/[^a-z0-9]/g, '');
+  let ok = docs.filter(d => d.fields && Object.keys(d.fields).length > 1);
+  // Samme faktura lastet opp flere ganger (f.eks. som foto og som PDF): bruk den som er lest sikrest.
+  const seen = new Map(); const conf1 = d => d.kind === 'ehf' ? 2 : d.kind === 'pdf' ? 1.5 : (d.conf.total || 0);
+  ok.forEach(d => { const k = nref(d.fields.invoiceNo); if (k.length < 3 || d.fields.total == null) return; const key = k + '|' + Math.round(Math.abs(d.fields.total)); const o = seen.get(key); if (!o) seen.set(key, d); else { const [keep, drop] = conf1(d) > conf1(o) ? [d, o] : [o, d]; seen.set(key, keep); drop.dupOf = keep.name; } });
+  ok.filter(d => d.dupOf).forEach(d => warn('bilag-dup', `«${d.name}» er samme faktura som «${d.dupOf}» og er ikke kontrollert på nytt.`));
+  ok = ok.filter(d => !d.dupOf);
+  docs.filter(d => !(d.fields && Object.keys(d.fields).length > 1)).forEach(d => warn('bilag-les', `Bilaget «${d.name}» kunne ikke leses${d.error ? ': ' + d.error : ''}. Last opp PDF med tekst, et tydeligere bilde eller EHF.`));
+  const fmtF = (d, k, v) => v == null || v === '' ? '—' : typeof v === 'number' ? kr(v) : /date|Date/.test(k) ? nd(v) : String(v);
+  const confL = (d, k) => d.conf && d.conf[k] != null ? `${Math.round(d.conf[k] * 100)} %` : '—';
+  const LAB = { invoiceNo: 'Fakturanummer', date: 'Fakturadato', dueDate: 'Forfallsdato', supplier: 'Selger', orgNo: 'Selgers org.nr.', total: 'Beløp inkl. MVA', vat: 'MVA', net: 'Beløp eks. MVA', kid: 'KID' };
+  // Pliktige opplysninger (bokføringsforskriften § 5-1-1): nummer, dato, selger, org.nr., beløp; MVA når selger er MVA-registrert.
+  run('bilag-innhold', add => {
+    ok.forEach(d => {
+      const f = d.fields, need = ['invoiceNo', 'date', 'supplier', 'orgNo', 'total'].concat(f.mvaReg ? ['vat'] : []);
+      const miss = need.filter(k => f[k] == null || f[k] === ''), unsure = need.filter(k => !miss.includes(k) && d.conf[k] != null && d.conf[k] < 0.6);
+      if (!miss.length && !unsure.length) return;
+      add({ sev: miss.length ? 'middels' : 'lav', title: miss.length ? `Mangler pliktige opplysninger · ${d.name}` : `Usikker avlesning · ${d.name}`,
+        summary: miss.length ? `Rettført fant ikke ${miss.map(k => LAB[k].toLowerCase()).join(', ')} på bilaget.` : `${unsure.map(k => LAB[k]).join(', ')} er lest med lav sikkerhet og bør kontrolleres manuelt.`,
+        why: ['En salgsdokumentasjon skal blant annet ha fakturanummer, dato, selgers navn og organisasjonsnummer, beløp og MVA (bokføringsforskriften § 5-1-1).', d.kind === 'bilde' ? 'Bildet er lest med tekstgjenkjenning. Utydelige bilder kan gi manglende eller feil felt.' : 'Feltene er lest automatisk fra dokumentet.'],
+        ev: { cols: ['Felt', 'Lest fra bilaget', 'Sikkerhet'], rows: need.map(k => [LAB[k], miss.includes(k) ? 'Ikke funnet' : fmtF(d, k, f[k]), miss.includes(k) ? '—' : confL(d, k)]) },
+        next: ['Kontroller bilaget manuelt.', 'Be om korrekt faktura fra leverandøren hvis opplysninger mangler.'] });
+    });
+    return ok.length;
+  });
+  run('bilag-bokforing', add => {
+    if (!S) return null;
+    // Leverandørfakturaer i regnskapet: kredit på 24xx med leverandør, eller bilag med referanse.
+    const P = [];
+    S.txs.forEach(tx => { const ap = tx.lines.filter(l => /^24/.test(l.acc)); const vat = tx.lines.filter(l => /^271/.test(l.acc)).reduce((a, l) => a + l.d - l.c, 0); const refL = tx.lines.find(l => l.ref) || {};
+      const amtAp = ap.reduce((a, l) => a + l.c - l.d, 0), sup = (ap.find(l => l.sup) || {}).sup || tx.sup || '';
+      if (ap.length || refL.ref || tx.ref) P.push({ tx, amount: r2b(amtAp), vat: r2b(vat), sup, sname: nname((S.suppliers.get(sup) || {}).name || ''), ref: refL.ref || tx.ref || '', nr: nref(refL.ref || tx.ref) }); });
+    const used = new Set();
+    ok.forEach(d => {
+      const f = d.fields, nr = nref(f.invoiceNo), sname = nname(f.supplier || '');
+      const sign = f.credit ? -1 : 1, total = f.total != null ? Math.abs(f.total) * sign : null;
+      let hit = nr.length >= 3 ? P.filter(p => p.nr === nr && (!sname || !p.sname || p.sname.includes(sname.slice(0, 6)) || sname.includes(p.sname.slice(0, 6)))) : [];
+      let how = 'fakturanummer';
+      if (!hit.length && total != null) { hit = P.filter(p => Math.abs(p.amount - total) <= 1 && (!f.date || Math.abs(days(p.tx.date, f.date)) <= 20) && (!sname || !p.sname || p.sname.includes(sname.slice(0, 6)) || sname.includes(p.sname.slice(0, 6)))); how = 'beløp og dato'; }
+      hit = hit.filter(p => !used.has(p.tx.id));
+      if (!hit.length) {
+        const inPeriod = !f.date || !S.start || (f.date >= S.start && f.date <= S.end);
+        if (!inPeriod) { warn('bilag-periode', `Bilaget «${d.name}» er datert ${nd(f.date)}, utenfor regnskapsperioden. Det er ikke sammenlignet.`); return; }
+        add({ sev: 'middels', title: `Bilaget finnes ikke i regnskapet · ${d.name}`, amount: total, date: f.date || null,
+          summary: `Rettført fant ingen bokføring som passer med ${f.invoiceNo ? 'fakturanummer ' + f.invoiceNo : 'bilaget'}${total != null ? ' på ' + kr(Math.abs(total)) : ''}${f.supplier ? ' fra ' + f.supplier : ''}.`,
+          why: ['En faktura som ikke er bokført, gir for lave kostnader og leverandørgjeld.', 'Rettført leter etter samme fakturanummer, eller samme beløp innen 20 dager fra samme leverandør.'],
+          ev: { cols: ['Felt', 'Lest fra bilaget', 'Sikkerhet'], rows: Object.keys(LAB).filter(k => f[k] != null).map(k => [LAB[k], fmtF(d, k, f[k]), confL(d, k)]) },
+          next: ['Sjekk om fakturaen er bokført med et annet nummer eller beløp.', 'Bokfør fakturaen hvis den mangler.'] });
+        return;
+      }
+      const p = hit.sort((a, z) => Math.abs(a.amount - (total || 0)) - Math.abs(z.amount - (total || 0)))[0]; used.add(p.tx.id);
+      const rows = [], diffs = [];
+      const cmp = (k, a, b, tol) => { const same = a == null || b == null ? null : typeof a === 'number' ? Math.abs(a - b) <= tol : a === b; rows.push([LAB[k], fmtF(d, k, a), b == null ? '—' : typeof b === 'number' ? kr(b) : /date/i.test(k) ? nd(b) : b, same == null ? '—' : same ? 'Lik' : 'Ulik', confL(d, k)]); if (same === false) diffs.push(k); };
+      cmp('invoiceNo', f.invoiceNo || null, p.ref || null, 0);
+      cmp('total', total, p.amount, 1);
+      if (f.vat != null && p.vat) cmp('vat', Math.abs(f.vat) * sign, p.vat, 1);
+      cmp('date', f.date || null, p.tx.date, 0);
+      const serious = diffs.filter(k => k === 'total' || k === 'vat');
+      const dateOff = diffs.includes('date') && f.date && Math.abs(days(f.date, p.tx.date)) > 31;
+      if (!serious.length && !dateOff) return;
+      const lowConf = serious.some(k => d.conf[k] != null && d.conf[k] < 0.6);
+      add({ sev: lowConf ? 'lav' : serious.length ? 'hoy' : 'lav', title: serious.length ? `${serious.includes('total') ? 'Beløpet' : 'MVA'} på bilaget avviker fra bokføringen · bilag ${p.tx.id}` : `Bilaget er bokført i en annen måned · bilag ${p.tx.id}`, amount: serious.includes('total') ? Math.abs((total || 0) - p.amount) : serious.includes('vat') ? Math.abs(Math.abs(f.vat) * sign - p.vat) : null, date: p.tx.date,
+        summary: serious.length ? `${d.name} (${f.supplier || 'ukjent selger'}) er koblet til bilag ${p.tx.id} på ${how}, men ${serious.map(k => LAB[k].toLowerCase()).join(' og ')} er ikke likt.` : `${d.name} er datert ${nd(f.date)}, men bokført ${nd(p.tx.date)}.`,
+        why: [lowConf ? 'Tallet er lest med lav sikkerhet fra et bilde. Kontroller bilaget manuelt før du konkluderer.' : 'Bokført beløp skal stemme med dokumentasjonen (bokføringsloven § 10).', `Koblet på ${how}.`],
+        ev: { cols: ['Felt', 'Bilaget', 'Regnskapet', 'Samsvar', 'Sikkerhet'], rows }, next: ['Sammenlign fakturaen med bilaget i regnskapssystemet.', 'Korriger bokføringen hvis beløpet er feil.'] });
+    });
+    return ok.length;
+  });
+}
+
 function runCross(S, B, F, st, ck) {
   const accName = id => { const a = S.accounts.get(id); return a && a.name ? `${id} ${a.name}` : id; };
   const toks = x => new Set(normTxt(x).split(/[^a-z0-9]+/).filter(Boolean));
@@ -507,11 +764,11 @@ const factsOf = (f, c, rows) => {
     ...(r ? { avstemming: { periode: r.period, lonnsgrunnlag: r.payroll, forventet: r.expected, bokfort: r.booked, differanse: r.diff, toleranse: r.tol, status: r.status, metode: r.method, kilde: r.source, kontoer: r.accounts, sats: r.rateUsed || null, hint: r.hints || [], sone: r.zone || null, posteringer: r.postings, holdt_utenfor: r.excluded } } : {}) };
 };
 
-export function analyze({ saft, prev, curr, settings }) {
+export function analyze({ saft, prev, curr, bank, docs, settings }) {
   WARN = [];
-  try { return analyzeInner({ saft, prev, curr, settings }); } finally { WARN = null; CTX = ''; }
+  try { return analyzeInner({ saft, prev, curr, bank, docs, settings }); } finally { WARN = null; CTX = ''; }
 }
-function analyzeInner({ saft, prev, curr, settings }) {
+function analyzeInner({ saft, prev, curr, bank, docs, settings }) {
   const cfg = mergeSettings(settings);
   const findings = [], st = {}, ck = {};
   let S = null, A = null, B = null, pay = null, recon = null;
@@ -535,10 +792,15 @@ function analyzeInner({ saft, prev, curr, settings }) {
     if (recon.reason) { st.fordel = 'ikke'; ck.fordel = 0; }
     else { runCross(S, B, findings, st, ck); recon.fordel = { n: findings.filter(f => f.controlId === 'fordel').length, checked: ck.fordel || 0 }; }
   }
+  const banks = [].concat(bank || []).filter(x => typeof x === 'string');
+  if (banks.length && S) { const parsed = banks.map((t, i) => { CTX = banks.length > 1 ? `Bank ${i + 1}` : 'Bank'; try { return parseBank(t); } catch (e) { throw new Error(`${CTX}: ${e.message}`); } }); CTX = 'Bank'; runBank(S, parsed, findings, st, ck); }
+  else if (banks.length) { CTX = 'Bank'; warn('bank-saft', 'Kontoutskriften avstemmes mot SAF-T-filen. Legg inn SAF-T for å kjøre bankkontrollene.'); }
+  const dl = [].concat(docs || []);
+  if (dl.length) { CTX = 'Bilag'; const parsed = dl.map(d => { try { if (d.error && !d.text && !d.xml) return { name: d.name, error: d.error }; if (d.fields) return d; if (d.xml) return { name: d.name, ...parseEhf(d.xml) }; return { name: d.name, ...parseInvoiceText(d.text || '', d.conf ?? 1), kind: d.kind || 'tekst' }; } catch (e) { return { name: d.name, error: e.message }; } }); runDocs(S, parsed, findings, st, ck); }
   const controls = CONTROLS.map(c => ({ ...c, status: st[c.id] || 'ikke', checked: ck[c.id] || 0, count: findings.filter(f => f.controlId === c.id).length }));
   const cById = {}; controls.forEach(c => cById[c.id] = c);
   findings.forEach(f => { f.facts = factsOf(f, cById[f.controlId], recon ? recon.rows : []); });
-  return { warnings: WARN.map(({ fil, tekst, antall }) => ({ fil, tekst, antall })), payInfo: B ? { mode: B.mode, ignored: [...new Set([...A.ignored, ...B.ignored])], prevMissing: !!A.none } : null, company: S ? S.company : '', org: S ? S.org : '', start: S ? S.start : '', end: S ? S.end : '', payPeriods: B ? [A.none ? null : A.period, B.period] : null, stats: { lines: S ? S.lineCount : 0, txs: S ? S.txs.length : 0, emps: B ? B.emps.size : 0 }, controls, findings, pay, recon, settings: cfg };
+  return { warnings: WARN.map(({ fil, tekst, antall }) => ({ fil, tekst, antall })), payInfo: B ? { mode: B.mode, ignored: [...new Set([...A.ignored, ...B.ignored])], prevMissing: !!A.none } : null, company: S ? S.company : '', org: S ? S.org : '', start: S ? S.start : '', end: S ? S.end : '', payPeriods: B ? [A.none ? null : A.period, B.period] : null, stats: { lines: S ? S.lineCount : 0, txs: S ? S.txs.length : 0, emps: B ? B.emps.size : 0, bankLines: banks.length, docs: dl.length }, controls, findings, pay, recon, settings: cfg };
 }
 
 // Eksempeldata: Nordhavn Drift AS, januar–september 2026, med innlagte avvik
