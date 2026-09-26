@@ -87,6 +87,17 @@ input,textarea{font-family:inherit}
 @keyframes rfLean{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(-8deg) translateX(-3px)}}
 @keyframes rfNod{0%,40%{transform:none}48%{transform:rotate(-9deg) translateX(-6px)}58%,100%{transform:none}}
 @keyframes rfChip{0%,45%{opacity:0;transform:translateY(6px)}55%,92%{opacity:1;transform:none}100%{opacity:0}}
+.rf-acc{background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden;scroll-margin-top:86px}
+.rf-acc[open]{border-color:#D9D3C6;box-shadow:0 14px 30px -24px rgba(11,37,69,.35)}
+.rf-acc summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:14px;padding:18px 22px;min-height:62px}
+.rf-acc summary::-webkit-details-marker{display:none}
+.rf-acc summary:hover .rf-chev{background:#EAE5DA}
+.rf-acc summary:focus-visible{outline:2px solid #0B2545;outline-offset:-2px;border-radius:14px}
+.rf-acc-t{flex:1;font-size:20px;font-weight:600;letter-spacing:-0.015em;color:#0B2545}
+.rf-chev{width:30px;height:30px;border-radius:50%;background:#F1EDE4;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .2s}
+.rf-acc[open] .rf-chev{transform:rotate(180deg)}
+.rf-acc-b{padding:0 22px 24px}
+@media (max-width:520px){.rf-acc summary{padding:16px 18px}.rf-acc-b{padding:0 18px 20px}.rf-acc-t{font-size:18px}}
 @media print{.rf-noprint{display:none !important}}
 @media (max-width:1080px){[data-rf=cta]{padding-right:200px !important}}
 @media (max-width:900px){[data-rf=nav]{display:none !important}[data-rf=deskact]{display:none !important}[data-rf=mobmenu]{display:flex !important}[data-rf=sec]{padding-top:72px !important;padding-bottom:56px !important}[data-rf=hero]{padding-top:56px !important;padding-bottom:64px !important;gap:48px !important}[data-rf=dark]{padding-top:56px !important;padding-bottom:56px !important}[data-rf=co]{display:none !important}[data-rf=stick]{position:static !important}}
@@ -298,21 +309,6 @@ input,textarea{font-family:inherit}
     <button onClick="{{ toControls }}" style="margin-top:28px;background:transparent;border:0;border-bottom:1px solid #0B2545;padding:0 0 2px;font-size:15px;font-weight:500;color:#0B2545;display:flex;align-items:center;gap:8px">Se alle kontroller med terskel og regelgrunnlag {{ iArrow }}</button>
   </section>
 
-  <section style="padding:0 20px">
-    <div data-rf="dark" style="max-width:1320px;margin:0 auto;background:#0B2545;color:#fff;border-radius:28px;padding:88px clamp(24px,5vw,72px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:56px;align-items:center">
-      <div>
-        <h2 style="font-size:clamp(32px,3.8vw,48px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0;text-wrap:balance">Råfilene blir på maskinen din.</h2>
-        <p style="font-size:17px;line-height:1.6;color:rgba(255,255,255,.72);margin:20px 0 0;max-width:480px">SAF-T- og CSV-filene leses i nettleseren og lastes ikke opp som filer. Kontrollmotoren kjører lokalt. Bruker du assistenten, sendes bare opplysningene fra funnet du ser på videre til en språkmodell (DeepSeek). Råfilene sendes aldri.</p>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.14);border-radius:14px;overflow:hidden">
-        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Lokal kontroll</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Kontrollmotoren kjører i nettleseren.</div></div>
-        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Råfiler blir lokale</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">SAF-T- og CSV-filene lastes ikke opp som filer.</div></div>
-        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Regler, ikke gjetning</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Alle beregninger er vanlig kode med faste terskler.</div></div>
-        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Begrenset deling</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Assistenten får bare opplysningene fra ett funn, og bare når du spør.</div></div>
-      </div>
-    </div>
-  </section>
-
   <section id="priser" data-rf="sec" style="max-width:1240px;margin:0 auto;padding:128px 32px 24px">
     <div style="text-align:center">
       <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0 auto;max-width:720px;text-wrap:balance">Planlagte priser.</h2>
@@ -397,37 +393,48 @@ input,textarea{font-family:inherit}
       </div>
       <div data-rf="aboutM" style="flex-shrink:0">{{ mAbout }}</div>
     </div>
-    <div style="margin-top:56px;display:flex;flex-direction:column;gap:48px;font-size:17px;line-height:1.7;color:#2A3547">
-      <section>
-        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Problemet</h2>
-        <p style="margin:12px 0 0">Før en periode lukkes, blir bilag, saldoer og andre underlag kontrollert på nytt. Mange av sjekkene er de samme hver gang: mulige dobbeltføringer, MVA-avvik, store endringer og poster som ikke passer med resten. Det tar tid å lete gjennom alt når bare noen få forhold faktisk trenger en nærmere vurdering.</p>
-      </section>
-      <section>
-        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Hva Rettført gjør</h2>
-        <p style="margin:12px 0 0">Rettført tar inn strukturerte underlag – SAF-T Financial for perioden og forrige periode, bankutskrift, lønn og bilag – kjører {{ nCtrl }} faste kontroller og lager en arbeidsliste med funnene. Hvert funn viser datagrunnlaget, sporingen tilbake til kilden, hvorfor det ble markert og hva som bør sjekkes. Brukeren vurderer funnet, skriver en kommentar og signerer til slutt et kontrollbevis for perioden.</p>
-        <p style="margin:12px 0 0">Rettført erstatter ikke fagsystemene. Det fungerer som et kontrollag over dataene som allerede finnes der.</p>
-      </section>
-      <section>
-        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Slik fungerer det</h2>
-        <div style="margin-top:16px;display:flex;flex-direction:column;border-top:1px solid #E4DFD4">
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Innlesing</span><span>Rettført leser strukturerte filer fra systemene du allerede bruker: SAF-T Financial fra Tripletex, PowerOffice Go, Fiken, Visma og Xledger, i tillegg til bankutskrift, lønn og bilag.</span></div>
+    <div style="margin-top:48px;display:flex;flex-direction:column;gap:10px;font-size:17px;line-height:1.7;color:#2A3547">
+      <details class="rf-acc">
+        <summary><span class="rf-acc-t">Problemet</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+        <div class="rf-acc-b">
+          <p style="margin:0">Før en periode lukkes, blir bilag, saldoer og andre underlag kontrollert på nytt. Mange av sjekkene er de samme hver gang: mulige dobbeltføringer, MVA-avvik, store endringer, bankdifferanser og poster som ikke passer med resten. Det tar tid å lete gjennom alt når bare noen få forhold faktisk trenger en nærmere vurdering.</p>
+        </div>
+      </details>
+      <details class="rf-acc">
+        <summary><span class="rf-acc-t">Hva Rettført gjør</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+        <div class="rf-acc-b">
+          <p style="margin:0">Rettført tar inn underlagene for perioden – SAF-T Financial, kontoutskrift, lønn og bilag – kjører {{ nCtrl }} faste kontroller og lager en arbeidsliste med funnene. Hvert funn viser datagrunnlaget, sporingen tilbake til kilden, hvorfor det ble markert og hva som bør sjekkes. Brukeren vurderer funnet, skriver en kommentar og signerer til slutt et kontrollbevis for perioden.</p>
+          <p style="margin:12px 0 0">Rettført erstatter ikke fagsystemene. Det fungerer som et kontrollag over dataene som allerede finnes der.</p>
+        </div>
+      </details>
+      <details class="rf-acc">
+        <summary><span class="rf-acc-t">Slik fungerer det</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+        <div class="rf-acc-b">
+          <div style="margin-top:0;display:flex;flex-direction:column;border-top:1px solid #E4DFD4">
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Innlesing</span><span>Rettført leser strukturerte filer fra systemene du allerede bruker: SAF-T Financial fra Tripletex, PowerOffice Go, Fiken, Visma og Xledger, i tillegg til kontoutskrift fra nettbanken (CSV eller CAMT.053), lønn (CSV) og bilag (PDF, bilde eller EHF). Bilder leses med tekstgjenkjenning i nettleseren.</span></div>
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Kontrollmotor</span><span>Faste regler går gjennom dataene og finner avvik, uvanlige mønstre og forhold som bør undersøkes nærmere.</span></div>
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">AI-støtte</span><span>En assistent forklarer funn, viser kildene, foreslår hva som bør kontrolleres videre og skriver utkast til kundeforespørsler. Den endrer ikke tallene eller selve kontrollresultatet.</span></div>
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Menneskelig vurdering</span><span>Brukeren ser grunnlaget bak hvert funn, vurderer det som rettet, forventet avvik, oppfølging eller ikke relevant, og signerer et kontrollbevis som låser perioden.</span></div>
         </div>
-        <p style="margin:12px 0 0;font-size:14.5px;color:#586174">Rettført er fortsatt under utvikling, og demoen bruker fiktive data. Assistenten i demoen er koblet til en språkmodell (DeepSeek) og får bare opplysningene fra funnet du ser på.</p>
-      </section>
-      <section>
-        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Regelgrunnlag</h2>
-        <p style="margin:12px 0 0">Kontrollene henviser blant annet til bokføringsloven §§ 4, 7 og 10, merverdiavgiftsloven § 8-3 om begrenset fradragsrett, arbeidsmiljøloven § 10-6 om overtid og a-opplysningsloven. Terskler og henvisninger for hver kontroll ligger i <a onClick="{{ toControls }}" style="cursor:pointer;border-bottom:1px solid #0B2545">kontrolloversikten</a>.</p>
-      </section>
-      <section>
-        <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Videre arbeid</h2>
-        <p style="margin:12px 0 0">Egne terskler per kunde, sammenligning av flere perioder, eksport av rapport som PDF og støtte for a-meldingsfiler.</p>
-      </section>
-      <section id="om-meg" style="margin-top:24px;padding-top:56px;border-top:1px solid #E4DFD4">
-        <div style="font-size:15px;color:#586174">Om meg</div>
-        <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:36px;align-items:start">
+          <p style="margin:12px 0 0;font-size:14.5px;color:#586174">Rettført er fortsatt under utvikling. Filene leses i nettleseren din og lastes ikke opp. Assistenten får bare opplysningene fra funnet du ser på.</p>
+        </div>
+      </details>
+      <details class="rf-acc">
+        <summary><span class="rf-acc-t">Regelgrunnlag</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+        <div class="rf-acc-b">
+          <p style="margin:0">Kontrollene henviser blant annet til bokføringsloven §§ 4, 7 og 10, bokføringsforskriften § 5-1-1 om innholdet i fakturaer, merverdiavgiftsloven § 8-3 om begrenset fradragsrett, arbeidsmiljøloven § 10-6 om overtid og a-opplysningsloven. Terskler og henvisninger for hver kontroll ligger i <a onClick="{{ toControls }}" style="cursor:pointer;border-bottom:1px solid #0B2545">kontrolloversikten</a>.</p>
+        </div>
+      </details>
+      <details class="rf-acc">
+        <summary><span class="rf-acc-t">Videre arbeid</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+        <div class="rf-acc-b">
+          <p style="margin:0">Egne terskler per kunde, sammenligning med forrige periodes SAF-T, eksport av rapport som PDF, støtte for a-meldingsfiler og iPhone-bilder (HEIC).</p>
+        </div>
+      </details>
+      <details class="rf-acc" id="om-meg" open="open">
+        <summary><span class="rf-acc-t">Om meg</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+        <div class="rf-acc-b">
+          <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:36px;align-items:start">
           <div style="aspect-ratio:4/5;border-radius:16px;overflow:hidden;background:#E9E5DC;max-width:320px">
             <img src="assets/mohamad-web.jpg" alt="Mohamad Bokdasji" style="width:100%;height:100%;object-fit:cover;object-position:48% 30%;display:block">
           </div>
@@ -443,7 +450,8 @@ input,textarea{font-family:inherit}
             </div>
           </div>
         </div>
-      </section>
+        </div>
+      </details>
     </div>
   </article>
 </div>
