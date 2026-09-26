@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="nb">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Rettført er et kontrollverktøy for regnskapsdata. Importer SAF-T og CSV, kjør faste kontroller og se hvilke forhold som bør undersøkes nærmere.">
+<meta name="description" content="Rettført kontrollerer regnskapet før du godkjenner perioden. SAF-T, bank, lønn og bilag går gjennom 32 faste kontroller. Du vurderer de få funnene som gjenstår og signerer et kontrollbevis.">
 <link rel="canonical" href="https://xn--rettfrt-u1a.no/">
 <script type="application/ld+json">
 {
@@ -14,7 +14,7 @@
       "@id": "https://xn--rettfrt-u1a.no/#website",
       "url": "https://xn--rettfrt-u1a.no/",
       "name": "Rettført",
-      "description": "Rettført er et kontrollverktøy for regnskapsdata. Importer SAF-T og CSV, kjør faste kontroller og se hvilke forhold som bør undersøkes nærmere.",
+      "description": "Rettført kontrollerer regnskapet før du godkjenner perioden. SAF-T, bank, lønn og bilag går gjennom 32 faste kontroller. Du vurderer de få funnene som gjenstår og signerer et kontrollbevis.",
       "creator": {
         "@id": "https://xn--rettfrt-u1a.no/#mohamad-bokdasji"
       }
@@ -135,12 +135,12 @@ input,textarea{font-family:inherit}
     <div style="animation:rfIn .7s ease both">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:15px;color:#586174"><span style="font-size:12.5px;font-weight:600;color:#0B2545;background:#F6DF6E;padding:3px 10px;border-radius:99px">Tidlig versjon</span>Et ekstra kontrollag før godkjenning</div>
       <h1 style="font-size:clamp(42px,5.4vw,70px);line-height:1.02;letter-spacing:-0.035em;font-weight:600;margin:22px 0 0;text-wrap:balance">Se det som fortjener <span style="background:linear-gradient(transparent 60%,#F6DF6E 60%,#F6DF6E 92%,transparent 92%)">en ekstra vurdering.</span></h1>
-      <p style="font-size:19px;line-height:1.55;color:#3D4759;margin:26px 0 0;max-width:520px;text-wrap:pretty">Importer data fra systemene du allerede bruker. Rettført kjører faste kontroller og kobler informasjon på tvers. Du ser raskt hva som bør undersøkes nærmere.</p>
+      <p style="font-size:19px;line-height:1.55;color:#3D4759;margin:26px 0 0;max-width:540px;text-wrap:pretty">Før en periode lukkes, må tusenvis av posteringer sjekkes på nytt. Rettført leser SAF-T, bank, lønn og bilag, kjører 32 faste kontroller og viser bare de få forholdene som trenger din vurdering. Du vurderer, dokumenterer og signerer i ett kontrollbevis.</p>
       <div style="display:flex;gap:10px;margin-top:38px;flex-wrap:wrap">
         <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:16px;font-weight:500;padding:14px 22px;border-radius:9px;display:flex;align-items:center;gap:10px" style-hover="background:#16345E">Prøv Rettført {{ iArrow }}</button>
         <button onClick="{{ toUpload }}" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;font-size:16px;padding:14px 22px;border-radius:9px" style-hover="border-color:#A9A294">Last opp egen fil</button>
       </div>
-      <div style="margin-top:40px;display:flex;gap:28px;font-size:14px;color:#586174;flex-wrap:wrap"><span>SAF-T Financial 1.30</span><span>CSV-støtte</span><span>Filene lastes ikke opp</span></div>
+      <div style="margin-top:40px;display:flex;gap:28px;font-size:14px;color:#586174;flex-wrap:wrap"><span>SAF-T fra fem regnskapssystemer</span><span>32 faste kontroller</span><span>Kontrollbevis med signering</span><span>Råfilene lastes ikke opp</span></div>
     </div>
 
     <div style="position:relative;animation:rfIn .9s .15s ease both">
@@ -182,7 +182,7 @@ input,textarea{font-family:inherit}
           </div>
           <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">01</div>
           <div style="font-size:20px;font-weight:600;margin-top:8px">Last opp</div>
-          <p style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">SAF-T fra Tripletex, PowerOffice, Fiken, Visma eller et annet system. Lønn som CSV for to perioder.</p>
+          <p style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">SAF-T fra Tripletex, PowerOffice Go, Fiken, Visma eller Xledger. I tillegg forrige periode, bankutskrift, lønn og bilag.</p>
         </div>
         <div>
           <div style="height:200px;position:relative;display:flex;align-items:flex-end;justify-content:center">
@@ -200,7 +200,7 @@ input,textarea{font-family:inherit}
           </div>
           <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">02</div>
           <div style="font-size:20px;font-weight:600;margin-top:8px">Analyser</div>
-          <p style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">{{ nCtrl }} kontroller kjøres på sekunder. Det som stemmer, huker Rettført av. Det som ikke stemmer, markeres.</p>
+          <p style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">{{ nCtrl }} kontroller kjøres på sekunder, på tvers av hovedbok, MVA, bank, reskontro, periodisering og lønn. Det som stemmer, huker Rettført av. Resten blir en kort arbeidsliste.</p>
         </div>
         <div>
           <div style="height:200px;position:relative;display:flex;align-items:flex-end;justify-content:center">
@@ -214,7 +214,64 @@ input,textarea{font-family:inherit}
           </div>
           <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">03</div>
           <div style="font-size:20px;font-weight:600;margin-top:8px">Vurder</div>
-          <p style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">Hvert funn viser hvorfor Rettført reagerte. Du merker det som avklart, med en kommentar.</p>
+          <p style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">Hvert funn viser hva som ble sjekket, hvorfor og sporingen til bilaget. Du vurderer det som rettet, forventet avvik, oppfølging eller ikke relevant, og signerer kontrollbeviset.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="losning" data-rf="sec" style="max-width:1240px;margin:0 auto;padding:120px 32px 0">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:48px;align-items:end">
+      <div>
+        <div style="font-size:15px;color:#586174">Hva Rettført løser</div>
+        <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:14px 0 0;text-wrap:balance">Mindre leting. Mer tid til vurdering.</h2>
+      </div>
+      <p style="font-size:17px;line-height:1.6;color:#3D4759;margin:0;max-width:480px">Periodeavslutning handler om å finne de få postene som ikke stemmer, og å kunne vise at de er vurdert. Rettført gjør letingen og dokumentasjonen. Den faglige vurderingen er fortsatt din.</p>
+    </div>
+    <div style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:26px 24px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C">01</div>
+          <div style="font-size:15px;color:#8A2E1F;margin-top:12px;line-height:1.45">«De samme sjekkene hver måned tar timer.»</div>
+          <div style="font-size:19px;font-weight:600;letter-spacing:-0.015em;margin-top:10px;line-height:1.3">Faste kontroller gjør rutinearbeidet</div>
+          <p style="font-size:15px;line-height:1.6;color:#3D4759;margin:8px 0 0">Dobbeltføringer, MVA-koder, bankdifferanser, periodisering og lønn mot regnskap sjekkes likt hver gang, med kjent terskel og regelgrunnlag.</p>
+        </div>
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:26px 24px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C">02</div>
+          <div style="font-size:15px;color:#8A2E1F;margin-top:12px;line-height:1.45">«Avvikene drukner i tusenvis av posteringer.»</div>
+          <div style="font-size:19px;font-weight:600;letter-spacing:-0.015em;margin-top:10px;line-height:1.3">Bare det som trenger deg</div>
+          <p style="font-size:15px;line-height:1.6;color:#3D4759;margin:8px 0 0">I demoen blir 4 812 posteringer til fem funn. Hvert funn viser grunnlaget, sporingen tilbake til bilaget og hva som bør sjekkes.</p>
+        </div>
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:26px 24px">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C">03</div>
+          <div style="font-size:15px;color:#8A2E1F;margin-top:12px;line-height:1.45">«Vurderingene blir ikke dokumentert.»</div>
+          <div style="font-size:19px;font-weight:600;letter-spacing:-0.015em;margin-top:10px;line-height:1.3">Et kontrollbevis for hver periode</div>
+          <p style="font-size:15px;line-height:1.6;color:#3D4759;margin:8px 0 0">Hver vurdering lagres med kommentar, tidspunkt og hvem som gjorde den. Perioden signeres, låses og kan sendes til oppdragsansvarlig.</p>
+        </div>
+    </div>
+    <div style="margin-top:64px;background:#fff;border:1px solid #E4DFD4;border-radius:20px;padding:clamp(24px,4vw,40px)">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px 24px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:14px;color:#586174">Nytt i demoen</div>
+          <h3 style="font-size:clamp(24px,2.6vw,30px);line-height:1.15;letter-spacing:-0.025em;font-weight:600;margin:8px 0 0">Hele arbeidsflyten, fra fil til signert kontroll.</h3>
+        </div>
+        <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 20px;font-size:15px;font-weight:500;display:flex;align-items:center;gap:10px" style-hover="background:#16345E">Se det i demoen {{ iArrow }}</button>
+      </div>
+      <div style="margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px">
+        <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Gjennomgang med sporing</span></div>
+          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Arbeidsliste over funn. Hvert funn viser hva, hvorfor og mulig effekt, med sporing til kilde, grunnlag og bilagsleser.</p>
+        </div>
+        <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Assistent med kilder</span></div>
+          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Forklarer funnet, foreslår hva du bør sjekke og skriver utkast til e-post til kunden. Den endrer aldri tallene.</p>
+        </div>
+        <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Kontrollbevis</span></div>
+          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Oppsummering av perioden, vurderte forhold, aktivitetslogg og signering som låser perioden.</p>
+        </div>
+        <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Portefølje</span></div>
+          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Flere klienter i én oversikt, på tvers av fem regnskapssystemer.</p>
         </div>
       </div>
     </div>
@@ -245,13 +302,13 @@ input,textarea{font-family:inherit}
     <div data-rf="dark" style="max-width:1320px;margin:0 auto;background:#0B2545;color:#fff;border-radius:28px;padding:88px clamp(24px,5vw,72px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:56px;align-items:center">
       <div>
         <h2 style="font-size:clamp(32px,3.8vw,48px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0;text-wrap:balance">Råfilene blir på maskinen din.</h2>
-        <p style="font-size:17px;line-height:1.6;color:rgba(255,255,255,.72);margin:20px 0 0;max-width:480px">SAF-T- og CSV-filene leses i nettleseren og lastes ikke opp som filer. Kontrollmotoren kjører lokalt. Ved en utvidet forklaring kan bare relevante opplysninger fra det valgte funnet sendes videre.</p>
+        <p style="font-size:17px;line-height:1.6;color:rgba(255,255,255,.72);margin:20px 0 0;max-width:480px">SAF-T- og CSV-filene leses i nettleseren og lastes ikke opp som filer. Kontrollmotoren kjører lokalt. Bruker du assistenten, sendes bare opplysningene fra funnet du ser på videre til en språkmodell (DeepSeek). Råfilene sendes aldri.</p>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.14);border-radius:14px;overflow:hidden">
         <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Lokal kontroll</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Kontrollmotoren kjører i nettleseren.</div></div>
         <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Råfiler blir lokale</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">SAF-T- og CSV-filene lastes ikke opp som filer.</div></div>
         <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Regler, ikke gjetning</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Alle beregninger er vanlig kode med faste terskler.</div></div>
-        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Begrenset deling</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Kun relevante opplysninger fra ett funn brukes ved utvidet forklaring.</div></div>
+        <div style="background:#0B2545;padding:22px"><div style="font-size:16px;font-weight:600">Begrenset deling</div><div style="font-size:14px;color:rgba(255,255,255,.66);margin-top:6px;line-height:1.5">Assistenten får bare opplysningene fra ett funn, og bare når du spør.</div></div>
       </div>
     </div>
   </section>
@@ -278,7 +335,7 @@ input,textarea{font-family:inherit}
           </div>
           <div style="height:1px;background:{{ p.line }};margin:22px 0"></div>
           <div style="display:flex;flex-direction:column;gap:12px">
-            <sc-for list="{{ p.feats }}" as="f" hint-placeholder-count="11">
+            <sc-for list="{{ p.feats }}" as="f" hint-placeholder-count="12">
               <div style="display:flex;align-items:center;gap:12px;font-size:14.5px;color:{{ f.txt }}">
                 <span style="width:20px;height:20px;border-radius:50%;background:{{ f.icBg }};color:{{ f.icFg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background-color .35s,color .35s">
                   <sc-if value="{{ f.on }}" hint-placeholder-val="{{ true }}">{{ iTickS }}</sc-if>
@@ -317,7 +374,7 @@ input,textarea{font-family:inherit}
   </section>
   <footer style="max-width:1240px;margin:0 auto;padding:40px 32px;border-top:1px solid #E4DFD4;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;font-size:14px;color:#586174">
     <div style="width:79px;height:20px;overflow:hidden;position:relative"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;max-width:none;left:-11.2px;top:-6.4px;width:100.8px;height:33.6px"></div>
-    <div style="display:flex;gap:24px;flex-wrap:wrap"><span>rettført.no</span><a onClick="{{ toAbout }}" style="cursor:pointer;color:#586174">Om prosjektet</a><a onClick="{{ toControls }}" style="cursor:pointer;color:#586174">Kontroller</a><span>Personvern</span></div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap"><span>rettført.no</span><a onClick="{{ toAbout }}" style="cursor:pointer;color:#586174">Om prosjektet</a><a onClick="{{ toControls }}" style="cursor:pointer;color:#586174">Kontroller</a><a href="/personvern.html" style="color:#586174">Personvern</a></div>
   </footer>
 </div>
 </sc-if>
@@ -347,18 +404,18 @@ input,textarea{font-family:inherit}
       </section>
       <section>
         <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Hva Rettført gjør</h2>
-        <p style="margin:12px 0 0">Rettført tar inn strukturerte underlag – i dag SAF-T Financial og CSV – kjører {{ nCtrl }} faste kontroller og lager en rapport med funnene. Hvert funn viser datagrunnlaget det bygger på, hvorfor det ble markert, og hva som er et naturlig neste steg. Brukeren kan avklare funnet og dokumentere vurderingen med en kommentar.</p>
+        <p style="margin:12px 0 0">Rettført tar inn strukturerte underlag – SAF-T Financial for perioden og forrige periode, bankutskrift, lønn og bilag – kjører {{ nCtrl }} faste kontroller og lager en arbeidsliste med funnene. Hvert funn viser datagrunnlaget, sporingen tilbake til kilden, hvorfor det ble markert og hva som bør sjekkes. Brukeren vurderer funnet, skriver en kommentar og signerer til slutt et kontrollbevis for perioden.</p>
         <p style="margin:12px 0 0">Rettført erstatter ikke fagsystemene. Det fungerer som et kontrollag over dataene som allerede finnes der.</p>
       </section>
       <section>
         <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Slik fungerer det</h2>
         <div style="margin-top:16px;display:flex;flex-direction:column;border-top:1px solid #E4DFD4">
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Innlesing</span><span>Rettført leser strukturerte filer fra systemene du allerede bruker, blant annet SAF-T Financial og CSV.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Innlesing</span><span>Rettført leser strukturerte filer fra systemene du allerede bruker: SAF-T Financial fra Tripletex, PowerOffice Go, Fiken, Visma og Xledger, i tillegg til bankutskrift, lønn og bilag.</span></div>
           <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Kontrollmotor</span><span>Faste regler går gjennom dataene og finner avvik, uvanlige mønstre og forhold som bør undersøkes nærmere.</span></div>
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">AI-støtte</span><span>AI brukes til å forklare funn, foreslå hva som bør kontrolleres videre og hjelpe med prioritering. Den endrer ikke tallene eller selve kontrollresultatet.</span></div>
-          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Menneskelig vurdering</span><span>Brukeren ser grunnlaget bak hvert funn, velger hvordan det skal avklares og kan dokumentere vurderingen med en kommentar.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">AI-støtte</span><span>En assistent forklarer funn, viser kildene, foreslår hva som bør kontrolleres videre og skriver utkast til kundeforespørsler. Den endrer ikke tallene eller selve kontrollresultatet.</span></div>
+          <div data-rf="kv" style="padding:16px 0;border-bottom:1px solid #E4DFD4;display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 20px;font-size:15.5px"><span style="font-weight:600;color:#0B2545">Menneskelig vurdering</span><span>Brukeren ser grunnlaget bak hvert funn, vurderer det som rettet, forventet avvik, oppfølging eller ikke relevant, og signerer et kontrollbevis som låser perioden.</span></div>
         </div>
-        <p style="margin:12px 0 0;font-size:14.5px;color:#586174">Den publiserte versjonen er fortsatt under utvikling, og AI-funksjonen er foreløpig simulert.</p>
+        <p style="margin:12px 0 0;font-size:14.5px;color:#586174">Rettført er fortsatt under utvikling, og demoen bruker fiktive data. Assistenten i demoen er koblet til en språkmodell (DeepSeek) og får bare opplysningene fra funnet du ser på.</p>
       </section>
       <section>
         <h2 style="font-size:22px;font-weight:600;letter-spacing:-0.015em;margin:0;color:#0B2545">Regelgrunnlag</h2>
@@ -1223,11 +1280,11 @@ class Component extends DCLogic {
     const ctrlGroups = [['regnskap', 'Regnskap', 'SAF-T Financial'], ['lonn', 'Lønn', 'To lønnsperioder'], ['kryss', 'Lønn × regnskap', 'SAF-T og lønn for samme måned'], ['revisjon', 'Revisjonsblikk', 'Risikobasert utvelgelse']].map(([a, t, sub]) => ({ t, s: sub, items: ctrls.filter(c => c.area === a).map(c => { const m = stMap[c.status] || stMap.ikke; const rw = rc && rc.rows ? rc.rows.find(x => x.id === c.id) : null; return { ...c, stL: c.status === 'avvik' ? `${c.count} avvik` : rw && rw.status === 'innenfor' ? 'Innenfor toleranse' : m[0], stC: m[1], stBg: m[2] }; }) }));
 
     // plans
-    const PF = [['Regnskapskontroll via SAF-T', [1, 1, 1]], ['Kontrollrapport med forklaring per funn', [1, 1, 1]], ['Analyse lokalt i nettleseren', [1, 1, 1]], ['Lønnskontroll mellom perioder', [0, 1, 1]], ['Merk funn som avklart med kommentar', [0, 1, 1]], ['Eksport av rapport (CSV og PDF)', [0, 1, 1]], ['Utvidet forklaring av funn', [0, 1, 1]], ['Historikk mellom analyser', [0, 1, 1]], ['Flere kunder i én oversikt', [0, 0, 1]], ['Egne terskler per kunde', [0, 0, 1]], ['Prioritert support', [0, 0, 1]]];
+    const PF = [['Regnskapskontroll via SAF-T', [1, 1, 1]], ['Funn med sporing til kilde', [1, 1, 1]], ['Analyse lokalt i nettleseren', [1, 1, 1]], ['Bankavstemming og bilagsleser', [0, 1, 1]], ['Lønn mot regnskap', [0, 1, 1]], ['Vurdering med kommentar per funn', [0, 1, 1]], ['Assistent med kilder', [0, 1, 1]], ['Kontrollbevis med signering', [0, 1, 1]], ['Eksport av rapport (CSV og PDF)', [0, 1, 1]], ['Portefølje med flere klienter', [0, 0, 1]], ['Egne terskler per kunde', [0, 0, 1]], ['Prioritert support', [0, 0, 1]]];
     const plans = [
       { k: 'Gratis', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
-      { k: 'Pro', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '249', unit: 'kr / mnd per selskap', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 utvidede forklaringer per måned'], pop: true },
-      { k: 'Byrå', d: 'For miljøer som følger opp flere virksomheter.', price: '1 490', unit: 'kr / mnd inkl. 15 kunder', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 utvidede forklaringer per måned'] }
+      { k: 'Pro', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '249', unit: 'kr / mnd per selskap', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 assistentsvar per måned'], pop: true },
+      { k: 'Byrå', d: 'For miljøer som følger opp flere virksomheter.', price: '1 490', unit: 'kr / mnd inkl. 15 kunder', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 assistentsvar per måned'] }
     ].map((p, i) => { const dk = s.planHover === i; return { ...p, dark: dk, bg: dk ? INK : '#fff', fg: dk ? '#fff' : INK, sub: dk ? 'rgba(255,255,255,.68)' : C.mut, bd: dk ? INK : C.line, line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2', btnBg: dk ? '#F6DF6E' : INK, btnFg: dk ? INK : '#fff', shadow: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', lift: dk ? '-12px' : '0px', limits: p.lim.map(l => ({ l })), feats: PF.map(f => { const on = !!f[1][i]; return { l: f[0], on, off: !on, txt: on ? (dk ? '#fff' : INK) : (dk ? 'rgba(255,255,255,.4)' : '#A4A8B0'), icBg: on ? (dk ? '#35AE74' : C.grnBg) : (dk ? 'rgba(255,255,255,.08)' : '#EFEBE2'), icFg: on ? (dk ? '#fff' : C.grn) : (dk ? 'rgba(255,255,255,.42)' : '#A4A8B0') }; }), enter: () => { if (s.planHover !== i) this.setState({ planHover: i }); }, fn: i === 0 ? () => this.trySample() : () => this.setState(st => ({ screen: 'auth', authMode: 'signup', su: { ...st.su, plan: p.k } })) }; });
 
     const cat = E ? E.CONTROLS : [];
@@ -1318,6 +1375,96 @@ class Component extends DCLogic {
     };
   }
 }
+</script>
+<!-- Chat om Rettført. Står utenfor x-dc slik at den ligger fast nederst på alle skjermer på forsiden. -->
+<style>
+#rf-chat-btn{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;align-items:center;gap:10px;background:#0B2545;color:#fff;border:0;border-radius:99px;padding:13px 18px 13px 14px;font:500 15px 'Schibsted Grotesk',system-ui,sans-serif;box-shadow:0 14px 34px -14px rgba(11,37,69,.6);cursor:pointer;min-height:48px}
+#rf-chat-btn:hover{background:#16345E}
+#rf-chat-btn .dot{width:26px;height:26px;border-radius:50%;background:#F6DF6E;color:#0B2545;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+#rf-chat{position:fixed;right:20px;bottom:20px;z-index:61;width:min(380px,calc(100vw - 32px));height:min(560px,calc(100dvh - 40px));background:#fff;border:1px solid #E1DBCE;border-radius:18px;box-shadow:0 30px 70px -30px rgba(11,37,69,.55);display:none;flex-direction:column;overflow:hidden;font-family:'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;animation:rfIn .22s ease both}
+#rf-chat.open{display:flex}
+#rf-chat .hd{padding:14px 16px;border-bottom:1px solid #EFEBE2;display:flex;align-items:center;gap:10px}
+#rf-chat .hd b{font-size:16px;font-weight:600}
+#rf-chat .hd span{font-size:12.5px;color:#586174;display:flex;align-items:center;gap:6px}
+#rf-chat .hd span i{width:7px;height:7px;border-radius:50%;background:#35AE74;display:inline-block}
+#rf-chat .x{margin-left:auto;background:#F1EDE4;border:0;border-radius:8px;width:36px;height:36px;font-size:18px;color:#0B2545;cursor:pointer}
+#rf-chat .log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#FBFAF6;overscroll-behavior:contain}
+#rf-chat .m{max-width:86%;padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+#rf-chat .m.bot{background:#fff;border:1px solid #E4DFD4;align-self:flex-start;border-bottom-left-radius:4px}
+#rf-chat .m.me{background:#0B2545;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+#rf-chat .m.wait{color:#586174}
+#rf-chat .chips{display:flex;flex-wrap:wrap;gap:6px}
+#rf-chat .chips button{background:#fff;border:1px solid #D9D3C6;border-radius:99px;padding:7px 11px;font:14px 'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;cursor:pointer}
+#rf-chat .chips button:hover{border-color:#A9A294}
+#rf-chat form{display:flex;gap:8px;padding:12px;border-top:1px solid #EFEBE2;background:#fff}
+#rf-chat textarea{flex:1;resize:none;border:1px solid #D9D3C6;border-radius:10px;padding:10px 12px;font:16px 'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;outline:none;max-height:120px;min-height:44px}
+#rf-chat textarea:focus{border-color:#0B2545}
+#rf-chat form button{background:#0B2545;color:#fff;border:0;border-radius:10px;padding:0 16px;font:500 15px 'Schibsted Grotesk',system-ui,sans-serif;cursor:pointer;min-height:44px}
+#rf-chat form button:disabled{opacity:.5;cursor:default}
+#rf-chat .ft{font-size:11.5px;color:#8A909C;padding:0 14px 10px;background:#fff}
+#rf-chat .ft a{color:#586174;text-decoration:underline}
+@media (max-width:520px){#rf-chat{right:0;bottom:0;width:100vw;height:min(88dvh,640px);border-radius:18px 18px 0 0}#rf-chat-btn{right:14px;bottom:14px}#rf-chat-btn .lbl{display:none}#rf-chat-btn{padding:11px}}
+@media print{#rf-chat,#rf-chat-btn{display:none !important}}
+</style>
+<button id="rf-chat-btn" type="button" aria-controls="rf-chat" aria-expanded="false"><span class="dot">?</span><span class="lbl">Spør om Rettført</span></button>
+<section id="rf-chat" role="dialog" aria-label="Chat om Rettført">
+  <div class="hd"><div><b>Spør om Rettført</b><span><i></i>Svarer med en gang</span></div><button class="x" type="button" aria-label="Lukk chatten">×</button></div>
+  <div class="log" aria-live="polite"></div>
+  <form><textarea rows="1" maxlength="1000" placeholder="Skriv et spørsmål …" aria-label="Spørsmål"></textarea><button type="submit">Send</button></form>
+  <div class="ft">Svarene lages av en språkmodell (DeepSeek) og kan være feil. Ikke skriv personopplysninger. <a href="/personvern.html">Personvern</a></div>
+</section>
+<script>
+(function () {
+  var btn = document.getElementById('rf-chat-btn'), box = document.getElementById('rf-chat');
+  var log = box.querySelector('.log'), form = box.querySelector('form'), ta = form.querySelector('textarea'), send = form.querySelector('button');
+  var msgs = [], busy = false, started = false;
+  var CHIPS = ['Hva løser Rettført?', 'Hvordan fungerer kontrollene?', 'Hva skjer med filene mine?', 'Hva koster det?'];
+
+  function add(role, text, cls) {
+    var d = document.createElement('div');
+    d.className = 'm ' + (role === 'user' ? 'me' : 'bot') + (cls ? ' ' + cls : '');
+    d.textContent = text;
+    log.appendChild(d); log.scrollTop = log.scrollHeight;
+    return d;
+  }
+  function start() {
+    if (started) return; started = true;
+    add('assistant', 'Hei! Jeg svarer på spørsmål om Rettført – hva det løser, hvordan kontrollene virker, personvern og priser.');
+    var c = document.createElement('div'); c.className = 'chips';
+    CHIPS.forEach(function (q) { var b = document.createElement('button'); b.type = 'button'; b.textContent = q; b.onclick = function () { c.remove(); ask(q); }; c.appendChild(b); });
+    log.appendChild(c);
+  }
+  function open(v) {
+    box.classList.toggle('open', v); btn.style.display = v ? 'none' : '';
+    btn.setAttribute('aria-expanded', String(v));
+    if (v) { start(); setTimeout(function () { ta.focus(); }, 50); } else btn.focus();
+  }
+  async function ask(q) {
+    q = q.trim(); if (!q || busy) return;
+    busy = true; send.disabled = true;
+    add('user', q); msgs.push({ role: 'user', content: q });
+    var w = add('assistant', 'Skriver …', 'wait');
+    var text;
+    try {
+      var r = await fetch('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'site', messages: msgs.slice(-10) }) });
+      if (r.status === 429) throw new Error('Du har sendt mange spørsmål på kort tid. Prøv igjen om noen minutter.');
+      if (!r.ok) throw new Error('');
+      text = (await r.json()).text;
+      msgs.push({ role: 'assistant', content: text });
+    } catch (e) {
+      msgs.pop();
+      text = e.message || 'Assistenten svarer ikke akkurat nå. Prøv demoen på /demo.html, eller send en e-post til mohbok04@hotmail.com.';
+    }
+    w.textContent = text; w.className = 'm bot'; log.scrollTop = log.scrollHeight;
+    busy = false; send.disabled = false; ta.focus();
+  }
+  btn.onclick = function () { open(true); };
+  box.querySelector('.x').onclick = function () { open(false); };
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && box.classList.contains('open')) open(false); });
+  form.onsubmit = function (e) { e.preventDefault(); var q = ta.value; ta.value = ''; ta.style.height = ''; ask(q); };
+  ta.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
+  ta.addEventListener('input', function () { ta.style.height = ''; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; });
+})();
 </script>
 </body>
 </html>
