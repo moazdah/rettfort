@@ -348,7 +348,7 @@ input,textarea{font-family:inherit}
       <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0 auto;max-width:720px;text-wrap:balance">Planlagte priser.</h2>
       <p style="font-size:17px;line-height:1.6;color:#3D4759;margin:18px auto 0;max-width:560px">Rettført er under utvikling. Demoen er åpen for alle. Meld deg på, så får du beskjed når du kan ta det i bruk med egne data.</p>
     </div>
-    <p class="rf-mob" style="text-align:center;font-size:14px;color:#586174;margin:20px 0 0">Sveip for å se alle tre →</p>
+    <p class="rf-mob" style="text-align:center;font-size:14px;color:#586174;margin:20px 0 0">← Sveip for å se alle tre →</p>
     <div data-rf="plans" onMouseLeave="{{ planReset }}" style="margin-top:80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px;align-items:start">
       <sc-for list="{{ plans }}" as="p" hint-placeholder-count="3">
         <div style="position:relative;background:{{ p.bg }};color:{{ p.fg }};border:1px solid {{ p.bd }};border-radius:18px;padding:32px 28px 28px;box-shadow:{{ p.shadow }};transform:translateY({{ p.lift }});transition:transform .35s cubic-bezier(.3,.7,.2,1),box-shadow .35s ease,border-color .35s ease,background-color .35s ease,color .35s ease" onMouseEnter="{{ p.enter }}">
@@ -1655,6 +1655,22 @@ class Component extends DCLogic {
   var hideTeaser = false; try { hideTeaser = sessionStorage.getItem('rfc_teaser') === '0'; } catch (x) {}
   teaser.hidden = hideTeaser;
   intro();
+})();
+</script>
+<script>
+// Prisene på mobil: start på pakken i midten.
+(function () {
+  var done = typeof WeakSet === 'function' ? new WeakSet() : null;
+  function center() {
+    var el = document.querySelector('[data-rf=plans]');
+    if (el && done && !done.has(el) && el.children.length >= 3 && el.scrollWidth > el.clientWidth) {
+      var mid = el.children[1];
+      var a = el.getBoundingClientRect(), b = mid.getBoundingClientRect();
+      el.scrollLeft += b.left - a.left - (a.width - b.width) / 2;
+      done.add(el);
+    }
+  }
+  setInterval(center, 400);
 })();
 </script>
 </body>
