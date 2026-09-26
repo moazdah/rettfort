@@ -54,6 +54,13 @@
         /<header data-noprint="1" style="position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #E4DFD4">[\s\S]*?<\/header>/,
         demoHeader
       );
+
+      // Unngå at omvisningsboksen rekker å rendres i (0,0) før posisjonen
+      // er målt på desktop. På mobil er boksen en bunn-sheet og trenger ikke måling.
+      source=source.replace(
+        'hasGuide: gi >= 0, gStep: gs,',
+        'hasGuide: gi >= 0 && (m || !!tp), gStep: gs,'
+      );
       document.open();
       document.write(source);
       document.close();
