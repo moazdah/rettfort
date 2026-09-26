@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Rettført stresstest</title>
+<script type="module">
+  import * as E from '../../rettfort-engine.js';
+  window.E = E;
+  // Kjører motoren slik appen gjør. Byte-input dekodes som File.text() (UTF-8).
+  window.runCase = input => {
+    const dec = b64 => b64 == null ? undefined : new TextDecoder('utf-8').decode(Uint8Array.from(atob(b64), c => c.charCodeAt(0)));
+    const x = { saft: input.saft ?? dec(input.saftB64), prev: input.prev ?? dec(input.prevB64), curr: input.curr ?? dec(input.currB64), settings: input.settings };
+    if (input.grounded) return { ok: true, ms: 0, r: { grounded: E.numbersGrounded(input.grounded[0], input.grounded[1]), findings: [], controls: [] } };
+    const t0 = performance.now();
+    try {
+      const r = E.analyze(x);
+      return { ok: true, ms: performance.now() - t0, r: JSON.parse(JSON.stringify(r)) };
+    } catch (e) {
+      return { ok: false, ms: performance.now() - t0, error: String(e && e.message || e), stack: String(e && e.stack || '').split('\n').slice(0, 3).join(' | ') };
+    }
+  };
+  window.ready = true;
+</script>
