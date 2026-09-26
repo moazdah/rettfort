@@ -107,6 +107,7 @@ input,textarea{font-family:inherit}
 .rf-tag b{color:#6FD39F;margin-left:4px}
 .rf-spark{position:absolute;color:#F2C94C;font-size:16px;animation:rfSpark 2.6s var(--d) ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.rf-tag,.rf-spark{animation:none}}
+.rf-pd summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:16px 0 2px;font-size:15px;font-weight:600}.rf-pd summary::-webkit-details-marker{display:none}.rf-pd-c{font-size:14px;transition:transform .2s}.rf-pd[open] .rf-pd-c{transform:rotate(180deg)}.rf-pd[open] .rf-pd-b{animation:rfIn .3s ease both;margin-top:14px}
 @media (max-width:1080px){[data-rf=cta]{padding-right:200px !important}}
 @media (max-width:900px){[data-rf=nav]{display:none !important}[data-rf=deskact]{display:none !important}[data-rf=mobmenu]{display:flex !important}[data-rf=sec]{padding-top:72px !important;padding-bottom:56px !important}[data-rf=hero]{padding-top:56px !important;padding-bottom:64px !important;gap:48px !important}[data-rf=dark]{padding-top:56px !important;padding-bottom:56px !important}[data-rf=co]{display:none !important}[data-rf=stick]{position:static !important}}
 @media (max-width:760px){body{width:100%;max-width:100%;overflow-x:hidden}.rf-ctrl-extra{display:none !important}.rf-ctrl-expanded .rf-ctrl-extra{display:flex !important;animation:rfIn .28s ease both}[data-rf=ctrlToggle]{display:flex !important}[data-rf=span2]{grid-column:auto !important}[data-rf=cta]{padding:24px !important;margin-top:24px !important;width:100% !important;max-width:100% !important;overflow:hidden !important;display:flex !important;flex-direction:column !important;align-items:stretch !important;gap:12px !important}[data-rf=cta]>button{width:100% !important}[data-rf=ctaText]{width:100% !important;flex:0 0 auto !important}[data-rf=ctaForm]{width:100% !important;max-width:none !important;min-width:0 !important;flex:0 0 auto !important;display:grid !important;grid-template-columns:minmax(0,1fr) !important;gap:8px !important}[data-rf=ctaForm] input,[data-rf=ctaForm] button{width:100% !important;max-width:100% !important;min-width:0 !important}[data-rf=ctaM]{display:none !important}[data-rf=card44]{padding:28px 24px !important}[data-rf=kv]{grid-template-columns:1fr !important}[data-rf=aboutM]{display:none !important}[data-rf=apphdr]{gap:14px !important;padding:0 18px !important}[data-rf=main]{padding:24px 16px 72px !important}[data-rf=hist]{grid-template-columns:1fr auto !important;gap:6px 12px !important}[data-rf=hist]>span:last-child{grid-column:1 / -1}[data-rf=kv2]{grid-template-columns:1fr !important;gap:6px !important}[data-rf=frow]{grid-template-columns:auto minmax(0,1fr) !important}[data-rf=frow]>div:last-child{grid-column:1 / -1;text-align:left !important;display:flex;gap:10px}}
@@ -376,6 +377,20 @@ input,textarea{font-family:inherit}
               </div>
             </sc-for>
           </div>
+          <details class="rf-mob rf-pd" style="margin-top:20px;border-top:1px solid {{ p.line }}">
+            <summary style="color:{{ p.fg }}"><span>Se hva som er med</span><span class="rf-pd-c" aria-hidden="true">▾</span></summary>
+            <div class="rf-pd-b" style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ p.feats }}" as="f" hint-placeholder-count="12">
+                <div style="display:flex;align-items:center;gap:12px;font-size:14.5px;color:{{ f.txt }}">
+                  <span style="width:20px;height:20px;border-radius:50%;background:{{ f.icBg }};color:{{ f.icFg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background-color .35s,color .35s">
+                    <sc-if value="{{ f.on }}" hint-placeholder-val="{{ true }}">{{ iTickS }}</sc-if>
+                    <sc-if value="{{ f.off }}">{{ iXs }}</sc-if>
+                  </span>
+                  <span>{{ f.l }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </details>
         </div>
       </sc-for>
     </div>
@@ -1325,8 +1340,8 @@ class Component extends DCLogic {
     // plans
     const PF = [['Regnskapskontroll via SAF-T', [1, 1, 1]], ['Funn med sporing til kilde', [1, 1, 1]], ['Analyse lokalt i nettleseren', [1, 1, 1]], ['Bankavstemming og bilagsleser', [0, 1, 1]], ['Lønn mot regnskap', [0, 1, 1]], ['Vurdering med kommentar per funn', [0, 1, 1]], ['Assistent med kilder', [0, 1, 1]], ['Kontrollbevis med signering', [0, 1, 1]], ['Eksport av rapport (CSV og PDF)', [0, 1, 1]], ['Portefølje med flere klienter', [0, 0, 1]], ['Egne terskler per kunde', [0, 0, 1]], ['Prioritert support', [0, 0, 1]]];
     const plans = [
-      { k: 'Gratis', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
-      { k: 'Pro', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '249', unit: 'kr / mnd per selskap', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 assistentsvar per måned'], pop: true },
+      { k: 'Start', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
+      { k: 'Selskap', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '249', unit: 'kr / mnd per selskap', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 assistentsvar per måned'], pop: true },
       { k: 'Byrå', d: 'For miljøer som følger opp flere virksomheter.', price: '1 490', unit: 'kr / mnd inkl. 15 kunder', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 assistentsvar per måned'] }
     ].map((p, i) => { const dk = s.planHover === i; return { ...p, dark: dk, bg: dk ? INK : '#fff', fg: dk ? '#fff' : INK, sub: dk ? 'rgba(255,255,255,.68)' : C.mut, bd: dk ? INK : C.line, line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2', btnBg: dk ? '#F6DF6E' : INK, btnFg: dk ? INK : '#fff', shadow: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', lift: dk ? '-12px' : '0px', limits: p.lim.map(l => ({ l })), feats: PF.map(f => { const on = !!f[1][i]; return { l: f[0], on, off: !on, txt: on ? (dk ? '#fff' : INK) : (dk ? 'rgba(255,255,255,.4)' : '#A4A8B0'), icBg: on ? (dk ? '#35AE74' : C.grnBg) : (dk ? 'rgba(255,255,255,.08)' : '#EFEBE2'), icFg: on ? (dk ? '#fff' : C.grn) : (dk ? 'rgba(255,255,255,.42)' : '#A4A8B0') }; }), enter: () => { if (s.planHover !== i) this.setState({ planHover: i }); }, fn: i === 0 ? () => this.trySample() : () => this.setState(st => ({ screen: 'auth', authMode: 'signup', su: { ...st.su, plan: p.k } })) }; });
 

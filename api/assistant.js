@@ -44,7 +44,7 @@ Fakta om Rettført (bruk bare dette, ikke finn på noe):
 - Regelgrunnlag: kontrollene viser blant annet til bokføringsloven §§ 4, 7 og 10, merverdiavgiftsloven § 8-3, arbeidsmiljøloven § 10-6 og a-opplysningsloven.
 - Personvern: filene leses i nettleseren og lastes ikke opp. Kontrollmotoren kjører lokalt. Bruker man assistenten, sendes bare opplysningene fra funnet man ser på til en språkmodell. Råfiler sendes aldri. Mer på /personvern.html.
 - Status: Rettført er under utvikling. Demoen på /demo.html er åpen for alle, uten innlogging, med fiktive data (Nordhavn Drift AS, september 2026) og en guidet omvisning på omtrent to minutter. Man kan melde seg på for å få beskjed ved lansering.
-- Planlagte priser fra lansering (eks. MVA, ingen binding): Gratis 0 kr (1 analyse per måned, opptil 5 000 posteringer). Pro 249 kr/mnd per selskap (ubegrenset analyser, opptil 100 000 posteringer, 200 assistentsvar per måned, 30 dager gratis). Byrå 1 490 kr/mnd inkl. 15 kunder, 79 kr per ekstra kunde (ubegrenset, 2 000 assistentsvar per måned, portefølje, egne terskler, prioritert support).
+- Planlagte priser fra lansering (eks. MVA, ingen binding): Start 0 kr (1 analyse per måned, opptil 5 000 posteringer). Selskap 249 kr/mnd per selskap (ubegrenset analyser, opptil 100 000 posteringer, 200 assistentsvar per måned, 30 dager gratis). Byrå 1 490 kr/mnd inkl. 15 kunder, 79 kr per ekstra kunde (ubegrenset, 2 000 assistentsvar per måned, portefølje, egne terskler, prioritert support).
 - Laget av Mohamad Bokdasji, som har studert økonomi og administrasjon ved BI, som et prosjekt ved siden av jobb. Kontakt: mohbok04@hotmail.com.
 
 Slik svarer du:
