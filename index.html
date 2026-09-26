@@ -360,7 +360,8 @@ input,textarea{font-family:inherit}
           <div style="font-size:21px;font-weight:600;letter-spacing:-0.015em">{{ p.k }}</div>
           <div style="font-size:14.5px;line-height:1.5;color:{{ p.sub }};margin-top:6px;min-height:44px">{{ p.d }}</div>
           <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-top:20px"><span style="font-size:clamp(38px,3.6vw,48px);font-weight:600;letter-spacing:-0.04em;line-height:1;white-space:nowrap">{{ p.price }}</span><span style="font-size:14.5px;color:{{ p.sub }};white-space:nowrap">{{ p.unit }}</span></div>
-          <div style="font-size:13px;color:{{ p.sub }};margin-top:8px">{{ p.note }}</div>
+          <div style="font-size:14px;font-weight:500;margin-top:8px">{{ p.vat }}</div>
+          <div style="font-size:13px;color:{{ p.sub }};margin-top:4px">{{ p.note }}</div>
           <button onClick="{{ p.fn }}" style="margin-top:22px;width:100%;background:{{ p.btnBg }};color:{{ p.btnFg }};border:0;border-radius:9px;padding:13px;font-size:15px;font-weight:500;transition:background-color .35s,color .35s" style-hover="opacity:.88">{{ p.cta }}</button>
           <div style="margin-top:24px;display:flex;flex-direction:column;gap:8px">
             <sc-for list="{{ p.limits }}" as="l" hint-placeholder-count="3"><div style="font-size:14.5px;font-weight:500">{{ l.l }}</div></sc-for>
@@ -394,7 +395,7 @@ input,textarea{font-family:inherit}
         </div>
       </sc-for>
     </div>
-    <p style="text-align:center;font-size:13.5px;color:#586174;margin:40px 0 0">Prisene gjelder fra lansering og er eks. MVA. Ingen binding. Byrå: 79 kr per ekstra kunde utover 15.</p>
+    <p style="text-align:center;font-size:13.5px;color:#586174;margin:40px 0 0">Prisene gjelder fra lansering. Store tall er eks. MVA, med pris inkl. 25 % MVA under. Ingen binding. Byrå: 79 kr (98,75 kr inkl. MVA) per ekstra kunde utover 15.</p>
   </section>
 
   <section data-rf="sec" class="rf-desk" style="max-width:1240px;margin:0 auto;padding:120px 32px 40px">
@@ -409,7 +410,7 @@ input,textarea{font-family:inherit}
   </section>
 
   <section data-rf="sec" style="max-width:1240px;margin:0 auto;padding:96px 32px 72px">
-    <h2 style="font-size:clamp(32px,4vw,52px);line-height:1.05;letter-spacing:-0.035em;font-weight:600;margin:0;max-width:680px;text-wrap:balance">Se hva en kontrollrapport finner i ditt regnskap.</h2>
+    <h2 class="rf-desk" style="font-size:clamp(32px,4vw,52px);line-height:1.05;letter-spacing:-0.035em;font-weight:600;margin:0;max-width:680px;text-wrap:balance">Se hva en kontrollrapport finner i ditt regnskap.</h2>
     <div data-rf="cta" style="position:relative;margin-top:104px;background:#E2F1E8;border-radius:20px;padding:28px 32px;display:flex;align-items:center;gap:16px 24px;flex-wrap:wrap">
       <div data-rf="ctaM" style="position:absolute;right:40px;top:-128px;pointer-events:none">{{ mCta }}</div>
       <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:15.5px;font-weight:500;padding:13px 20px;border-radius:9px" style-hover="background:#16345E">Prøv Rettført</button>
@@ -444,6 +445,27 @@ input,textarea{font-family:inherit}
       <div data-rf="aboutM" style="flex-shrink:0">{{ mAbout }}</div>
     </div>
     <div style="margin-top:48px;display:flex;flex-direction:column;gap:10px;font-size:17px;line-height:1.7;color:#2A3547">
+      <details class="rf-acc" id="om-meg" open="open">
+        <summary><span class="rf-acc-t">Om meg</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
+        <div class="rf-acc-b">
+          <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:36px;align-items:start">
+          <div style="aspect-ratio:4/5;border-radius:16px;overflow:hidden;background:#E9E5DC;max-width:320px">
+            <img src="assets/mohamad-web.jpg" alt="Mohamad Bokdasji" style="width:100%;height:100%;object-fit:cover;object-position:48% 30%;display:block">
+          </div>
+          <div data-rf="span2" style="grid-column:span 2;min-width:0">
+            <h2 style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin:0;color:#0B2545">Mohamad Bokdasji</h2>
+            <p style="margin:14px 0 0">Jeg har studert økonomi og administrasjon ved BI og er interessert i hvordan teknologi, automatisering og språkmodeller kan brukes på praktiske problemer i økonomifaget.</p>
+            <p style="margin:14px 0 0">Rettført er et hobbyprosjekt ved siden av jobb. Ideen var å bygge et lite kontrollverktøy fra bunnen av: først forstå datagrunnlaget, deretter lage faste kontroller, og til slutt gjøre resultatene enkle å undersøke og dokumentere. Det faglige grunnlaget kommer fra studiet; resten har jeg lært underveis.</p>
+            <div style="margin-top:24px;display:grid;grid-template-columns:auto 1fr;gap:10px 24px;font-size:15.5px;border-top:1px solid #E4DFD4;padding-top:18px">
+              <span style="color:#586174">Utdanning</span><span>Økonomi og administrasjon, BI · 2023–2026</span>
+              <span style="color:#586174">Interesse</span><span>Økonomi × teknologi</span>
+              <span style="color:#586174">E-post</span><a href="mailto:mohbok04@hotmail.com" style="border-bottom:1px solid #0B2545;justify-self:start">mohbok04@hotmail.com</a>
+              <span style="color:#586174;display:flex;align-items:center" title="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="#586174" aria-label="LinkedIn" style="display:block"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"></path></svg></span><a href="https://www.linkedin.com/in/mohamad-bokdasji-99b0b5262/" target="_blank" rel="noopener" style="border-bottom:1px solid #0B2545;justify-self:start">Mohamad Bokdasji</a>
+            </div>
+          </div>
+        </div>
+        </div>
+      </details>
       <details class="rf-acc">
         <summary><span class="rf-acc-t">Problemet</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
         <div class="rf-acc-b">
@@ -479,27 +501,6 @@ input,textarea{font-family:inherit}
         <summary><span class="rf-acc-t">Videre arbeid</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
         <div class="rf-acc-b">
           <p style="margin:0">Egne terskler per kunde, sammenligning med forrige periodes SAF-T, eksport av rapport som PDF, støtte for a-meldingsfiler og iPhone-bilder (HEIC).</p>
-        </div>
-      </details>
-      <details class="rf-acc" id="om-meg" open="open">
-        <summary><span class="rf-acc-t">Om meg</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
-        <div class="rf-acc-b">
-          <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:36px;align-items:start">
-          <div style="aspect-ratio:4/5;border-radius:16px;overflow:hidden;background:#E9E5DC;max-width:320px">
-            <img src="assets/mohamad-web.jpg" alt="Mohamad Bokdasji" style="width:100%;height:100%;object-fit:cover;object-position:48% 30%;display:block">
-          </div>
-          <div data-rf="span2" style="grid-column:span 2;min-width:0">
-            <h2 style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin:0;color:#0B2545">Mohamad Bokdasji</h2>
-            <p style="margin:14px 0 0">Jeg har studert økonomi og administrasjon ved BI og er interessert i hvordan teknologi, automatisering og språkmodeller kan brukes på praktiske problemer i økonomifaget.</p>
-            <p style="margin:14px 0 0">Rettført er et hobbyprosjekt ved siden av jobb. Ideen var å bygge et lite kontrollverktøy fra bunnen av: først forstå datagrunnlaget, deretter lage faste kontroller, og til slutt gjøre resultatene enkle å undersøke og dokumentere. Det faglige grunnlaget kommer fra studiet; resten har jeg lært underveis.</p>
-            <div style="margin-top:24px;display:grid;grid-template-columns:auto 1fr;gap:10px 24px;font-size:15.5px;border-top:1px solid #E4DFD4;padding-top:18px">
-              <span style="color:#586174">Utdanning</span><span>Økonomi og administrasjon, BI · 2023–2026</span>
-              <span style="color:#586174">Interesse</span><span>Økonomi × teknologi</span>
-              <span style="color:#586174">E-post</span><a href="mailto:mohbok04@hotmail.com" style="border-bottom:1px solid #0B2545;justify-self:start">mohbok04@hotmail.com</a>
-              <span style="color:#586174;display:flex;align-items:center" title="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="#586174" aria-label="LinkedIn" style="display:block"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"></path></svg></span><a href="https://www.linkedin.com/in/mohamad-bokdasji-99b0b5262/" target="_blank" rel="noopener" style="border-bottom:1px solid #0B2545;justify-self:start">Mohamad Bokdasji</a>
-            </div>
-          </div>
-        </div>
         </div>
       </details>
     </div>
@@ -1136,7 +1137,7 @@ class Component extends DCLogic {
     if (ps.screen !== this.state.screen || ps.page !== this.state.page || ps.fid !== this.state.fid) {
       if (this.state.mobileMenu) this.setState({ mobileMenu: false });
       try { localStorage.setItem('rettfort_nav', JSON.stringify({ screen: this.state.screen, page: this.state.page })); } catch (e) {}
-      window.scrollTo(0, 0);
+      window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0;
       if (ps.screen !== this.state.screen) { clearTimeout(this.tiredT); if (this.state.tired) this.setState({ tired: false }); this.tiredT = setTimeout(() => this.setState({ tired: true }), 25000); }
       if (this.state.screen === 'landing' && ps.screen !== 'landing') this.startHero();
     }
@@ -1220,7 +1221,7 @@ class Component extends DCLogic {
   }
 
   renderVals() {
-    const s = this.state, E = this.E, set = o => () => this.setState(o);
+    const s = this.state, E = this.E, set = o => () => this.setState(o), toTop = () => { window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; }, goTop = o => () => { this.setState(o); toTop(); requestAnimationFrame(toTop); };
     const kr = E ? E.kr : (n => Math.round(n) + ' kr'), nd = E ? E.nd : (x => x), fmt = E ? E.fmt : (n => String(Math.round(n))), monthName = E ? E.monthName : (x => x);
     const res = s.result, R = s.resolved;
     const smp = this.sample;
@@ -1340,9 +1341,9 @@ class Component extends DCLogic {
     // plans
     const PF = [['Regnskapskontroll via SAF-T', [1, 1, 1]], ['Funn med sporing til kilde', [1, 1, 1]], ['Analyse lokalt i nettleseren', [1, 1, 1]], ['Bankavstemming og bilagsleser', [0, 1, 1]], ['Lønn mot regnskap', [0, 1, 1]], ['Vurdering med kommentar per funn', [0, 1, 1]], ['Assistent med kilder', [0, 1, 1]], ['Kontrollbevis med signering', [0, 1, 1]], ['Eksport av rapport (CSV og PDF)', [0, 1, 1]], ['Portefølje med flere klienter', [0, 0, 1]], ['Egne terskler per kunde', [0, 0, 1]], ['Prioritert support', [0, 0, 1]]];
     const plans = [
-      { k: 'Start', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
-      { k: 'Selskap', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '249', unit: 'kr / mnd per selskap', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 assistentsvar per måned'], pop: true },
-      { k: 'Byrå', d: 'For miljøer som følger opp flere virksomheter.', price: '1 490', unit: 'kr / mnd inkl. 15 kunder', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 assistentsvar per måned'] }
+      { k: 'Start', d: 'For å prøve regnskapskontroll på eget selskap.', price: '0', unit: 'kr', vat: '0 kr inkl. MVA', note: 'Ingen kort kreves', cta: 'Prøv demoen', lim: ['1 analyse per måned', 'Opptil 5 000 posteringer'] },
+      { k: 'Selskap', d: 'For virksomheter som ønsker flere kontroller og avstemminger.', price: '249', unit: 'kr / mnd per selskap', vat: '311,25 kr inkl. MVA', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Opptil 100 000 posteringer', '200 assistentsvar per måned'], pop: true },
+      { k: 'Byrå', d: 'For miljøer som følger opp flere virksomheter.', price: '1 490', unit: 'kr / mnd inkl. 15 kunder', vat: '1 862,50 kr inkl. MVA', note: '30 dager gratis ved lansering', cta: 'Meld interesse', lim: ['Ubegrenset analyser', 'Ingen grense på posteringer', '2 000 assistentsvar per måned'] }
     ].map((p, i) => { const dk = s.planHover === i; return { ...p, dark: dk, bg: dk ? INK : '#fff', fg: dk ? '#fff' : INK, sub: dk ? 'rgba(255,255,255,.68)' : C.mut, bd: dk ? INK : C.line, line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2', btnBg: dk ? '#F6DF6E' : INK, btnFg: dk ? INK : '#fff', shadow: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', lift: dk ? '-12px' : '0px', limits: p.lim.map(l => ({ l })), feats: PF.map(f => { const on = !!f[1][i]; return { l: f[0], on, off: !on, txt: on ? (dk ? '#fff' : INK) : (dk ? 'rgba(255,255,255,.4)' : '#A4A8B0'), icBg: on ? (dk ? '#35AE74' : C.grnBg) : (dk ? 'rgba(255,255,255,.08)' : '#EFEBE2'), icFg: on ? (dk ? '#fff' : C.grn) : (dk ? 'rgba(255,255,255,.42)' : '#A4A8B0') }; }), enter: () => { if (s.planHover !== i) this.setState({ planHover: i }); }, fn: i === 0 ? () => this.trySample() : () => this.setState(st => ({ screen: 'auth', authMode: 'signup', su: { ...st.su, plan: p.k } })) }; });
 
     const cat = E ? E.CONTROLS : [];
@@ -1359,7 +1360,7 @@ class Component extends DCLogic {
       mobAbout: () => this.setState({ mobileMenu: false, screen: 'about' }),
       mobLogin: () => this.setState({ mobileMenu: false, screen: 'auth', authMode: 'login' }),
       mobTry: () => { this.setState({ mobileMenu: false }); this.trySample(); },
-      toLanding: set({ screen: 'landing', mobileMenu: false }), toAbout: set({ screen: 'about', mobileMenu: false }), toLogin: set({ screen: 'auth', authMode: 'login', mobileMenu: false }), toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
+      toLanding: goTop({ screen: 'landing', mobileMenu: false }), toAbout: goTop({ screen: 'about', mobileMenu: false }), toLogin: set({ screen: 'auth', authMode: 'login', mobileMenu: false }), toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
       enterApp: () => { window.location.href = '/demo.html'; }, toUpload: () => { window.location.href = '/demo.html'; }, toControls: set({ screen: 'app', page: 'controls' }),
       trySample: () => this.trySample(),
       resetSent: () => this.toast('Lenke sendt (demo)'), logout: set({ screen: 'landing' }),
