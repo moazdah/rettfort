@@ -1,5 +1,7 @@
 # Stresstest av kontrollmotoren – rapport
 
+> **Trinn 5 (koblet til demoen):** Opplastede filer analyseres nå av motoren i en egen tråd (`rettfort-worker.js`). Motoren har fått sin egen XML-leser fordi `DOMParser` ikke finnes i Web Workers; 190 000 linjer tar nå ca. 5 s (før 10 s). Bank, bilag og forrige periodes SAF-T er merket «Kommer senere» og brukes ikke.
+>
 > **Status etter retting (trinn 1–4):** 83 tilfeller: **81 OK, 2 akseptert, 0 avvik.** Motorens egne 21 tester er grønne. Rapporten under beskriver avvikene slik de var før retting.
 >
 > Akseptert uten retting: R15 (rundt beløp delt i to bilag – for mange falske alarmer) og K04 (fordel med bare etternavn – for usikker kobling).

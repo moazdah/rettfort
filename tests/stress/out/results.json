@@ -7,7 +7,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 35,
+    "ms": 30,
     "error": null,
     "fails": [],
     "passes": [
@@ -54,7 +54,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 11,
+    "ms": 8,
     "error": null,
     "fails": [],
     "passes": [
@@ -79,7 +79,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 10,
+    "ms": 6,
     "error": null,
     "fails": [],
     "passes": [
@@ -103,7 +103,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -128,7 +128,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -153,7 +153,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 11,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -178,7 +178,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -202,7 +202,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -226,7 +226,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 11,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -251,7 +251,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -276,7 +276,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -300,7 +300,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -324,7 +324,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -348,7 +348,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -372,7 +372,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -397,7 +397,7 @@
     "severity": "lav",
     "accepted": "Beløp delelig med 500 gir for mange falske alarmer. Fanges i stedet av «store endringer» når beløpet er stort nok.",
     "status": "AKSEPTERT",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [
       {
@@ -421,7 +421,7 @@
     "severity": "lav",
     "accepted": null,
     "status": "OK",
-    "ms": 15,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -445,7 +445,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -469,7 +469,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -493,7 +493,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -517,7 +517,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 7,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -541,7 +541,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -565,7 +565,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -589,7 +589,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -613,7 +613,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -637,7 +637,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -661,7 +661,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 7,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -688,7 +688,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -710,7 +710,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -735,7 +735,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -762,7 +762,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -786,7 +786,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -813,7 +813,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 7,
+    "ms": 2,
     "error": "Samme lønnsfil er valgt for begge periodene. Velg lønnsfilen for forrige måned som «forrige periode».",
     "fails": [],
     "passes": [
@@ -835,7 +835,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -864,7 +864,7 @@
     "severity": "lav",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -886,7 +886,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -913,7 +913,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -935,7 +935,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -962,7 +962,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -986,7 +986,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1010,7 +1010,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 18,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -1034,7 +1034,7 @@
     "severity": "lav",
     "accepted": "Kobling på bare etternavn er for usikker: mange ansatte og leverandører deler etternavn.",
     "status": "AKSEPTERT",
-    "ms": 11,
+    "ms": 3,
     "error": null,
     "fails": [
       {
@@ -1056,7 +1056,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1080,7 +1080,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1102,7 +1102,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -1124,7 +1124,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1146,7 +1146,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1173,7 +1173,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1200,7 +1200,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 7,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1227,7 +1227,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -1254,7 +1254,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -1286,7 +1286,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -1308,7 +1308,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -1419,13 +1419,13 @@
     "accepted": null,
     "status": "OK",
     "ms": 1,
-    "error": "Regnskap: SAF-T-filen er ikke gyldig XML.",
+    "error": "Regnskap: SAF-T-filen er ikke gyldig XML (ufullstendig element). Er filen ufullstendig eller skadet? Eksporter den på nytt.",
     "fails": [],
     "passes": [
       {
         "kind": "throws",
         "label": "Mangler tydelig feilmelding",
-        "detail": "Melding: «Regnskap: SAF-T-filen er ikke gyldig XML.»"
+        "detail": "Melding: «Regnskap: SAF-T-filen er ikke gyldig XML (ufullstendig element). Er filen ufullstendig eller skadet? Eksporter den på nytt.»"
       }
     ],
     "invariants": [],
@@ -1484,7 +1484,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 7,
+    "ms": 2,
     "error": "Lønn, denne perioden: Lønnsfilen har ingen rader med ansatte, bare kolonneoverskrifter.",
     "fails": [],
     "passes": [
@@ -1506,7 +1506,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 11,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -1536,7 +1536,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1558,7 +1558,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 11,
+    "ms": 5,
     "error": null,
     "fails": [],
     "passes": [
@@ -1582,18 +1582,18 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 10,
-    "error": "Regnskap: SAF-T-filen er ikke gyldig XML.",
+    "ms": 4,
+    "error": null,
     "fails": [],
     "passes": [
       {
         "kind": "survives",
         "label": "Tåler ikke filen",
-        "detail": "10 ms, avvist: «Regnskap: SAF-T-filen er ikke gyldig XML.»"
+        "detail": "4 ms, analysert"
       }
     ],
     "invariants": [],
-    "nFindings": null,
+    "nFindings": 0,
     "findings": []
   },
   {
@@ -1604,14 +1604,14 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 83,
+    "ms": 68,
     "error": null,
     "fails": [],
     "passes": [
       {
         "kind": "survives",
         "label": "Tåler ikke filen",
-        "detail": "83 ms, analysert"
+        "detail": "68 ms, analysert"
       }
     ],
     "invariants": [],
@@ -1626,7 +1626,7 @@
     "severity": "hoy",
     "accepted": null,
     "status": "OK",
-    "ms": 9,
+    "ms": 4,
     "error": null,
     "fails": [],
     "passes": [
@@ -1651,14 +1651,14 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 2316,
+    "ms": 608,
     "error": null,
     "fails": [],
     "passes": [
       {
         "kind": "survives",
         "label": "Tåler ikke filen",
-        "detail": "2316 ms, analysert"
+        "detail": "608 ms, analysert"
       }
     ],
     "invariants": [],
@@ -1700,14 +1700,14 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 11617,
+    "ms": 5049,
     "error": null,
     "fails": [],
     "passes": [
       {
         "kind": "survives",
         "label": "Tåler ikke filen",
-        "detail": "11617 ms, analysert"
+        "detail": "5049 ms, analysert"
       }
     ],
     "invariants": [],
@@ -1749,14 +1749,14 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 345,
+    "ms": 404,
     "error": null,
     "fails": [],
     "passes": [
       {
         "kind": "survives",
         "label": "Tåler ikke filen",
-        "detail": "345 ms, analysert"
+        "detail": "404 ms, analysert"
       }
     ],
     "invariants": [],
@@ -1775,7 +1775,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1797,7 +1797,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 7,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1819,7 +1819,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1841,7 +1841,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 7,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1873,7 +1873,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1895,7 +1895,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [
@@ -1917,7 +1917,7 @@
     "severity": "middels",
     "accepted": null,
     "status": "OK",
-    "ms": 8,
+    "ms": 3,
     "error": null,
     "fails": [],
     "passes": [

@@ -41,19 +41,19 @@ const acc4 = a => { const m = String(a || '').match(/^\d{4}/); return m ? +m[0] 
 const isExp = a => { const n = acc4(a); return n >= 4000 && n < 8000; };
 
 export const CONTROLS = [
-  { id: 'balanse', area: 'regnskap', t: 'Bilag i balanse', d: 'Hvert bilag har lik sum debet og kredit.', rule: 'Bokføringsloven § 4 (nøyaktighet)', th: 'Differanse over 0,50 kr' },
+  { id: 'balanse', area: 'regnskap', t: 'Bilag i balanse', d: 'Hvert bilag har lik sum debet og kredit, og små avvik gjentar seg ikke i mange bilag.', rule: 'Bokføringsloven § 4 (nøyaktighet)', th: 'Differanse over 0,50 kr, eller minst 5 bilag med småavvik som til sammen er over 1 kr' },
   { id: 'totaler', area: 'regnskap', t: 'Kontrollsummer i filen', d: 'Antall bilag og totaler i filhodet stemmer med innholdet.', rule: 'SAF-T Financial, GeneralLedgerEntries', th: 'Avvik over 1 kr' },
-  { id: 'nummer', area: 'regnskap', t: 'Sammenhengende bilagsnummer', d: 'Bilagsnumrene er fortløpende uten hull.', rule: 'Bokføringsforskriften, krav til nummerering', th: 'Ett eller flere manglende nummer' },
-  { id: 'duplikat', area: 'regnskap', t: 'Mulige dobbeltføringer', d: 'Samme leverandør og beløp bokført to ganger.', rule: 'Internkontroll, leverandørreskontro', th: 'Likt fakturanummer, eller maks 10 dager mellom' },
-  { id: 'uvanlig', area: 'revisjon', t: 'Uvanlige beløp', d: 'Posteringer som er langt høyere enn det som er vanlig på kontoen.', rule: 'Analytisk kontroll', th: 'Over 15 000 kr og minst 4 × median' },
-  { id: 'mvaber', area: 'regnskap', t: 'MVA-beregning', d: 'Ført MVA stemmer med grunnlag og sats.', rule: 'Merverdiavgiftsloven kap. 5', th: 'Avvik over 1 kr' },
-  { id: 'mvafradrag', area: 'regnskap', t: 'Fradrag uten fradragsrett', d: 'Inngående MVA trukket fra på representasjon, gaver og kontingenter.', rule: 'Merverdiavgiftsloven § 8-3', th: 'Alle tilfeller' },
+  { id: 'nummer', area: 'regnskap', t: 'Sammenhengende bilagsnummer', d: 'Bilagsnumrene er fortløpende uten hull, også når de har prefiks som «2026-0041».', rule: 'Bokføringsforskriften, krav til nummerering', th: 'Ett eller flere manglende nummer' },
+  { id: 'duplikat', area: 'regnskap', t: 'Mulige dobbeltføringer', d: 'Samme leverandør og beløp bokført to ganger. Leverandører med samme navn regnes som én.', rule: 'Internkontroll, leverandørreskontro', th: 'Likt fakturanummer uten bokstaver og ledende nuller, eller maks 10 dager mellom' },
+  { id: 'uvanlig', area: 'revisjon', t: 'Uvanlige beløp', d: 'Posteringer som er langt høyere enn det som er vanlig på kontoen, og store beløp på kostnadskontoer uten tidligere bruk.', rule: 'Analytisk kontroll', th: 'Over 15 000 kr og minst 4 × median, eller minst 100 000 kr på ny konto' },
+  { id: 'mvaber', area: 'regnskap', t: 'MVA-beregning', d: 'Ført MVA stemmer med grunnlag og sats. Uten MVA-kode på linjene sammenlignes MVA-posteringen med kostnaden.', rule: 'Merverdiavgiftsloven kap. 5', th: 'Avvik over 1 kr, eller MVA regnet av beløp inkl. MVA' },
+  { id: 'mvafradrag', area: 'regnskap', t: 'Fradrag uten fradragsrett', d: 'Inngående MVA trukket fra på representasjon, gaver og kontingenter, også når bilagsteksten viser det (for eksempel julebord).', rule: 'Merverdiavgiftsloven § 8-3', th: 'Alle tilfeller' },
   { id: 'sen', area: 'regnskap', t: 'Sen bokføring', d: 'Bilag bokført lenge etter bilagsdato.', rule: 'Bokføringsloven § 7 (ajourhold)', th: 'Mer enn 60 dager' },
   { id: 'periode', area: 'regnskap', t: 'Dato utenfor perioden', d: 'Bilag med dato utenfor perioden filen gjelder.', rule: 'Periodisering', th: 'Alle tilfeller' },
-  { id: 'runde', area: 'revisjon', t: 'Runde beløp uten motpart', d: 'Store, runde kostnader uten leverandør på bilaget.', rule: 'Bokføringsloven § 10 (dokumentasjon)', th: 'Fra 10 000 kr, delelig med 1 000' },
+  { id: 'runde', area: 'revisjon', t: 'Runde beløp uten motpart', d: 'Store, runde kostnader uten leverandør eller kunde på bilaget. Motpart på banklinjen teller ikke.', rule: 'Bokføringsloven § 10 (dokumentasjon)', th: 'Fra 10 000 kr, delelig med 1 000' },
   { id: 'endring', area: 'revisjon', t: 'Store endringer mellom måneder', d: 'Kostnadskontoer som øker kraftig i siste måned.', rule: 'Analytisk kontroll', th: 'Over 50 % og mer enn 20 000 kr' },
   { id: 'saldo', area: 'regnskap', t: 'Unaturlige saldoer', d: 'Bank, kundefordringer og leverandørgjeld med motsatt fortegn.', rule: 'Avstemming av balansekontoer', th: 'Motsatt fortegn over 1 kr' },
-  { id: 'tekst', area: 'revisjon', t: 'Bilag uten tekst', d: 'Bilag som mangler beskrivelse.', rule: 'Bokføringsloven § 4 (sporbarhet)', th: 'Alle tilfeller' },
+  { id: 'tekst', area: 'revisjon', t: 'Bilag uten tekst', d: 'Bilag som mangler beskrivelse, eller har tekst uten innhold.', rule: 'Bokføringsloven § 4 (sporbarhet)', th: 'Færre enn tre bokstaver' },
   { id: 'duplikat-lonn', area: 'lonn', t: 'Dupliserte lønnslinjer', d: 'Samme ansatt og periode, eller samme lønnslinje, står flere ganger.', rule: 'Datavalidering', th: 'Identiske eller nesten identiske rader' },
   { id: 'brutto-sum', area: 'lonn', t: 'Bruttolønn mot lønnsartene', d: 'Oppgitt bruttolønn er lik summen av fastlønn, overtid, bonus og tillegg.', rule: 'Datavalidering', th: 'Avvik over 1 kr' },
   { id: 'netto-sum', area: 'lonn', t: 'Nettolønn mot brutto, skatt og trekk', d: 'Nettolønn er lik bruttolønn minus skatt og trekk.', rule: 'Datavalidering', th: 'Avvik over 1 kr' },
@@ -67,7 +67,7 @@ export const CONTROLS = [
   { id: 'stilling', area: 'lonn', t: 'Endret stillingsprosent', d: 'Stillingsprosent endret uten tilsvarende endring i fastlønn.', rule: 'Arbeidsavtale', th: 'Fastlønn avviker mer enn 2 % fra forventet' },
   { id: 'overtid', area: 'lonn', t: 'Høy eller økende overtid', d: 'Mye overtid, eller kraftig økning mot forrige periode.', rule: 'Arbeidsmiljøloven § 10-6', th: 'Over 25 t, eller minst 3 × og +15 t mot forrige periode' },
   { id: 'nytt-tillegg', area: 'lonn', t: 'Nye variable tillegg', d: 'Bonus eller tillegg som ikke var med forrige periode.', rule: 'Godkjenning av variabel lønn', th: 'Alle nye tillegg' },
-  { id: 'nyansatt', area: 'lonn', t: 'Nye i lønn', d: 'Ansatte som ikke var med forrige periode.', rule: 'A-opplysningsloven (arbeidsforhold)', th: 'Alle nye' },
+  { id: 'nyansatt', area: 'lonn', t: 'Nye i lønn', d: 'Ansatte som ikke var med forrige periode. Ansattnummer sammenlignes uten ledende nuller.', rule: 'A-opplysningsloven (arbeidsforhold)', th: 'Alle nye' },
   { id: 'mangler', area: 'lonn', t: 'Mangler i lønnskjøringen', d: 'Ansatte fra forrige periode som mangler, uten sluttdato.', rule: 'Internkontroll lønn', th: 'Alle tilfeller' },
   { id: 'avst-brutto', area: 'kryss', t: 'Avstemming av bruttolønn', d: 'Bruttolønn i lønnsfilen mot bokført lønn i SAF-T for samme måned. Feriepenger og periodiseringer holdes utenfor.', rule: 'Bokføringsloven § 4 og a-opplysningsloven § 4', th: 'Toleranse i innstillingene, standard 1 kr' },
   { id: 'avst-skatt', area: 'kryss', t: 'Avstemming av forskuddstrekk', d: 'Skatt i lønnsfilen mot kreditposteringer på forskuddstrekkontoen i lønnsbilagene. Betalinger til Skatteetaten holdes utenfor.', rule: 'Skattebetalingsloven kap. 5 (forskuddstrekk)', th: 'Toleranse i innstillingene, standard 1 kr' },
@@ -113,6 +113,39 @@ export const RECON_STATUS = { stemmer: 'Stemmer', innenfor: 'Innenfor toleranse'
 export const classifyDiff = (diff, tol) => { const d = Math.abs(diff); return d < 0.005 ? 'stemmer' : d <= (tol || 0) + 0.004 ? 'innenfor' : 'avvik'; };
 const isFordelArt = s => { const a = normTxt(s); return /fordel|naturalytelse/.test(a) || FORDEL.some(([, , re]) => re.test(a)); };
 
+// Liten XML-leser. Brukes i stedet for DOMParser, som ikke finnes i Web Workers.
+// Leser elementer, tekst, CDATA og standard-entiteter. Hopper over kommentarer,
+// prosesseringsinstruksjoner og DOCTYPE (egne entiteter utvides ikke). Kaster ved
+// ugyldig struktur, f.eks. en avkuttet fil.
+const XML_ENT = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
+const xmlText = t => t.indexOf('&') < 0 ? t : t.replace(/&(#x[0-9a-f]+|#\d+|\w+);/gi, (m, e) => e[0] === '#' ? String.fromCodePoint(e[1] === 'x' || e[1] === 'X' ? parseInt(e.slice(2), 16) : +e.slice(1)) : (XML_ENT[e] ?? m));
+class XNode {
+  constructor(name) { const i = name.indexOf(':'); this.localName = i < 0 ? name : name.slice(i + 1); this.name = name; this.children = []; this.t = ''; }
+  get textContent() { return this.children.length ? this.t + this.children.map(c => c.textContent).join('') : this.t; }
+  getElementsByTagNameNS(ns, n) { const out = []; const walk = e => e.children.forEach(c => { if (c.localName === n) out.push(c); walk(c); }); walk(this); return out; }
+}
+export function parseXml(xml) {
+  const root = new XNode('#document'), index = new Map(), stack = [root];
+  root.getElementsByTagNameNS = (ns, n) => index.get(n) || [];
+  const re = /<!--[\s\S]*?-->|<!\[CDATA\[([\s\S]*?)\]\]>|<\?[\s\S]*?\?>|<!DOCTYPE(?:[^\[>]|\[[\s\S]*?\])*>|<(\/?)([A-Za-z_][\w.:-]*)((?:\s+[^\s=\/>]+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*(\/?)>/g;
+  let last = 0, m;
+  const text = t => { if (t && stack.length > 1) stack[stack.length - 1].t += xmlText(t); else if (t && /\S/.test(t)) throw new Error('tekst utenfor rotelementet'); };
+  while ((m = re.exec(xml))) {
+    const between = xml.slice(last, m.index); if (between.indexOf('<') >= 0) throw new Error('ugyldig tegn «<»'); text(between); last = re.lastIndex;
+    if (m[1] != null) { text(m[1]); continue; }
+    if (!m[3]) continue;
+    const name = m[3], cur = stack[stack.length - 1];
+    if (m[2]) { if (cur.name !== name) throw new Error(`</${name}> passer ikke med <${cur.name}>`); stack.pop(); continue; }
+    const node = new XNode(name); cur.children.push(node);
+    let list = index.get(node.localName); if (!list) index.set(node.localName, list = []); list.push(node);
+    if (!m[5]) stack.push(node);
+  }
+  const rest = xml.slice(last); if (rest.indexOf('<') >= 0) throw new Error('ufullstendig element'); text(rest);
+  if (stack.length > 1) throw new Error(`<${stack[stack.length - 1].name}> er ikke avsluttet`);
+  if (!root.children.length) throw new Error('fant ingen elementer');
+  return root;
+}
+
 const kid = (el, n) => { if (!el) return null; for (const c of el.children) if (c.localName === n) return c; return null; };
 const txt = (el, n) => { const c = kid(el, n); return c ? c.textContent.trim() : ''; };
 const amt = (el, n, where = 'Beløp') => { const c = kid(el, n); if (!c) return 0; const a = kid(c, 'Amount'); return numW(a ? a.textContent : c.textContent, false, where); };
@@ -146,8 +179,7 @@ export function decodeFile(buf, kind) {
 export function parseSaft(xml) {
   if (!String(xml).trim()) throw new Error('Filen er tom.');
   sniff(xml, 'xml');
-  const doc = new DOMParser().parseFromString(xml, 'application/xml');
-  if (doc.getElementsByTagName('parsererror').length) throw new Error('SAF-T-filen er ikke gyldig XML.');
+  let doc; try { doc = parseXml(xml); } catch (e) { throw new Error(`SAF-T-filen er ikke gyldig XML (${e.message}). Er filen ufullstendig eller skadet? Eksporter den på nytt.`); }
   const header = all(doc, 'Header')[0];
   if (!header || !all(doc, 'Transaction').length) throw new Error('Fant ingen transaksjoner. Er dette en SAF-T Financial-fil?');
   const company = kid(header, 'Company');
