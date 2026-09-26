@@ -108,16 +108,9 @@ input,textarea{font-family:inherit}
 .rf-spark{position:absolute;color:#F2C94C;font-size:16px;animation:rfSpark 2.6s var(--d) ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.rf-tag,.rf-spark{animation:none}}
 .rf-pd summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:16px 0 2px;font-size:15px;font-weight:600}.rf-pd summary::-webkit-details-marker{display:none}.rf-pd-c{font-size:14px;transition:transform .2s}.rf-pd[open] .rf-pd-c{transform:rotate(180deg)}.rf-pd[open] .rf-pd-b{animation:rfIn .3s ease both;margin-top:14px}
-.rf-rail{position:absolute;left:29px;top:6px;bottom:6px;width:3px;background:#E4DFD4;border-radius:3px}
-.rf-rail-fill{position:absolute;left:0;top:0;width:100%;height:0;background:#35AE74;border-radius:3px;transition:height .12s linear}
-.rf-walker{position:absolute;left:0;top:0;width:62px;height:62px;z-index:2;will-change:transform;transition:transform .12s linear}
-.rf-w{position:absolute;inset:0;opacity:0;transform-origin:50% 90%;transition:opacity .3s}
-.rf-walker[data-s="1"] .rf-w1,.rf-walker[data-s="2"] .rf-w2,.rf-walker[data-s="3"] .rf-w3{opacity:1}
-.rf-walker.moving .rf-w{animation:rfWaddle .42s ease-in-out infinite}
-@keyframes rfWaddle{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(6deg) translateY(-4px)}}
 .rf-drop{position:absolute;left:calc(50% + var(--x) - 22px);top:0;background:#0B2545;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 8px;border-radius:4px;opacity:0;animation:rfDrop 2.7s var(--d) ease-in infinite}
 @keyframes rfDrop{0%{opacity:0;transform:translateY(-10px) rotate(-6deg)}15%{opacity:1}55%{opacity:1;transform:translateY(96px) rotate(4deg)}70%,100%{opacity:0;transform:translateY(118px) rotate(0)}}
-@media (prefers-reduced-motion:reduce){.rf-walker.moving .rf-w,.rf-drop{animation:none}.rf-drop{opacity:1}}
+@media (prefers-reduced-motion:reduce){.rf-drop{animation:none;opacity:1}}
 @media (max-width:1080px){[data-rf=cta]{padding-right:200px !important}}
 @media (max-width:900px){[data-rf=nav]{display:none !important}[data-rf=deskact]{display:none !important}[data-rf=mobmenu]{display:flex !important}[data-rf=sec]{padding-top:72px !important;padding-bottom:56px !important}[data-rf=hero]{padding-top:56px !important;padding-bottom:64px !important;gap:48px !important}[data-rf=dark]{padding-top:56px !important;padding-bottom:56px !important}[data-rf=co]{display:none !important}[data-rf=stick]{position:static !important}}
 @media (max-width:760px){body{width:100%;max-width:100%;overflow-x:hidden}.rf-ctrl-extra{display:none !important}.rf-ctrl-expanded .rf-ctrl-extra{display:flex !important;animation:rfIn .28s ease both}[data-rf=ctrlToggle]{display:flex !important}[data-rf=span2]{grid-column:auto !important}[data-rf=cta]{padding:24px !important;margin-top:24px !important;width:100% !important;max-width:100% !important;overflow:hidden !important;display:flex !important;flex-direction:column !important;align-items:stretch !important;gap:12px !important}[data-rf=cta]>button{width:100% !important}[data-rf=ctaText]{width:100% !important;flex:0 0 auto !important}[data-rf=ctaForm]{width:100% !important;max-width:none !important;min-width:0 !important;flex:0 0 auto !important;display:grid !important;grid-template-columns:minmax(0,1fr) !important;gap:8px !important}[data-rf=ctaForm] input,[data-rf=ctaForm] button{width:100% !important;max-width:100% !important;min-width:0 !important}[data-rf=ctaM]{display:none !important}[data-rf=card44]{padding:28px 24px !important}[data-rf=kv]{grid-template-columns:1fr !important}[data-rf=aboutM]{display:none !important}[data-rf=apphdr]{gap:14px !important;padding:0 18px !important}[data-rf=main]{padding:24px 16px 72px !important}[data-rf=hist]{grid-template-columns:1fr auto !important;gap:6px 12px !important}[data-rf=hist]>span:last-child{grid-column:1 / -1}[data-rf=kv2]{grid-template-columns:1fr !important;gap:6px !important}[data-rf=frow]{grid-template-columns:auto minmax(0,1fr) !important}[data-rf=frow]>div:last-child{grid-column:1 / -1;text-align:left !important;display:flex;gap:10px}}
@@ -125,7 +118,7 @@ input,textarea{font-family:inherit}
 [data-rf=hero]{text-align:center;padding-top:40px !important;padding-bottom:40px !important}[data-rf=hero] h1{font-size:37px !important}[data-rf=hero]>div>div:first-child{justify-content:center}
 [data-rf=heroBtns]{margin-top:28px !important}[data-rf=heroBtns]>button{width:100%;justify-content:center;font-size:17px !important;padding:17px 22px !important;border-radius:12px !important}
 [data-rf=plans]{display:flex !important;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px !important;padding:84px 18px 18px;gap:14px !important;scrollbar-width:none;align-items:stretch !important}[data-rf=plans]::-webkit-scrollbar{display:none}[data-rf=plans]>div{flex:0 0 86%;scroll-snap-align:center;min-width:0}
-.rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=mobmenu]{margin-left:2px !important;margin-right:-8px}[data-rf=mlogin]{display:inline-flex !important}[data-rf=steps]{position:relative;padding-left:66px;text-align:left !important;gap:56px !important}[data-rf=steps] p{margin-left:0 !important}[data-rf=tray]{left:calc(50% - 54px) !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=s3card]{left:calc(50% - 88px) !important}#slik{background:transparent !important;border:0 !important}#slik>[data-rf=sec]{padding-top:32px !important}[data-rf=hero]{padding-bottom:8px !important}#kontroller{padding-top:64px !important}}
+.rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=mobmenu]{margin-left:2px !important;margin-right:-8px}[data-rf=mlogin]{display:inline-flex !important}[data-rf=steps]{gap:56px !important}[data-rf=tray]{left:calc(50% - 54px) !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=s3card]{left:calc(50% - 88px) !important}#slik{background:transparent !important;border:0 !important}#slik>[data-rf=sec]{padding-top:32px !important}[data-rf=hero]{padding-bottom:8px !important}#kontroller{padding-top:64px !important}}
 @media (max-width:520px){[data-rf=hdr]{padding:0 18px !important;gap:12px !important}[data-rf=login]{display:none !important}[data-rf=sec]{padding-left:18px !important;padding-right:18px !important}[data-rf=hero]{padding-left:18px !important;padding-right:18px !important}[data-rf=steps]{gap:48px !important}}
 </style>
 </helmet>
@@ -220,8 +213,6 @@ input,textarea{font-family:inherit}
     <div data-rf="sec" style="max-width:1240px;margin:0 auto;padding:120px 32px 112px">
       <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0 auto;max-width:760px;text-align:center;text-wrap:balance">Last opp. Analyser. Vurder.</h2>
       <div data-rf="steps" style="margin-top:80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:64px 40px;text-align:center">
-        <div class="rf-mob rf-rail" aria-hidden="true"><div class="rf-rail-fill"></div></div>
-        <div class="rf-mob rf-walker" data-s="1" aria-hidden="true"><div class="rf-w rf-w1">{{ mTrail1 }}</div><div class="rf-w rf-w2">{{ mTrail2 }}</div><div class="rf-w rf-w3">{{ mTrail3 }}</div></div>
         <div>
           <div style="height:200px;position:relative">
             <div data-rf="tray" style="position:absolute;left:calc(50% + 34px);bottom:14px;width:108px;height:62px;background:#fff;border:1px solid #D9D3C6;border-radius:8px 8px 10px 10px;box-shadow:0 14px 26px -18px rgba(11,37,69,.35);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9px;animation:{{ s1Tray }}">
@@ -229,7 +220,7 @@ input,textarea{font-family:inherit}
               <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#586174">SAF-T · CSV</div>
             </div>
             <div class="rf-desk" style="position:absolute;left:calc(50% - 150px);bottom:0;animation:{{ s1Walk }}">{{ mStep1 }}</div>
-            <span class="rf-mob rf-drop" style="--x:-62px;--d:0s">SAF-T</span><span class="rf-mob rf-drop" style="--x:-10px;--d:.9s">Bank</span><span class="rf-mob rf-drop" style="--x:38px;--d:1.8s">Bilag</span>
+            <span class="rf-mob rf-drop" style="--x:-28px;--d:0s">SAF-T</span><span class="rf-mob rf-drop" style="--x:0px;--d:.9s">Bank</span><span class="rf-mob rf-drop" style="--x:24px;--d:1.8s">Bilag</span>
           </div>
           <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">01</div>
           <div style="font-size:20px;font-weight:600;margin-top:8px">Last opp</div>
@@ -1380,7 +1371,7 @@ class Component extends DCLogic {
       goHow: () => this.scrollTo('slik'), goCtrl: () => this.scrollTo('kontroller'), goPrice: () => this.scrollTo('priser'),
       iArrow: icon('arrow', 15), iTick: icon('tick', 22, 2.4), iX: icon('x', 15), iXs: icon('x', 11, 2.4), iTickS: icon('tick', 12, 2.6),
       mHero: M({ s: 132, lx: -9, ly: hs < 7 ? 4 : 6, smile: hs >= 7, wave: hs >= 12, ground: false }),
-      mHero: M({ s: 150, wave: true, bob: true, lx: -5, ly: 3 }), mTrail1: M({ s: 62, hold: true, ground: false, lx: 5, ly: 3 }), mTrail2: M({ s: 62, scan: true, smile: false, ground: false }), mTrail3: M({ s: 62, wave: true, ground: false, lx: 4, ly: 2 }), mStep1: M({ s: 150, hold: true, lx: 6, ly: 3, tired: s.tired, d: 0, fidget: s.fidget === 's1' }), mStep2: M({ s: 132, lx: -9, ly: 6, smile: false, scan: true, tired: s.tired, d: 2.3, fidget: s.fidget === 's2' }), mStep3: M({ s: 140, lx: -8, ly: 5, wave: true, tired: s.tired, d: 4.6, fidget: s.fidget === 's3' }),
+      mHero: M({ s: 150, wave: true, bob: true, lx: -5, ly: 3 }), mStep1: M({ s: 150, hold: true, lx: 6, ly: 3, tired: s.tired, d: 0, fidget: s.fidget === 's1' }), mStep2: M({ s: 132, lx: -9, ly: 6, smile: false, scan: true, tired: s.tired, d: 2.3, fidget: s.fidget === 's2' }), mStep3: M({ s: 140, lx: -8, ly: 5, wave: true, tired: s.tired, d: 4.6, fidget: s.fidget === 's3' }),
       mCta: M({ s: 140, lx: -5, ly: 4, wave: true, ground: false, tired: s.tired, d: 1.2, fidget: s.fidget === 'cta' }), mPrice: M({ s: 90, lx: -4, ly: 5, ground: false, bob: true }), mAbout: M({ s: 150, hold: true, lx: -4, ly: 2, tired: s.tired, d: 3, fidget: s.fidget === 'about' }),
       mAuth: M({ s: 190, lx: -5, ly: 4, wave: true, tired: s.tired, d: 1.7, fidget: s.fidget === 'auth' }), mRun: M({ s: 150, smile: false, scan: true, bob: true }), mEmpty: M({ s: 110, wave: true, tired: s.tired, fidget: s.fidget === 'empty' }),
       heroLinesS: fmt(Math.min(hLines, Math.round(hLines * hs / 6))), heroOkS: String(hOk), heroOpenS: String(hOpen), heroSumOp: hs >= 7 ? 1 : 0, heroW: Math.min(100, hs / 6 * 100) + '%', heroBusy: hs < 7, heroDone: hs >= 7, heroFinds,
@@ -1700,29 +1691,6 @@ class Component extends DCLogic {
     }
   }
   setInterval(center, 400);
-})();
-</script>
-<script>
-// «Slik fungerer det» på mobil: figuren går nedover linjen mens man scroller,
-// og bytter positur ved hvert steg (holder fil, leser liste, vinker).
-(function () {
-  var mq = window.matchMedia('(max-width:760px)'), last = -1, t;
-  function upd() {
-    if (!mq.matches) return;
-    var st = document.querySelector('[data-rf=steps]'); if (!st) return;
-    var w = st.querySelector('.rf-walker'), f = st.querySelector('.rf-rail-fill'); if (!w || !f) return;
-    var r = st.getBoundingClientRect(), mh = 62, a = window.innerHeight * 0.45;
-    var y = Math.max(0, Math.min(r.height - mh, a - r.top - mh / 2));
-    w.style.transform = 'translateY(' + y + 'px)'; f.style.height = (y + mh / 2) + 'px';
-    var n = 1, k = 0;
-    for (var i = 0; i < st.children.length; i++) { var c = st.children[i]; if (c.classList.contains('rf-mob')) continue; k++; if (c.getBoundingClientRect().top - r.top <= y + mh) n = k; }
-    if (w.getAttribute('data-s') !== String(n)) w.setAttribute('data-s', n);
-    if (last >= 0 && Math.abs(y - last) > 0.5) { w.classList.add('moving'); clearTimeout(t); t = setTimeout(function () { w.classList.remove('moving'); }, 200); }
-    last = y;
-  }
-  document.addEventListener('scroll', upd, { passive: true, capture: true });
-  window.addEventListener('resize', upd);
-  setInterval(upd, 400);
 })();
 </script>
 </body>
