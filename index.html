@@ -1376,107 +1376,242 @@ class Component extends DCLogic {
   }
 }
 </script>
-<!-- Chat om Rettført. Står utenfor x-dc slik at den ligger fast nederst på alle skjermer på forsiden. -->
+<!-- Chat om Rettført (design fra Claude Design). Står utenfor x-dc slik at den ligger fast nederst på forsiden. -->
 <style>
-#rf-chat-btn{position:fixed;right:20px;bottom:20px;z-index:60;display:flex;align-items:center;gap:10px;background:#0B2545;color:#fff;border:0;border-radius:99px;padding:6px 18px 6px 6px;font:500 15px 'Schibsted Grotesk',system-ui,sans-serif;box-shadow:0 14px 34px -14px rgba(11,37,69,.6);cursor:pointer;min-height:48px}
-#rf-chat-btn:hover{background:#16345E}
-#rf-chat-btn .av{width:44px;height:44px;border-radius:50%;background:#F4F1EA;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:rfBob 3.6s ease-in-out infinite}
-#rf-chat-btn .av svg{width:34px;height:34px;margin-top:2px}
-.rf-av{width:40px;height:40px;border-radius:50%;background:#E2F1E8;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.rf-av svg{width:30px;height:30px;margin-top:2px}
-.rf-av.sm{width:28px;height:28px;background:#F1EDE4}
-.rf-av.sm svg{width:22px;height:22px;margin-top:1px}
-.rf-eyes{animation:rfBlink 5.2s infinite;transform-origin:100px 66px;transform-box:view-box}
-#rf-chat .row{display:flex;gap:8px;align-items:flex-end}
-#rf-chat .row.me{justify-content:flex-end}
-#rf-chat{position:fixed;right:20px;bottom:20px;z-index:61;width:min(380px,calc(100vw - 32px));height:min(560px,calc(100dvh - 40px));background:#fff;border:1px solid #E1DBCE;border-radius:18px;box-shadow:0 30px 70px -30px rgba(11,37,69,.55);display:none;flex-direction:column;overflow:hidden;font-family:'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;animation:rfIn .22s ease both}
-#rf-chat.open{display:flex}
-#rf-chat .hd{padding:12px 14px;border-bottom:1px solid #EFEBE2;display:flex;align-items:center;gap:10px}
-#rf-chat .hd b{font-size:16px;font-weight:600}
-#rf-chat .hd span{font-size:12.5px;color:#586174;display:flex;align-items:center;gap:6px}
-#rf-chat .hd span i{width:7px;height:7px;border-radius:50%;background:#35AE74;display:inline-block}
-#rf-chat .x{margin-left:auto;background:#F1EDE4;border:0;border-radius:8px;width:36px;height:36px;font-size:18px;color:#0B2545;cursor:pointer}
-#rf-chat .log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#FBFAF6;overscroll-behavior:contain}
-#rf-chat .m{max-width:86%;padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
-#rf-chat .m.bot{background:#fff;border:1px solid #E4DFD4;align-self:flex-start;border-bottom-left-radius:4px}
-#rf-chat .m.me{background:#0B2545;color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
-#rf-chat .m.wait{color:#586174}
-#rf-chat .chips{display:flex;flex-wrap:wrap;gap:6px}
-#rf-chat .chips button{background:#fff;border:1px solid #D9D3C6;border-radius:99px;padding:7px 11px;font:14px 'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;cursor:pointer}
-#rf-chat .chips button:hover{border-color:#A9A294}
-#rf-chat form{display:flex;gap:8px;padding:12px;border-top:1px solid #EFEBE2;background:#fff}
-#rf-chat textarea{flex:1;resize:none;border:1px solid #D9D3C6;border-radius:10px;padding:10px 12px;font:16px 'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;outline:none;max-height:120px;min-height:44px}
-#rf-chat textarea:focus{border-color:#0B2545}
-#rf-chat form button{background:#0B2545;color:#fff;border:0;border-radius:10px;padding:0 16px;font:500 15px 'Schibsted Grotesk',system-ui,sans-serif;cursor:pointer;min-height:44px}
-#rf-chat form button:disabled{opacity:.5;cursor:default}
-#rf-chat .ft{font-size:11.5px;color:#8A909C;padding:0 14px 10px;background:#fff}
-#rf-chat .ft a{color:#586174;text-decoration:underline}
-@media (max-width:520px){#rf-chat{right:0;bottom:0;width:100vw;height:min(88dvh,640px);border-radius:18px 18px 0 0}#rf-chat-btn{right:14px;bottom:14px;padding:5px}#rf-chat-btn .lbl{display:none}}
-@media print{#rf-chat,#rf-chat-btn{display:none !important}}
+@keyframes rfcIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes rfcDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+@keyframes rfcRing{0%{box-shadow:0 0 0 0 rgba(246,223,110,.75)}70%{box-shadow:0 0 0 16px rgba(246,223,110,0)}100%{box-shadow:0 0 0 0 rgba(246,223,110,0)}}
+@keyframes rfcWave{0%,100%{transform:rotate(0)}20%{transform:rotate(-8deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)}}
+@keyframes rfcTilt{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(5deg) translateY(-2px)}}
+@keyframes rfcPop{0%{opacity:0;transform:translateY(10px) scale(.85)}60%{opacity:1;transform:translateY(-2px) scale(1.03)}100%{opacity:1;transform:none}}
+@keyframes rfcPeek{0%,100%{transform:translateY(0) rotate(0)}8%{transform:translateY(-6px) rotate(-6deg)}16%{transform:translateY(0) rotate(0)}}
+@keyframes rfcCaret{0%,49%{opacity:1}50%,100%{opacity:0}}
+.rfc,.rfc *{box-sizing:border-box;font-family:'Schibsted Grotesk',system-ui,sans-serif}
+.rfc button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.rfc-teaser{position:fixed;right:20px;bottom:88px;z-index:48;width:250px;animation:rfcPop .5s 1.4s cubic-bezier(.3,.7,.2,1) both}
+.rfc-teaser .b{position:relative;cursor:pointer;background:#fff;border:1px solid #E4DFD4;border-radius:16px 16px 4px 16px;padding:12px 34px 12px 14px;box-shadow:0 18px 40px -22px rgba(11,37,69,.5);color:#0B2545}
+.rfc-teaser .t1{font-size:15px;font-weight:600;line-height:1.3}
+.rfc-teaser .t2{font-size:13.5px;color:#586174;margin-top:2px;line-height:1.4}
+.rfc-teaser .x{position:absolute;top:4px;right:4px;background:transparent;border:0;color:#8A909C;font-size:17px;padding:6px;line-height:1;min-width:30px;min-height:30px}
+.rfc-launch{position:fixed;right:20px;bottom:20px;z-index:50;display:flex;height:56px;border:0;padding:0;background:transparent;align-items:flex-end}
+.rfc-pill{position:relative;z-index:1;display:flex;align-items:center;gap:10px;height:56px;padding:0 20px 0 7px;border-radius:99px;background:#0B2545;color:#fff;box-shadow:0 16px 36px -14px rgba(11,37,69,.7);white-space:nowrap;transform-origin:bottom right;transition:opacity .2s,transform .35s cubic-bezier(.3,.7,.2,1),background .2s}
+.rfc-launch:hover .rfc-pill{background:#16345E}
+.rfc-pill.ring{animation:rfcRing 2.2s ease-out 1s 2}
+.rfc-av{width:42px;height:42px;border-radius:50%;background:#E2F1E8;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;flex-shrink:0}
+.rfc-av span{display:block;transform-origin:bottom center;animation:rfcPeek 6s 2.5s ease-in-out infinite}
+.rfc-av img{width:36px;height:auto;display:block;margin-bottom:1px}
+.rfc-pl{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+.rfc-pl b{font-size:15.5px;font-weight:600}
+.rfc-pl small{font-size:12px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:5px;margin-top:2px}
+.rfc-pl small i{width:6px;height:6px;border-radius:50%;background:#35AE74;display:inline-block}
+.rfc-x{position:absolute;right:0;bottom:0;width:56px;height:56px;border-radius:50%;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1;box-shadow:0 16px 36px -14px rgba(11,37,69,.7);opacity:0;transform:rotate(-90deg) scale(.5);transition:opacity .2s,transform .35s cubic-bezier(.3,.7,.2,1);pointer-events:none}
+.rfc.open .rfc-pill{opacity:0;transform:scale(.4)}
+.rfc.open .rfc-x{opacity:1;transform:none}
+.rfc-panel{position:fixed;z-index:49;right:20px;bottom:92px;width:min(400px,calc(100vw - 48px));height:min(600px,calc(100vh - 124px));background:#fff;border:1px solid #E4DFD4;border-radius:18px;box-shadow:0 30px 70px -30px rgba(11,37,69,.55);display:flex;flex-direction:column;overflow:hidden;transform-origin:bottom right;opacity:0;transform:translateY(12px) scale(.94);pointer-events:none;visibility:hidden;transition:opacity .22s ease,transform .35s cubic-bezier(.3,.7,.2,1),visibility 0s .35s;color:#0B2545}
+.rfc.open .rfc-panel{opacity:1;transform:none;pointer-events:auto;visibility:visible;transition:opacity .22s ease,transform .35s cubic-bezier(.3,.7,.2,1)}
+.rfc-hd{padding:16px 18px 14px;border-bottom:1px solid #EFEBE2;display:flex;align-items:center;gap:12px}
+.rfc-hd .n{flex:1;min-width:0}
+.rfc-hd .n b{display:block;font-size:15.5px;font-weight:600}
+.rfc-hd .n span{font-size:12.5px;color:#586174;display:flex;align-items:center;gap:6px}
+.rfc-hd .n span i{width:7px;height:7px;border-radius:50%;background:#35AE74;display:inline-block}
+.rfc-reset{background:transparent;border:0;color:#586174;font-size:13.5px;padding:6px 8px;border-radius:6px;min-height:36px}
+.rfc-reset:hover{background:#F1EDE4}
+.rfc-close{background:#F1EDE4;border:0;border-radius:8px;width:36px;height:36px;font-size:18px;color:#0B2545;line-height:1}
+.rfc-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;overscroll-behavior:contain}
+.rfc-intro{display:flex;gap:14px;align-items:flex-end;animation:rfcIn .35s .05s ease both}
+.rfc-intro .m{flex-shrink:0;display:block;transform-origin:bottom center}
+.rfc.open .rfc-intro .m{animation:rfcWave 1.1s .35s ease-in-out 1}
+.rfc-intro img{display:block;width:74px;height:auto}
+.rfc-intro h3{font-size:22px;font-weight:600;letter-spacing:-0.02em;line-height:1.2;margin:0}
+.rfc-intro p{font-size:14.5px;color:#3D4759;line-height:1.55;margin:6px 0 0}
+.rfc-starters{display:flex;flex-direction:column;gap:6px}
+.rfc-starters button{text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;background:#FBFAF6;border:1px solid #EFEBE2;border-radius:11px;padding:11px 14px;font-size:14.5px;color:#0B2545;min-height:46px;animation:rfcIn .35s ease both}
+.rfc-starters button:hover{border-color:#0B2545;background:#fff}
+.rfc-starters button span:last-child{color:#A9A294}
+.rfc-note{font-size:12.5px;color:#8A909C;line-height:1.5;animation:rfcIn .35s .45s ease both}
+.rfc-note a{color:#586174;text-decoration:underline}
+.rfc-msg{animation:rfcIn .28s ease both}
+.rfc-msg.me{align-self:flex-end;max-width:82%}
+.rfc-msg.bot{align-self:flex-start;max-width:92%}
+.rfc-msg .t{font-size:15px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word;padding:10px 14px;border:1px solid}
+.rfc-msg.me .t{background:#0B2545;color:#fff;border-color:#0B2545;border-radius:14px 14px 4px 14px}
+.rfc-msg.bot .t{background:#F4F1EA;color:#0B2545;border-color:#F4F1EA;border-radius:14px 14px 14px 4px}
+.rfc-caret{display:inline-block;width:2px;height:15px;background:#0B2545;margin-left:2px;vertical-align:-2px;animation:rfcCaret .9s steps(1) infinite}
+.rfc-acts,.rfc-follow{display:flex;flex-wrap:wrap;gap:6px;animation:rfcIn .3s ease both}
+.rfc-acts{margin-top:8px}
+.rfc-acts button{border-radius:99px;padding:7px 13px;font-size:13.5px;font-weight:500;min-height:36px;color:#0B2545;background:#fff;border:1px solid #D9D3C6}
+.rfc-acts button.demo{background:#F6DF6E;border-color:#F6DF6E}
+.rfc-follow button{background:#fff;border:1px solid #D9D3C6;border-radius:99px;padding:7px 12px;font-size:13.5px;color:#0B2545;min-height:36px}
+.rfc-follow button:hover{border-color:#0B2545}
+.rfc-think{align-self:flex-start;display:flex;align-items:flex-end;gap:8px;animation:rfcIn .25s ease both}
+.rfc-think img{display:block;width:34px;height:auto;transform-origin:bottom center;animation:rfcTilt 1.2s ease-in-out infinite}
+.rfc-think .d{background:#F4F1EA;border-radius:14px 14px 14px 4px;padding:12px 14px;display:flex;gap:5px}
+.rfc-think .d i{width:7px;height:7px;border-radius:50%;background:#586174;animation:rfcDot 1.1s ease-in-out infinite}
+.rfc-think .d i:nth-child(2){animation-delay:.15s}.rfc-think .d i:nth-child(3){animation-delay:.3s}
+.rfc-form{padding:12px;border-top:1px solid #EFEBE2;display:flex;gap:8px;align-items:center;background:#fff}
+.rfc-form input{flex:1;min-width:0;border:1px solid #D9D3C6;border-radius:12px;padding:12px 14px;font-size:16px;outline:none;color:#0B2545;background:#FBFAF6}
+.rfc-form input:focus{border-color:#0B2545;background:#fff}
+.rfc-form button{width:46px;height:46px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:18px;flex-shrink:0;transition:background .2s}
+.rfc-form button:disabled{background:#A9A294;cursor:default}
+@media (max-width:519px){
+  .rfc-teaser{right:16px;width:min(240px,calc(100vw - 32px))}
+  .rfc-pl small{display:none}
+  .rfc.open .rfc-launch{display:none}
+  .rfc-panel{right:0;bottom:0;left:0;top:0;width:100%;height:100%;border-radius:0;transform:translateY(24px)}
+}
+@media print{.rfc{display:none !important}}
 </style>
-<button id="rf-chat-btn" type="button" aria-controls="rf-chat" aria-expanded="false"><span class="av" data-rf-av></span><span class="lbl">Spør om Rettført</span></button>
-<section id="rf-chat" role="dialog" aria-label="Chat om Rettført">
-  <div class="hd"><span class="rf-av" data-rf-av></span><div><b>Rettført-assistenten</b><span><i></i>Svarer på spørsmål om Rettført</span></div><button class="x" type="button" aria-label="Lukk chatten">×</button></div>
-  <div class="log" aria-live="polite"></div>
-  <form><textarea rows="1" maxlength="1000" placeholder="Skriv et spørsmål …" aria-label="Spørsmål"></textarea><button type="submit">Send</button></form>
-  <div class="ft">Spørsmålene besvares av en språkmodell (DeepSeek). Skriv ikke personopplysninger i chatten. <a href="/personvern.html#assistent">Les mer</a></div>
-</section>
+<div class="rfc" id="rfc">
+  <div class="rfc-teaser" hidden><div class="b"><div class="t1">Lurer du på noe?</div><div class="t2">Jeg svarer på spørsmål om Rettført.</div><button type="button" class="x" aria-label="Skjul">×</button></div></div>
+  <button type="button" class="rfc-launch" aria-label="Åpne chat" aria-controls="rfc-panel" aria-expanded="false">
+    <span class="rfc-pill ring"><span class="rfc-av"><span><img src="assets/mascot-hip.png" alt=""></span></span><span class="rfc-pl"><b class="lbl">Spør assistenten</b><small><i></i>Svarer med en gang</small></span></span>
+    <span class="rfc-x" aria-hidden="true">×</span>
+  </button>
+  <div class="rfc-panel" id="rfc-panel" role="dialog" aria-label="Rettført-assistenten">
+    <div class="rfc-hd"><div class="n"><b>Rettført-assistenten</b><span><i></i><em class="st" style="font-style:normal">Pålogget</em></span></div><button type="button" class="rfc-reset" hidden>Ny samtale</button><button type="button" class="rfc-close" aria-label="Lukk">×</button></div>
+    <div class="rfc-body" aria-live="polite"></div>
+    <form class="rfc-form"><input type="text" maxlength="500" placeholder="Skriv et spørsmål …" aria-label="Spørsmål"><button type="submit" aria-label="Send" disabled>↑</button></form>
+  </div>
+</div>
 <script>
 (function () {
-  var btn = document.getElementById('rf-chat-btn'), box = document.getElementById('rf-chat');
-  var log = box.querySelector('.log'), form = box.querySelector('form'), ta = form.querySelector('textarea'), send = form.querySelector('button');
-  var msgs = [], busy = false, started = false;
-  // Den grønne haken fra forsiden, uten bein, som avatar.
-  var AV = '<svg viewBox="6 0 158 136" aria-hidden="true"><path d="M30 72 L64 108 L136 28" stroke="#1F7D52" stroke-width="40" fill="none" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 4)"/><path d="M30 72 L64 108 L136 28" stroke="#35AE74" stroke-width="40" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M112 36 L123 23" stroke="rgba(255,255,255,.35)" stroke-width="5" stroke-linecap="round"/><path d="M20 62 L32 75" stroke="rgba(255,255,255,.3)" stroke-width="4.5" stroke-linecap="round"/><g transform="translate(100 67) scale(1.4) translate(-100 -67)"><g stroke="#0B2545" stroke-width="3" fill="none" stroke-linecap="round"><path d="M86 57 Q92 53 98 56"/><path d="M102 56 Q108 53 114 57"/><path d="M94 75 Q100 81 106 75"/></g><g class="rf-eyes"><ellipse cx="93" cy="66" rx="4.2" ry="5.4" fill="#0B2545"/><ellipse cx="107" cy="66" rx="4.2" ry="5.4" fill="#0B2545"/><circle cx="94.3" cy="64" r="1.3" fill="#fff"/><circle cx="108.3" cy="64" r="1.3" fill="#fff"/></g></g></svg>';
-  document.querySelectorAll('[data-rf-av]').forEach(function (el) { el.innerHTML = AV; });
-  var CHIPS = ['Hva løser Rettført?', 'Hvordan fungerer kontrollene?', 'Hva skjer med filene mine?', 'Hva koster det?'];
+  var root = document.getElementById('rfc');
+  var teaser = root.querySelector('.rfc-teaser'), launch = root.querySelector('.rfc-launch'), pill = root.querySelector('.rfc-pill');
+  var body = root.querySelector('.rfc-body'), form = root.querySelector('.rfc-form'), input = form.querySelector('input'), send = form.querySelector('button');
+  var resetBtn = root.querySelector('.rfc-reset'), status = root.querySelector('.st');
+  var MASCOT = 'assets/mascot-hip.png', MAIL = 'mohbok04@hotmail.com';
 
-  function add(role, text, cls) {
-    var row = document.createElement('div'), d = document.createElement('div');
-    row.className = 'row' + (role === 'user' ? ' me' : '');
-    if (role !== 'user') { var a = document.createElement('span'); a.className = 'rf-av sm'; a.innerHTML = AV; row.appendChild(a); }
-    d.className = 'm ' + (role === 'user' ? 'me' : 'bot') + (cls ? ' ' + cls : '');
-    d.textContent = text;
-    row.appendChild(d); log.appendChild(row); log.scrollTop = log.scrollHeight;
-    return d;
+  var STARTERS = ['Hva gjør Rettført?', 'Hvilke regnskapssystemer støttes?', 'Lastes filene mine opp?', 'Hvordan prøver jeg demoen?'];
+  // Brukes bare hvis assistenten ikke svarer.
+  var CANNED = {
+    'Hva gjør Rettført?': 'Rettført er et kontrollag du bruker før du godkjenner en periode. Det leser SAF-T, bank, lønn og bilag, kjører 32 faste kontroller og viser de få forholdene som bør vurderes. Du ser hvorfor hvert funn ble flagget, tar selv den endelige vurderingen og signerer et kontrollbevis.',
+    'Hvilke regnskapssystemer støttes?': 'Alle som kan eksportere SAF-T Financial (1.30 eller 1.20). Det gjelder blant annet Tripletex, PowerOffice Go, Fiken, Visma og Xledger. Lønn leses som CSV.',
+    'Lastes filene mine opp?': 'Nei. SAF-T- og CSV-filene leses i nettleseren din og lastes ikke opp. Bruker du assistenten i demoen, sendes bare opplysningene fra funnet du ser på.',
+    'Hvordan prøver jeg demoen?': 'Trykk «Prøv Rettført». Demoen åpner uten innlogging, med fiktive data for Nordhavn Drift AS. Det finnes også en guidet omvisning på omtrent to minutter.'
+  };
+  var FOLLOW = {
+    'Hva gjør Rettført?': ['Hvilke kontroller kjøres?', 'Erstatter det regnskapssystemet?'],
+    'Hvilke regnskapssystemer støttes?': ['Hva er SAF-T?', 'Hvordan eksporterer jeg SAF-T?'],
+    'Lastes filene mine opp?': ['Hva gjør assistenten?', 'Hvem har laget Rettført?'],
+    'Hvordan prøver jeg demoen?': ['Hva koster det?', 'Når lanseres det?']
+  };
+
+  var msgs = [], busy = false, lastQ = null, tw = null;
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function scroll() { body.scrollTop = body.scrollHeight; }
+  function clean(t) { return String(t || '').replace(/^#+\s*/gm, '').replace(/\*\*(.*?)\*\*/g, '$1').replace(/^\s*[-*]\s+/gm, '• ').trim(); }
+  function setBusy(v) { busy = v; send.disabled = v || !input.value.trim(); status.textContent = v ? 'Skriver …' : 'Pålogget'; }
+
+  function intro() {
+    body.textContent = '';
+    var i = el('div', 'rfc-intro');
+    var m = el('span', 'm'); var img = el('img'); img.src = MASCOT; img.alt = ''; m.appendChild(img);
+    var t = el('div'); t.appendChild(el('h3', null, 'Hei! Hva lurer du på?'));
+    t.appendChild(el('p', null, 'Jeg svarer på spørsmål om Rettført: hva det gjør, hvilke data det bruker, og hvordan du prøver det.'));
+    i.appendChild(m); i.appendChild(t); body.appendChild(i);
+    var s = el('div', 'rfc-starters');
+    STARTERS.forEach(function (q, n) {
+      var b = el('button'); b.type = 'button'; b.style.animationDelay = (0.12 + n * 0.07) + 's';
+      b.appendChild(el('span', null, q)); b.appendChild(el('span', null, '→'));
+      b.onclick = function () { ask(q); }; s.appendChild(b);
+    });
+    body.appendChild(s);
+    var note = el('div', 'rfc-note');
+    note.innerHTML = 'Svarene lages av en språkmodell (DeepSeek). Ikke del personopplysninger eller kundedata her. <a href="/personvern.html#assistent">Personvern</a>';
+    body.appendChild(note);
+    resetBtn.hidden = true;
   }
-  function start() {
-    if (started) return; started = true;
-    add('assistant', 'Hei! Jeg er Rettført-assistenten. Spør meg om hva Rettført løser, hvordan kontrollene virker, personvern eller priser.');
-    var c = document.createElement('div'); c.className = 'chips';
-    CHIPS.forEach(function (q) { var b = document.createElement('button'); b.type = 'button'; b.textContent = q; b.onclick = function () { c.remove(); ask(q); }; c.appendChild(b); });
-    log.appendChild(c);
+
+  function addUser(q) {
+    var w = el('div', 'rfc-msg me'); w.appendChild(el('div', 't', q)); body.appendChild(w); scroll();
   }
-  function open(v) {
-    box.classList.toggle('open', v); btn.style.display = v ? 'none' : '';
-    btn.setAttribute('aria-expanded', String(v));
-    if (v) { start(); setTimeout(function () { ta.focus(); }, 50); } else btn.focus();
+  function thinking(on) {
+    var t = body.querySelector('.rfc-think'); if (t) t.remove();
+    if (!on) return;
+    t = el('div', 'rfc-think'); var img = el('img'); img.src = MASCOT; img.alt = ''; t.appendChild(img);
+    var d = el('div', 'd'); d.appendChild(el('i')); d.appendChild(el('i')); d.appendChild(el('i')); t.appendChild(d);
+    body.appendChild(t); scroll();
   }
+  function actionsFor(q) {
+    var l = q.toLowerCase();
+    if (/demo|prøv|test/.test(l) || q === STARTERS[0] || q === STARTERS[3]) return [{ l: 'Prøv demoen', kind: 'demo' }];
+    if (/pris|koster|kontakt|lanser/.test(l)) return [{ l: 'Send e-post', kind: 'mail' }];
+    return [];
+  }
+  function followUps() {
+    var old = body.querySelector('.rfc-follow'); if (old) old.remove();
+    var list = FOLLOW[lastQ] || STARTERS.filter(function (s) { return !msgs.some(function (m) { return m.content === s; }); }).slice(0, 2);
+    if (!list.length) return;
+    var f = el('div', 'rfc-follow');
+    list.forEach(function (q) { var b = el('button', null, q); b.type = 'button'; b.onclick = function () { ask(q); }; f.appendChild(b); });
+    body.appendChild(f); scroll();
+  }
+  function typeOut(full, acts, done) {
+    var w = el('div', 'rfc-msg bot'), t = el('div', 't'), txt = document.createTextNode(''), caret = el('span', 'rfc-caret');
+    t.appendChild(txt); t.appendChild(caret); w.appendChild(t); body.appendChild(w);
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var i = reduce ? full.length : 0, step = Math.max(2, Math.round(full.length / 90));
+    function finish() {
+      clearInterval(tw); tw = null; txt.nodeValue = full; caret.remove();
+      if (acts.length) {
+        var a = el('div', 'rfc-acts');
+        acts.forEach(function (x) {
+          var b = el('button', x.kind === 'demo' ? 'demo' : '', x.l); b.type = 'button';
+          b.onclick = function () { window.location.href = x.kind === 'mail' ? 'mailto:' + MAIL : '/demo.html'; };
+          a.appendChild(b);
+        });
+        w.appendChild(a);
+      }
+      scroll(); done();
+    }
+    if (i >= full.length) return finish();
+    tw = setInterval(function () { i = Math.min(full.length, i + step); txt.nodeValue = full.slice(0, i); scroll(); if (i >= full.length) finish(); }, 18);
+  }
+
   async function ask(q) {
-    q = q.trim(); if (!q || busy) return;
-    busy = true; send.disabled = true;
-    add('user', q); msgs.push({ role: 'user', content: q });
-    var w = add('assistant', 'Skriver …', 'wait');
-    var text;
+    q = String(q || '').trim(); if (!q || busy) return;
+    var f = body.querySelector('.rfc-follow'); if (f) f.remove();
+    if (!msgs.length) body.textContent = '';
+    resetBtn.hidden = false;
+    lastQ = q; input.value = ''; setBusy(true);
+    addUser(q); msgs.push({ role: 'user', content: q });
+    thinking(true);
+    var minWait = new Promise(function (r) { setTimeout(r, 650); });
+    var text = null;
     try {
       var r = await fetch('/api/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'site', messages: msgs.slice(-10) }) });
-      if (r.status === 429) throw new Error('Du har sendt mange spørsmål på kort tid. Prøv igjen om noen minutter.');
-      if (!r.ok) throw new Error('');
-      text = (await r.json()).text;
-      msgs.push({ role: 'assistant', content: text });
-    } catch (e) {
-      msgs.pop();
-      text = e.message || 'Assistenten svarer ikke akkurat nå. Prøv demoen på /demo.html, eller send en e-post til mohbok04@hotmail.com.';
-    }
-    w.textContent = text; w.className = 'm bot'; log.scrollTop = log.scrollHeight;
-    busy = false; send.disabled = false; ta.focus();
+      if (r.status === 429) text = 'Du har sendt mange spørsmål på kort tid. Prøv igjen om noen minutter.';
+      else if (r.ok) text = (await r.json()).text;
+    } catch (e) {}
+    await minWait;
+    if (!text) text = CANNED[q] || 'Det vet jeg ikke sikkert. Prøv demoen, eller send en e-post til ' + MAIL + ', så får du svar.';
+    text = clean(text);
+    msgs.push({ role: 'assistant', content: text });
+    thinking(false);
+    typeOut(text, actionsFor(q), function () { setBusy(false); followUps(); if (window.innerWidth > 520) input.focus(); });
   }
-  btn.onclick = function () { open(true); };
-  box.querySelector('.x').onclick = function () { open(false); };
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && box.classList.contains('open')) open(false); });
-  form.onsubmit = function (e) { e.preventDefault(); var q = ta.value; ta.value = ''; ta.style.height = ''; ask(q); };
-  ta.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); } });
-  ta.addEventListener('input', function () { ta.style.height = ''; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; });
+
+  function open(v) {
+    root.classList.toggle('open', v);
+    launch.setAttribute('aria-expanded', String(v));
+    launch.setAttribute('aria-label', v ? 'Lukk chat' : 'Åpne chat');
+    if (v) { teaser.hidden = true; pill.classList.remove('ring'); if (window.innerWidth > 520) setTimeout(function () { input.focus(); }, 320); }
+  }
+
+  launch.onclick = function () { open(!root.classList.contains('open')); };
+  root.querySelector('.rfc-close').onclick = function () { open(false); launch.focus(); };
+  teaser.querySelector('.b').onclick = function () { open(true); };
+  teaser.querySelector('.x').onclick = function (e) { e.stopPropagation(); teaser.hidden = true; try { sessionStorage.setItem('rfc_teaser', '0'); } catch (x) {} };
+  resetBtn.onclick = function () { clearInterval(tw); tw = null; msgs = []; lastQ = null; setBusy(false); intro(); };
+  input.addEventListener('input', function () { send.disabled = busy || !input.value.trim(); });
+  form.onsubmit = function (e) { e.preventDefault(); ask(input.value); };
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && root.classList.contains('open')) open(false); });
+  function lbl() { root.querySelector('.lbl').textContent = window.innerWidth < 520 ? 'Spør oss' : 'Spør assistenten'; }
+  window.addEventListener('resize', lbl); lbl();
+  var hideTeaser = false; try { hideTeaser = sessionStorage.getItem('rfc_teaser') === '0'; } catch (x) {}
+  teaser.hidden = hideTeaser;
+  intro();
 })();
 </script>
 </body>
