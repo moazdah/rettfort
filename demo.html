@@ -28,7 +28,32 @@
       for(let i=0;i<raw.length;i++) bytes[i]=raw.charCodeAt(i);
       const ds=new DecompressionStream("gzip");
       const stream=new Blob([bytes]).stream().pipeThrough(ds);
-      const source=await new Response(stream).text();
+      let source=await new Response(stream).text();
+
+      // Knytter demoen visuelt til hovedsiden uten å endre selve demoflyten.
+      // Vi bytter kun toppbaren i Claude-demoen: samme Rettført-logo, høyde,
+      // bakgrunn og bredde som på forsiden. Logoen går tilbake til forsiden.
+      const demoHeader = `<header data-noprint="1" style="position:sticky;top:0;z-index:30;background:rgba(244,241,234,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #E4DFD4">
+<div style="max-width:1240px;margin:0 auto;padding:8px clamp(18px,2.5vw,32px);min-height:70px;display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap;width:100%">
+<a href="/" aria-label="Til Rettført-forsiden" title="Til forsiden" style="width:103px;height:26px;overflow:hidden;position:relative;flex-shrink:0;display:block">
+<img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;max-width:none;left:-14.6px;top:-8.3px;width:131px;height:43.7px">
+</a>
+<sc-if value="{{ showCompany }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;color:#586174;white-space:nowrap">Nordhavn Drift AS · sep. 2026</span></sc-if>
+<div style="flex:1"></div>
+<button onClick="{{ startGuide }}" style="background:#F6DF6E;border:0;border-radius:8px;padding:9px 14px;font-size:14.5px;font-weight:600;color:#0B2545;min-height:40px">{{ guideBtn }}</button>
+<nav style="display:flex;gap:2px;overflow-x:auto;width:{{ navW }};order:{{ navOrder }};-webkit-overflow-scrolling:touch">
+<sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+<button onClick="{{ s.fn }}" style="display:flex;align-items:center;gap:7px;background:{{ s.bg }};color:{{ s.fg }};border:0;border-radius:8px;padding:8px 11px;font-size:14px;font-weight:500;white-space:nowrap;min-height:40px">
+<span style="width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-family:'IBM Plex Mono',monospace;background:{{ s.numBg }};color:{{ s.numFg }}">{{ s.num }}</span>{{ s.l }}</button>
+</sc-for>
+</nav>
+</div>
+</header>`;
+
+      source=source.replace(
+        /<header data-noprint="1" style="position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid #E4DFD4">[\s\S]*?<\/header>/,
+        demoHeader
+      );
       document.open();
       document.write(source);
       document.close();
