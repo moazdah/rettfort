@@ -71,14 +71,14 @@ for (const c of CASES) {
     (ok ? passes : fails).push({ kind, label: x.label || LABEL[kind], detail, why: x.why });
   }
   const inv = out.ok ? invariants(out.r) : [];
-  const status = fails.length ? (out.hang ? 'HENGER' : 'AVVIK') : inv.length ? 'AVVIK' : 'OK';
+  const status = fails.length ? (out.hang ? 'HENGER' : c.accepted ? 'AKSEPTERT' : 'AVVIK') : inv.length ? 'AVVIK' : 'OK';
   results.push({ ...meta(c), status, ms: Math.round(out.ms || 0), error: out.ok ? null : out.error, fails, passes, invariants: inv, nFindings: out.ok ? out.r.findings.length : null, findings: out.ok ? out.r.findings.map(f => `[${f.controlId}] ${f.title}`) : [] });
-  process.stdout.write(`${status === 'OK' ? '✓' : '✗'} ${c.id} ${c.title} (${Math.round(out.ms || 0)} ms)\n`);
+  process.stdout.write(`${status === 'OK' ? '✓' : status === 'AKSEPTERT' ? '–' : '✗'} ${c.id} ${c.title} (${Math.round(out.ms || 0)} ms)\n`);
 }
-function meta(c) { return { id: c.id, group: c.group, title: c.title, planted: c.planted, severity: c.severity || 'middels' }; }
+function meta(c) { return { id: c.id, group: c.group, title: c.title, planted: c.planted, severity: c.severity || 'middels', accepted: c.accepted || null }; }
 
 await browser.close(); server.close();
 fs.mkdirSync(path.join(here, 'out'), { recursive: true });
 fs.writeFileSync(path.join(here, 'out', 'results.json'), JSON.stringify(results, null, 2));
 const n = s => results.filter(r => r.status === s).length;
-console.log(`\n${results.length} tilfeller: ${n('OK')} OK, ${n('AVVIK')} avvik, ${n('HENGER')} henger, ${n('FEIL I TEST')} feil i test`);
+console.log(`\n${results.length} tilfeller: ${n('OK')} OK, ${n('AVVIK')} avvik, ${n('AKSEPTERT')} akseptert, ${n('HENGER')} henger, ${n('FEIL I TEST')} feil i test`);

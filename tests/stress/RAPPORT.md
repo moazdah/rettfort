@@ -1,5 +1,10 @@
 # Stresstest av kontrollmotoren – rapport
 
+> **Status etter retting (trinn 1–4):** 83 tilfeller: **81 OK, 2 akseptert, 0 avvik.** Motorens egne 21 tester er grønne. Rapporten under beskriver avvikene slik de var før retting.
+>
+> Akseptert uten retting: R15 (rundt beløp delt i to bilag – for mange falske alarmer) og K04 (fordel med bare etternavn – for usikker kobling).
+> Nye tilfeller G01–G07 sjekker at de nye reglene ikke gir falske alarmer. Én ble funnet og rettet underveis: hotellregning med to MVA-satser.
+
 Kjørt 26.09.2026 mot `rettfort-engine.js` (commit `dc8ef6f`) i Chromium.
 75 testtilfeller: **42 OK, 33 avvik**. Ingen tilfeller hang eller krasjet nettleseren.
 
