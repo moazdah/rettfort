@@ -111,6 +111,20 @@ input,textarea{font-family:inherit}
 .rf-drop{position:absolute;left:calc(50% + var(--x) - 22px);top:0;background:#0B2545;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 8px;border-radius:4px;opacity:0;animation:rfDrop 2.7s var(--d) ease-in infinite}
 @keyframes rfDrop{0%{opacity:0;transform:translateY(-10px) rotate(-6deg)}15%{opacity:1}55%{opacity:1;transform:translateY(96px) rotate(4deg)}70%,100%{opacity:0;transform:translateY(118px) rotate(0)}}
 @media (prefers-reduced-motion:reduce){.rf-drop{animation:none;opacity:1}}
+.rf-chip{display:inline-flex;align-items:center;gap:8px;border:1px solid #E4DFD4;border-radius:99px;padding:8px 12px 8px 14px;font-size:15px;font-weight:500;cursor:pointer;transition:background-color .22s,color .22s,border-color .22s,box-shadow .22s,transform .12s;-webkit-tap-highlight-color:transparent}
+.rf-chip:active{transform:scale(.96)}
+.rf-chip-n{font-family:'IBM Plex Mono',monospace;font-size:12.5px;border-radius:99px;padding:1px 7px;transition:background-color .22s,color .22s}
+.rf-chip-v{opacity:.55;transition:transform .25s ease}
+.rf-cp{display:grid;transition:grid-template-rows .38s cubic-bezier(.3,.7,.2,1)}
+.rf-cp-in{overflow:hidden;min-height:0}
+.rf-cp-card{margin-top:14px;background:#fff;border:1px solid #E4DFD4;border-radius:18px;padding:20px 18px 14px;box-shadow:0 18px 40px -30px rgba(11,37,69,.45);transition:opacity .3s ease,transform .38s cubic-bezier(.3,.7,.2,1)}
+.rf-cp-x{flex-shrink:0;width:34px;height:34px;border-radius:50%;border:0;background:#F1EEE6;color:#0B2545;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center}
+.rf-cp-row{display:grid;grid-template-columns:22px minmax(0,1fr);gap:12px;padding:14px 0;border-top:1px solid #EFEBE2}
+.rf-cp-row:first-child{border-top:0}
+.rf-cp-tick{width:22px;height:22px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.rf-cp-rule{display:inline-block;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#586174;background:#F4F1EA;border-radius:6px;padding:3px 8px}
+.rf-cp-more{margin:4px 0 4px;background:transparent;border:0;padding:8px 0;font-size:14.5px;font-weight:600;color:#0B2545;display:flex;align-items:center;gap:8px}
+@media (prefers-reduced-motion:reduce){.rf-cp,.rf-cp-card,.rf-chip,.rf-chip-v{transition:none}.rf-cp-row{animation:none !important}}
 @media (max-width:1080px){[data-rf=cta]{padding-right:200px !important}}
 @media (max-width:900px){[data-rf=nav]{display:none !important}[data-rf=deskact]{display:none !important}[data-rf=mobmenu]{display:flex !important}[data-rf=sec]{padding-top:72px !important;padding-bottom:56px !important}[data-rf=hero]{padding-top:56px !important;padding-bottom:64px !important;gap:48px !important}[data-rf=dark]{padding-top:56px !important;padding-bottom:56px !important}[data-rf=co]{display:none !important}[data-rf=stick]{position:static !important}}
 @media (max-width:760px){body{width:100%;max-width:100%;overflow-x:hidden}.rf-ctrl-extra{display:none !important}.rf-ctrl-expanded .rf-ctrl-extra{display:flex !important;animation:rfIn .28s ease both}[data-rf=ctrlToggle]{display:flex !important}[data-rf=span2]{grid-column:auto !important}[data-rf=cta]{padding:24px !important;margin-top:24px !important;width:100% !important;max-width:100% !important;overflow:hidden !important;display:flex !important;flex-direction:column !important;align-items:stretch !important;gap:12px !important}[data-rf=cta]>button{width:100% !important}[data-rf=ctaText]{width:100% !important;flex:0 0 auto !important}[data-rf=ctaForm]{width:100% !important;max-width:none !important;min-width:0 !important;flex:0 0 auto !important;display:grid !important;grid-template-columns:minmax(0,1fr) !important;gap:8px !important}[data-rf=ctaForm] input,[data-rf=ctaForm] button{width:100% !important;max-width:100% !important;min-width:0 !important}[data-rf=ctaM]{display:none !important}[data-rf=card44]{padding:28px 24px !important}[data-rf=kv]{grid-template-columns:1fr !important}[data-rf=aboutM]{display:none !important}[data-rf=apphdr]{gap:14px !important;padding:0 18px !important}[data-rf=main]{padding:24px 16px 72px !important}[data-rf=hist]{grid-template-columns:1fr auto !important;gap:6px 12px !important}[data-rf=hist]>span:last-child{grid-column:1 / -1}[data-rf=kv2]{grid-template-columns:1fr !important;gap:6px !important}[data-rf=frow]{grid-template-columns:auto minmax(0,1fr) !important}[data-rf=frow]>div:last-child{grid-column:1 / -1;text-align:left !important;display:flex;gap:10px}}
@@ -327,10 +341,39 @@ input,textarea{font-family:inherit}
       <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0;text-wrap:balance">{{ nCtrl }} kontroller med kjent regelgrunnlag.</h2>
       <p style="font-size:17px;line-height:1.6;color:#3D4759;margin:0;max-width:480px">Hver kontroll har en fast terskel og en henvisning. Du ser alltid hva som ble sjekket, og hvorfor noe ble markert.</p>
     </div>
-    <div class="rf-mob" style="margin-top:24px">
+    <div class="rf-mob" style="margin-top:28px">
+      <div style="font-size:13.5px;color:#586174;margin-bottom:12px">Trykk på et område for å se kontrollene.</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px">
-        <sc-for list="{{ ctrlCards }}" as="g" hint-placeholder-count="6"><span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E4DFD4;border-radius:99px;padding:8px 14px;font-size:15px;font-weight:500">{{ g.t }}<span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#1F7D52;background:#E2F1E8;border-radius:99px;padding:1px 7px">{{ g.c }}</span></span></sc-for>
+        <sc-for list="{{ ctrlCards }}" as="g" hint-placeholder-count="6"><button type="button" class="rf-chip" onClick="{{ g.pick }}" aria-expanded="{{ g.openS }}" style="background:{{ g.cBg }};color:{{ g.cFg }};border-color:{{ g.cBd }};box-shadow:{{ g.cSh }}">{{ g.t }}<span class="rf-chip-n" style="background:{{ g.nBg }};color:{{ g.nFg }}">{{ g.c }}</span><svg class="rf-chip-v" style="transform:{{ g.rot }}" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></sc-for>
       </div>
+      <sc-for list="{{ ctrlCards }}" as="g" hint-placeholder-count="0">
+        <div class="rf-cp" style="grid-template-rows:{{ g.rows }}">
+          <div class="rf-cp-in">
+            <div class="rf-cp-card" style="opacity:{{ g.op }};transform:{{ g.tf }}">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                <div style="min-width:0">
+                  <div style="font-size:18px;font-weight:600;letter-spacing:-0.01em">{{ g.t }}</div>
+                  <div style="font-size:14px;color:#586174;margin-top:3px;line-height:1.45">{{ g.d }}</div>
+                </div>
+                <button type="button" onClick="{{ g.pick }}" aria-label="Lukk" class="rf-cp-x">×</button>
+              </div>
+              <div style="margin-top:6px">
+                <sc-for list="{{ g.items }}" as="x" hint-placeholder-count="0">
+                  <div class="rf-cp-row" style="animation:{{ x.an }}">
+                    <span class="rf-cp-tick">{{ iTickS }}</span>
+                    <div style="min-width:0">
+                      <div style="font-size:15.5px;font-weight:600;line-height:1.35">{{ x.t }}</div>
+                      <div style="font-size:13.5px;color:#3D4759;line-height:1.5;margin-top:3px"><span style="color:#8A909C">Markeres når: </span>{{ x.th }}</div>
+                      <span class="rf-cp-rule">{{ x.rule }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ g.hasMore }}"><button type="button" onClick="{{ toControls }}" class="rf-cp-more">{{ g.moreL }} {{ iArrow }}</button></sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-for>
     </div>
     <div class="rf-desk" style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px">
       <sc-for list="{{ ctrlCards }}" as="g" hint-placeholder-count="4">
@@ -1124,7 +1167,7 @@ const M = ({ s = 130, lx = 0, ly = 0, smile = true, wave = false, hold = false, 
 };
 
 class Component extends DCLogic {
-  state = { screen: 'landing', page: 'new', authMode: 'login', heroStep: 0, mobileMenu: false, ctrlExpanded: false, ready: false, files: { saft: null, prev: null, curr: null }, drag: null, err: null, runIdx: 0, runList: [], pending: null, result: null, resolved: {}, fArea: 'alle', fStatus: 'apne', fid: null, note: '', toast: null, fmtOpen: false, planHover: 1, tired: false, fidget: null, ex: 0, su: { name: '', email: '', role: '', org: '', notify: true, plan: '' }, suState: 'form', suErr: '', nfEmail: '', nfDone: false, slikSeen: false, demo: false, showIntro: false, showHow: false, showEnd: false, tour: null, hist: [], ai: {}, prio: null, outcome: null, settings: null, rid: null, mapDraft: {}, tolDraft: {} };
+  state = { screen: 'landing', page: 'new', authMode: 'login', heroStep: 0, mobileMenu: false, ctrlExpanded: false, ctrlArea: null, ready: false, files: { saft: null, prev: null, curr: null }, drag: null, err: null, runIdx: 0, runList: [], pending: null, result: null, resolved: {}, fArea: 'alle', fStatus: 'apne', fid: null, note: '', toast: null, fmtOpen: false, planHover: 1, tired: false, fidget: null, ex: 0, su: { name: '', email: '', role: '', org: '', notify: true, plan: '' }, suState: 'form', suErr: '', nfEmail: '', nfDone: false, slikSeen: false, demo: false, showIntro: false, showHow: false, showEnd: false, tour: null, hist: [], ai: {}, prio: null, outcome: null, settings: null, rid: null, mapDraft: {}, tolDraft: {} };
   timers = [];
   componentDidMount() {
     try { const s = JSON.parse(localStorage.getItem('rettfort_nav') || '{}'); if (s.screen) this.setState({ screen: s.screen, page: s.page === 'controls' || s.page === 'settings' ? s.page : 'new' }); } catch (e) {}
@@ -1139,6 +1182,7 @@ class Component extends DCLogic {
     this.fidT = setTimeout(next, 30000);
   }
   componentDidUpdate(pp, ps) {
+    if (!ps) return;
     if (ps.screen !== this.state.screen || ps.page !== this.state.page || ps.fid !== this.state.fid) {
       if (this.state.mobileMenu) this.setState({ mobileMenu: false });
       try { localStorage.setItem('rettfort_nav', JSON.stringify({ screen: this.state.screen, page: this.state.page })); } catch (e) {}
@@ -1388,7 +1432,7 @@ class Component extends DCLogic {
       s1Walk: s.slikSeen ? 'rfWalk 2.2s ease-out both' : 'none', s1Tray: s.slikSeen ? 'rfTray 2.2s ease both' : 'none', s2Lean: s.slikSeen ? 'rfLean 6s ease-in-out infinite' : 'none', s3Nod: s.slikSeen ? 'rfNod 5s ease-in-out infinite' : 'none',
       scanRows: [0, 1, 2, 3, 4, 5].map(i => { const EX = ['Mulig dobbeltføring', 'Lønn etter sluttdato', 'AGA-differanse', 'Uvanlig stort beløp', 'Endret bankkonto']; const b = s.ex % 2 ? 'B' : '', D = ' 3s ease both'; if (i === 3) return { t: EX[s.ex], an: `rfIn2${b}${D}`, tan: `rfTin${b}${D}`, kan: 'rfKno 1s both' }; if (i === 2) return { t: EX[(s.ex + 4) % 5], an: `rfOut2${b}${D}`, tan: `rfTout${b}${D}`, kan: `rfKin${b}${D}` }; return { t: '', an: 'none', tan: 'none', kan: 'none' }; }), scanAn: `rfScrl${s.ex % 2 ? 'B' : ''} 3s ease both`,
       ex3t: ['Mulig dobbeltføring', 'Lønn etter sluttdato', 'Arbeidsgiveravgift', 'Programvare 950 000 kr', 'Endret bankkonto'][s.ex], ex3d: ['Faktura 48213 ført to ganger. Bilag 1211 kreditert.', 'Sluttoppgjør avtalt 12.08. Avtale lagt ved.', 'Fri bil manglet i grunnlaget. Korrigert i oktober.', 'Årslisens 2026–2027. Periodiseres over 12 mnd.', 'Ringt Amir Khalil 24.09. Ny konto er riktig.'][s.ex], ex3o: ['Rettet', 'Forventet avvik', 'Rettet', 'Krever oppfølging', 'Forventet avvik'][s.ex],
-      ctrlCards: [['regnskap', 'Regnskap', 'Bilag, MVA og perioder i SAF-T.', ['balanse', 'duplikat', 'mvaber']], ['lonn', 'Lønn', 'Endringer mellom to lønnsperioder.', ['sluttdato', 'bankkonto', 'endring-lonn']], ['kryss', 'Lønn × regnskap', 'Lønnsfilen avstemt mot hovedboken.', ['avst-brutto', 'avst-skatt', 'avst-aga']], ['revisjon', 'Revisjonsblikk', 'Poster som kan fortjene nærmere kontroll.', ['uvanlig', 'runde', 'tekst']], ['bank', 'Bank', 'Kontoutskriften avstemt mot hovedboken.', ['bank-saldo', 'bank-poster']], ['bilag', 'Bilag', 'PDF, bilder og EHF sammenlignet med bokføringen.', ['bilag-bokforing', 'bilag-innhold']]].map(([a, t, d, ids], i) => { const all = cat.filter(c => c.area === a); const ex = ids.map(id => all.find(c => c.id === id)).filter(Boolean); return { t, d, n: E ? `${all.length} kontroller` : '', c: E ? String(all.length) : '', ex: ex.map(c => ({ t: c.t })), more: all.length > ex.length ? `og ${all.length - ex.length} til` : '', mobileClass: i ? 'rf-ctrl-extra' : '' }; }),
+      ctrlCards: [['regnskap', 'Regnskap', 'Bilag, MVA og perioder i SAF-T.', ['balanse', 'duplikat', 'mvaber']], ['lonn', 'Lønn', 'Endringer mellom to lønnsperioder.', ['sluttdato', 'bankkonto', 'endring-lonn']], ['kryss', 'Lønn × regnskap', 'Lønnsfilen avstemt mot hovedboken.', ['avst-brutto', 'avst-skatt', 'avst-aga']], ['revisjon', 'Revisjonsblikk', 'Poster som kan fortjene nærmere kontroll.', ['uvanlig', 'runde', 'tekst']], ['bank', 'Bank', 'Kontoutskriften avstemt mot hovedboken.', ['bank-saldo', 'bank-poster']], ['bilag', 'Bilag', 'PDF, bilder og EHF sammenlignet med bokføringen.', ['bilag-bokforing', 'bilag-innhold']]].map(([a, t, d, ids], i) => { const all = cat.filter(c => c.area === a); const ex = ids.map(id => all.find(c => c.id === id)).filter(Boolean); return { t, d, n: E ? `${all.length} kontroller` : '', c: E ? String(all.length) : '', ex: ex.map(c => ({ t: c.t })), more: all.length > ex.length ? `og ${all.length - ex.length} til` : '', mobileClass: i ? 'rf-ctrl-extra' : '', ...(() => { const on = s.ctrlArea === a; return { openS: on ? 'true' : 'false', pick: () => this.setState(st => ({ ctrlArea: st.ctrlArea === a ? null : a })), cBg: on ? INK : '#fff', cFg: on ? '#fff' : INK, cBd: on ? INK : '#E4DFD4', cSh: on ? '0 10px 22px -14px rgba(11,37,69,.7)' : 'none', nBg: on ? 'rgba(255,255,255,.16)' : '#E2F1E8', nFg: on ? '#fff' : '#1F7D52', rot: on ? 'rotate(180deg)' : 'none', rows: on ? '1fr' : '0fr', op: on ? 1 : 0, tf: on ? 'none' : 'translateY(-6px)', items: all.slice(0, 4).map((c, k) => ({ t: c.t, th: c.th, rule: c.rule, an: on ? `rfIn .38s ${0.12 + k * 0.07}s ease both` : 'none' })), hasMore: all.length > 4, moreL: `Se alle ${all.length} kontroller i området` }; })() }; }),
       ctrlSectionClass: s.ctrlExpanded ? 'rf-ctrl-expanded' : '', ctrlExpanded: !!s.ctrlExpanded, ctrlToggle: () => this.setState(st => ({ ctrlExpanded: !st.ctrlExpanded })), ctrlToggleLabel: s.ctrlExpanded ? 'Vis færre' : 'Vis alle kontrollområder', ctrlToggleArrow: s.ctrlExpanded ? '↑' : '↓',
       nCtrl: E ? String(cat.length) : '', nR: E ? String(nBy('regnskap')) : '', nL: E ? String(nBy('lonn')) : '', nK: E ? String(nBy('kryss')) : '', heroLinesAll: fmt(hLines),
       pg_recon: s.page === 'recon', pg_settings: s.page === 'settings', toSettings: set({ screen: 'app', page: 'settings' }),
