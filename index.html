@@ -118,7 +118,7 @@ input,textarea{font-family:inherit}
 [data-rf=hero]{text-align:center;padding-top:40px !important;padding-bottom:40px !important}[data-rf=hero] h1{font-size:37px !important}[data-rf=hero]>div>div:first-child{justify-content:center}
 [data-rf=heroBtns]{margin-top:28px !important}[data-rf=heroBtns]>button{width:100%;justify-content:center;font-size:17px !important;padding:17px 22px !important;border-radius:12px !important}
 [data-rf=plans]{display:flex !important;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px !important;padding:84px 18px 18px;gap:14px !important;scrollbar-width:none;align-items:stretch !important}[data-rf=plans]::-webkit-scrollbar{display:none}[data-rf=plans]>div{flex:0 0 86%;scroll-snap-align:center;min-width:0}
-.rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=mobmenu]{margin-left:2px !important;margin-right:-8px}[data-rf=mlogin]{display:inline-flex !important}[data-rf=steps]{gap:56px !important}[data-rf=tray]{left:calc(50% - 54px) !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=s3card]{left:calc(50% - 88px) !important}#slik{background:transparent !important;border:0 !important}#slik>[data-rf=sec]{padding-top:32px !important}[data-rf=hero]{padding-bottom:8px !important}#kontroller{padding-top:64px !important}}
+.rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=mobmenu]{margin-left:2px !important;margin-right:-8px}[data-rf=mlogin]{display:inline-flex !important}.rf-about{padding-top:20px !important}#om-meg{margin-bottom:40px !important}#om-meg .rf-acc-b>div{gap:16px !important;margin-top:4px !important}[data-rf=aboutPhoto]{max-width:230px !important}[data-rf=steps]{gap:56px !important}[data-rf=tray]{left:calc(50% - 54px) !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=s3card]{left:calc(50% - 88px) !important}#slik{background:transparent !important;border:0 !important}#slik>[data-rf=sec]{padding-top:32px !important}[data-rf=hero]{padding-bottom:8px !important}#kontroller{padding-top:64px !important}}
 @media (max-width:520px){[data-rf=hdr]{padding:0 18px !important;gap:12px !important}[data-rf=login]{display:none !important}[data-rf=sec]{padding-left:18px !important;padding-right:18px !important}[data-rf=hero]{padding-left:18px !important;padding-right:18px !important}[data-rf=steps]{gap:48px !important}}
 </style>
 </helmet>
@@ -436,28 +436,21 @@ input,textarea{font-family:inherit}
     <div data-rf="hdr" style="max-width:1240px;margin:0 auto;padding:0 32px;height:70px;display:flex;align-items:center;gap:24px">
       <div onClick="{{ toLanding }}" style="width:103px;height:26px;overflow:hidden;position:relative;flex-shrink:0;cursor:pointer"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;max-width:none;left:-14.6px;top:-8.3px;width:131px;height:43.7px"></div>
       <div style="flex:1"></div>
-      <a onClick="{{ toLanding }}" style="font-size:15px;cursor:pointer;color:#3D4759">← Til forsiden</a>
-      <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:15px;font-weight:500;padding:10px 16px;border-radius:8px">Prøv Rettført</button>
+      <a onClick="{{ toLanding }}" style="font-size:15px;cursor:pointer;color:#3D4759;white-space:nowrap">← <span class="rf-desk">Til forsiden</span><span class="rf-mobi">Tilbake</span></a>
+      <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:15px;font-weight:500;padding:10px 16px;border-radius:8px;white-space:nowrap">Prøv Rettført</button>
     </div>
   </header>
-  <article data-rf="sec" style="max-width:760px;margin:0 auto;padding:96px 32px 120px;animation:rfIn .5s ease both">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px">
-      <div>
-        <div style="font-size:15px;color:#586174">Om prosjektet</div>
-        <h1 style="font-size:clamp(38px,5vw,56px);line-height:1.04;letter-spacing:-0.035em;font-weight:600;margin:16px 0 0;text-wrap:balance">Et lite verktøy for et konkret problem.</h1>
-      </div>
-      <div data-rf="aboutM" style="flex-shrink:0">{{ mAbout }}</div>
-    </div>
-    <div style="margin-top:48px;display:flex;flex-direction:column;gap:10px;font-size:17px;line-height:1.7;color:#2A3547">
-      <details class="rf-acc" id="om-meg" open="open">
+  <article data-rf="sec" class="rf-about" style="max-width:760px;margin:0 auto;padding:96px 32px 120px;animation:rfIn .5s ease both">
+      <details class="rf-acc" id="om-meg" open="open" style="margin-bottom:56px">
         <summary><span class="rf-acc-t">Om meg</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
         <div class="rf-acc-b">
           <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:36px;align-items:start">
-          <div style="aspect-ratio:4/5;border-radius:16px;overflow:hidden;background:#E9E5DC;max-width:320px">
+          <h2 class="rf-mob" style="font-size:28px;font-weight:600;letter-spacing:-0.025em;margin:0;color:#0B2545">Mohamad Bokdasji</h2>
+          <div data-rf="aboutPhoto" style="aspect-ratio:4/5;border-radius:16px;overflow:hidden;background:#E9E5DC;max-width:320px">
             <img src="assets/mohamad-web.jpg" alt="Mohamad Bokdasji" style="width:100%;height:100%;object-fit:cover;object-position:48% 30%;display:block">
           </div>
           <div data-rf="span2" style="grid-column:span 2;min-width:0">
-            <h2 style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin:0;color:#0B2545">Mohamad Bokdasji</h2>
+            <h2 class="rf-desk" style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin:0;color:#0B2545">Mohamad Bokdasji</h2>
             <p style="margin:14px 0 0">Jeg har studert økonomi og administrasjon ved BI og er interessert i hvordan teknologi, automatisering og språkmodeller kan brukes på praktiske problemer i økonomifaget.</p>
             <p style="margin:14px 0 0">Rettført er et hobbyprosjekt ved siden av jobb. Ideen var å bygge et lite kontrollverktøy fra bunnen av: først forstå datagrunnlaget, deretter lage faste kontroller, og til slutt gjøre resultatene enkle å undersøke og dokumentere. Det faglige grunnlaget kommer fra studiet; resten har jeg lært underveis.</p>
             <div style="margin-top:24px;display:grid;grid-template-columns:auto 1fr;gap:10px 24px;font-size:15.5px;border-top:1px solid #E4DFD4;padding-top:18px">
@@ -470,6 +463,14 @@ input,textarea{font-family:inherit}
         </div>
         </div>
       </details>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px">
+      <div>
+        <div style="font-size:15px;color:#586174">Om prosjektet</div>
+        <h1 style="font-size:clamp(38px,5vw,56px);line-height:1.04;letter-spacing:-0.035em;font-weight:600;margin:16px 0 0;text-wrap:balance">Et lite verktøy for et konkret problem.</h1>
+      </div>
+      <div data-rf="aboutM" style="flex-shrink:0">{{ mAbout }}</div>
+    </div>
+    <div style="margin-top:48px;display:flex;flex-direction:column;gap:10px;font-size:17px;line-height:1.7;color:#2A3547">
       <details class="rf-acc">
         <summary><span class="rf-acc-t">Problemet</span><span class="rf-chev" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="#0B2545" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span></summary>
         <div class="rf-acc-b">
@@ -1361,7 +1362,7 @@ class Component extends DCLogic {
       mobHow: () => { this.setState({ mobileMenu: false }); this.scrollTo('slik'); },
       mobCtrl: () => { this.setState({ mobileMenu: false }); this.scrollTo('kontroller'); },
       mobPrice: () => { this.setState({ mobileMenu: false }); this.scrollTo('priser'); },
-      mobAbout: () => this.setState({ mobileMenu: false, screen: 'about' }),
+      mobAbout: goTop({ mobileMenu: false, screen: 'about' }),
       mobLogin: () => this.setState({ mobileMenu: false, screen: 'auth', authMode: 'login' }),
       mobTry: () => { this.setState({ mobileMenu: false }); this.trySample(); },
       toLanding: goTop({ screen: 'landing', mobileMenu: false }), toAbout: goTop({ screen: 'about', mobileMenu: false }), toLogin: set({ screen: 'auth', authMode: 'login', mobileMenu: false }), toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
