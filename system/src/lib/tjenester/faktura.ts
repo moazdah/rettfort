@@ -108,7 +108,7 @@ export async function sendSalg(t: Sporring, orgId: string, id: string, brukerId?
   if (!f) throw new RegnskapsFeil('Fant ikke dokumentet.');
   if (f.status !== 'utkast') throw new RegnskapsFeil('Dokumentet er allerede sendt.');
   const org = await hentOrg(t, orgId);
-  const m = mangler(org, f.kunde, { ...f, type: f.type }, f.avsender);
+  const m = mangler(org, f.kunde, { ...f, kontaktId: f.kontakt_id }, f.avsender);
   if (m.length) throw new RegnskapsFeil(m.join(' '));
   let nr: number;
   if (f.type === 'tilbud') {

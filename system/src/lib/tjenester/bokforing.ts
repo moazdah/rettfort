@@ -59,7 +59,10 @@ export async function korriger(t: Sporring, orgId: string, bilagId: string, dato
   const finnes = await t.en('select 1 from bilag where korrigerer_id = $1 and type = $2', [bilagId, 'korrigering']);
   if (finnes) throw new RegnskapsFeil(`Bilag ${orig.nr} er allerede korrigert.`);
   const p = await hentBilagPosteringer(t, orgId, bilagId);
-  return bokfor(t, orgId, { dato, type: 'korrigering', beskrivelse: `${grunn} av bilag ${orig.nr}`, korrigererId: bilagId, kontaktId: orig.kontakt_id, brukerId }, reverser(p));
+  const r = await bokfor(t, orgId, { dato, type: 'korrigering', beskrivelse: `${grunn} av bilag ${orig.nr}`, korrigererId: bilagId, kontaktId: orig.kontakt_id, brukerId }, reverser(p));
+  // Bankbevegelser som var koblet til det korrigerte bilaget må kobles på nytt (til det nye bilaget).
+  await t.q(`update bankbevegelse set status = 'apen', bilag_id = null, match_type = null, match_id = null where organisasjon_id = $1 and bilag_id = $2`, [orgId, bilagId]);
+  return r;
 }
 
 export async function hentPosteringer(db: Sporring, orgId: string, fra?: string, til?: string): Promise<PostRad[]> {
