@@ -224,6 +224,21 @@ export function byggMvaOppgjor(saldo2700: Ore, saldo2710: Ore): Postering[] {
   return p;
 }
 
+/** Betaling av MVA til Skatteetaten (eller tilbakebetaling når beløpet er positivt i banken). */
+export function byggMvaBetaling(bankBelop: Ore): Postering[] {
+  if (bankBelop === 0) throw new RegnskapsFeil('Beløpet kan ikke være 0.');
+  const p = bankBelop < 0 ? [D(MVA_KONTO_OPPGJOR, -bankBelop), Kr(1920, -bankBelop)] : [D(1920, bankBelop), Kr(MVA_KONTO_OPPGJOR, bankBelop)];
+  validerBilag(p);
+  return p;
+}
+
+/** Betaling av skattetrekk og arbeidsgiveravgift. */
+export function byggSkattAgaBetaling(skatt: Ore, aga: Ore, agaFerie = 0): Postering[] {
+  const p = [D(2600, skatt), D(2770, aga), D(2785, agaFerie), Kr(1920, skatt + aga + agaFerie)].filter(x => x.debet > 0 || x.kredit > 0);
+  validerBilag(p);
+  return p;
+}
+
 // ---------- Korrigering ----------
 
 /** Lager motposteringen til et bilag: samme linjer med debet og kredit byttet. Posteringer endres aldri. */
