@@ -182,10 +182,10 @@ export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org &
           <h2>Hva skal de betale for?</h2>
           {linjer.map((l, i) => (
             <div key={i} className={`fakturalinje ${org.mva_registrert ? '' : 'uten-mva'}`}>
-              <label className="felt"><span>{i ? '' : 'Beskrivelse'}</span><input className="inndata" value={l.beskrivelse} onChange={e => oppdater(i, { beskrivelse: e.target.value })} placeholder="F.eks. Konsulenttimer" /></label>
-              <label className="felt"><span>{i ? '' : 'Antall'}</span><input className="inndata mono" inputMode="decimal" value={l.antall} onChange={e => oppdater(i, { antall: e.target.value })} /></label>
-              <label className="felt"><span>{i ? '' : 'Pris eks. MVA'}</span><input className="inndata mono" inputMode="decimal" value={l.pris} onChange={e => oppdater(i, { pris: e.target.value })} onBlur={() => { const o = tilOre(l.pris); if (o != null && l.pris) oppdater(i, { pris: kr(o) }); }} placeholder="0,00" /></label>
-              {org.mva_registrert && <label className="felt"><span>{i ? '' : 'MVA'}</span><select className="inndata" value={l.sats} onChange={e => oppdater(i, { sats: Number(e.target.value) })}><option value={25}>25 %</option><option value={15}>15 %</option><option value={12}>12 %</option><option value={0}>0 %</option></select></label>}
+              <label className="felt"><span>{i ? '' : 'Hva har du levert?'}</span><input className="inndata" value={l.beskrivelse} onChange={e => oppdater(i, { beskrivelse: e.target.value })} placeholder="F.eks. Konsulenttimer" /></label>
+              <label className="felt"><span>Antall</span><input className="inndata mono" inputMode="decimal" value={l.antall} onChange={e => oppdater(i, { antall: e.target.value })} /></label>
+              <label className="felt"><span>Pris eks. MVA</span><input className="inndata mono" inputMode="decimal" value={l.pris} onChange={e => oppdater(i, { pris: e.target.value })} onBlur={() => { const o = tilOre(l.pris); if (o != null && l.pris) oppdater(i, { pris: kr(o) }); }} placeholder="0,00" /></label>
+              {org.mva_registrert && <label className="felt"><span>MVA</span><select className="inndata" value={l.sats} onChange={e => oppdater(i, { sats: Number(e.target.value) })}><option value={25}>25 %</option><option value={15}>15 %</option><option value={12}>12 %</option><option value={0}>0 %</option></select></label>}
               <button type="button" className="knapp hvit liten" style={{ padding: '10px 0' }} title="Fjern linje" aria-label="Fjern linje" onClick={() => setLinjer(linjer.length > 1 ? linjer.filter((_, j) => j !== i) : [{ beskrivelse: '', antall: '1', pris: '', sats: std }])}>×</button>
             </div>
           ))}

@@ -148,18 +148,20 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
 
 .delt { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); align-items: start; }
 .delt.kvittering { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); }
-.fakturalinje { display: grid; grid-template-columns: minmax(0, 2.4fr) 70px minmax(0, 1fr) 84px 34px; gap: 8px; align-items: end; }
-.fakturalinje.uten-mva { grid-template-columns: minmax(0, 2.4fr) 70px minmax(0, 1fr) 34px; }
+.fakturalinje { display: grid; grid-template-columns: 76px minmax(0, 1fr) 96px 38px; gap: 8px; align-items: end; padding-bottom: 12px; border-bottom: 1px solid var(--linje-3); }
+.fakturalinje.uten-mva { grid-template-columns: 76px minmax(0, 1fr) 38px; }
+.fakturalinje > label:first-child { grid-column: 1 / -1; }
 .fakturalinje label.felt > span:empty { display: none; }
 .mobilmeny { display: none; }
+.mobil-bare { display: none !important; }
 @media (max-width: 900px) {
   .ramme { grid-template-columns: 1fr; }
   .meny { display: none; }
+  .mobil-bare { display: flex !important; }
+  .skjul-mobil { display: none !important; }
+  .innhold { min-width: 0; }
   .innhold { padding: 20px 16px 96px; }
   .to, .tre, .delt, .delt.kvittering { grid-template-columns: 1fr; }
-  .fakturalinje, .fakturalinje.uten-mva { grid-template-columns: 70px minmax(0, 1fr) 84px 34px; padding-bottom: 10px; border-bottom: 1px solid var(--linje-3); }
-  .fakturalinje.uten-mva { grid-template-columns: 70px minmax(0, 1fr) 34px; }
-  .fakturalinje > label:first-child { grid-column: 1 / -1; }
   .hode { align-items: flex-start; }
   h1 { font-size: 26px; }
   .mobilmeny { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--linje); z-index: 30; justify-content: space-around; padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }

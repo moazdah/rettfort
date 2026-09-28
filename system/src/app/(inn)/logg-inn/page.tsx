@@ -6,9 +6,11 @@ import { LoggInnSkjema } from './skjema';
 
 export const metadata = { title: 'Logg inn' };
 
-export default async function LoggInn() {
+export default async function LoggInn({ searchParams }: { searchParams: Promise<{ neste?: string }> }) {
+  const { neste: n } = await searchParams;
+  const neste = n && /^\/invitasjon\/[\w-]+$/.test(n) ? n : undefined;
   const s = await sesjon();
-  if (s) redirect('/');
+  if (s) redirect(neste ?? '/');
   const d = await db();
   return (
     <main className="midt">
@@ -21,7 +23,7 @@ export default async function LoggInn() {
             Testmodus: databasen er ikke koblet til ennå, så alt nullstilles med jevne mellomrom. Prøv med <b>demo@rettfort.no</b> (bedrift) eller <b>regnskap@rettfort.no</b> (regnskapsfører), passord <b>rettfort-demo</b>.
           </div>
         )}
-        <LoggInnSkjema />
+        <LoggInnSkjema neste={neste} />
         <p className="mut liten" style={{ marginTop: 22 }}>Ny her? <Link href="/registrer">Lag en konto</Link> · <Link href="/registrer?rolle=bedrift">Start gratis for bedriften</Link></p>
       </div>
     </main>

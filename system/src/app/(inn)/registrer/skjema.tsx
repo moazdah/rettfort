@@ -4,7 +4,7 @@ import { useActionState, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { registrer } from '@/app/handlinger';
 
-export function RegistrerSkjema({ startRolle }: { startRolle: 'bedrift' | 'regnskapsforer' }) {
+export function RegistrerSkjema({ startRolle, neste, epost }: { startRolle: 'bedrift' | 'regnskapsforer'; neste?: string; epost?: string }) {
   const [hvem, setHvem] = useState(startRolle);
   const [res, handling, venter] = useActionState(registrer, null);
   const router = useRouter();
@@ -12,9 +12,9 @@ export function RegistrerSkjema({ startRolle }: { startRolle: 'bedrift' | 'regns
     if (res?.ok) {
       const kode = (res.data as { kode?: string } | undefined)?.kode;
       // E-post er ikke koblet til ennå: koden vises på neste side (testmodus).
-      router.push(hvem === 'regnskapsforer' ? '/byra' : `/velkommen${kode ? `?kode=${kode}` : ''}`);
+      router.push(neste ? neste : hvem === 'regnskapsforer' ? '/byra' : `/velkommen${kode ? `?kode=${kode}` : ''}`);
     }
-  }, [res, hvem, router]);
+  }, [res, hvem, router, neste]);
   return (
     <form action={handling} className="stakk" style={{ marginTop: 24 }}>
       <div className="rutenett to" role="radiogroup" aria-label="Hvem er du?">
@@ -26,7 +26,7 @@ export function RegistrerSkjema({ startRolle }: { startRolle: 'bedrift' | 'regns
       </div>
       <input type="hidden" name="hvem" value={hvem} />
       <label className="felt"><span>Navnet ditt</span><input className="inndata" name="navn" autoComplete="name" required /></label>
-      <label className="felt"><span>E-post</span><input className="inndata" name="epost" type="email" autoComplete="email" required /></label>
+      <label className="felt"><span>E-post</span><input className="inndata" name="epost" type="email" autoComplete="email" defaultValue={epost} required /></label>
       <label className="felt"><span>Passord</span><input className="inndata" name="passord" type="password" minLength={8} autoComplete="new-password" required /><span className="hint">Minst 8 tegn.</span></label>
       {res && !res.ok && <div className="varsel rod" role="alert">{res.feil}</div>}
       <button className="knapp" disabled={venter}>{venter ? 'Lager kontoen …' : 'Lag kontoen'}</button>

@@ -86,7 +86,7 @@ export async function lagreSalg(t: Sporring, orgId: string, f: FakturaInput): Pr
 
 export async function hentSalg(t: Sporring, orgId: string, id: string) {
   const f = await t.en<{ id: string; type: SalgType; nr: number | null; status: string; kontakt_id: string | null; dato: string; forfall: string | null; levert: string | null; referanse: string | null; kid: string | null; netto: number; mva: number; total: number; betalt: number; bilag_id: string | null; krediterer_id: string | null; kreditgrunn: string | null; gjentakelse: string | null; avsender: Record<string, string> | null; sendt_tid: string | null; apnet_tid: string | null; opprettet: string }>(
-    `select *, dato::text as dato, forfall::text as forfall from faktura where id = $1 and organisasjon_id = $2`, [id, orgId]);
+    `select *, dato::text as dato, forfall::text as forfall, opprettet::text as opprettet, sendt_tid::text as sendt_tid, apnet_tid::text as apnet_tid from faktura where id = $1 and organisasjon_id = $2`, [id, orgId]);
   if (!f) return null;
   const linjer = await t.q<{ beskrivelse: string; antall_milli: number; pris: number; mva_sats: number; konto: number | null }>('select * from faktura_linje where faktura_id = $1 order by linje', [id]);
   const kunde = f.kontakt_id ? await t.en<Kontakt>('select * from kontakt where id = $1', [f.kontakt_id]) : null;

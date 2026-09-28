@@ -68,7 +68,7 @@ export default async function Hjem() {
           <h2>Send kvitteringer på e-post</h2>
           <p className="mut liten">Videresend kvitteringer og fakturaer hit. De havner under Penger ut og blir kontrollert med en gang.</p>
           <div className="rad" style={{ background: 'var(--kort-2)', border: '1px solid var(--linje)', borderRadius: 10, padding: '8px 10px', flexWrap: 'nowrap' }}>
-            <span className="mono liten" style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>{bilagEpost}</span>
+            <span className="mono liten" style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{bilagEpost}</span>
             <Kopier tekst={bilagEpost} />
           </div>
           <p className="faint liten">Med i alle pakker, også Gratis. Mottak på e-post slås på når e-posttjenesten er koblet til.</p>
@@ -84,10 +84,10 @@ export default async function Hjem() {
           <div className="liste">
             {sist.map((r, i) => (
               <Link key={i} href={r.href} className="linje">
-                <span className={`merke ${r.belop >= 0 ? 'gronn' : ''}`} style={{ minWidth: 76, justifyContent: 'center' }}>{r.type}</span>
+                <span className={`merke ${r.belop >= 0 ? 'gronn' : ''}`} style={{ minWidth: 60, justifyContent: 'center' }}>{r.type}</span>
                 <span className="fyll tittel">{r.tekst}</span>
-                <span className="mut liten">{nd(r.dato)}</span>
-                <span className="belop" style={{ minWidth: 110, textAlign: 'right' }}>{r.belop >= 0 ? '' : '−'}{kr(Math.abs(r.belop))}</span>
+                <span className="mut liten skjul-mobil">{nd(r.dato)}</span>
+                <span className="belop" style={{ textAlign: 'right' }}>{r.belop >= 0 ? '' : '−'}{kr(Math.abs(r.belop))}</span>
               </Link>
             ))}
           </div>

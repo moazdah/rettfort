@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 1;
+export const SKJEMA_VERSJON = 2;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -352,4 +352,7 @@ drop trigger if exists bilag_periodelaas on bilag;
 create trigger bilag_periodelaas before insert on bilag for each row execute function rf_periodelaas();
 drop trigger if exists postering_periodelaas on postering;
 create trigger postering_periodelaas before insert on postering for each row execute function rf_periodelaas();
+
+-- Versjon 2: hemmelig lenke til kalenderabonnement på frister.
+alter table organisasjon add column if not exists kalender_token text unique;
 `;

@@ -1,6 +1,6 @@
 import { fakturaSummer, linjeNetto, type FakturaLinje } from '@/lib/hovedbok';
 import { formaterOrgnr } from '@/lib/brreg';
-import { kr, nd, antallTekst } from '@/lib/vis';
+import { kr, nd, antallTekst, formaterKontonr } from '@/lib/vis';
 
 export interface DokAvsender { navn: string; orgnr?: string | null; adresse?: string | null; postnr?: string | null; poststed?: string | null; kontonr?: string | null; epost?: string | null; telefon?: string | null; tekst?: string | null; mvaRegistrert: boolean; orgform?: string }
 export interface DokKunde { navn: string; orgnr?: string | null; adresse?: string | null; postnr?: string | null; poststed?: string | null }
@@ -16,15 +16,15 @@ export function FakturaDokument({ type, nr, dato, forfall, levert, referanse, ki
   const orgTekst = avsender.orgnr ? `Org.nr ${formaterOrgnr(avsender.orgnr)}${avsender.mvaRegistrert ? ' MVA' : ''}` : 'Org.nr mangler';
   return (
     <div className="dokument">
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-        <div style={{ lineHeight: 1.5 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ lineHeight: 1.5, minWidth: 0 }}>
           <div style={{ fontWeight: 700, fontSize: 15 }}>{avsender.navn || 'Firmanavn'}</div>
           <div className="mut">{[avsender.adresse, [avsender.postnr, avsender.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', ') || 'Adresse mangler'}</div>
           <div className="mut">{orgTekst}</div>
           {avsender.orgform === 'AS' && <div className="mut">Foretaksregisteret</div>}
           <div className="mut">{[avsender.epost, avsender.telefon].filter(Boolean).join(' · ')}</div>
         </div>
-        <div style={{ textAlign: 'right', lineHeight: 1.6 }}>
+        <div style={{ textAlign: 'right', lineHeight: 1.6, flexShrink: 0 }}>
           <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em' }}>{TITTEL[type] ?? 'Faktura'}</div>
           <div className="mut">Nr. {nr ?? 'gis ved sending'}</div>
           <div className="mut">Dato {nd(dato)}</div>
@@ -58,7 +58,7 @@ export function FakturaDokument({ type, nr, dato, forfall, levert, referanse, ki
       </div>
       <div style={{ marginTop: 18, paddingTop: 10, borderTop: '1px solid var(--linje-3)', fontSize: 12 }} className="mut">
         {avsender.tekst && <div style={{ marginBottom: 4 }}>{avsender.tekst}</div>}
-        {type === 'faktura' && <div>Betal til konto <span className="mono">{avsender.kontonr || '–'}</span>{kid ? <> med KID <span className="mono">{kid}</span></> : null}{forfall ? ` innen ${nd(forfall)}` : ''}.</div>}
+        {type === 'faktura' && <div>Betal til konto <span className="mono">{formaterKontonr(avsender.kontonr) || '–'}</span>{kid ? <> med KID <span className="mono">{kid}</span></> : null}{forfall ? ` innen ${nd(forfall)}` : ''}.</div>}
         {!avsender.mvaRegistrert && <div>Foretaket er ikke registrert i Merverdiavgiftsregisteret.</div>}
       </div>
     </div>

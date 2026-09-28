@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { MENY } from '@/components/Meny';
+import { MENY } from '@/components/menyvalg';
 import { loggUt } from '@/app/handlinger';
 
 export const metadata = { title: 'Meny' };

@@ -111,6 +111,6 @@ export function matchBevegelser(bev: Bevegelse[], data: { fakturaer: ApenFaktura
     if (k) ut.set(b.id, { type: 'bankpost', post: k, sikker: true, grunn: k === 'gebyr' ? 'Bankgebyr. Føres automatisk.' : k === 'renteinntekt' ? 'Renter fra banken. Føres automatisk.' : 'Rentekostnad. Føres automatisk.' });
   }
 
-  for (const b of sortert) if (!ut.has(b.id)) ut.set(b.id, { type: 'ingen', grunn: b.belop < 0 ? 'Finner ikke kjøpet i regnskapet.' : 'Finner ikke hva innbetalingen gjelder.' });
+  for (const b of sortert) if (!ut.has(b.id)) ut.set(b.id, { type: 'ingen', grunn: /skatteetaten|skatt|mva|merverdi/i.test(b.tekst) ? 'Ser ut som Skatteetaten. Velg MVA eller skattetrekk under «Andre valg».' : b.belop < 0 ? 'Finner ikke kjøpet i regnskapet.' : 'Finner ikke hva innbetalingen gjelder.' });
   return ut;
 }

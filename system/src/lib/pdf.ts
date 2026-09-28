@@ -4,6 +4,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf
 import { fakturaSummer, linjeNetto, type FakturaLinje } from './hovedbok';
 import { formaterOrgnr } from './brreg';
 import { kr } from './penger';
+import { formaterKontonr } from './vis';
 
 const BLA = rgb(11 / 255, 37 / 255, 69 / 255);
 const MUT = rgb(0.35, 0.38, 0.45);
@@ -103,7 +104,7 @@ export async function lagFakturaPdf(f: PdfData): Promise<Uint8Array> {
   side.drawLine({ start: { x: V, y: by + 18 }, end: { x: H, y: by + 18 }, thickness: 0.7, color: LINJE });
   if (f.type === 'faktura') {
     tekst(side, 'Betalingsinformasjon', V, by, { font: fet, size: 10 }); by -= 15;
-    tekst(side, `Kontonummer: ${a.kontonr ?? ''}`, V, by, { size: 10 });
+    tekst(side, `Kontonummer: ${formaterKontonr(a.kontonr)}`, V, by, { size: 10 });
     if (f.kid) tekst(side, `KID: ${f.kid}`, 250, by, { size: 10, font: fet });
     tekst(side, `Beløp: ${kr(s.total)} kr`, H, by, { size: 10, hoyre: true }); by -= 14;
     if (f.forfall) { tekst(side, `Betales innen ${nd(f.forfall)}`, V, by, { size: 9.5, farge: MUT }); by -= 14; }

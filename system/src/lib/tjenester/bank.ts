@@ -3,7 +3,7 @@
 import type { Sporring } from '../db';
 import { parseBank } from '../motor/rettfort-motor.js';
 import { matchBevegelser, type Forslag, type Bevegelse } from '../bankmatch';
-import { byggBankPost, RegnskapsFeil, type BankType } from '../hovedbok';
+import { byggBankPost, byggMvaBetaling, byggSkattAgaBetaling, RegnskapsFeil, type BankType } from '../hovedbok';
 import { bokfor, laasPeriode, hentPosteringer } from './bokforing';
 import { registrerBetaling } from './faktura';
 import { betalKjop } from './kjop';
@@ -54,7 +54,7 @@ export async function foreslaAlle(t: Sporring, orgId: string): Promise<void> {
   }
 }
 
-export type Handling = { type: 'godkjenn' } | { type: 'bankpost'; post: BankType } | { type: 'ignorer' } | { type: 'koble_bilag'; bilagId: string };
+export type Handling = { type: 'godkjenn' } | { type: 'bankpost'; post: BankType } | { type: 'ignorer' } | { type: 'koble_bilag'; bilagId: string } | { type: 'skatteetaten'; hva: 'mva' | 'skatt_aga' };
 
 /** Utfører forslaget (eller brukerens valg) for én bevegelse. */
 export async function behandleBevegelse(t: Sporring, orgId: string, id: string, h: Handling, brukerId?: string | null): Promise<string> {
@@ -85,6 +85,10 @@ export async function behandleBevegelse(t: Sporring, orgId: string, id: string, 
     const s = await t.en<{ belop: number }>(`select sum(debet - kredit)::bigint as belop from postering where bilag_id = $1 and organisasjon_id = $2 and konto = 1920`, [h.bilagId, orgId]);
     if (!s || s.belop !== b.belop) throw new RegnskapsFeil('Beløpet i regnskapet er ikke det samme som i banken.');
     bilagId = h.bilagId; type = 'bokfort'; melding = 'Koblet til.';
+  } else if (h.type === 'skatteetaten') {
+    const p = h.hva === 'mva' ? byggMvaBetaling(b.belop) : await skattAgaPosteringer(t, orgId, b.belop);
+    const r = await bokfor(t, orgId, { dato: b.dato, type: 'bank', beskrivelse: b.tekst, brukerId, kilde: 'bank' }, p);
+    bilagId = r.id; type = h.hva === 'mva' ? 'mva' : 'skatt_aga'; melding = 'Ført.';
   } else if (h.type === 'ignorer') {
     await t.q(`update bankbevegelse set status = 'ignorert' where id = $1`, [id]);
     return 'Ignorert.';
@@ -92,6 +96,21 @@ export async function behandleBevegelse(t: Sporring, orgId: string, id: string, 
   await t.q(`update bankbevegelse set status = 'matchet', match_type = $2, match_id = $3, bilag_id = $4 where id = $1`, [id, type, matchId, bilagId]);
   await foreslaAlle(t, orgId);
   return melding;
+}
+
+/**
+ * Betaling av skattetrekk og arbeidsgiveravgift fordeles på det som er skyldig: først trekk (2600),
+ * så avgift (2770) og avgift på feriepenger (2785). Et overskytende beløp føres på 2600 og synes som tilgode.
+ */
+async function skattAgaPosteringer(t: Sporring, orgId: string, belop: number) {
+  if (belop >= 0) throw new RegnskapsFeil('Tilbakebetaling av skattetrekk må føres av regnskapsføreren.');
+  const sb = saldobalanse(await hentPosteringer(t, orgId));
+  let rest = -belop;
+  const skyld = (k: number) => Math.max(0, -(sb.get(k)?.saldo ?? 0));
+  const skatt = Math.min(rest, skyld(2600)); rest -= skatt;
+  const aga = Math.min(rest, skyld(2770)); rest -= aga;
+  const agaF = Math.min(rest, skyld(2785)); rest -= agaF;
+  return byggSkattAgaBetaling(skatt + rest, aga, agaF);
 }
 
 /** Saldo i banken mot saldo på 1920 i regnskapet per siste dag i måneden. */

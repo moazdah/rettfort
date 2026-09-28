@@ -5,19 +5,8 @@ import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
 import { loggUt } from '@/app/handlinger';
 
-export const MENY: { href: string; navn: string; ikon: string; aktivPa: string[] }[] = [
-  { href: '/hjem', navn: 'Hjem', ikon: 'Hj', aktivPa: ['/hjem'] },
-  { href: '/kjop/ny', navn: 'Penger ut', ikon: 'Ut', aktivPa: ['/kjop'] },
-  { href: '/salg/ny', navn: 'Penger inn', ikon: 'Inn', aktivPa: ['/salg'] },
-  { href: '/bank', navn: 'Bank', ikon: 'Ba', aktivPa: ['/bank'] },
-  { href: '/lonn', navn: 'Lønn', ikon: 'Lø', aktivPa: ['/lonn'] },
-  { href: '/rapporter', navn: 'Rapporter', ikon: 'Ra', aktivPa: ['/rapporter'] },
-  { href: '/mva', navn: 'MVA', ikon: 'Mv', aktivPa: ['/mva'] },
-  { href: '/frister', navn: 'Frister', ikon: 'Fr', aktivPa: ['/frister'] },
-  { href: '/aarsavslutning', navn: 'Årsavslutning', ikon: 'År', aktivPa: ['/aarsavslutning'] },
-  { href: '/regnskapsforer', navn: 'Regnskapsfører', ikon: 'Rf', aktivPa: ['/regnskapsforer'] },
-  { href: '/innstillinger', navn: 'Innstillinger', ikon: 'In', aktivPa: ['/innstillinger'] },
-];
+import { MENY } from './menyvalg';
+export { MENY };
 
 const PAKKE: Record<string, string> = { gratis: 'Gratis', start: 'Start', selskap: 'Selskap', byra: 'Byrå' };
 const ROLLE: Record<string, string> = { eier: 'Eier', full: 'Full tilgang', les: 'Kan se', kvittering: 'Kvitteringer', regnskapsforer_full: 'Regnskapsfører', regnskapsforer_les: 'Regnskapsfører (se)' };

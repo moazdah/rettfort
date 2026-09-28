@@ -56,3 +56,9 @@ export function tilMilli(t: string): number {
   const n = Number(String(t).replace(/\s/g, '').replace(',', '.'));
   return Number.isFinite(n) ? Math.round(n * 1000) : 0;
 }
+
+/** 15062233445 → 1506 22 33445 */
+export function formaterKontonr(k: string | null | undefined): string {
+  const d = (k ?? '').replace(/\D/g, '');
+  return d.length === 11 ? `${d.slice(0, 4)} ${d.slice(4, 6)} ${d.slice(6)}` : (k ?? '');
+}

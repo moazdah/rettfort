@@ -28,6 +28,12 @@ async function kreverInnlogget() {
   return s;
 }
 
+/** Kvittering-rollen kan bare registrere kjøp og laste opp vedlegg. */
+function sjekkKjopstilgang(s: { rolle: string | null }) {
+  if (s.rolle === 'kvittering') return;
+  sjekkSkrivetilgang(s as Parameters<typeof sjekkSkrivetilgang>[0]);
+}
+
 async function kreverOrg() {
   const s = await kreverInnlogget();
   if (!s.org) throw new RegnskapsFeil('Velg foretak først.');
@@ -49,6 +55,8 @@ export async function loggInn(_: unknown, fd: FormData): Promise<Resultat> {
     return m?.type ?? null;
   });
   if (!res.ok) return res;
+  const neste = String(fd.get('neste') ?? '');
+  if (/^\/invitasjon\/[\w-]+$/.test(neste)) redirect(neste);
   redirect(res.data === 'byra' ? '/byra' : res.data ? '/hjem' : '/velkommen');
 }
 
@@ -226,7 +234,7 @@ export async function slettUtkast(type: 'salg' | 'kjop', id: string): Promise<Re
 
 export async function registrerKjopHandling(k: KjopInput): Promise<Resultat<{ id: string; bilagNr: number }>> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkKjopstilgang(s);
     const db = await getDb();
     const r = await db.tx(t => registrerKjop(t, s.org.id, k, s.bruker.id));
     revalidatePath('/', 'layout');
@@ -236,7 +244,7 @@ export async function registrerKjopHandling(k: KjopInput): Promise<Resultat<{ id
 
 export async function lagreKjopUtkastHandling(k: KjopInput): Promise<Resultat<{ id: string }>> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkKjopstilgang(s);
     const db = await getDb();
     const id = await db.tx(t => lagreKjopUtkast(t, s.org.id, k));
     revalidatePath('/kjop');
@@ -333,7 +341,13 @@ export async function sendMvaHandling(termin: Termin): Promise<Resultat<{ aBetal
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     const db = await getDb();
-    const r = await db.tx(t => sendMva(t, s.org.id, termin, s.bruker.id));
+    const o = await db.en<{ mva_termin: 'tomnd' | 'aar' | 'ingen' }>('select mva_termin from organisasjon where id = $1', [s.org.id]);
+    if (!o || o.mva_termin === 'ingen') throw new RegnskapsFeil('Foretaket er ikke MVA-registrert.');
+    const { terminFor } = await import('@/lib/tjenester/mva');
+    const riktig = terminFor(termin.fra, o.mva_termin);
+    if (riktig.fra !== termin.fra || riktig.til !== termin.til) throw new RegnskapsFeil('Terminen passer ikke med MVA-terminen til foretaket.');
+    if (riktig.til >= idag()) throw new RegnskapsFeil('Terminen er ikke over ennå.');
+    const r = await db.tx(t => sendMva(t, s.org.id, riktig, s.bruker.id));
     revalidatePath('/', 'layout');
     return r;
   });
@@ -499,6 +513,11 @@ export async function kontrollKjopHandling(k: KjopInput, unntakId?: string): Pro
       [s.org.id, k.leverandorOrgnr ? k.leverandorOrgnr.replace(/\s/g, '') : navn]) : null;
     const duplikat = navn && k.total > 0 && k.dato ? await finnDuplikat(db, s.org.id, navn, k.total, k.dato, unntakId) : null;
     const funn = kontrollerKjop(k, { orgMvaRegistrert: !!org?.mva_registrert, finnesLeverandor: navn ? !!kontakt : undefined, mvaRegistrertLeverandor: kontakt?.mva_registrert ?? null, duplikat });
+    // Regel først: samme leverandør som før gir samme type kjøp.
+    const forrige = navn ? await db.en<{ konto: number }>(`select konto from kjop where organisasjon_id = $1 and lower(leverandor_navn) = lower($2) and status <> 'utkast' and konto is not null order by opprettet desc limit 1`, [s.org.id, navn]) : null;
+    const { konto: finnKonto } = await import('@/lib/kontoplan');
+    const kf = forrige ? finnKonto(forrige.konto) : null;
+    if (kf) return { funn, forslag: { nr: kf.nr, navn: kf.navn, grunn: `Samme som sist du kjøpte fra ${navn}.` } };
     const f = navn ? foreslaKonto(`${navn} ${k.tekst ?? ''}`) : null;
     return { funn, forslag: f ? { nr: f.konto.nr, navn: f.konto.navn, grunn: f.grunn } : null };
   });
@@ -506,7 +525,7 @@ export async function kontrollKjopHandling(k: KjopInput, unntakId?: string): Pro
 
 export async function lastOppVedlegg(fd: FormData): Promise<Resultat<{ id: string; navn: string }>> {
   return trygt(async () => {
-    const s = await kreverOrg();
+    const s = await kreverOrg(); sjekkKjopstilgang(s);
     const fil = fd.get('fil') as File | null;
     if (!fil || !fil.size) throw new RegnskapsFeil('Velg en fil.');
     if (fil.size > 15 * 1024 * 1024) throw new RegnskapsFeil('Filen er for stor (maks 15 MB).');
@@ -527,4 +546,84 @@ export async function kobleVedlegg(kjopId: string, vedleggId: string): Promise<R
     await db.q('update kjop set vedlegg_id = $3 where id = $1 and organisasjon_id = $2', [kjopId, s.org.id, vedleggId]);
     revalidatePath('/', 'layout');
   }, 'Kvitteringen er lagt ved.');
+}
+
+export async function kalenderLenke(): Promise<Resultat<{ token: string }>> {
+  return trygt(async () => {
+    const s = await kreverOrg();
+    const db = await getDb();
+    const o = await db.en<{ kalender_token: string | null }>('select kalender_token from organisasjon where id = $1', [s.org.id]);
+    if (o?.kalender_token) return { token: o.kalender_token };
+    const token = randomBytes(24).toString('base64url');
+    await db.q('update organisasjon set kalender_token = $2 where id = $1 and kalender_token is null', [s.org.id, token]);
+    const n = await db.en<{ kalender_token: string }>('select kalender_token from organisasjon where id = $1', [s.org.id]);
+    return { token: n!.kalender_token };
+  });
+}
+
+export async function laasPeriodeHandling(tilDato: string): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(tilDato)) throw new RegnskapsFeil('Velg en dato.');
+    if (tilDato >= idag()) throw new RegnskapsFeil('Du kan bare låse perioder som er over.');
+    const db = await getDb();
+    const { laasPeriode, laastTil } = await import('@/lib/tjenester/bokforing');
+    const f = await laastTil(db, s.org.id);
+    if (f && tilDato <= f) throw new RegnskapsFeil(`Regnskapet er allerede låst til og med ${f.split('-').reverse().join('.')}. En lås kan ikke flyttes bakover.`);
+    await db.tx(t => laasPeriode(t, s.org.id, tilDato, 'Låst av bruker', s.bruker.id));
+    revalidatePath('/', 'layout');
+  }, 'Regnskapet er låst.');
+}
+
+export async function lagreApningsbalanse(dato: string, saldoer: { konto: number; saldo: number }[]): Promise<Resultat<{ bilagNr: number }>> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dato)) throw new RegnskapsFeil('Velg dato for åpningsbalansen.');
+    const db = await getDb();
+    if (await db.en(`select 1 from bilag where organisasjon_id = $1 and type = 'apningsbalanse' and not exists (select 1 from bilag k where k.korrigerer_id = bilag.id)`, [s.org.id])) throw new RegnskapsFeil('Åpningsbalansen er allerede ført. Rett den med en korrigering, eller ta kontakt med regnskapsføreren.');
+    const { byggApningsbalanse } = await import('@/lib/hovedbok');
+    const { bokfor } = await import('@/lib/tjenester/bokforing');
+    const p = byggApningsbalanse(saldoer.filter(x => x.saldo !== 0));
+    const b = await db.tx(t => bokfor(t, s.org.id, { dato, type: 'apningsbalanse', beskrivelse: 'Åpningsbalanse', brukerId: s.bruker.id, kilde: 'manuell' }, p));
+    revalidatePath('/', 'layout');
+    return { bilagNr: b.nr };
+  }, 'Åpningsbalansen er ført.');
+}
+
+// ---------- Byrå ----------
+
+async function kreverByraOrg() {
+  const s = await kreverInnlogget();
+  const byra = s.medlemskap.find(m => m.type === 'byra');
+  if (!byra) throw new RegnskapsFeil('Du er ikke registrert som regnskapsfører.');
+  return { s, byraId: byra.orgId };
+}
+
+/** Regnskapsføreren legger til en ny kunde. Kunden starter på Gratis, og byrået får full tilgang. */
+export async function opprettKlient(e: { navn: string; orgnr?: string | null; orgform?: string; adresse?: string; postnr?: string; poststed?: string; mvaRegistrert?: boolean; stiftet?: string | null }): Promise<Resultat<{ id: string }>> {
+  return trygt(async () => {
+    const { byraId } = await kreverByraOrg();
+    if (!e.navn?.trim()) throw new RegnskapsFeil('Skriv navnet på kunden.');
+    const db = await getDb();
+    const orgnr = e.orgnr?.replace(/\s/g, '') || null;
+    if (orgnr) {
+      const finnes = await db.en<{ id: string }>(`select id from organisasjon where orgnr = $1 and type = 'selskap'`, [orgnr]);
+      if (finnes) {
+        const koblet = await db.en(`select 1 from byra_kunde where byra_id = $1 and selskap_id = $2 and status = 'aktiv'`, [byraId, finnes.id]);
+        throw new RegnskapsFeil(koblet ? 'Kunden er allerede i listen din.' : 'Foretaket bruker allerede Rettført. Be dem invitere deg under «Regnskapsfører».');
+      }
+    }
+    let slug = lagSlug(e.navn);
+    if (await db.en('select 1 from organisasjon where bilag_slug = $1', [slug])) slug = `${slug}-${randomBytes(2).toString('hex')}`;
+    const ar = idag().slice(0, 4);
+    const id = await db.tx(async t => {
+      const o = await t.en<{ id: string }>(`insert into organisasjon (type, navn, orgnr, orgform, stiftet, adresse, postnr, poststed, mva_registrert, mva_termin, regnskap_fra, pakke, bilag_slug)
+        values ('selskap',$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'gratis',$11) returning id`,
+        [e.navn.trim(), orgnr, e.orgform || 'AS', e.stiftet || null, e.adresse || null, e.postnr || null, e.poststed || null, e.mvaRegistrert !== false, e.mvaRegistrert === false ? 'ingen' : 'tomnd', `${ar}-01-01`, slug]);
+      await t.q(`insert into byra_kunde (byra_id, selskap_id, status, rolle) values ($1,$2,'aktiv','regnskapsforer_full')`, [byraId, o!.id]);
+      return o!.id;
+    });
+    revalidatePath('/byra');
+    return { id };
+  }, 'Kunden er lagt til.');
 }
