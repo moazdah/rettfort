@@ -203,3 +203,28 @@ export function forfallFra(dato: string, dager: number): string {
   d.setUTCDate(d.getUTCDate() + dager);
   return d.toISOString().slice(0, 10);
 }
+
+/**
+ * Faste fakturaer: lager et utkast for inneværende måned når dagen er passert og det ikke finnes et fra før.
+ * Utkastet sendes ikke automatisk. Brukeren ser over og sender selv.
+ */
+export async function lagGjentakendeUtkast(t: Sporring, orgId: string, idag: string): Promise<number> {
+  const maler = await t.q<{ id: string; dato: string }>(`select id, dato::text as dato from faktura where organisasjon_id = $1 and type = 'faktura' and gjentakelse = 'maned' and status <> 'utkast'`, [orgId]);
+  let n = 0;
+  const denne = idag.slice(0, 7);
+  for (const m of maler) {
+    if (m.dato.slice(0, 7) >= denne) continue;
+    const dag = Math.min(Number(m.dato.slice(8, 10)), 28);
+    if (Number(idag.slice(8, 10)) < dag) continue;
+    const merke = `fra:${m.id}:${denne}`;
+    if (await t.en('select 1 from faktura where organisasjon_id = $1 and gjentakelse = $2', [orgId, merke])) continue;
+    const f = await hentSalg(t, orgId, m.id);
+    if (!f) continue;
+    const org = await hentOrg(t, orgId);
+    const dato = `${denne}-${String(dag).padStart(2, '0')}`;
+    const id = await lagreSalg(t, orgId, { type: 'faktura', kontaktId: f.kontakt_id, dato, forfall: forfallFra(dato, org.faktura_forfall_dager), referanse: f.referanse, levert: null, linjer: f.linjer, avsender: f.avsender });
+    await t.q('update faktura set gjentakelse = $2 where id = $1', [id, merke]);
+    n++;
+  }
+  return n;
+}

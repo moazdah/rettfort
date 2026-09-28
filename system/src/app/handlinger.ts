@@ -178,13 +178,14 @@ export async function lagreUtkastSalg(f: FakturaInput): Promise<Resultat<{ id: s
   }, 'Utkastet er lagret.');
 }
 
-export async function sendSalgHandling(f: FakturaInput): Promise<Resultat<{ id: string; nr: number; kid: string | null }>> {
+export async function sendSalgHandling(f: FakturaInput, videreKjop: string[] = []): Promise<Resultat<{ id: string; nr: number; kid: string | null }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     const db = await getDb();
     const r = await db.tx(async t => {
       const id = await lagreSalg(t, s.org.id, f);
       const x = await sendSalg(t, s.org.id, id, s.bruker.id);
+      for (const k of videreKjop) await t.q('update kjop set videre_faktura_id = $3 where id = $1 and organisasjon_id = $2', [k, s.org.id, id]);
       return { id, ...x };
     });
     revalidatePath('/', 'layout');
@@ -253,7 +254,7 @@ export async function betalKjopHandling(id: string, dato: string): Promise<Resul
 }
 
 /** Retter et kjøp: motposterer det gamle og fører det nye. Opprinnelig bilag står urørt. */
-export async function rettKjopHandling(id: string, ny: KjopInput): Promise<Resultat<{ id: string }>> {
+export async function rettKjopHandling(id: string, ny: KjopInput): Promise<Resultat<{ id: string; bilagNr: number }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     const db = await getDb();
@@ -267,7 +268,7 @@ export async function rettKjopHandling(id: string, ny: KjopInput): Promise<Resul
       return registrerKjop(t, s.org.id, { ...ny, id: undefined }, s.bruker.id);
     });
     revalidatePath('/', 'layout');
-    return { id: r.id };
+    return { id: r.id, bilagNr: r.bilagNr };
   }, 'Kjøpet er rettet med en korrigering.');
 }
 
@@ -481,4 +482,49 @@ export async function forfallForDato(dato: string): Promise<string> {
   const db = await getDb();
   const o = s?.org ? await db.en<{ d: number }>('select faktura_forfall_dager as d from organisasjon where id = $1', [s.org.id]) : null;
   return forfallFra(dato, o?.d ?? 14);
+}
+
+// ---------- Live kontroll og vedlegg ----------
+
+export async function kontrollKjopHandling(k: KjopInput, unntakId?: string): Promise<Resultat<{ funn: import('@/lib/tjenester/kjop').Funn[]; forslag: { nr: number; navn: string; grunn: string } | null }>> {
+  return trygt(async () => {
+    const s = await kreverOrg();
+    const db = await getDb();
+    const { kontrollerKjop, finnDuplikat } = await import('@/lib/tjenester/kjop');
+    const { foreslaKonto } = await import('@/lib/kontoplan');
+    const org = await db.en<{ mva_registrert: boolean }>('select mva_registrert from organisasjon where id = $1', [s.org.id]);
+    const navn = k.leverandorNavn.trim();
+    const kontakt = navn ? await db.en<{ mva_registrert: boolean | null }>(
+      k.leverandorOrgnr ? 'select mva_registrert from kontakt where organisasjon_id = $1 and orgnr = $2' : 'select mva_registrert from kontakt where organisasjon_id = $1 and lower(navn) = lower($2)',
+      [s.org.id, k.leverandorOrgnr ? k.leverandorOrgnr.replace(/\s/g, '') : navn]) : null;
+    const duplikat = navn && k.total > 0 && k.dato ? await finnDuplikat(db, s.org.id, navn, k.total, k.dato, unntakId) : null;
+    const funn = kontrollerKjop(k, { orgMvaRegistrert: !!org?.mva_registrert, finnesLeverandor: navn ? !!kontakt : undefined, mvaRegistrertLeverandor: kontakt?.mva_registrert ?? null, duplikat });
+    const f = navn ? foreslaKonto(`${navn} ${k.tekst ?? ''}`) : null;
+    return { funn, forslag: f ? { nr: f.konto.nr, navn: f.konto.navn, grunn: f.grunn } : null };
+  });
+}
+
+export async function lastOppVedlegg(fd: FormData): Promise<Resultat<{ id: string; navn: string }>> {
+  return trygt(async () => {
+    const s = await kreverOrg();
+    const fil = fd.get('fil') as File | null;
+    if (!fil || !fil.size) throw new RegnskapsFeil('Velg en fil.');
+    if (fil.size > 15 * 1024 * 1024) throw new RegnskapsFeil('Filen er for stor (maks 15 MB).');
+    const mime = fil.type || 'application/octet-stream';
+    if (!/^(image\/|application\/pdf|application\/xml|text\/xml)/.test(mime)) throw new RegnskapsFeil('Last opp bilde, PDF eller EHF (XML).');
+    const { lagreVedlegg } = await import('@/lib/vedlegg');
+    const id = await lagreVedlegg(await getDb(), s.org.id, fil.name, mime, new Uint8Array(await fil.arrayBuffer()));
+    return { id, navn: fil.name };
+  });
+}
+
+export async function kobleVedlegg(kjopId: string, vedleggId: string): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const db = await getDb();
+    const v = await db.en('select 1 from vedlegg where id = $1 and organisasjon_id = $2', [vedleggId, s.org.id]);
+    if (!v) throw new RegnskapsFeil('Fant ikke vedlegget.');
+    await db.q('update kjop set vedlegg_id = $3 where id = $1 and organisasjon_id = $2', [kjopId, s.org.id, vedleggId]);
+    revalidatePath('/', 'layout');
+  }, 'Kvitteringen er lagt ved.');
 }
