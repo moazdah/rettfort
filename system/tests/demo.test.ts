@@ -32,4 +32,16 @@ describe('eksempeldata', () => {
     expect(s2!.org!.navn).toBe('Havøy Fisk AS');
     expect(s2!.rolle).toBe('regnskapsforer_full');
   }, 120000);
+  it('åpne poster i demoen summerer til saldoen, og banken er positiv', async () => {
+    const { rapportData } = await import('@/lib/tjenester/rapport');
+    const { nyTestDb } = await import('@/lib/db');
+    const { seedDemo } = await import('@/lib/db/demo');
+    const db = await nyTestDb(); await seedDemo(db);
+    const o = (await db.en<{ id: string }>(`select id from organisasjon where navn = 'Havøy Fisk AS'`))!.id;
+    const d = await rapportData(db, o, 2026, '2026-10-05');
+    expect(d.kundePoster.reduce((a, k) => a + k.rest, 0)).toBe(d.sb.get(1500)?.saldo ?? 0);
+    expect(d.levPoster.reduce((a, k) => a + k.total, 0)).toBe(-(d.sb.get(2400)?.saldo ?? 0));
+    expect(d.sb.get(1920)!.saldo).toBeGreaterThan(0);
+    expect(d.res.resultat).toBeGreaterThan(0);
+  });
 });

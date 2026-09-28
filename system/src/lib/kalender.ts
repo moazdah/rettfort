@@ -2,7 +2,7 @@
 
 import type { Frist } from './frister';
 
-const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 const dt = (d: string) => d.replace(/-/g, '');
 
 export function lagIcs(firma: string, frister: Frist[], lenke: string): string {

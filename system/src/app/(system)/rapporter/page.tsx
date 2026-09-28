@@ -47,7 +47,7 @@ export default async function Rapporter({ searchParams }: { searchParams: Promis
   const skyldPoster = [
     ...(r.mvaSkyld > 0 ? [{ t: 'MVA til Skatteetaten', d: 'Oppgjør for sendt termin', b: r.mvaSkyld, href: '/mva' }] : []),
     ...(r.trekk + r.aga > 0 ? [{ t: 'Skattetrekk og arbeidsgiveravgift', d: 'Til Skatteetaten', b: r.trekk + r.aga, href: '/frister' }] : []),
-    ...r.levPoster.map(l => ({ t: l.navn, d: `Regning${l.forfall ? ` · forfall ${nd(l.forfall)}` : ''}`, b: l.total, href: `/kjop/${l.id}` })),
+    ...r.levPoster.map(l => ({ t: l.navn, d: l.id ? `Regning${l.forfall ? ` · forfall ${nd(l.forfall)}` : ''}` : 'Leverandørgjeld', b: l.total, href: l.id ? `/kjop/${l.id}` : '/rapporter?tab=sb' })),
   ];
   const storst = skyldPoster.slice().sort((a, b) => b.b - a.b)[0];
   const maks = Math.max(1, ...r.mnd.map(m => Math.max(m.inn, m.ut)));
@@ -96,8 +96,8 @@ export default async function Rapporter({ searchParams }: { searchParams: Promis
         <section className="kort stakk">
           <div className="rad" style={{ justifyContent: 'space-between' }}><h2>Kunder skylder deg</h2><span className="belop">{kr(r.kundePoster.reduce((a, k) => a + k.rest, 0))} kr</span></div>
           {r.kundePoster.length ? r.kundePoster.map(k => (
-            <Link key={k.id} href={`/salg/${k.id}`} className="rad" style={{ textDecoration: 'none', borderTop: '1px solid var(--linje-3)', paddingTop: 8, flexWrap: 'nowrap' }}>
-              <div style={{ flex: 1 }}><div>{k.kunde}</div><div className="liten" style={{ color: k.forfall && k.forfall < dag ? 'var(--rod)' : 'var(--mut)' }}>Faktura {k.nr} · {k.forfall && k.forfall < dag ? `forfalt ${nd(k.forfall)}` : `forfall ${nd(k.forfall)}`}</div></div>
+            <Link key={k.id || 'diff'} href={k.id ? `/salg/${k.id}` : '/rapporter?tab=sb'} className="rad" style={{ textDecoration: 'none', borderTop: '1px solid var(--linje-3)', paddingTop: 8, flexWrap: 'nowrap' }}>
+              <div style={{ flex: 1 }}><div>{k.kunde}</div><div className="liten" style={{ color: k.rest > 0 && k.forfall && k.forfall < dag ? 'var(--rod)' : 'var(--mut)' }}>{k.nr ? `Faktura ${k.nr}` : 'Kundefordringer'} · {!k.nr ? 'uten faktura i Rettført' : k.rest < 0 ? 'kreditert etter betaling, kunden har til gode' : k.forfall && k.forfall < dag ? `forfalt ${nd(k.forfall)}` : `forfall ${nd(k.forfall)}`}</div></div>
               <span className="belop">{kr(k.rest)}</span>
             </Link>
           )) : <p className="mut liten">Alle fakturaer er betalt.</p>}

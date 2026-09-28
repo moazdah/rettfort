@@ -23,7 +23,7 @@ export default async function AlleFakturaer({ searchParams }: { searchParams: Pr
   const rader = await d.q<{ id: string; type: string; nr: number; kunde: string; dato: string; forfall: string | null; total: number; betalt: number; status: string }>(
     `select f.id, f.type, f.nr, coalesce(c.navn,'') as kunde, f.dato::text as dato, f.forfall::text as forfall, f.total, f.betalt, f.status from faktura f left join kontakt c on c.id = f.kontakt_id
      where f.organisasjon_id = $1 and f.status <> 'utkast' ${hvor} ${q ? `and (c.navn ilike $2 or f.nr::text = $3)` : ''} order by f.dato desc, f.nr desc limit 300`, q ? [s.org.id, `%${q}%`, q] : [s.org.id]);
-  const ute = await d.en<{ n: number; sum: number; forfalt: number }>(`select count(*)::int as n, coalesce(sum(total - betalt),0)::bigint as sum, count(*) filter (where forfall < $2)::int as forfalt from faktura where organisasjon_id = $1 and type = 'faktura' and status in ('sendt','delvis_betalt')`, [s.org.id, dag]);
+  const ute = await d.en<{ n: number; sum: number; forfalt: number }>(`select count(*)::int as n, coalesce(sum(total - betalt - coalesce((select sum(k.total) from faktura k where k.krediterer_id = faktura.id and k.status <> 'utkast'),0)),0)::bigint as sum, count(*) filter (where forfall < $2)::int as forfalt from faktura where organisasjon_id = $1 and type = 'faktura' and status in ('sendt','delvis_betalt')`, [s.org.id, dag]);
   return (
     <div className="stakk" style={{ gap: 20 }}>
       <div className="hode">

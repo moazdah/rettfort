@@ -40,9 +40,9 @@ export async function kontrollFunn(t: Sporring, orgId: string, fra: string, til:
   // 4) Forfalte fakturaer
   if (idag) {
     const forfalt = await t.q<{ id: string; nr: number; kunde: string; rest: number; forfall: string }>(
-      `select f.id, f.nr, coalesce(c.navn,'') as kunde, (f.total - f.betalt)::bigint as rest, f.forfall::text as forfall from faktura f left join kontakt c on c.id = f.kontakt_id
+      `select f.id, f.nr, coalesce(c.navn,'') as kunde, (f.total - f.betalt - coalesce((select sum(k.total) from faktura k where k.krediterer_id = f.id and k.status <> 'utkast'),0))::bigint as rest, f.forfall::text as forfall from faktura f left join kontakt c on c.id = f.kontakt_id
        where f.organisasjon_id = $1 and f.type = 'faktura' and f.status in ('sendt','delvis_betalt') and f.forfall < $2`, [orgId, idag]);
-    for (const x of forfalt) ut.push({ id: `forfalt:${x.id}`, kode: 'forfalt', alvor: 'info', tekst: `Faktura ${x.nr} til ${x.kunde} forfalt ${nd(x.forfall)}. ${kr(x.rest)} kr er ikke betalt.`, handling: 'Send purring', refType: 'faktura', refId: x.id, dato: x.forfall });
+    for (const x of forfalt.filter(y => y.rest > 0)) ut.push({ id: `forfalt:${x.id}`, kode: 'forfalt', alvor: 'info', tekst: `Faktura ${x.nr} til ${x.kunde} forfalt ${nd(x.forfall)}. ${kr(x.rest)} kr er ikke betalt.`, handling: 'Send purring', refType: 'faktura', refId: x.id, dato: x.forfall });
   }
 
   // 5) Bankmåneder i perioden som ikke er avstemt

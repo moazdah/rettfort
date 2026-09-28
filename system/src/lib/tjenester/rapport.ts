@@ -39,7 +39,7 @@ export async function rapportData(t: Sporring, orgId: string, ar: number, idag: 
   // Åpne poster
   const kundePoster = await t.q<{ id: string; nr: number; kunde: string; forfall: string | null; rest: number }>(
     `select f.id, f.nr, coalesce(c.navn,'') as kunde, f.forfall::text as forfall, (f.total - f.betalt - coalesce((select sum(k.total) from faktura k where k.krediterer_id = f.id and k.status <> 'utkast'),0))::bigint as rest
-     from faktura f left join kontakt c on c.id = f.kontakt_id where f.organisasjon_id = $1 and f.type = 'faktura' and f.status in ('sendt','delvis_betalt') order by f.forfall`, [orgId]);
+     from faktura f left join kontakt c on c.id = f.kontakt_id where f.organisasjon_id = $1 and f.type = 'faktura' and f.status <> 'utkast' order by f.forfall`, [orgId]);
   const levPoster = await t.q<{ id: string; navn: string; forfall: string | null; total: number }>(
     `select id, leverandor_navn as navn, forfall::text as forfall, total from kjop where organisasjon_id = $1 and status = 'registrert' order by forfall nulls last`, [orgId]);
   const mvaSkyld = -(sb.get(2740)?.saldo ?? 0);
@@ -47,7 +47,14 @@ export async function rapportData(t: Sporring, orgId: string, ar: number, idag: 
 
   // Saldobalanse: balansekontoer fra starten, resultatkontoer bare for året.
   const sbVis = new Map([...sb.entries()].filter(([k]) => k < 3000).concat([...saldobalanse(alle, fra, til).entries()].filter(([k]) => k >= 3000)).sort((a, b) => a[0] - b[0]));
-  return { fra, til, res, sbVis, ifjor: harIfjor ? ifjor : null, bal, sb, bank, kunder, gjeld, inn: fordel('inntekt'), ut: fordel('kostnad'), siste, mnd: manedForManed(iAr, ar), kundePoster: kundePoster.filter(k => k.rest > 0), levPoster, mvaSkyld, trekk, aga, rader: iAr };
+  // Beløp på 1500/2400 uten faktura eller kjøp bak (for eksempel fra åpningsbalansen) vises som egen linje,
+  // slik at åpne poster alltid summerer til saldoen i regnskapet.
+  const kp = kundePoster.filter(k => k.rest !== 0);
+  const kDiff = (sb.get(1500)?.saldo ?? 0) - kp.reduce((a, k) => a + k.rest, 0);
+  if (kDiff !== 0) kp.push({ id: '', nr: 0, kunde: 'Fra før Rettført (åpningsbalanse og andre føringer)', forfall: null, rest: kDiff });
+  const lDiff = -(sb.get(2400)?.saldo ?? 0) - levPoster.reduce((a, k) => a + k.total, 0);
+  if (lDiff !== 0) levPoster.push({ id: '', navn: 'Fra før Rettført (åpningsbalanse og andre føringer)', forfall: null, total: lDiff });
+  return { fra, til, res, sbVis, ifjor: harIfjor ? ifjor : null, bal, sb, bank, kunder, gjeld, inn: fordel('inntekt'), ut: fordel('kostnad'), siste, mnd: manedForManed(iAr, ar), kundePoster: kp, levPoster, mvaSkyld, trekk, aga, rader: iAr };
 }
 
 /** Oppstillingene som tabellrader: [konto, tekst, beløp, sum?] */

@@ -47,7 +47,7 @@ export async function seedDemo(db: Db): Promise<void> {
   let i = 0;
   for (const m of mnd) {
     i++;
-    const f = await db.tx(t => lagreSalg(t, org, { type: 'faktura', kontaktId: i % 2 ? kunder.kvam : kunder.lyngen, dato: `2026-${m}-05`, forfall: `2026-${m}-19`, linjer: [{ beskrivelse: `Konsulenttimer ${m}.2026`, antallMilli: (20 + i) * 1000, pris: 115000, sats: 25 }] }));
+    const f = await db.tx(t => lagreSalg(t, org, { type: 'faktura', kontaktId: i % 2 ? kunder.kvam : kunder.lyngen, dato: `2026-${m}-05`, forfall: `2026-${m}-19`, linjer: [{ beskrivelse: `Konsulenttimer ${m}.2026`, antallMilli: (70 + i * 3) * 1000, pris: 115000, sats: 25 }] }));
     await db.tx(t => sendSalg(t, org, f));
     const tot = (await db.en<{ total: number }>('select total from faktura where id = $1', [f]))!.total;
     if (m !== '09') await db.tx(t => registrerBetaling(t, org, f, tot, `2026-${m}-18`));
