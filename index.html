@@ -218,10 +218,10 @@ input,textarea{font-family:inherit}
       <h1 style="margin:0;font-size:clamp(56px,6.4vw,88px);line-height:1;letter-spacing:-0.045em;font-weight:600">Rettført leter.<br><span style="background:linear-gradient(transparent 64%,#F6DF6E 64%);padding:0 6px">Du vurderer.</span></h1>
       <p style="margin:28px 0 0;font-size:20px;line-height:1.5;color:#3D4759;max-width:680px;text-wrap:pretty">Regnskap som sjekker seg selv. Bedrifter fører faktura, kjøp og MVA med kontrollen innebygd. Regnskapsførere får alle kundene i én arbeidsliste.</p>
       <div style="margin-top:36px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
-        <a href="/demo-bedrift?ny" style="height:60px;padding:0 30px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#16345E">Start gratis for bedriften</a>
-        <a href="/demo?signup" style="height:60px;padding:0 30px;border-radius:99px;border:1.5px solid #0B2545;color:#0B2545;display:flex;align-items:center;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#fff">Jeg er regnskapsfører</a>
+        <a href="/?venteliste=bedrift" style="height:60px;padding:0 30px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#16345E">Start gratis for bedriften</a>
+        <a href="/?venteliste=regnskapsforer" style="height:60px;padding:0 30px;border-radius:99px;border:1.5px solid #0B2545;color:#0B2545;display:flex;align-items:center;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#fff">Jeg er regnskapsfører</a>
       </div>
-      <div style="margin-top:16px;font-size:15px;color:#3D4759">Vil du se det først? <a href="/demo" style="color:#0B2545;border-bottom:1.5px solid #0B2545;font-weight:600;text-decoration:none">Åpne demoen</a> med ferdige tall, uten konto.</div>
+      <div style="margin-top:16px;font-size:15px;color:#3D4759">Vil du se det først? <a href="/?demo" style="color:#0B2545;border-bottom:1.5px solid #0B2545;font-weight:600;text-decoration:none">Åpne demoen</a> med ferdige tall, uten konto.</div>
       <div style="position:relative;width:min(820px,100%);margin-top:64px">
         <div style="background:#fff;border:1px solid #E4DFD4;border-radius:18px;box-shadow:0 30px 60px -40px rgba(11,37,69,.45);text-align:left;overflow:hidden;position:relative"><div class="rf-an-ov" style="position:absolute;inset:0;background:#fff;z-index:2;padding:22px 26px;display:flex;flex-direction:column;gap:14px">
             <div style="font-size:12px;color:#586174">Nordhavn Drift AS · september</div>
@@ -245,7 +245,7 @@ input,textarea{font-family:inherit}
       <p class="rf-desk" style="font-size:19px;line-height:1.55;color:#3D4759;margin:26px 0 0;max-width:540px;text-wrap:pretty">Rettført er arbeidsflaten rundt regnskapssystemet ditt. Bilag tolkes med AI, 36 faste kontroller kjører hver natt, kunden svarer fra mobilen, og hver periode ender i et signert kontrollbevis. AI gjør forarbeidet og viser hvorfor. Du bestemmer.</p>
       <div data-rf="heroBtns" style="display:flex;gap:10px;margin-top:38px;flex-wrap:wrap">
         <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:16px;font-weight:500;padding:14px 22px;border-radius:9px;display:flex;align-items:center;gap:10px" style-hover="background:#16345E"><span class="rf-desk">Prøv Rettført</span><span class="rf-mobi">Prøv demoen gratis</span> {{ iArrow }}</button>
-        <a class="rf-mobi" href="/demo-bedrift?ny" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;font-size:16px;font-weight:500;padding:14px 22px;border-radius:9px;text-decoration:none;display:flex;justify-content:center">Start gratis for bedriften</a>
+        <a class="rf-mobi" href="/?venteliste=bedrift" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;font-size:16px;font-weight:500;padding:14px 22px;border-radius:9px;text-decoration:none;display:flex;justify-content:center">Start gratis for bedriften</a>
         <button class="rf-desk" onClick="{{ toUpload }}" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;font-size:16px;padding:14px 22px;border-radius:9px" style-hover="border-color:#A9A294">Last opp egen fil</button>
       </div>
       <div class="rf-mob" style="margin-top:18px;font-size:15.5px;color:#0B2545">Har du egne filer? <a onClick="{{ toUpload }}" style="cursor:pointer;color:#0B2545;font-weight:600;border-bottom:1.5px solid #0B2545;padding-bottom:1px">Last opp her</a></div>
@@ -416,7 +416,7 @@ input,textarea{font-family:inherit}
       <div style="background:#fff;padding:28px 28px 30px"><div style="font-size:19px;font-weight:600">Dokumentert når noen spør</div><div style="font-size:15px;line-height:1.55;color:#3D4759;margin-top:8px">Vurderinger lagres med navn og tidspunkt, og perioden signeres. Kontrollbeviset er klart ved tilsyn eller revisjon.</div></div>
     </div>
 
-    <div style="text-align:center"><a href="/demo" style="font-size:16px;font-weight:600;color:#0B2545;text-decoration:none;border-bottom:1.5px solid #0B2545;padding-bottom:2px">Se funnene i demoen →</a></div>
+    <div style="text-align:center"><a href="/?demo" style="font-size:16px;font-weight:600;color:#0B2545;text-decoration:none;border-bottom:1.5px solid #0B2545;padding-bottom:2px">Se funnene i demoen →</a></div>
   </div>
 </section>
 
@@ -508,15 +508,15 @@ input,textarea{font-family:inherit}
     <div style="max-width:1200px;margin:0 auto;background:#fff;border:1px solid #E4DFD4;border-radius:32px;padding:56px clamp(24px,5vw,64px);display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:32px;align-items:center" data-rf="endCta">
       <img src="assets/mascot-hip.png" alt="" style="width:96px;height:auto">
       <div><div style="font-size:clamp(26px,3vw,36px);font-weight:600;letter-spacing:-0.025em;line-height:1.12">Se hva Rettført finner hos deg.</div><div style="font-size:17px;color:#3D4759;margin-top:8px">Koble til regnskapssystemet og få første kontroll på fem minutter.</div></div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><a href="/demo?signup" style="height:56px;padding:0 28px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;font-size:17px;font-weight:600;text-decoration:none;white-space:nowrap">Prøv gratis i 30 dager</a><a href="/demo" style="font-size:14px;color:#3D4759">eller åpne demoen</a></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><a href="/?venteliste=regnskapsforer" style="height:56px;padding:0 28px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;font-size:17px;font-weight:600;text-decoration:none;white-space:nowrap">Prøv gratis i 30 dager</a><a href="/?demo" style="font-size:14px;color:#3D4759">eller åpne demoen</a></div>
     </div>
   </section>
   <footer style="border-top:1px solid #E4DFD4;padding:56px 32px 40px">
     <div data-rf="foot" style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));gap:32px">
       <div><img src="assets/rettfort-logo.png" alt="Rettført" style="height:24px;width:auto"><div style="font-size:15px;color:#586174;margin-top:14px;line-height:1.5;max-width:300px">Kontroll, bilag og kundeoppfølging oppå regnskapssystemet du har.</div></div>
-      <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><div style="font-size:13px;color:#8A909C;font-weight:600;margin-bottom:2px">Produkt</div><a href="/#funksjoner" style="text-decoration:none">Funksjoner</a><a href="/#priser" style="text-decoration:none">Priser</a><a href="/demo" style="text-decoration:none">Demo</a></div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><div style="font-size:13px;color:#8A909C;font-weight:600;margin-bottom:2px">Produkt</div><a href="/#funksjoner" style="text-decoration:none">Funksjoner</a><a href="/#priser" style="text-decoration:none">Priser</a><a href="/?demo" style="text-decoration:none">Demo</a></div>
       <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><div style="font-size:13px;color:#8A909C;font-weight:600;margin-bottom:2px">Passer for</div><a href="/#priser" style="text-decoration:none">Regnskapsbyrå</a><a href="/#priser" style="text-decoration:none">Bedrifter</a></div>
-      <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><div style="font-size:13px;color:#8A909C;font-weight:600;margin-bottom:2px">Rettført</div><a href="/#om" style="text-decoration:none">Om prosjektet</a><a href="/personvern.html" style="text-decoration:none">Personvern</a><a href="/demo?login" style="text-decoration:none">Logg inn</a></div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><div style="font-size:13px;color:#8A909C;font-weight:600;margin-bottom:2px">Rettført</div><a href="/#om" style="text-decoration:none">Om prosjektet</a><a href="/personvern.html" style="text-decoration:none">Personvern</a><a href="/?logg-inn" style="text-decoration:none">Logg inn</a></div>
     </div>
     <div style="max-width:1200px;margin:40px auto 0;padding-top:20px;border-top:1px solid #E4DFD4;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:#8A909C"><span>© 2026 Rettført</span><span>Regnskapsfiler leses i nettleseren og lastes ikke opp.</span></div>
   </footer>
@@ -612,6 +612,13 @@ input,textarea{font-family:inherit}
     <div onClick="{{ toLanding }}" style="width:103px;height:26px;overflow:hidden;position:relative;cursor:pointer"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;max-width:none;left:-14.6px;top:-8.3px;width:131px;height:43.7px"></div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:48px 0">
       <div style="width:100%;max-width:380px">
+        <sc-if value="{{ isVelg }}">
+          <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:0">{{ velgTittel }}</h1>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:28px">
+            <a href="{{ velgBedrift }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:76px;padding:0 24px;border-radius:16px;font-size:19px;font-weight:600;text-decoration:none;box-sizing:border-box;background:#0B2545;color:#fff" style-hover="background:#16345E">Jeg driver en bedrift <span aria-hidden="true">→</span></a>
+            <a href="{{ velgByra }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:76px;padding:0 24px;border-radius:16px;font-size:19px;font-weight:600;text-decoration:none;box-sizing:border-box;background:#fff;color:#0B2545;border:1.5px solid #0B2545" style-hover="background:#EAE5DA">Jeg er regnskapsfører <span aria-hidden="true">→</span></a>
+          </div>
+        </sc-if>
         <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
           <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:0">Logg inn</h1>
           <p style="font-size:15.5px;color:#586174;margin:10px 0 0;line-height:1.5">Innlogging for egne kunder åpner ved lansering. Nå logger du inn med demokontoen.</p>
@@ -625,12 +632,12 @@ input,textarea{font-family:inherit}
         <sc-if value="{{ isSignup }}">
           <sc-if value="{{ suForm }}" hint-placeholder-val="{{ true }}">
             <span style="font-size:12.5px;font-weight:600;color:#0B2545;background:#F6DF6E;padding:3px 10px;border-radius:99px">Tidlig versjon</span>
-            <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:16px 0 0">Meld interesse</h1>
-            <p style="font-size:15.5px;color:#586174;margin:10px 0 0;line-height:1.5">Rettført er under utvikling. Registrer deg, så får du beskjed når du kan bruke det med egne filer.</p>
+            <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:16px 0 0">Meld deg på ventelisten</h1>
+            <p style="font-size:15.5px;color:#586174;margin:10px 0 0;line-height:1.5">Rettført er under utvikling. Meld deg på, så får du beskjed så snart du kan opprette en bruker.</p>
             <form onSubmit="{{ suSubmit }}">
               <label style="font-size:13.5px;font-weight:500;display:block;margin-top:18px;margin-top:28px">Navn</label>
               <input value="{{ suName }}" onChange="{{ suSetName }}" autoComplete="name" style="margin-top:8px;width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:12px 14px;font-size:15px;outline:none;color:#0B2545;background:#fff">
-              <label style="font-size:13.5px;font-weight:500;display:block;margin-top:18px">Jobb-e-post</label>
+              <label style="font-size:13.5px;font-weight:500;display:block;margin-top:18px">E-post</label>
               <input type="email" value="{{ suEmail }}" onChange="{{ suSetEmail }}" autoComplete="email" style="margin-top:8px;width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:12px 14px;font-size:15px;outline:none;color:#0B2545;background:#fff">
               <label style="font-size:13.5px;font-weight:500;display:block;margin-top:18px">Rolle</label>
               <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
@@ -647,7 +654,7 @@ input,textarea{font-family:inherit}
           </sc-if>
           <sc-if value="{{ suDone }}">
             <span style="width:44px;height:44px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center">{{ iTick }}</span>
-            <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:18px 0 0">Takk, du står på listen.</h1>
+            <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:18px 0 0">Takk, du står på ventelisten.</h1>
             <p style="font-size:15.5px;color:#586174;margin:10px 0 0;line-height:1.55">{{ suDoneTxt }}</p>
             <button onClick="{{ trySample }}" style="margin-top:26px;width:100%;background:#0B2545;color:#fff;border:0;border-radius:8px;padding:14px;font-size:15px;font-weight:500">Prøv demoen</button>
             <button onClick="{{ toLanding }}" style="margin-top:10px;width:100%;background:#fff;color:#0B2545;border:1px solid #D9D3C6;border-radius:8px;padding:13px;font-size:15px">Til forsiden</button>
@@ -661,7 +668,7 @@ input,textarea{font-family:inherit}
           <button onClick="{{ resetSent }}" style="margin-top:24px;width:100%;background:#0B2545;color:#fff;border:0;border-radius:8px;padding:14px;font-size:15px;font-weight:500">Send lenke</button>
           <p style="font-size:14.5px;margin:24px 0 0;text-align:center"><a onClick="{{ toLogin }}" style="font-weight:600;cursor:pointer">Tilbake til innlogging</a></p>
         </sc-if>
-        <div style="margin-top:36px;font-size:13px;color:#8A909C;text-align:center">Demo: ingen passord kreves.</div>
+        <sc-if value="{{ isLogin }}"><div style="margin-top:36px;font-size:13px;color:#8A909C;text-align:center">Demo: ingen passord kreves.</div></sc-if>
       </div>
     </div>
   </div>
@@ -1254,15 +1261,20 @@ class Component extends DCLogic {
     const i = this.state.fnI || 0; const f = this.FN[i];
     const sev = s => s === 'Høy' ? ['#C4553F', '#F6E1DC', '#8A2E1F'] : ['#E0B43C', '#FAEDD3', '#8E5A0F'];
     return {
-      goSignup: () => { window.location.href = '/demo?signup'; },
+      goSignup: () => { window.location.href = '/?venteliste=regnskapsforer'; },
       fnList: this.FN.map((x, j) => ({ ...x, dot: sev(x.sev)[0], bg: j === i ? '#fff' : 'transparent', border: j === i ? '#0B2545' : '#E4DFD4', onClick: () => this.setState({ fnI: j }) })),
       fnC: { ...f, sevBg: sev(f.sev)[1], sevFg: sev(f.sev)[2], spor: f.spor.map((p, j) => ({ t: p[0], d: p[1], arrow: j > 0, bg: p[2] ? '#FBEFA8' : '#fff', border: p[2] ? '#E6CF5C' : '#D9D3C6' })) }
     };
   }
 
   componentDidMount() {
-    try { const s = JSON.parse(localStorage.getItem('rettfort_nav') || '{}'); if (s.screen) this.setState({ screen: s.screen, page: s.page === 'controls' || s.page === 'settings' ? s.page : 'new' }); } catch (e) {}
+    try { const s = JSON.parse(localStorage.getItem('rettfort_nav') || '{}'); if (s.screen && s.screen !== 'auth') this.setState({ screen: s.screen, page: s.page === 'controls' || s.page === 'settings' ? s.page : 'new' }); } catch (e) {}
     try { const st = JSON.parse(localStorage.getItem('rettfort_settings') || 'null'); if (st) this.setState({ settings: st }); } catch (e) {}
+    try { const q = new URLSearchParams(location.search); const v = q.get('venteliste');
+      if (q.has('logg-inn')) this.setState({ screen: 'auth', authMode: 'velg', velgFor: 'login' });
+      else if (q.has('demo')) this.setState({ screen: 'auth', authMode: 'velg', velgFor: 'demo' });
+      else if (q.has('venteliste')) this.setState(st => ({ screen: 'auth', authMode: 'signup', su: { ...st.su, role: v === 'regnskapsforer' ? 'Regnskapsfører' : v === 'bedrift' ? 'Driver bedrift' : (st.su || {}).role } }));
+    } catch (e) {}
     import('./rettfort-engine.js').then(E => { this.E = E; try { const p = E.samplePayroll(); this.sample = E.analyze({ saft: E.sampleSaft(), prev: p.prev, curr: p.curr }); } catch (e) { console.error(e); } this.setState({ ready: true }); }).catch(e => { console.error(e); this.setState({ err: 'Kunne ikke laste kontrollmotoren.' }); });
     this.startHero();
     this.slikRef = el => { if (!el || this.slikIO) return; this.slikIO = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { this.setState({ slikSeen: true }); this.slikIO.disconnect(); } }, { threshold: 0.35 }); this.slikIO.observe(el); };
@@ -1349,7 +1361,7 @@ class Component extends DCLogic {
     else this.setState({ ...base, tour: null, showEnd: true, page: 'report' });
   }
   async sendForm(data) { if (!FORM_ENDPOINT) { await new Promise(r => setTimeout(r, 500)); return true; } const r = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) }); return r.ok; }
-  trySample() { window.location.href = '/demo'; }
+  trySample() { window.location.href = '/?demo'; }
   applySettings(ns) { try { localStorage.setItem('rettfort_settings', JSON.stringify(ns)); } catch (e) {} const up = { settings: ns }; const f = this.state.files; if (this.E && this.state.result) { try { up.result = this.E.analyze({ saft: f.saft && f.saft.text, prev: f.prev && f.prev.text, curr: f.curr && f.curr.text, settings: ns }); } catch (e) { console.error(e); } } this.setState(up); }
   analyze(files) {
     const f = files || this.state.files; if (!this.E) return; this.demoRun = !!(f.saft && f.saft.demo);
@@ -1487,22 +1499,22 @@ class Component extends DCLogic {
     ].map((p, i) => { const dk = s.planHover === i; return { ...p, dark: dk, bg: dk ? INK : '#fff', fg: dk ? '#fff' : INK, sub: dk ? 'rgba(255,255,255,.68)' : C.mut, bd: dk ? INK : C.line, line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2', btnBg: dk ? '#F6DF6E' : INK, btnFg: dk ? INK : '#fff', shadow: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', lift: dk ? '-12px' : '0px', limits: p.lim.map(l => ({ l })), feats: PF.map(f => { const on = !!f[1][i]; return { l: f[0], on, off: !on, txt: on ? (dk ? '#fff' : INK) : (dk ? 'rgba(255,255,255,.4)' : '#A4A8B0'), icBg: on ? (dk ? '#35AE74' : C.grnBg) : (dk ? 'rgba(255,255,255,.08)' : '#EFEBE2'), icFg: on ? (dk ? '#fff' : C.grn) : (dk ? 'rgba(255,255,255,.42)' : '#A4A8B0') }; }), enter: () => { if (s.planHover !== i) this.setState({ planHover: i }); }, fn: i === 0 ? () => this.trySample() : () => this.setState(st => ({ screen: 'auth', authMode: 'signup', su: { ...st.su, plan: p.k } })) }; });
 
     const cat = E ? E.CONTROLS : [];
-    const appNav = [['new', 'Ny analyse'], ['report', 'Rapport'], ['payroll', 'Lønn'], ['controls', 'Kontroller'], ['history', 'Historikk'], ['settings', 'Innstillinger']].map(([k, l]) => { const on = s.page === k || (k === 'report' && (s.page === 'finding' || s.page === 'recon')) || (k === 'new' && s.page === 'run'); return { l, fn: k === 'new' ? () => { window.location.href = '/demo'; } : set({ page: k }), bg: on ? '#F1EDE4' : 'transparent', col: on ? INK : C.mut, fw: on ? 600 : 400, hasBadge: k === 'report' && openN > 0, badge: String(openN) }; });
+    const appNav = [['new', 'Ny analyse'], ['report', 'Rapport'], ['payroll', 'Lønn'], ['controls', 'Kontroller'], ['history', 'Historikk'], ['settings', 'Innstillinger']].map(([k, l]) => { const on = s.page === k || (k === 'report' && (s.page === 'finding' || s.page === 'recon')) || (k === 'new' && s.page === 'run'); return { l, fn: k === 'new' ? () => { window.location.href = '/?demo'; } : set({ page: k }), bg: on ? '#F1EDE4' : 'transparent', col: on ? INK : C.mut, fw: on ? 600 : 400, hasBadge: k === 'report' && openN > 0, badge: String(openN) }; });
 
     return {
       isLanding: s.screen === 'landing', isAbout: s.screen === 'about', isAuth: s.screen === 'auth', isApp: s.screen === 'app',
-      isLogin: s.authMode === 'login', isSignup: s.authMode === 'signup', isReset: s.authMode === 'reset',
+      isVelg: s.authMode === 'velg', velgTittel: s.velgFor === 'demo' ? 'Hvilken demo vil du se?' : 'Logg inn', velgBedrift: s.velgFor === 'demo' ? '/demo-bedrift' : '/demo?login&rolle=bedrift', velgByra: s.velgFor === 'demo' ? '/demo' : '/demo?login&rolle=regnskapsforer', isLogin: s.authMode === 'login', isSignup: s.authMode === 'signup', isReset: s.authMode === 'reset',
       mobMenuOpen: !!s.mobileMenu, mobToggle: () => this.setState(st => ({ mobileMenu: !st.mobileMenu })), mobClose: () => this.setState({ mobileMenu: false }),
       mobLine1: s.mobileMenu ? 'translateY(7.5px) rotate(45deg)' : 'none', mobLine2Op: s.mobileMenu ? 0 : 1, mobLine3: s.mobileMenu ? 'translateY(-7.5px) rotate(-45deg)' : 'none',
       mobHow: () => { this.setState({ mobileMenu: false }); this.scrollTo('slik'); },
       mobCtrl: () => { this.setState({ mobileMenu: false }); this.scrollTo('kontroller'); },
       mobPrice: () => { this.setState({ mobileMenu: false }); this.scrollTo('priser'); },
       mobAbout: goTop({ mobileMenu: false, screen: 'about' }),
-      mobLogin: () => { window.location.href = '/demo?login'; },
+      mobLogin: () => { window.location.href = '/?logg-inn'; },
       mobTry: () => { this.setState({ mobileMenu: false }); this.trySample(); },
-      toLanding: goTop({ screen: 'landing', mobileMenu: false }), toAbout: goTop({ screen: 'about', mobileMenu: false }), toLogin: () => { window.location.href = '/demo?login'; }, toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
-      enterApp: () => { window.location.href = '/demo'; }, toUpload: () => { window.location.href = '/demo?login'; }, toControls: set({ screen: 'app', page: 'controls' }),
-      trySample: () => { window.location.href = '/demo'; }, ...this.funnVals(),
+      toLanding: goTop({ screen: 'landing', mobileMenu: false }), toAbout: goTop({ screen: 'about', mobileMenu: false }), toLogin: () => { window.location.href = '/?logg-inn'; }, toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
+      enterApp: () => { window.location.href = '/?demo'; }, toUpload: () => { window.location.href = '/?logg-inn'; }, toControls: set({ screen: 'app', page: 'controls' }),
+      trySample: () => { window.location.href = '/?demo'; }, ...this.funnVals(),
       resetSent: () => this.toast('Lenke sendt (demo)'), logout: set({ screen: 'landing' }),
       goHow: () => this.scrollTo('slik'), goCtrl: () => this.scrollTo('kontroller'), goPrice: () => this.scrollTo('priser'),
       iArrow: icon('arrow', 15), iTick: icon('tick', 22, 2.4), iX: icon('x', 15), iXs: icon('x', 11, 2.4), iTickS: icon('tick', 12, 2.6),
@@ -1516,7 +1528,7 @@ class Component extends DCLogic {
       pcards: (() => { const FT = [['Faktura, kjøp og MVA-melding', 1, 1, 1, 1], ['Lønnsslipper', 1, 1, 1, 1], ['Kvitteringer på e-post', 1, 1, 1, 1], ['Frister, påminnelser og kalender', 1, 1, 1, 1], ['Sjekk av sum, duplikater og leverandør', 1, 1, 1, 1], ['Regnskapsføreren din får tilgang', 1, 1, 1, 1], ['Kvitteringer leses automatisk', 0, 1, 1, 1], ['36 kontroller hver natt', 0, 1, 1, 1], ['Bankkobling og avstemming', 0, 0, 1, 1], ['Assistent med kilder', 0, 0, 1, 1], ['Kontrollbevis med signering', 0, 0, 1, 1], ['Flere klienter i én arbeidsliste', 0, 0, 0, 1], ['Kundeportal og manglende bilag', 0, 0, 0, 1], ['Ansatte med roller', 0, 0, 0, 1], ['Prioritert support', 0, 0, 0, 1]];
         const P = [['Gratis', 'For bedriften som vil føre selv uten å betale.', '0', 'kr / mnd', 'Ingen kort. Ingen tidsgrense.', 'Start gratis', ['Opptil 100 bilag per år', 'Lønnsslipp for inntil 3 ansatte', 'Uten AI']], ['Start', 'For bedriften som vil slippe å taste inn kvitteringer.', '149', 'kr / mnd per selskap', '186,25 kr inkl. MVA', 'Velg Start', ['Ubegrenset bilag', '300 kvitteringer leses per måned', 'Kontroll hver natt']], ['Selskap', 'For bedriften som vil ha bank, kontroll og assistent på ett sted.', '249', 'kr / mnd per selskap', '311,25 kr inkl. MVA', 'Velg Selskap', ['Ubegrenset bilag', 'Bankkobling', '200 assistentsvar per måned']], ['Byrå', 'For regnskapsførere som følger opp mange kunder.', '1 490', 'kr / mnd inkl. 15 kunder', '1 862,50 kr inkl. MVA', 'Velg Byrå', ['Kunder på Rettført kobles til av seg selv', 'Ingen grense på posteringer', '2 000 assistentsvar per måned']]];
         const hv = s.pcH ?? 2;
-        return P.map(([n, d, pris, unit, vat, cta, lim], i) => { const dk = i === hv; const href = i === 3 ? '/demo?signup' : '/demo-bedrift?ny';
+        return P.map(([n, d, pris, unit, vat, cta, lim], i) => { const dk = i === hv; const href = i === 3 ? '/?venteliste=regnskapsforer' : '/?venteliste=bedrift';
           return { href,  n, d, pris, unit, vat, cta, lim, rec: i === 2, onEnter: () => { if ((this.state.pcH ?? 2) !== i) this.setState({ pcH: i }); },
             bg: dk ? '#0B2545' : '#fff', fg: dk ? '#fff' : '#0B2545', border: dk ? '#0B2545' : '#E4DFD4', sub: dk ? '#C9D3E2' : '#586174', line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2',
             sh: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', tf: dk ? 'translateY(-10px)' : 'none', btnBg: dk ? '#F6DF6E' : '#0B2545', btnFg: dk ? '#0B2545' : '#fff',
@@ -1524,8 +1536,8 @@ class Component extends DCLogic {
       planReset: () => { if (s.planHover !== 1) this.setState({ planHover: 1 }); }, ctrlR: cat.filter(c => c.area === 'regnskap'), ctrlL: cat.filter(c => c.area === 'lonn'), ctrlK: cat.filter(c => c.area === 'kryss'), ctrlV: cat.filter(c => c.area === 'revisjon'), nV: E ? String(nBy('revisjon')) : '', stop: e => e.stopPropagation(), plans,
       ...(() => { const su = s.su, upd = k => e => { const v = e.target.value; this.setState(st => ({ su: { ...st.su, [k]: v }, suErr: '' })); }; const okMail = x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.trim());
         return { suForm: s.suState !== 'done', suDone: s.suState === 'done', suName: su.name, suEmail: su.email, suOrg: su.org, suNotify: su.notify, suSetName: upd('name'), suSetEmail: upd('email'), suSetOrg: upd('org'), suToggle: () => this.setState(st => ({ su: { ...st.su, notify: !st.su.notify } })),
-          suRoles: ['Økonomi', 'Kontroll / revisjon', 'Lønn / HR', 'Annet'].map(l => { const on = su.role === l; return { l, fn: () => this.setState(st => ({ su: { ...st.su, role: on ? '' : l } })), bg: on ? INK : '#fff', fg: on ? '#fff' : INK, bd: on ? INK : '#D9D3C6' }; }),
-          suHasErr: !!s.suErr, suErr: s.suErr, suBusy: s.suState === 'busy', suBtn: s.suState === 'busy' ? 'Sender …' : 'Meld interesse',
+          suRoles: ['Driver bedrift', 'Regnskapsfører', 'Annet'].map(l => { const on = su.role === l; return { l, fn: () => this.setState(st => ({ su: { ...st.su, role: on ? '' : l } })), bg: on ? INK : '#fff', fg: on ? '#fff' : INK, bd: on ? INK : '#D9D3C6' }; }),
+          suHasErr: !!s.suErr, suErr: s.suErr, suBusy: s.suState === 'busy', suBtn: s.suState === 'busy' ? 'Sender …' : 'Meld meg på',
           suDoneTxt: su.notify ? `Vi gir beskjed til ${su.email.trim()} når Rettført lanseres. Frem til da kan du prøve demoen med fiktive data.` : 'Frem til lansering kan du prøve demoen med fiktive data.',
           suSubmit: async e => { e.preventDefault(); if (!su.name.trim()) return this.setState({ suErr: 'Skriv inn navnet ditt.' }); if (!okMail(su.email)) return this.setState({ suErr: 'Skriv inn en gyldig e-postadresse.' }); this.setState({ suState: 'busy', suErr: '' }); let ok = false; try { ok = await this.sendForm({ type: 'interesse', navn: su.name.trim(), epost: su.email.trim(), rolle: su.role, virksomhet: su.org.trim(), varsle: su.notify, plan: su.plan }); } catch (x) {} this.setState(ok ? { suState: 'done' } : { suState: 'form', suErr: 'Kunne ikke sende akkurat nå. Prøv igjen om litt.' }); },
           nfOpen: !s.nfDone, nfDone: s.nfDone, nfEmail: s.nfEmail, nfType: e => this.setState({ nfEmail: e.target.value }), nfMsg: 'Takk. Du får beskjed når Rettført lanseres.',
@@ -1554,7 +1566,7 @@ class Component extends DCLogic {
       hasResult: !!res, noResult: !res, rCompany: res ? res.company : '', rHead, rMeta, tiles, areaTabs, statusTabs, flist, listEmpty: !!res && flist.length === 0, ctrlSide,
       emptyT: openN === 0 ? 'Alle forhold er avklart.' : 'Ingen funn her.', emptyS: openN === 0 ? 'Rapporten er klar til å lagres eller skrives ut.' : 'Prøv et annet filter.',
       exportCsv: () => { const rows = [['Alvorlighet', 'Område', 'Kontroll', 'Funn', 'Beløp', 'Dato', 'Status', 'Kommentar']].concat(fAll.map(f => [f.sevL, f.areaL, f.ctrlT, f.title, f.amountS, f.dateS, R[f.id] ? OUT_L[R[f.id].outcome] : 'Åpen', (R[f.id] || {}).note || ''])); this.download('rettfort-kontrollrapport.csv', '\uFEFF' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n'), 'text/csv'); },
-      printIt: () => window.print(), toReport: set({ page: 'report' }), toNew: () => { window.location.href = '/demo'; },
+      printIt: () => window.print(), toReport: set({ page: 'report' }), toNew: () => { window.location.href = '/?demo'; },
       hasF: !!F, F: F || {}, fWhy: F ? F.why.map(t => ({ t })) : [], fNext: F ? F.next.map((t, i) => ({ t, n: String(i + 1).padStart(2, '0') })) : [], fCols, fRows, fPos: F ? `${idx + 1} / ${fAll.length}` : '', prevF: go(-1), nextF: go(1),
       fOpen: !fr, fDone: !!fr, note: s.note, noteType: e => this.setState({ note: e.target.value }), fNote: fr ? fr.note : '', fHasNote: !!(fr && fr.note), fDoneAt: fr ? `Vurdert av ${fr.who} · ${fr.at}` : '',
       resolveF: () => { if (!F || !s.outcome) return; const t = this.now(), lbl = OUT_L[s.outcome], nt = s.note.trim(); this.setState(st => ({ resolved: { ...st.resolved, [F.id]: { outcome: st.outcome, note: nt, at: `${t.date} kl. ${t.time}`, who: 'Daniel Berg' } }, outcome: null })); this.log('Daniel Berg', `Vurderte «${F.title}» som «${lbl}».${nt ? ` Kommentar: ${nt}` : ''}`, F.id); this.toast('Vurderingen er lagret'); if (s.tour === 3) this.later(() => this.tourGo(4), 1300); },
@@ -1767,7 +1779,7 @@ class Component extends DCLogic {
         var a = el('div', 'rfc-acts');
         acts.forEach(function (x) {
           var b = el('button', x.kind === 'demo' ? 'demo' : '', x.l); b.type = 'button';
-          b.onclick = function () { window.location.href = x.kind === 'mail' ? 'mailto:' + MAIL : '/demo'; };
+          b.onclick = function () { window.location.href = x.kind === 'mail' ? 'mailto:' + MAIL : '/?demo'; };
           a.appendChild(b);
         });
         w.appendChild(a);

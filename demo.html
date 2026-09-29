@@ -1489,11 +1489,11 @@ input,textarea,select{font-family:inherit;}
       <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
         <div style="width:420px;max-width:100%;background:#fff;border:1px solid #E4DFD4;border-radius:18px;padding:32px 32px 28px;display:flex;flex-direction:column;gap:16px;box-shadow:0 18px 40px -30px rgba(11,37,69,.45)">
           <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
-            <div><h1 style="margin:0;font-size:26px;font-weight:600;letter-spacing:-0.03em">Logg inn</h1><p style="margin:6px 0 0;font-size:14px;color:#586174">Prototype: trykk «Logg inn», passord trengs ikke.</p></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#EFEBE2;border-radius:12px;padding:4px">
+            <div><h1 style="margin:0;font-size:26px;font-weight:600;letter-spacing:-0.03em">{{ loginTittel }}</h1><p style="margin:6px 0 0;font-size:14px;color:#586174">Prototype: trykk «Logg inn», passord trengs ikke.</p></div>
+            <sc-if value="{{ visRolleValg }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#EFEBE2;border-radius:12px;padding:4px">
               <button onClick="{{ suByra }}" style="height:40px;border:none;border-radius:9px;font-size:14px;font-weight:600;background:{{ suRb.bg }};color:{{ suRb.fg }};box-shadow:{{ suRb.sh }}">Regnskapsfører</button>
               <button onClick="{{ suSel }}" style="height:40px;border:none;border-radius:9px;font-size:14px;font-weight:600;background:{{ suRs.bg }};color:{{ suRs.fg }};box-shadow:{{ suRs.sh }}">Egen bedrift</button>
-            </div>
+            </div></sc-if>
             <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;color:#586174">E-post</span><input type="email" value="{{ aEmail }}" onChange="{{ setAEmail }}" placeholder="navn@firma.no" style="width:100%;height:40px;border:1px solid #D9D3C6;border-radius:10px;padding:0 12px;font-size:14px;color:#0B2545;background:#fff;outline:none;height:44px;font-size:15px"></label>
             <label style="display:flex;flex-direction:column;gap:6px"><span style="display:flex;justify-content:space-between"><span style="font-size:12px;color:#586174">Passord</span><button onClick="{{ toGlemt }}" style="border:none;background:none;padding:0;font-size:13px;color:#586174;text-decoration:underline;text-underline-offset:2px;text-align:left;font-size:12px">Glemt passord?</button></span><input type="password" value="{{ apw }}" onChange="{{ setApw }}" style="width:100%;height:40px;border:1px solid #D9D3C6;border-radius:10px;padding:0 12px;font-size:14px;color:#0B2545;background:#fff;outline:none;height:44px;font-size:15px"></label>
             <button onClick="{{ doLogin }}" style="height:40px;padding:0 16px;border-radius:10px;border:none;background:#0B2545;color:#fff;font-size:14px;font-weight:600;white-space:nowrap;height:46px;font-size:15px">Logg inn</button>
@@ -1672,7 +1672,7 @@ input,textarea,select{font-family:inherit;}
             <div style="display:flex;flex-direction:column;gap:14px">
               <div style="font-size:14px;color:#3D4759">{{ tmPris }}</div>
               <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-                <a href="/demo?signup" style="height:54px;padding:0 30px;border-radius:99px;background:#0B2545;color:#fff;font-size:17px;font-weight:600;display:flex;align-items:center;text-decoration:none" style-hover="background:#16345E;color:#fff">Prøv gratis i 30 dager</a>
+                <a href="/?venteliste=regnskapsforer" style="height:54px;padding:0 30px;border-radius:99px;background:#0B2545;color:#fff;font-size:17px;font-weight:600;display:flex;align-items:center;text-decoration:none" style-hover="background:#16345E;color:#fff">Prøv gratis i 30 dager</a>
                 <button onClick="{{ tClose }}" style="height:54px;padding:0 24px;border-radius:99px;border:1.5px solid #0B2545;background:transparent;color:#0B2545;font-size:16px;font-weight:600">Utforsk videre selv</button>
               </div>
               <button onClick="{{ tRestart }}" style="align-self:flex-start;border:0;background:none;padding:0;font-size:14px;color:#586174">↺ Ta omvisningen på nytt</button>
@@ -2098,8 +2098,8 @@ class Component extends DCLogic {
   }
   tourInit() {
     let sel = false; try { const q = new URLSearchParams(location.search).get('rolle'); sel = q === 'bedrift' || q === 'selskap'; } catch (e) {}
-    let mode = null; try { const q = new URLSearchParams(location.search); mode = q.has('login') ? 'login' : q.has('signup') ? 'signup' : null; } catch (e) {}
-    this.setState({ tour: mode ? null : 0, tRect: null, ...(mode ? { auth: mode, aEmail: mode === 'login' ? 'dina@bergholm.no' : '' } : {}), ...(sel ? { pakke: 'Selskap' } : {}) });
+    let mode = null; try { const q = new URLSearchParams(location.search); mode = q.has('login') ? 'login' : q.has('signup') ? 'signup' : null; } catch (e) {} if (mode === 'signup') { location.replace(sel ? '/?venteliste=bedrift' : '/?venteliste=regnskapsforer'); return; } let fastRolle = false; try { fastRolle = !!new URLSearchParams(location.search).get('rolle'); } catch (e) {}
+    this.setState({ tour: mode ? null : 0, tRect: null, ...(mode ? { auth: mode, aEmail: mode === 'login' ? (sel ? 'kari@havoyfisk.no' : 'dina@bergholm.no') : '' } : {}), ...(sel ? { pakke: 'Selskap' } : {}), fastRolle });
     this.onTR = () => { cancelAnimationFrame(this.tRaf); this.tRaf = requestAnimationFrame(() => this.tMeasure()); };
     window.addEventListener('resize', this.onTR); document.addEventListener('scroll', this.onTR, true);
   }
@@ -2329,11 +2329,11 @@ class Component extends DCLogic {
   authVals(s) {
     const a = s.auth; const ok = this.pwOk(s.apw, s.apw2);
     return {
-      isAuth: !!a, isLogin: a === 'login', isSignup: a === 'signup',
-      suRb: this.segSt(s.pakke !== 'Selskap'), suRs: this.segSt(s.pakke === 'Selskap'), suByra: () => this.setState({ pakke: 'Byrå' }), suSel: () => { if (s.auth === 'signup') { window.location.href = '/demo-bedrift?ny'; return; } this.setState({ pakke: 'Selskap', ctx: null }); },
+      visRolleValg: !s.fastRolle, loginTittel: s.fastRolle ? (s.pakke === 'Selskap' ? 'Logg inn for bedriften' : 'Logg inn som regnskapsfører') : 'Logg inn', isAuth: !!a, isLogin: a === 'login', isSignup: a === 'signup',
+      suRb: this.segSt(s.pakke !== 'Selskap'), suRs: this.segSt(s.pakke === 'Selskap'), suByra: () => this.setState({ pakke: 'Byrå' }), suSel: () => { if (s.auth === 'signup') { window.location.href = '/?venteliste=bedrift'; return; } this.setState({ pakke: 'Selskap', ctx: null }); },
       suFirmaL: s.pakke === 'Selskap' ? 'Bedrift' : 'Regnskapsbyrå', suFirmaPh: s.pakke === 'Selskap' ? 'Nordhavn Drift AS' : 'Berg & Holm Regnskap AS', suFirma: s.suFirma || '', setSuFirma: e => this.setState({ suFirma: e.target.value }),
       suPris: s.pakke === 'Selskap' ? 'Gratis for alltid. Oppgrader til Start eller Selskap når du vil.' : 'Etter prøveperioden: 1 490 kr/mnd eks. MVA, 15 klienter inkludert.',
-      doSignup: () => { if (s.pakke === 'Selskap') { window.location.href = '/demo-bedrift?ny'; return; } this.setState({ auth: null, tour: 0, tRect: null, screen: 'oversikt' }); this.toast('Kontoen er opprettet. Velkommen!'); }, isGlemt: a === 'glemt', isGlemtSendt: a === 'glemtSendt', isReset: a === 'reset', isInvite: a === 'invite', isInviteDone: a === 'inviteDone',
+      doSignup: () => { window.location.href = s.pakke === 'Selskap' ? '/?venteliste=bedrift' : '/?venteliste=regnskapsforer'; }, isGlemt: a === 'glemt', isGlemtSendt: a === 'glemtSendt', isReset: a === 'reset', isInvite: a === 'invite', isInviteDone: a === 'inviteDone',
       aEmail: s.aEmail, setAEmail: e => this.setState({ aEmail: e.target.value }), aName: s.aName, setAName: e => this.setState({ aName: e.target.value }), apw: s.apw, setApw: e => this.setState({ apw: e.target.value }), apw2: s.apw2, setApw2: e => this.setState({ apw2: e.target.value }),
       aRules: this.pwRules(s.apw, s.apw2), aBtnBg: ok ? '#0B2545' : '#B9B2A4', glemtEmail: s.aEmail || 'e-postadressen din', inviteFirst: (s.aName || 'Tone').trim().split(' ')[0], inviteRoleLow: 'regnskapsmedarbeider',
       authClose: () => this.setState({ auth: null }), toLogin: () => this.setState({ auth: 'login' }), toGlemt: () => this.setState({ auth: 'glemt' }), toReset: () => this.setState({ auth: 'reset', apw: '', apw2: '' }),
