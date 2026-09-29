@@ -601,10 +601,9 @@ input,textarea{font-family:inherit}
     <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:48px 0">
       <div style="width:100%;max-width:380px">
         <sc-if value="{{ isVelg }}">
-          <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.025em;margin:0">{{ velgTittel }}</h1>
-          <div style="display:flex;flex-direction:column;gap:12px;margin-top:28px">
-            <a href="{{ velgBedrift }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:76px;padding:0 24px;border-radius:16px;font-size:19px;font-weight:600;text-decoration:none;box-sizing:border-box;background:#0B2545;color:#fff" style-hover="background:#16345E">Jeg driver en bedrift <span aria-hidden="true">→</span></a>
-            <a href="{{ velgByra }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:76px;padding:0 24px;border-radius:16px;font-size:19px;font-weight:600;text-decoration:none;box-sizing:border-box;background:#fff;color:#0B2545;border:1.5px solid #0B2545" style-hover="background:#EAE5DA">Jeg er regnskapsfører <span aria-hidden="true">→</span></a>
+          <div role="group" aria-label="{{ velgTittel }}" style="display:flex;flex-direction:column;gap:14px">
+            <a href="{{ velgBedrift }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:72px;padding:0 20px;border-radius:16px;font-size:clamp(16px,4.6vw,19px);white-space:nowrap;font-weight:600;text-decoration:none;box-sizing:border-box;background:#0B2545;color:#fff" style-hover="background:#16345E">Jeg driver en bedrift <span aria-hidden="true">→</span></a>
+            <a href="{{ velgByra }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:72px;padding:0 20px;border-radius:16px;font-size:clamp(16px,4.6vw,19px);white-space:nowrap;font-weight:600;text-decoration:none;box-sizing:border-box;background:#fff;color:#0B2545;border:1.5px solid #0B2545" style-hover="background:#EAE5DA">Jeg er regnskapsfører <span aria-hidden="true">→</span></a>
           </div>
         </sc-if>
         <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
