@@ -16,7 +16,7 @@ import { kjorLonn, type LonnInput } from '@/lib/tjenester/lonn';
 import { vurderFunn } from '@/lib/tjenester/kontroll';
 import type { Enhet } from '@/lib/brreg';
 import { randomBytes } from 'node:crypto';
-import { sendEpost, maler, grunnadresse } from '@/lib/epost';
+import { sendEpost, maler, grunnadresse, epostPa } from '@/lib/epost';
 import { fakturaPdf } from '@/lib/tjenester/fakturaPdf';
 import { hentFakta } from '@/lib/tjenester/assistent';
 import { svar as assistentSvar, type Svar } from '@/lib/assistent';
@@ -513,6 +513,23 @@ export async function kjorLonnHandling(periode: string, dato: string, input: Lon
     revalidatePath('/', 'layout');
     return { bilagNr: r.bilagNr, sendt: u.sendt, feilet: u.feilet, planlagt: sendNar === 'na' ? 0 : planlagt, utenEpost };
   }, 'Lønnen er kjørt og ført i regnskapet.');
+}
+
+/** Sender (eller sender på nytt) lønnslippen for én ansatt og måned, med en gang. */
+export async function sendLonnslippNa(periode: string, ansattId: string): Promise<Resultat<{ til: string }>> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const db = await getDb();
+    const r = await db.en<{ id: string; epost: string | null; navn: string }>(`select ls.id, a.epost, a.navn from lonnslipp ls join lonnskjoring l on l.id = ls.lonnskjoring_id join ansatt a on a.id = ls.ansatt_id where l.organisasjon_id = $1 and l.periode = $2 and ls.ansatt_id = $3`, [s.org.id, periode, ansattId]);
+    if (!r) throw new RegnskapsFeil('Fant ikke lønnslippen.');
+    if (!r.epost) throw new RegnskapsFeil(`${r.navn} har ikke e-post. Legg den inn under Kjør lønn → Endre.`);
+    if (!epostPa()) throw new RegnskapsFeil('E-post er ikke koblet til ennå. Last ned PDF-en og send den selv.');
+    await db.q('update lonnslipp set send_etter = now(), sendt_tid = null where id = $1', [r.id]);
+    const u = await sendForfalte(db, await grunnadresse(), s.org.id);
+    if (!u.sendt.length) throw new RegnskapsFeil('E-posten kunne ikke sendes. Prøv igjen om litt.');
+    revalidatePath('/lonn');
+    return { til: r.epost };
+  }, 'Lønnslippen er sendt.');
 }
 
 /** Den ansatte åpner lønnslippen fra lenken i e-posten. Krever ikke innlogging, men passordet. */

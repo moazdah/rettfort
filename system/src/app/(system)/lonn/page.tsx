@@ -7,6 +7,7 @@ import { LonnOppsett } from './Oppsett';
 import { LonnKjoring } from './Kjoring';
 import type { AnsattData } from './Ansatt';
 import { Utfylling } from '@/components/Utfylling';
+import { SendSlipp } from './SendSlipp';
 
 export const metadata = { title: 'Lønn' };
 
@@ -71,10 +72,11 @@ export default async function Lonn({ searchParams }: { searchParams: Promise<{ v
           <div className="liste">
             {amSlipper.map(a => (
               <div key={a.id} className="linje">
-                <div className="fyll"><div className="tittel">{a.navn}</div><div className="mut liten">
+                <div className="fyll"><div className="tittel">{a.navn}</div><div className="mut liten">{a.epost ? `${a.epost} · ` : ''}
                   {a.apnet_tid ? `Sendt og åpnet ${nd(a.apnet_tid.slice(0, 10))}` : a.sendt_tid ? `Sendt på e-post ${nd(a.sendt_tid.slice(0, 10))}` : a.send_etter ? `Sendes på e-post ${nd(a.send_etter.slice(0, 10))}` : a.epost ? 'Ikke sendt på e-post' : 'Har ikke e-post'}
                 </div></div>
                 <b className="belop">{kr(a.netto)}</b>
+                {kanEndre(s.rolle) && a.epost && <SendSlipp periode={amKjoring.periode} ansattId={a.id} sendt={!!a.sendt_tid} />}
                 <a className="knapp hvit liten" href={`/api/lonn/slipp?periode=${amKjoring.periode}&ansatt=${a.id}`} target="_blank" rel="noreferrer">PDF</a>
               </div>
             ))}
