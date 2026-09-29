@@ -31,6 +31,8 @@ input,textarea,select{font-family:inherit;}
 [data-rf=valgrad]>button{padding:0 9px!important;font-size:14px!important}
 [data-rf=firmanavn]{display:none}
 [data-rf=topp]>img{height:20px!important}
+[data-rf=aiknapp]{right:12px!important;bottom:12px!important}
+[data-rf=aipanel]{right:8px!important;left:8px!important;bottom:8px!important;width:auto!important}
 [data-rf=hoved]{min-width:0;overflow-x:hidden}
 [data-rf=hoved]>div{padding-left:16px!important;padding-right:16px!important}
 [data-rf=hoved] [style*="minmax(340px"],[data-rf=hoved] [style*="minmax(380px"],[data-rf=hoved] [style*="minmax(300px"],[data-rf=hoved] [style*="minmax(280px"]{grid-template-columns:minmax(0,1fr)!important}
@@ -1419,13 +1421,41 @@ input,textarea,select{font-family:inherit;}
       </div>
     </sc-if>
 
+    <sc-if value="{{ aiKnapp }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ aiApne }}" data-rf="aiknapp" style="position:fixed;right:20px;bottom:20px;z-index:70;display:flex;align-items:center;gap:10px;padding:8px 18px 8px 10px;border-radius:99px;border:0;background:#0B2545;color:#fff;box-shadow:0 16px 36px -14px rgba(11,37,69,.55);text-align:left">
+        <img src="assets/mascot-hip.png" alt="" style="width:30px;height:auto"><span style="display:flex;flex-direction:column;line-height:1.2"><b style="font-size:15px">Spør assistenten</b><small style="font-size:12px;color:#C9D3E2">Svar med kilde</small></span>
+      </button>
+    </sc-if>
+    <sc-if value="{{ aiOpen }}" hint-placeholder-val="{{ false }}">
+      <section data-rf="aipanel" style="position:fixed;right:20px;bottom:20px;z-index:70;width:400px;max-width:calc(100vw - 24px);height:min(600px, calc(100vh - 120px));background:#fff;border:1px solid #E4DFD4;border-radius:18px;box-shadow:0 30px 60px -24px rgba(11,37,69,.45);display:flex;flex-direction:column;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #E4DFD4">
+          <img src="assets/mascot-hip.png" alt="" style="width:28px;height:auto">
+          <div style="flex:1"><div style="font-size:15px;font-weight:600">Assistenten</div><div style="font-size:12px;color:#586174">Svarer ut fra regnskapet, med kilde</div></div>
+          <button onClick="{{ aiLukk }}" style="border:0;background:none;color:#0B2545;text-decoration:underline;font-size:14px">Lukk</button>
+        </div>
+        <div data-rf="aimeld" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#FBFAF6">
+          <sc-if value="{{ aiTom }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:13.5px;color:#586174">Spør om tallene til Havøy Fisk. Alt hentes fra regnskapet, ingenting gjettes.</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ aiForslag }}" as="f" hint-placeholder-count="5"><button onClick="{{ f.on }}" style="border:1px solid #D9D3C6;background:#fff;border-radius:99px;padding:7px 12px;font-size:13.5px;color:#0B2545" style-hover="border-color:#0B2545">{{ f.t }}</button></sc-for></div>
+          </sc-if>
+          <sc-for list="{{ aiMeld }}" as="m" hint-placeholder-count="0">
+            <div style="align-self:{{ m.side }};max-width:88%;padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.5;white-space:pre-line;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }}">{{ m.t }}<sc-if value="{{ m.harKilde }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;padding-top:8px;border-top:1px solid #E4DFD4;font-size:12.5px;color:#586174">Kilde: <button onClick="{{ m.kildeOn }}" style="border:0;background:none;padding:0;color:#0B2545;text-decoration:underline;font-size:12.5px">{{ m.kilde }}</button></div></sc-if></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;padding:12px;border-top:1px solid #E4DFD4">
+          <input value="{{ aiTekst }}" onInput="{{ aiSkriv }}" onKeyDown="{{ aiTast }}" placeholder="Skriv et spørsmål" aria-label="Spørsmål" style="flex:1;min-width:0;height:44px;border:1px solid #D9D3C6;border-radius:10px;padding:0 12px;font-size:15px">
+          <button onClick="{{ aiSend }}" style="height:44px;padding:0 16px;border-radius:10px;border:none;background:#0B2545;color:#fff;font-size:15px;font-weight:600">Send</button>
+        </div>
+      </section>
+    </sc-if>
+
     <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
       <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0B2545;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:0 18px 40px -20px rgba(11,37,69,.6);z-index:50;animation:rfIn .25s ease both">{{ toast }}</div>
     </sc-if>
   </main>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;pakke&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Start&quot;,&quot;Selskap&quot;,&quot;Gratis&quot;],&quot;default&quot;:&quot;Start&quot;,&quot;tsType&quot;:&quot;'Start' | 'Selskap' | 'Gratis'&quot;},&quot;start&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Hjem&quot;,&quot;Velkomst&quot;],&quot;default&quot;:&quot;Hjem&quot;,&quot;tsType&quot;:&quot;'Hjem' | 'Velkomst'&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;pakke&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Start&quot;,&quot;Selskap&quot;,&quot;Gratis&quot;],&quot;default&quot;:&quot;Selskap&quot;,&quot;tsType&quot;:&quot;'Start' | 'Selskap' | 'Gratis'&quot;},&quot;start&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Hjem&quot;,&quot;Velkomst&quot;],&quot;default&quot;:&quot;Hjem&quot;,&quot;tsType&quot;:&quot;'Hjem' | 'Velkomst'&quot;}}">
 class Component extends DCLogic {
   state = { scr: 'hjem', copied: false, kStage: 'tom', shown: 0, kv: { lev: '', dato: '', tot: '', mva: '', tekst: '' }, levFix: false, konto: '6800', betalt: true, kvitt: true,
     fQ: '', kunde: null, org: false, fMer: false, forfall: '14', linjer: [{ t: 'Konsulenttimer september', a: '12', p: '1150', m: '25' }], fSendt: false,
@@ -1849,7 +1879,7 @@ class Component extends DCLogic {
     const s = this.state, t = s.iTab, O = s.iOpt;
     const tog = (k, t2, d, sep) => ({ t: t2, d, sep: sep ? '#EFEBE2' : 'transparent', bg: O[k] ? '#1F7D52' : '#D9D3C6', x: O[k] ? '21px' : '3px', on: () => this.setState(st => ({ iOpt: { ...st.iOpt, [k]: !st.iOpt[k] } })) });
     const pill = (on) => ({ bd: on ? '#0B2545' : '#D9D3C6', bg: on ? '#FBFAF6' : '#fff' });
-    const pk = s.pk ?? this.props.pakke ?? 'Start';
+    const pk = s.pk ?? this.props.pakke ?? 'Selskap';
     const rfB = s.rfInvitert ? [{ n: 'Regnskapsfører', e: s.rfInvitert, rolle: s.rfRolle === 'full' ? 'Full tilgang · venter' : 'Kan se · venter', pBg: '#FBEFA8', pFg: '#8A6A00', kanFjerne: true, fjern: () => this.setState({ rfInvitert: null }) }] : [];
     const mailOk = /\S+@\S+\.\S+/.test(s.iInvMail);
     return {
@@ -1952,8 +1982,40 @@ class Component extends DCLogic {
   aapneKjopListe(tab) { this.setState({ scr: 'kjop', kStage: 'liste', kTab: tab }); try { window.scrollTo(0, 0); } catch (e) {} }
   aapneFakturaListe() { this.setState({ scr: 'faktura', fSendt: false, fListe: true }); try { window.scrollTo(0, 0); } catch (e) {} }
   go(scr) { this.setState({ scr }); try { window.scrollTo(0, 0); } catch (e) {} }
-  gratis() { return (this.state.pk ?? this.props.pakke ?? 'Start') === 'Gratis'; }
-  selskap() { return (this.state.pk ?? this.props.pakke ?? 'Start') === 'Selskap'; }
+  gratis() { return (this.state.pk ?? this.props.pakke ?? 'Selskap') === 'Gratis'; }
+  // Assistenten i demoen: samme regler som i systemet, med demoens tall.
+  AI_FORSLAG = ['Hvor mye har vi i banken?', 'Hvem skylder oss penger?', 'Hva må vi betale snart?', 'Hvor mye MVA skal vi betale?', 'Hvordan går det i år?', 'Hva bruker vi mest penger på?', 'Når er neste frist?'];
+  aiSvar(q0) {
+    const q = ' ' + q0.toLowerCase().replace(/[^a-zæøå0-9 ]+/g, ' ') + ' ', har = (...o) => o.some(x => q.includes(x));
+    if (har('skylder oss', 'skylder meg', 'utestående', 'kundefordring', 'forfalt', 'hvem skylder', 'purre')) return ['Kundene skylder dere 25 000,00 kr fordelt på 2 fakturaer. 1 er forfalt.\n\n• Lyngen Bygg AS, faktura 10019: 6 250,00 kr, forfalt for 15 dager siden\n• Kvam Transport AS, faktura 10022: 18 750,00 kr, forfall 16.10.2026', 'Rapporter', 'rapp'];
+    if (har('betale snart', 'må vi betale', 'må jeg betale', 'regning', 'leverandør', 'vi skylder', 'gjeld', 'forfaller')) return ['Dere skylder 14 300,00 kr.\n\n• MVA juli–august: 9 810,00 kr, frist 10.10.2026\n• Nordlys Kontor AS: 2 990,00 kr, forfall 18.10.2026\n• Microsoft 365: 1 500,00 kr, forfall 28.10.2026', 'Penger ut', 'kjop'];
+    if (har(' mva', 'moms', 'merverdi')) return ['For juli–august skal dere betale 9 810,00 kr innen 10.10.2026. 3 ting må ordnes før meldingen kan sendes.', 'MVA', 'mva'];
+    if (har('frist', 'når må', 'når skal', 'altinn')) return ['Neste frist er MVA-meldingen for juli–august 10.10.2026. Deretter kommer skattetrekk og arbeidsgiveravgift 15.10.2026.', 'Frister', 'frister'];
+    if (har('bruker vi', 'bruker jeg', 'største kost', 'mest penger', 'kostnad', 'utgift')) return ['I år har dere brukt 328 500,00 kr. Mest går til:\n• Lønn og arbeidsgiveravgift: 214 800,00 kr\n• Husleie: 48 000,00 kr\n• Reise: 18 900,00 kr\n• Programvare: 14 600,00 kr\n• Kontorrekvisita: 9 400,00 kr', 'Rapporter', 'rapp'];
+    if (har('bank', 'saldo', 'likvid', 'penger har', 'hvor mye penger', 'råd til')) return ['Saldoen i banken er 71 235,00 kr ifølge regnskapet.\n\nDe neste 30 dagene venter dere 25 000,00 kr inn fra kunder og 14 300,00 kr ut til regninger og MVA. Det gir omtrent 81 935,00 kr om kundene betaler i tide.', 'Bank', 'bank'];
+    if (har('resultat', 'overskudd', 'underskudd', 'går det', 'tjent', 'inntekt', 'omsetning', 'lønnsom')) return ['Hittil i 2026 har dere 412 700,00 kr i inntekter og 328 500,00 kr i kostnader. Det gir et overskudd på 84 200,00 kr, 12 % mer enn på samme tid i fjor.', 'Rapporter', 'rapp'];
+    return ['Det finner jeg ikke svar på i tallene. Jeg kan svare på saldo i banken, hvem som skylder dere penger, hva dere må betale, MVA, frister, resultatet og hva dere bruker penger på.', '', ''];
+  }
+  aiSporr(q) {
+    const t = (q || '').trim(); if (!t) return;
+    const [svar, kilde, scr] = this.aiSvar(t);
+    this.setState(st => ({ aiTekst: '', aiMsgs: [...(st.aiMsgs || []), { fra: 'b', t }, { fra: 'a', t: svar, kilde, scr }] }));
+    setTimeout(() => { const el = document.querySelector('[data-rf=aimeld]'); if (el) el.scrollTop = el.scrollHeight; }, 50);
+  }
+  aiVals() {
+    const s = this.state, pa = this.harAi();
+    return {
+      aiKnapp: pa && !s.aiOpen && s.tour == null, aiOpen: pa && !!s.aiOpen, aiTom: !(s.aiMsgs || []).length, aiTekst: s.aiTekst || '',
+      aiApne: () => this.setState({ aiOpen: true, merOpen: false, profilOpen: false }), aiLukk: () => this.setState({ aiOpen: false }),
+      aiSkriv: e => this.setState({ aiTekst: e.target.value }), aiTast: e => { if (e.key === 'Enter') this.aiSporr(s.aiTekst); if (e.key === 'Escape') this.setState({ aiOpen: false }); }, aiSend: () => this.aiSporr(s.aiTekst),
+      aiForslag: this.AI_FORSLAG.map(t => ({ t, on: () => this.aiSporr(t) })),
+      aiMeld: (s.aiMsgs || []).map(m => m.fra === 'b'
+        ? { t: m.t, side: 'flex-end', bg: '#0B2545', fg: '#fff', bd: '#0B2545', harKilde: false, kilde: '', kildeOn: () => {} }
+        : { t: m.t, side: 'flex-start', bg: '#fff', fg: '#0B2545', bd: '#E4DFD4', harKilde: !!m.kilde, kilde: m.kilde, kildeOn: () => { this.setState({ aiOpen: false }); this.go(m.scr); } }),
+    };
+  }
+  harAi() { return (this.state.pk ?? this.props.pakke ?? 'Selskap') === 'Selskap'; }
+  selskap() { return (this.state.pk ?? this.props.pakke ?? 'Selskap') === 'Selskap'; }
 
 
   // Leser en ekte kvittering lokalt i nettleseren (tekstgjenkjenning, PDF-tekst eller EHF). Ingenting sendes.
@@ -2096,7 +2158,7 @@ class Component extends DCLogic {
     const mnd = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'].map((l, i) => ({ l, c: i < 9 ? '#35AE74' : i === 9 ? '#F6DF6E' : '#EFEBE2' }));
 
     return {
-      pakke: s.pk ?? this.props.pakke ?? 'Start', nav,
+      pakke: s.pk ?? this.props.pakke ?? 'Selskap', nav,
       isHjem: scr === 'hjem', isKjop: scr === 'kjop', isFaktura: scr === 'faktura', isMva: scr === 'mva', isFrister: scr === 'frister', isAars: scr === 'aars',
       goFaktura: () => this.go('faktura'), goKjop: () => this.go('kjop'), goMva: () => this.go('mva'), goFrister: () => this.go('frister'), goHjem: () => this.go('hjem'),
       kjopKortTxt: gratis ? 'Last opp kvitteringen og fyll inn beløpet. Vi sjekker at summen stemmer.' : 'Ta bilde av kvitteringen. Vi leser den og fyller ut resten.',
@@ -2148,7 +2210,7 @@ class Component extends DCLogic {
       kalendere: ['Google Kalender', 'Apple Kalender', 'Outlook'].map(t => ({ t, on: () => this.toast('Lenke kopiert. Lim den inn i ' + t + '.') })),
       aarsSteg: aars, mnd,
       ...this.obVals(), ...L, visVelkomst: () => this.setState({ ob: 0, obKode: '', obQ: '' }),
-      navMer, merOpen: !!s.merOpen, profilOpen: !!s.profilOpen, merLine: merAktiv ? '#0B2545' : 'transparent', merFw: merAktiv ? 600 : 400,
+      ...this.aiVals(), navMer, merOpen: !!s.merOpen, profilOpen: !!s.profilOpen, merLine: merAktiv ? '#0B2545' : 'transparent', merFw: merAktiv ? 600 : 400,
       merToggle: () => this.setState({ merOpen: !s.merOpen, profilOpen: false }), profilToggle: () => this.setState({ profilOpen: !s.profilOpen, merOpen: false }), menyLukk: () => this.setState({ merOpen: false, profilOpen: false }),
       visVelkomstLukk: () => this.setState({ merOpen: false, profilOpen: false, ob: 0, obKode: '', obQ: '' }),
       orgNavn: s.org, userNavn: s.user.navn, userRolle: s.user.rolle, userInit: s.user.navn.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(), fornavn: s.user.navn.split(' ')[0],
