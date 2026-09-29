@@ -6,6 +6,8 @@ import { Kopier } from '@/components/Kopier';
 import { Maskot } from '@/components/Logo';
 import { kr, langDato, nd, kortManed } from '@/lib/vis';
 import { norskDato } from '@/lib/frister';
+import { cookies } from 'next/headers';
+import { PAKKER } from '@/lib/pakker';
 
 export const metadata = { title: 'Hjem' };
 
@@ -20,6 +22,9 @@ export default async function Hjem() {
   const sist = await sistRegistrert(d, s.org.id, 6);
   const fornavn = s.bruker.navn.split(' ')[0];
   const bilagEpost = `${s.org.bilagSlug ?? 'firma'}@bilag.rettfort.no`;
+  // Valgte pakke på forsiden før registrering: minn om betalingen.
+  const valgt = (await cookies()).get('rf_pakke')?.value;
+  const valgtPakke = (valgt === 'start' || valgt === 'selskap') && s.org.pakke === 'gratis' && s.rolle === 'eier' ? PAKKER.find(p => p.k === valgt) : null;
   const ubetalt = await d.en<{ n: number }>(`select count(*)::int as n from kjop where organisasjon_id = $1 and status = 'registrert'`, [s.org.id]);
 
   return (
@@ -28,6 +33,10 @@ export default async function Hjem() {
         <div className="mut liten">{langDato(dag)}</div>
         <h1 style={{ marginTop: 6 }}>Hei, {fornavn}. Hva har skjedd i dag?</h1>
       </div>
+
+      {valgtPakke && (
+        <div className="varsel gul"><div className="fyll">Du valgte <b>{valgtPakke.n}</b>. Fullfør betalingen, så får du alt som er med i pakken.</div><a href={`/pakke/${valgtPakke.k}`} className="knapp liten">Gå til betaling</a></div>
+      )}
 
       <div className="rutenett to">
         <Link href="/salg/ny" className="kort mork" style={{ textDecoration: 'none', display: 'block' }}>
