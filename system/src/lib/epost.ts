@@ -4,7 +4,7 @@
 import { headers } from 'next/headers';
 
 const nokkel = () => process.env.RESEND_API_KEY || process.env.EPOST_API_KEY || '';
-const avsender = () => process.env.EPOST_FRA || 'Rettført <post@xn--rettfrt-u1a.no>';
+const avsender = () => process.env.EPOST_FRA || `Rettført <post@${process.env.RESEND_EMAIL_DOMAIN || 'xn--rettfrt-u1a.no'}>`;
 
 export const epostPa = () => nokkel() !== '';
 

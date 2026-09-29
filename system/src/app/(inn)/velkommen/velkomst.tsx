@@ -17,6 +17,7 @@ export function Velkomst({ navn, epost, bekreftet, testkode }: { navn: string; e
   const [steg, setSteg] = useState(bekreftet ? 3 : 2);
   const [kode, setKode] = useState('');
   const [visKode, setVisKode] = useState(testkode);
+  const [nySendt, setNySendt] = useState(false);
   const [feil, setFeil] = useState('');
   const [f, setF] = useState<NyttForetak>({ navn: '', orgnr: '', orgform: 'AS', stiftet: '', mvaTermin: 'tomnd', start: 'nytt' });
   const [fraBrreg, setFraBrreg] = useState(false);
@@ -56,11 +57,12 @@ export function Velkomst({ navn, epost, bekreftet, testkode }: { navn: string; e
           <div className="stakk">
             <h1>Bekreft e-posten</h1>
             <p className="mut">Vi har sendt en kode på 6 siffer til <b>{epost}</b>.</p>
-            {visKode && <div className="testmodus">E-post er ikke koblet til ennå. Koden din er <b className="mono">{visKode}</b>.</div>}
+            {visKode && <div className="testmodus">E-posten kom ikke frem ennå. Koden din er <b className="mono">{visKode}</b>.</div>}
+            {nySendt && !visKode && <div className="varsel gronn liten">En ny kode er sendt. Sjekk også søppelposten.</div>}
             <input className="inndata mono" inputMode="numeric" autoComplete="one-time-code" maxLength={7} value={kode} onChange={e => sjekkKode(e.target.value)} placeholder="000000" style={{ fontSize: 22, letterSpacing: '.3em', textAlign: 'center' }} autoFocus />
             {feil && <div className="varsel rod">{feil}</div>}
             <div className="rad">
-              <button type="button" className="lenke" onClick={async () => { const r = await nyKode(); if (r.ok) setVisKode(r.data!.kode); }}>Send på nytt</button>
+              <button type="button" className="lenke" onClick={async () => { const r = await nyKode(); if (r.ok) { setVisKode(r.data!.kode || null); setNySendt(true); } }}>Send på nytt</button>
               <span className="faint">·</span>
               <a className="lenke" href="/registrer">Feil e-post?</a>
             </div>
