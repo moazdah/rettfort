@@ -68,6 +68,7 @@ export function Inviter() {
   const [epost, setEpost] = useState('');
   const [rolle, setRolle] = useState<'full' | 'les' | 'kvittering'>('full');
   const [lenke, setLenke] = useState('');
+  const [sendtTil, setSendtTil] = useState('');
   const { kjor, vis, venter } = useLagre();
   return (
     <div className="stakk">
@@ -76,8 +77,8 @@ export function Inviter() {
         <button type="button" key={k} className={`valgkort ${rolle === k ? 'valgt' : ''}`} onClick={() => setRolle(k)}><b style={{ display: 'block', fontWeight: 600 }}>{t}</b><span className="mut liten">{d}</span></button>
       ))}
       {vis}
-      {lenke && <div className="varsel info"><div className="fyll">Send denne lenken til {epost}. Invitasjoner på e-post slås på når e-posttjenesten er koblet til.<div className="mono liten" style={{ wordBreak: 'break-all', marginTop: 4 }}>{lenke}</div></div></div>}
-      <div><button type="button" className="knapp" disabled={venter} onClick={() => kjor(async () => { const r = await inviterBruker(epost, rolle); if (r.ok) setLenke(location.origin + r.data!.lenke); return r; })}>Lag invitasjon</button></div>
+      {lenke && <div className="varsel info"><div className="fyll">{sendtTil ? `Invitasjonen er sendt på e-post til ${sendtTil}. Du kan også sende lenken selv:` : `E-posten kunne ikke sendes. Send denne lenken til ${epost}:`}<div className="mono liten" style={{ wordBreak: 'break-all', marginTop: 4 }}>{lenke}</div></div></div>}
+      <div><button type="button" className="knapp" disabled={venter} onClick={() => kjor(async () => { const r = await inviterBruker(epost, rolle); if (r.ok) { setLenke(location.origin + r.data!.lenke); setSendtTil(r.data!.sendt ? epost : ''); } return r; })}>Lag invitasjon</button></div>
     </div>
   );
 }

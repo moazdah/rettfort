@@ -16,6 +16,9 @@ import { kjorLonn, type LonnInput } from '@/lib/tjenester/lonn';
 import { vurderFunn } from '@/lib/tjenester/kontroll';
 import type { Enhet } from '@/lib/brreg';
 import { randomBytes } from 'node:crypto';
+import { sendEpost, maler, grunnadresse } from '@/lib/epost';
+import { fakturaPdf } from '@/lib/tjenester/fakturaPdf';
+import { kr } from '@/lib/penger';
 
 async function settCookie(token: string) {
   const c = await cookies();
@@ -104,7 +107,9 @@ export async function registrer(_: unknown, fd: FormData): Promise<Resultat<{ ko
       return opprettSesjon(t, b!.id, null);
     });
     await settCookie(token);
-    return { kode };
+    // Koden vises bare på skjermen hvis e-posten ikke kunne sendes.
+    const sendt = await sendEpost({ til: epost, ...maler.bekreftkode(navn.split(' ')[0], kode) });
+    return { kode: sendt ? undefined : kode };
   });
   return res;
 }
@@ -125,7 +130,8 @@ export async function nyKode(): Promise<Resultat<{ kode: string }>> {
     const kode = lagKode();
     const db = await getDb();
     await db.q('update bruker set bekreftkode = $2 where id = $1', [s.bruker.id, kode]);
-    return { kode };
+    const sendt = await sendEpost({ til: s.bruker.epost, ...maler.bekreftkode(s.bruker.navn.split(' ')[0], kode) });
+    return { kode: sendt ? '' : kode };
   });
 }
 
@@ -199,7 +205,7 @@ export async function lagreUtkastSalg(f: FakturaInput): Promise<Resultat<{ id: s
   }, 'Utkastet er lagret.');
 }
 
-export async function sendSalgHandling(f: FakturaInput, videreKjop: string[] = []): Promise<Resultat<{ id: string; nr: number; kid: string | null }>> {
+export async function sendSalgHandling(f: FakturaInput, videreKjop: string[] = []): Promise<Resultat<{ id: string; nr: number; kid: string | null; epostTil: string | null }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     const db = await getDb();
@@ -210,7 +216,17 @@ export async function sendSalgHandling(f: FakturaInput, videreKjop: string[] = [
       return { id, ...x };
     });
     revalidatePath('/', 'layout');
-    return { id: r.id, nr: r.nr, kid: r.kid };
+    // Dokumentet sendes til kunden med PDF-en vedlagt når kunden har e-post.
+    let epostTil: string | null = null;
+    const p = await fakturaPdf(db, s.org.id, r.id);
+    if (p?.f.kunde?.epost) {
+      const m = maler.faktura({ type: p.f.type, nr: r.nr, foretak: String(p.avsender.navn ?? s.org.navn), kunde: p.f.kunde.navn, belop: kr(p.f.total), forfall: p.f.forfall ? p.f.forfall.split('-').reverse().join('.') : null, kid: r.kid, kontonr: p.avsender.kontonr ? String(p.avsender.kontonr) : null });
+      if (await sendEpost({ til: p.f.kunde.epost, ...m, svarTil: p.avsender.epost ? String(p.avsender.epost) : s.bruker.epost, vedlegg: [{ filnavn: p.filnavn, innhold: p.pdf }] })) {
+        epostTil = p.f.kunde.epost;
+        await db.q(`insert into logg (organisasjon_id, bruker_id, handling, ref) values ($1,$2,'epost_sendt',$3)`, [s.org.id, s.bruker.id, `${r.id} til ${epostTil}`]).catch(() => {});
+      }
+    }
+    return { id: r.id, nr: r.nr, kid: r.kid, epostTil };
   });
 }
 
@@ -436,7 +452,7 @@ export async function byttPakke(pakke: 'gratis' | 'start' | 'selskap'): Promise<
   }, 'Pakken er byttet.');
 }
 
-export async function inviterRegnskapsforer(epost: string, rolle: 'regnskapsforer_full' | 'regnskapsforer_les'): Promise<Resultat<{ lenke: string }>> {
+export async function inviterRegnskapsforer(epost: string, rolle: 'regnskapsforer_full' | 'regnskapsforer_les'): Promise<Resultat<{ lenke: string; sendt: boolean }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     if (!gyldigEpost(epost)) throw new RegnskapsFeil('Skriv en gyldig e-postadresse.');
@@ -444,11 +460,13 @@ export async function inviterRegnskapsforer(epost: string, rolle: 'regnskapsfore
     const token = randomBytes(18).toString('base64url');
     await db.q('insert into invitasjon (organisasjon_id, epost, rolle, token) values ($1,$2,$3,$4)', [s.org.id, epost.trim().toLowerCase(), rolle, token]);
     revalidatePath('/regnskapsforer');
-    return { lenke: `/invitasjon/${token}` };
+    const lenke = `/invitasjon/${token}`;
+    const sendt = await sendEpost({ til: epost.trim(), ...maler.invitasjon(s.bruker.navn, s.org.navn, rolle === 'regnskapsforer_full' ? 'som regnskapsfører' : 'som regnskapsfører med lesetilgang', (await grunnadresse()) + lenke), svarTil: s.bruker.epost });
+    return { lenke, sendt };
   }, 'Invitasjonen er laget.');
 }
 
-export async function inviterBruker(epost: string, rolle: 'full' | 'les' | 'kvittering'): Promise<Resultat<{ lenke: string }>> {
+export async function inviterBruker(epost: string, rolle: 'full' | 'les' | 'kvittering'): Promise<Resultat<{ lenke: string; sendt: boolean }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     if (!gyldigEpost(epost)) throw new RegnskapsFeil('Skriv en gyldig e-postadresse.');
@@ -456,7 +474,9 @@ export async function inviterBruker(epost: string, rolle: 'full' | 'les' | 'kvit
     const token = randomBytes(18).toString('base64url');
     await db.q('insert into invitasjon (organisasjon_id, epost, rolle, token) values ($1,$2,$3,$4)', [s.org.id, epost.trim().toLowerCase(), rolle, token]);
     revalidatePath('/innstillinger');
-    return { lenke: `/invitasjon/${token}` };
+    const lenke = `/invitasjon/${token}`;
+    const sendt = await sendEpost({ til: epost.trim(), ...maler.invitasjon(s.bruker.navn, s.org.navn, rolle === 'full' ? 'med full tilgang' : rolle === 'les' ? 'med lesetilgang' : 'for å levere kvitteringer', (await grunnadresse()) + lenke), svarTil: s.bruker.epost });
+    return { lenke, sendt };
   }, 'Invitasjonen er laget.');
 }
 

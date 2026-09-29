@@ -1,3 +1,4 @@
+import { epostPa } from '@/lib/epost';
 import { redirect } from 'next/navigation';
 import { sesjon, db } from '@/lib/server';
 import { Velkomst } from './velkomst';
@@ -11,5 +12,5 @@ export default async function Velkommen({ searchParams }: { searchParams: Promis
   const { kode } = await searchParams;
   const d = await db();
   const b = await d.en<{ bekreftkode: string | null }>('select bekreftkode from bruker where id = $1', [s.bruker.id]);
-  return <Velkomst navn={s.bruker.navn.split(' ')[0]} epost={s.bruker.epost} bekreftet={s.bruker.epostBekreftet} testkode={d.modus === 'testmodus' || !process.env.EPOST_API_KEY ? (kode ?? b?.bekreftkode ?? null) : null} />;
+  return <Velkomst navn={s.bruker.navn.split(' ')[0]} epost={s.bruker.epost} bekreftet={s.bruker.epostBekreftet} testkode={d.modus === 'testmodus' || !epostPa() ? (kode ?? b?.bekreftkode ?? null) : null} />;
 }

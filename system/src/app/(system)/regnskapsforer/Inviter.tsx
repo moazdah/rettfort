@@ -10,11 +10,12 @@ export function InviterRegnskapsforer() {
   const [rolle, setRolle] = useState<'regnskapsforer_full' | 'regnskapsforer_les'>('regnskapsforer_full');
   const [feil, setFeil] = useState('');
   const [lenke, setLenke] = useState('');
+  const [sendt, setSendt] = useState(false);
   const send = async () => {
     setFeil('');
     const r = await inviterRegnskapsforer(epost, rolle);
     if (!r.ok) { setFeil(r.feil); return; }
-    setLenke(location.origin + r.data!.lenke); router.refresh();
+    setLenke(location.origin + r.data!.lenke); setSendt(r.data!.sendt); router.refresh();
   };
   return (
     <div className="stakk">
@@ -24,7 +25,7 @@ export function InviterRegnskapsforer() {
         <button type="button" key={k} className={`valgkort ${rolle === k ? 'valgt' : ''}`} onClick={() => setRolle(k)}><b style={{ display: 'block', fontWeight: 600 }}>{t}</b><span className="mut liten">{d}</span></button>
       ))}
       {feil && <div className="varsel rod">{feil}</div>}
-      {lenke && <div className="varsel info"><div className="fyll">Invitasjonen er laget. Send lenken til {epost}. Invitasjon på e-post slås på når e-posttjenesten er koblet til.<div className="mono liten" style={{ wordBreak: 'break-all', marginTop: 4 }}>{lenke}</div></div></div>}
+      {lenke && <div className="varsel info"><div className="fyll">{sendt ? `Invitasjonen er sendt på e-post til ${epost}. Du kan også sende lenken selv:` : `Invitasjonen er laget, men e-posten kunne ikke sendes. Send lenken til ${epost}:`}<div className="mono liten" style={{ wordBreak: 'break-all', marginTop: 4 }}>{lenke}</div></div></div>}
       <div><button type="button" className="knapp" onClick={send}>Lag invitasjon</button></div>
     </div>
   );
