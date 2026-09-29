@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 5;
+export const SKJEMA_VERSJON = 6;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -371,6 +371,16 @@ alter table ansatt add column if not exists stillingsprosent numeric not null de
 alter table ansatt add column if not exists faste_tillegg jsonb not null default '[]';
 -- Kunden slik den var da dokumentet ble sendt. Senere endringer på kunden påvirker ikke sendte fakturaer.
 alter table faktura add column if not exists mottaker jsonb;
+
+-- Versjon 6: lønnslipp på e-post, beskyttet med fødselsnummer eller eget passord, sendt når arbeidsgiveren velger.
+alter table ansatt add column if not exists slipp_passord_hash text;
+alter table ansatt add column if not exists slipp_passord_type text;
+alter table lonnslipp add column if not exists token text unique;
+alter table lonnslipp add column if not exists send_etter timestamptz;
+alter table lonnslipp add column if not exists sendt_tid timestamptz;
+alter table lonnslipp add column if not exists apnet_tid timestamptz;
+alter table lonnslipp add column if not exists feil int not null default 0;
+alter table lonnslipp add column if not exists sperret_til timestamptz;
 
 -- Supabase gir tilgang til tabellene i «public» gjennom sitt eget API med en offentlig nøkkel.
 -- Systemet bruker ikke det API-et, så all slik tilgang stenges: radsikkerhet uten regler, og ingen rettigheter

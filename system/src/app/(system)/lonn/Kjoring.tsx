@@ -23,7 +23,9 @@ export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, org
   const [endre, setEndre] = useState(false);
   const [feil, setFeil] = useState('');
   const [venter, setVenter] = useState(false);
-  const [ferdig, setFerdig] = useState<number | null>(null);
+  const [ferdig, setFerdig] = useState<{ bilagNr: number; sendt: string[]; feilet: string[]; planlagt: number; utenEpost: string[] } | null>(null);
+  const [sendNar, setSendNar] = useState<'na' | 'utbetaling' | 'ingen'>('utbetaling');
+  const medEpost = ansatte.filter(x => x.epost);
 
   const tall = (v: string | undefined) => Number((v ?? '0').replace(/\s/g, '').replace(',', '.')) || 0;
   const input: LonnInput[] = ansatte.map(a => ({ ansattId: a.id, timer: a.lonn_type === 'time' ? tall(timer[a.id]) : undefined, overtidTimer: tall(overtid[a.id]) || undefined, provisjonGrunnlag: a.lonn_type === 'provisjon' ? tilOre(salg[a.id] ?? '') ?? 0 : undefined, tillegg: (tillegg[a.id] ?? []).filter(t => t.tekst && tilOre(t.belop)).map(t => ({ tekst: t.tekst, belop: tilOre(t.belop) ?? 0 })) }));
@@ -43,16 +45,25 @@ export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, org
 
   const kjor = async () => {
     setVenter(true); setFeil('');
-    const r = await kjorLonnHandling(periode, utbetaling, input);
+    const r = await kjorLonnHandling(periode, utbetaling, input, sendNar);
     setVenter(false);
     if (!r.ok) { setFeil(r.feil); return; }
-    setFerdig(r.data!.bilagNr); router.refresh();
+    setFerdig(r.data!); router.refresh();
   };
 
   if (ferdig != null) return (
     <div className="kort rad" style={{ flexWrap: 'nowrap', alignItems: 'flex-start', gap: 18 }}>
       <Maskot storrelse={72} />
-      <div><h2>Lønn for {manedNavn(periode)} er kjørt.</h2><p className="mut" style={{ marginTop: 6 }}>Ført som bilag {ferdig}. Betal {kr(sumNetto)} kr til de ansatte {nd(utbetaling)}. Skattetrekk og arbeidsgiveravgift finner du under Frister. A-meldingen sendes innen den 5. i neste måned. Tallene står klare under «Tidligere».</p></div>
+      <div><h2>Lønn for {manedNavn(periode)} er kjørt.</h2>
+        {(ferdig.sendt.length > 0 || ferdig.planlagt > 0 || ferdig.feilet.length > 0 || ferdig.utenEpost.length > 0) && (
+          <div className="stakk" style={{ gap: 6, marginTop: 10 }}>
+            {ferdig.sendt.length > 0 && <div className="varsel gronn">Lønnslippen er sendt på e-post til {ferdig.sendt.join(', ')}.</div>}
+            {ferdig.planlagt > 0 && <div className="varsel info">{ferdig.planlagt === 1 ? 'Lønnslippen sendes' : `${ferdig.planlagt} lønnslipper sendes`} på e-post om morgenen {nd(utbetaling)}.</div>}
+            {ferdig.feilet.length > 0 && <div className="varsel gul">Kunne ikke sende til {ferdig.feilet.join(', ')}. Last ned lønnslippen under «Tidligere» og send den selv.</div>}
+            {ferdig.utenEpost.length > 0 && <div className="varsel gul">{ferdig.utenEpost.join(', ')} har ikke e-post. Last ned lønnslippen under «Tidligere».</div>}
+          </div>
+        )}
+        <p className="mut" style={{ marginTop: 6 }}>Ført som bilag {ferdig.bilagNr}. Betal {kr(sumNetto)} kr til de ansatte {nd(utbetaling)}. Skattetrekk og arbeidsgiveravgift finner du under Frister. A-meldingen sendes innen den 5. i neste måned. Tallene står klare under «Tidligere».</p></div>
     </div>
   );
   if (ny || !ansatte.length) return ny || kanEndre ? <AnsattSkjema onFerdig={() => setNy(false)} ferie={ferie} agaSats={agaSats} /> : <p className="mut">Ingen ansatte.</p>;
@@ -102,6 +113,17 @@ export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, org
           <div className="mut liten">Arbeidsgiveravgift {kr(sumAga)} kr ({String(agaSats).replace('.', ',')} %) kommer i tillegg.</div>
         </section>
         {feil && <div className="varsel rod" role="alert">{feil}</div>}
+        {kanEndre && medEpost.length > 0 && (
+          <section className="kort stakk">
+            <h2>Når skal lønnslippen sendes?</h2>
+            <div className="lonnstyper">
+              {([['utbetaling', 'På utbetalingsdagen', `Om morgenen ${nd(utbetaling)}.`], ['na', 'Med en gang', 'Når du kjører lønnen.'], ['ingen', 'Ikke send', 'Du laster den ned og sender selv.']] as const).map(([k, t, h]) => (
+                <button type="button" key={k} className={`valgkort ${sendNar === k ? 'valgt' : ''}`} aria-pressed={sendNar === k} onClick={() => setSendNar(k)}><b>{t}</b><span className="mut liten">{h}</span></button>
+              ))}
+            </div>
+            <span className="mut liten">Sendes til {medEpost.map(x => x.navn.split(' ')[0]).join(', ')}.{ansatte.length > medEpost.length ? ` ${ansatte.filter(x => !x.epost).map(x => x.navn.split(' ')[0]).join(', ')} har ikke e-post.` : ''}</span>
+          </section>
+        )}
         {kanEndre && (
           <div className="rad" style={{ justifyContent: 'space-between' }}>
             <span>Totalt til utbetaling <b className="belop">{kr(sumNetto)} kr</b></span>

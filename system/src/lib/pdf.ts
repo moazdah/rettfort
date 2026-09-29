@@ -113,3 +113,55 @@ export async function lagFakturaPdf(f: PdfData): Promise<Uint8Array> {
   if (!a.mvaRegistrert) tekst(side, 'Foretaket er ikke registrert i Merverdiavgiftsregisteret.', V, by, { size: 9, farge: MUT });
   return doc.save();
 }
+
+export interface LonnslippPdfData {
+  foretak: { navn: string; orgnr: string | null; adresse: string | null; postnr: string | null; poststed: string | null };
+  ansatt: { navn: string; stilling: string | null; kontonr: string | null };
+  periodeTekst: string; utbetalt: string; skatteprosent: number;
+  linjer: { tekst: string; antall?: number; sats?: number; belop: number }[];
+  brutto: number; skatt: number; netto: number; feriepenger: number; feriePst: number;
+}
+
+/** Lønnslipp som PDF (A4), samme oppsett som den den ansatte ser i systemet. */
+export async function lagLonnslippPdf(l: LonnslippPdfData): Promise<Uint8Array> {
+  const doc = await PDFDocument.create();
+  doc.setTitle(`Lønnslipp ${l.periodeTekst} ${rens(l.ansatt.navn)}`);
+  doc.setCreator('Rettført');
+  const reg = await doc.embedFont(StandardFonts.Helvetica);
+  const fet = await doc.embedFont(StandardFonts.HelveticaBold);
+  const side = doc.addPage([595.28, 841.89]);
+  const V = 50, H = 545;
+  let y = 790;
+  const tekst = (t: string, x: number, yy: number, o: { font?: PDFFont; size?: number; farge?: ReturnType<typeof rgb>; hoyre?: boolean } = {}) => {
+    const font = o.font ?? reg, size = o.size ?? 10, s = rens(t);
+    side.drawText(s, { x: o.hoyre ? x - font.widthOfTextAtSize(s, size) : x, y: yy, font, size, color: o.farge ?? BLA });
+  };
+  const f = l.foretak;
+  tekst(f.navn, V, y, { font: fet, size: 14 });
+  [[f.adresse, [f.postnr, f.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', '), f.orgnr ? `Org.nr ${formaterOrgnr(f.orgnr)}` : ''].filter(Boolean)
+    .forEach((t, i) => tekst(t, V, y - 16 - i * 13, { size: 9.5, farge: MUT }));
+  tekst('Lønnslipp', H, y, { font: fet, size: 20, hoyre: true });
+  tekst(l.periodeTekst, H, y - 20, { size: 9.5, farge: MUT, hoyre: true });
+  tekst(`Utbetalt ${nd(l.utbetalt)}`, H, y - 33, { size: 9.5, farge: MUT, hoyre: true });
+  y -= 80;
+  tekst('TIL', V, y, { size: 8, farge: MUT, font: fet });
+  tekst(l.ansatt.navn, V, y - 14, { font: fet, size: 11 });
+  const info = [l.ansatt.stilling, l.ansatt.kontonr ? `Konto ${formaterKontonr(l.ansatt.kontonr)}` : ''].filter(Boolean).join('  ·  ');
+  if (info) tekst(info, V, y - 28, { size: 9.5, farge: MUT });
+  y -= 60;
+  tekst('Beskrivelse', V, y, { size: 8.5, farge: MUT });
+  tekst('Beløp', H, y, { size: 8.5, farge: MUT, hoyre: true });
+  side.drawLine({ start: { x: V, y: y - 5 }, end: { x: H, y: y - 5 }, thickness: 0.7, color: LINJE });
+  y -= 22;
+  const rad = (t: string, b: string) => { tekst(t, V, y); tekst(b, H, y, { hoyre: true }); y -= 8; side.drawLine({ start: { x: V, y }, end: { x: H, y }, thickness: 0.4, color: LINJE }); y -= 14; };
+  for (const x of l.linjer) rad(`${x.tekst}${x.antall != null ? `  ·  ${String(x.antall).replace('.', ',')} t à ${kr(x.sats ?? 0)}` : ''}`, kr(x.belop));
+  rad('Sum brutto', kr(l.brutto));
+  rad(`Skattetrekk ${String(l.skatteprosent).replace('.', ',')} %`, `-${kr(l.skatt)}`);
+  y -= 4;
+  tekst('Utbetalt', V, y, { font: fet, size: 12 });
+  tekst(`${kr(l.netto)} kr`, H, y, { font: fet, size: 12, hoyre: true });
+  y -= 28;
+  tekst(`Feriepenger opptjent denne måneden: ${kr(l.feriepenger)} kr (${String(l.feriePst).replace('.', ',')} %). De utbetales etter reglene i ferieloven.`, V, y, { size: 9, farge: MUT });
+  tekst('Spørsmål om lønnen? Kontakt arbeidsgiveren din.', V, 90, { size: 9, farge: MUT });
+  return doc.save();
+}

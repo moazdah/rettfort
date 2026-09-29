@@ -24,6 +24,8 @@ import { harAssistent, erTestbruker } from '@/lib/pakker';
 import { nyHemmelighet, sjekkTotp, otpauthUri } from '@/lib/totp';
 import QRCode from 'qrcode';
 import { lagTestfirma, TESTFIRMA_ORGNR } from '@/lib/db/eksempel';
+import { gyldigFnr, planleggUtsending, sendForfalte, apneLonnslipp, type SendNar } from '@/lib/tjenester/lonnslipp';
+import type { LonnslippPdfData } from '@/lib/pdf';
 import { kr } from '@/lib/penger';
 
 async function settCookie(token: string) {
@@ -463,7 +465,7 @@ export async function lagreLonnsoppsett(v: { ferie: number; lonningsdag: number;
   });
 }
 
-export async function lagreAnsatt(a: { id?: string; navn: string; epost?: string; stilling?: string; lonnType: 'fast' | 'time' | 'provisjon'; manedslonn: number; timesats: number; skatteprosent: number; kontonr?: string; startdato?: string; provisjonProsent?: number; overtidProsent?: number; stillingsprosent?: number; fasteTillegg?: { tekst: string; belop: number; feriepengegrunnlag?: boolean }[] }): Promise<Resultat> {
+export async function lagreAnsatt(a: { id?: string; navn: string; epost?: string; stilling?: string; lonnType: 'fast' | 'time' | 'provisjon'; manedslonn: number; timesats: number; skatteprosent: number; kontonr?: string; startdato?: string; provisjonProsent?: number; overtidProsent?: number; stillingsprosent?: number; fasteTillegg?: { tekst: string; belop: number; feriepengegrunnlag?: boolean }[]; passordType?: 'fnr' | 'eget' | 'ingen'; passord?: string }): Promise<Resultat> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     if (!a.navn.trim()) throw new RegnskapsFeil('Skriv navnet til den ansatte.');
@@ -475,24 +477,51 @@ export async function lagreAnsatt(a: { id?: string; navn: string; epost?: string
     if (a.lonnType === 'provisjon' && !(prov > 0 && prov <= 100)) throw new RegnskapsFeil('Provisjonen må være mellom 0 og 100 prosent.');
     if (!(ot >= 0 && ot <= 200)) throw new RegnskapsFeil('Overtidstillegget må være mellom 0 og 200 prosent.');
     if (!(st > 0 && st <= 100)) throw new RegnskapsFeil('Stillingsprosenten må være mellom 1 og 100.');
+    const p = a.passordType && a.passordType !== 'ingen' && a.passord?.trim() ? (a.passordType === 'fnr' ? a.passord.replace(/\s/g, '') : a.passord) : '';
+    if (p && a.passordType === 'fnr' && !gyldigFnr(p)) throw new RegnskapsFeil('Fødselsnummeret er ikke gyldig. Sjekk at alle 11 siffer er riktige.');
+    if (p && a.passordType === 'eget' && p.length < 6) throw new RegnskapsFeil('Passordet må ha minst 6 tegn.');
     const faste = (a.fasteTillegg ?? []).filter(t => t.tekst.trim() && t.belop).map(t => ({ tekst: t.tekst.trim(), belop: Math.round(t.belop), feriepengegrunnlag: t.feriepengegrunnlag !== false }));
     if (faste.some(t => t.belop < 0)) throw new RegnskapsFeil('Faste tillegg kan ikke være negative.');
     const db = await getDb();
     const v = [a.navn.trim(), a.epost || null, a.stilling || null, a.lonnType, a.lonnType === 'time' ? 0 : a.manedslonn, a.lonnType === 'time' ? a.timesats : 0, a.skatteprosent, a.kontonr || null, a.startdato || null, a.lonnType === 'provisjon' ? prov : 0, ot, st, JSON.stringify(faste)];
+    let ansattId = a.id;
     if (a.id) await db.q('update ansatt set navn=$3, epost=$4, stilling=$5, lonn_type=$6, manedslonn=$7, timesats=$8, skatteprosent=$9, kontonr=$10, startdato=$11, provisjon_prosent=$12, overtid_prosent=$13, stillingsprosent=$14, faste_tillegg=$15 where id=$1 and organisasjon_id=$2', [a.id, s.org.id, ...v]);
-    else await db.q('insert into ansatt (organisasjon_id, navn, epost, stilling, lonn_type, manedslonn, timesats, skatteprosent, kontonr, startdato, provisjon_prosent, overtid_prosent, stillingsprosent, faste_tillegg) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)', [s.org.id, ...v]);
+    else ansattId = (await db.en<{ id: string }>('insert into ansatt (organisasjon_id, navn, epost, stilling, lonn_type, manedslonn, timesats, skatteprosent, kontonr, startdato, provisjon_prosent, overtid_prosent, stillingsprosent, faste_tillegg) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) returning id', [s.org.id, ...v]))!.id;
+    // Passord på lønnslippen: bare lagret som hash. Tomt felt ved endring betyr «behold det som er satt».
+    if (a.passordType === 'ingen') {
+      await db.q('update ansatt set slipp_passord_hash = null, slipp_passord_type = null where id = $1 and organisasjon_id = $2', [ansattId, s.org.id]);
+    } else if (a.passordType && p) {
+      await db.q('update ansatt set slipp_passord_hash = $3, slipp_passord_type = $4 where id = $1 and organisasjon_id = $2', [ansattId, s.org.id, await hashPassord(p), a.passordType]);
+    }
     revalidatePath('/lonn');
   }, 'Den ansatte er lagret.');
 }
 
-export async function kjorLonnHandling(periode: string, dato: string, input: LonnInput[]): Promise<Resultat<{ bilagNr: number }>> {
+export async function kjorLonnHandling(periode: string, dato: string, input: LonnInput[], sendNar: SendNar = 'utbetaling'): Promise<Resultat<{ bilagNr: number; sendt: string[]; feilet: string[]; planlagt: number; utenEpost: string[] }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    if (!['na', 'utbetaling', 'ingen'].includes(sendNar)) throw new RegnskapsFeil('Velg når lønnslippene skal sendes.');
     const db = await getDb();
-    const r = await db.tx(t => kjorLonn(t, s.org.id, periode, dato, input, s.bruker.id));
+    const r = await db.tx(async t => {
+      const k = await kjorLonn(t, s.org.id, periode, dato, input, s.bruker.id);
+      await planleggUtsending(t, k.id, sendNar, dato);
+      return k;
+    });
+    const utenEpost = (await db.q<{ navn: string }>(`select a.navn from lonnslipp s join ansatt a on a.id = s.ansatt_id where s.lonnskjoring_id = $1 and (a.epost is null or a.epost = '')`, [r.id])).map(x => x.navn);
+    const planlagt = (await db.en<{ n: number }>('select count(*)::int as n from lonnslipp where lonnskjoring_id = $1 and send_etter is not null and sendt_tid is null', [r.id]))!.n;
+    const u = sendNar === 'na' ? await sendForfalte(db, await grunnadresse(), s.org.id) : { sendt: [], feilet: [] };
     revalidatePath('/', 'layout');
-    return { bilagNr: r.bilagNr };
+    return { bilagNr: r.bilagNr, sendt: u.sendt, feilet: u.feilet, planlagt: sendNar === 'na' ? 0 : planlagt, utenEpost };
   }, 'Lønnen er kjørt og ført i regnskapet.');
+}
+
+/** Den ansatte åpner lønnslippen fra lenken i e-posten. Krever ikke innlogging, men passordet. */
+export async function apneLonnslippHandling(token: string, passord: string): Promise<Resultat<{ data: LonnslippPdfData; pdf: string }>> {
+  return trygt(async () => {
+    const db = await getDb();
+    const r = await apneLonnslipp(db, token, passord);
+    return { data: r.data, pdf: Buffer.from(r.pdf).toString('base64') };
+  });
 }
 
 // ---------- Innstillinger og regnskapsfører ----------

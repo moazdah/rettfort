@@ -8,7 +8,7 @@ import { TIMER_PER_MANED, type LonnTillegg, type LonnType } from '@/lib/tjeneste
 
 export interface AnsattData {
   id?: string; navn: string; epost: string | null; stilling: string | null; lonn_type: LonnType; manedslonn: number; timesats: number; skatteprosent: number; kontonr: string | null; startdato: string | null;
-  provisjon_prosent?: number; overtid_prosent?: number; stillingsprosent?: number; faste_tillegg?: LonnTillegg[] | string | null;
+  provisjon_prosent?: number; overtid_prosent?: number; stillingsprosent?: number; faste_tillegg?: LonnTillegg[] | string | null; slipp_passord_type?: string | null;
 }
 
 const TYPER: { k: LonnType; tittel: string; tekst: string }[] = [
@@ -32,6 +32,10 @@ export function AnsattSkjema({ a, onFerdig, ferie = 10.2, agaSats = 14.1 }: { a?
   });
   const [faste, setFaste] = useState(tilleggFra(a?.faste_tillegg).map(t => ({ tekst: t.tekst, belop: kr(t.belop), ferie: t.feriepengegrunnlag !== false })));
   const [visTillegg, setVisTillegg] = useState(tilleggFra(a?.faste_tillegg).length > 0 || Number(a?.overtid_prosent ?? 40) !== 40);
+  const harPassord = !!a?.slipp_passord_type;
+  const [pType, setPType] = useState<'fnr' | 'eget' | 'ingen'>((a?.slipp_passord_type as 'fnr' | 'eget') ?? 'fnr');
+  const [pVerdi, setPVerdi] = useState('');
+  const [endrePassord, setEndrePassord] = useState(!harPassord);
   const [feil, setFeil] = useState('');
   const [venter, setVenter] = useState(false);
   const sett = (e: Partial<typeof v>) => setV({ ...v, ...e });
@@ -45,12 +49,15 @@ export function AnsattSkjema({ a, onFerdig, ferie = 10.2, agaSats = 14.1 }: { a?
   const eksKost = Math.round(eksBrutto * (1 + ferie / 100) * (1 + agaSats / 100));
 
   const lagre = async () => {
-    setFeil(''); setVenter(true);
+    setFeil('');
+    if (v.epost.trim() && endrePassord && pType !== 'ingen' && !pVerdi.trim()) { setFeil(pType === 'fnr' ? 'Skriv fødselsnummeret til den ansatte, eller velg «Uten passord».' : 'Skriv et passord, eller velg «Uten passord».'); return; }
+    setVenter(true);
     const r = await lagreAnsatt({
       id: a?.id, navn: v.navn, epost: v.epost, stilling: v.stilling, kontonr: v.kontonr, startdato: v.startdato || undefined,
       lonnType: v.lonnType, manedslonn: v.lonnType === 'time' ? 0 : fast, timesats: v.lonnType === 'time' ? time : 0,
       skatteprosent: pst(v.skatt), provisjonProsent: v.lonnType === 'provisjon' ? pst(v.provisjon) : 0, overtidProsent: pst(v.overtid), stillingsprosent: pst(v.stillingsprosent),
       fasteTillegg: faste.map(t => ({ tekst: t.tekst, belop: tilOre(t.belop) ?? 0, feriepengegrunnlag: t.ferie })),
+      passordType: endrePassord || pType === 'ingen' ? pType : undefined, passord: endrePassord && pType !== 'ingen' ? pVerdi : undefined,
     });
     setVenter(false);
     if (!r.ok) { setFeil(r.feil); return; }
@@ -118,6 +125,33 @@ export function AnsattSkjema({ a, onFerdig, ferie = 10.2, agaSats = 14.1 }: { a?
             </div>
           ))}
           <button type="button" className="lenke" style={{ alignSelf: 'flex-start' }} onClick={() => setFaste([...faste, { tekst: '', belop: '', ferie: true }])}>+ Fast tillegg</button>
+        </>}
+      </div>
+
+      <div className="stakk" style={{ gap: 12 }}>
+        <h3 className="bolk">5. Lønnslipp på e-post</h3>
+        {!v.epost.trim() ? <p className="mut liten" style={{ margin: 0 }}>Legg inn e-posten til den ansatte over, så kan lønnslippen sendes dit.</p> : <>
+          <p className="mut liten" style={{ margin: 0 }}>Med passord får den ansatte en lenke i stedet for et vedlegg, og åpner lønnslippen med passordet. Da ligger den ikke åpent i innboksen.</p>
+          {harPassord && !endrePassord ? (
+            <div className="rad" style={{ justifyContent: 'space-between' }}>
+              <span>Beskyttet med {a?.slipp_passord_type === 'fnr' ? 'fødselsnummer' : 'eget passord'}.</span>
+              <button type="button" className="knapp hvit liten" onClick={() => setEndrePassord(true)}>Endre</button>
+            </div>
+          ) : <>
+            <div className="rad" style={{ gap: 6 }}>
+              {([['fnr', 'Fødselsnummer'], ['eget', 'Eget passord'], ['ingen', 'Uten passord']] as const).map(([k, t]) => <button type="button" key={k} className={`knapp liten ${pType === k ? '' : 'hvit'}`} onClick={() => { setPType(k); setPVerdi(''); }}>{t}</button>)}
+            </div>
+            {pType !== 'ingen' && (
+              <div className="rutenett to">
+                <label className="felt"><span>{pType === 'fnr' ? 'Fødselsnummeret til den ansatte' : 'Passord (minst 6 tegn)'}</span>
+                  <input className="inndata mono" type="password" autoComplete="new-password" inputMode={pType === 'fnr' ? 'numeric' : undefined} value={pVerdi} onChange={e => setPVerdi(e.target.value)} placeholder={pType === 'fnr' ? '11 siffer' : ''} />
+                  <span className="hint">{pType === 'fnr' ? 'Lagres bare som en kryptert kontrollverdi, aldri som tekst. Ingen kan lese det ut igjen.' : 'Gi passordet til den ansatte selv. Det lagres kryptert.'}</span>
+                </label>
+              </div>
+            )}
+            {pType === 'ingen' && <p className="varsel gul" style={{ margin: 0 }}>Lønnslippen sendes som vedlegg uten passord.</p>}
+            {harPassord && <button type="button" className="lenke liten" style={{ alignSelf: 'flex-start' }} onClick={() => { setEndrePassord(false); setPType((a?.slipp_passord_type as 'fnr' | 'eget') ?? 'fnr'); setPVerdi(''); }}>Behold det som er satt</button>}
+          </>}
         </>}
       </div>
 

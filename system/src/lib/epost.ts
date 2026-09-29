@@ -127,4 +127,17 @@ export const maler = {
       }),
     };
   },
+  lonnslipp: (o: { navn: string; foretak: string; periode: string; netto: string; utbetalt: string; lenke?: string | null; passordTekst?: string }): Mal => ({
+    emne: `Lønnslipp for ${o.periode} fra ${o.foretak}`,
+    tekst: `Hei ${o.navn}!\n\nLønnslippen din for ${o.periode} er klar.\n\nUtbetalt: ${o.netto} kr\nDato: ${o.utbetalt}\n\n${o.lenke ? `Åpne lønnslippen her:\n${o.lenke}\n\nDu trenger ${o.passordTekst ?? 'passordet'} for å åpne den.` : 'Lønnslippen ligger vedlagt som PDF.'}\n\nHar du spørsmål, svar på denne e-posten.\n\nVennlig hilsen\n${o.foretak}`,
+    html: ramme({
+      tittel: `Lønnslipp for ${o.periode}`, forhandsvisning: `${o.netto} kr utbetales ${o.utbetalt}`,
+      innhold: avsnitt(`Hei ${esc(o.navn)}! Her er lønnslippen din fra ${esc(o.foretak)}.`)
+        + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-top:1px solid ${LINJE}"><tr><td style="padding:10px 0;border-bottom:1px solid ${LINJE};font-size:14px;color:${MUT}">Utbetalt</td><td align="right" style="padding:10px 0;border-bottom:1px solid ${LINJE};font-size:20px;font-weight:700;color:${BLA};font-family:${FONT}">${esc(o.netto)} kr</td></tr><tr><td style="padding:10px 0;border-bottom:1px solid ${LINJE};font-size:14px;color:${MUT}">Dato</td><td align="right" style="padding:10px 0;border-bottom:1px solid ${LINJE};font-size:15px;font-weight:600;color:${BLA};font-family:'SFMono-Regular',Menlo,Consolas,monospace">${esc(o.utbetalt)}</td></tr></table>`
+        + (o.lenke
+          ? knapp('Åpne lønnslippen', o.lenke) + liten(`Du trenger ${esc(o.passordTekst ?? 'passordet')} for å åpne den. Lønnslippen ligger ikke i e-posten, så den er trygg selv om noen andre ser innboksen din.`)
+          : avsnitt('Lønnslippen ligger vedlagt som PDF.', 'margin:0') + liten('Har du spørsmål, svar på denne e-posten.')),
+      bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
+    }),
+  }),
 };

@@ -16,7 +16,7 @@ export default async function Lonn({ searchParams }: { searchParams: Promise<{ v
   const dag = idag();
   const sp = await searchParams;
   const o = await d.en<{ ferie_prosent: number; lonningsdag: number | null; otp: string | null; aga_sone: string; navn: string; orgnr: string | null }>('select ferie_prosent, lonningsdag, otp, aga_sone, navn, orgnr from organisasjon where id = $1', [s.org.id]);
-  const ansatte = await d.q<AnsattData & { id: string }>(`select id, navn, epost, stilling, lonn_type, manedslonn, timesats, skatteprosent, kontonr, startdato::text as startdato, provisjon_prosent, overtid_prosent, stillingsprosent, faste_tillegg from ansatt where organisasjon_id = $1 and aktiv order by navn`, [s.org.id]);
+  const ansatte = await d.q<AnsattData & { id: string }>(`select id, navn, epost, stilling, lonn_type, manedslonn, timesats, skatteprosent, kontonr, startdato::text as startdato, provisjon_prosent, overtid_prosent, stillingsprosent, faste_tillegg, slipp_passord_type from ansatt where organisasjon_id = $1 and aktiv order by navn`, [s.org.id]);
   const kjoringer = await d.q<{ periode: string; utbetalingsdato: string; brutto: number; skatt: number; netto: number; aga: number; feriepenger: number; nr: number | null }>(`select l.periode, l.utbetalingsdato::text as utbetalingsdato, l.brutto, l.skatt, l.netto, l.aga, l.feriepenger, b.nr from lonnskjoring l left join bilag b on b.id = l.bilag_id where l.organisasjon_id = $1 order by l.periode desc`, [s.org.id]);
   const kjort = new Set(kjoringer.map(k => k.periode));
   // Neste måned som ikke er kjørt, fra og med denne måneden.
@@ -33,7 +33,7 @@ export default async function Lonn({ searchParams }: { searchParams: Promise<{ v
   // A-melding: tallene for valgt måned (standard: siste kjørte), per ansatt og for virksomheten.
   const amPeriode = sp.amelding && kjort.has(sp.amelding) ? sp.amelding : kjoringer[0]?.periode;
   const amKjoring = kjoringer.find(k => k.periode === amPeriode);
-  const amSlipper = amPeriode ? await d.q<{ navn: string; brutto: number; skatt: number }>(`select a.navn, ls.brutto, ls.skatt from lonnslipp ls join lonnskjoring l on l.id = ls.lonnskjoring_id join ansatt a on a.id = ls.ansatt_id where l.organisasjon_id = $1 and l.periode = $2 order by a.navn`, [s.org.id, amPeriode]) : [];
+  const amSlipper = amPeriode ? await d.q<{ id: string; navn: string; brutto: number; skatt: number; netto: number; epost: string | null; send_etter: string | null; sendt_tid: string | null; apnet_tid: string | null }>(`select a.id, a.navn, a.epost, ls.brutto, ls.skatt, ls.netto, ls.send_etter::text as send_etter, ls.sendt_tid::text as sendt_tid, ls.apnet_tid::text as apnet_tid from lonnslipp ls join lonnskjoring l on l.id = ls.lonnskjoring_id join ansatt a on a.id = ls.ansatt_id where l.organisasjon_id = $1 and l.periode = $2 order by a.navn`, [s.org.id, amPeriode]) : [];
   const sone = AGA_SONER[o?.aga_sone ?? '1'];
   const amAga = amPeriode ? await agaForKjoring(d, s.org.id, amPeriode) : 0;
   const amFrist = amPeriode ? (() => { const [y, m] = amPeriode.split('-').map(Number); return m === 12 ? `05.01.${y + 1}` : `05.${String(m + 1).padStart(2, '0')}.${y}`; })() : '';
@@ -63,6 +63,22 @@ export default async function Lonn({ searchParams }: { searchParams: Promise<{ v
               { tekst: `Arbeidsgiveravgift, sone ${o?.aga_sone ?? '1'} (${sone?.sats ?? 14.1} %)`, verdier: [{ etikett: 'Grunnlag', verdi: kr(amKjoring.brutto) }, { etikett: 'Avgift', verdi: kr(amAga) }] },
               { tekst: 'Sum forskuddstrekk for virksomheten', verdier: [{ etikett: 'Sum', verdi: kr(amKjoring.skatt) }] },
             ]} />
+        </section>
+      )}
+      {vis === 'historikk' && amKjoring && (
+        <section className="kort stakk">
+          <h2>Lønnslipper for {manedNavn(amKjoring.periode)}</h2>
+          <div className="liste">
+            {amSlipper.map(a => (
+              <div key={a.id} className="linje">
+                <div className="fyll"><div className="tittel">{a.navn}</div><div className="mut liten">
+                  {a.apnet_tid ? `Sendt og åpnet ${nd(a.apnet_tid.slice(0, 10))}` : a.sendt_tid ? `Sendt på e-post ${nd(a.sendt_tid.slice(0, 10))}` : a.send_etter ? `Sendes på e-post ${nd(a.send_etter.slice(0, 10))}` : a.epost ? 'Ikke sendt på e-post' : 'Har ikke e-post'}
+                </div></div>
+                <b className="belop">{kr(a.netto)}</b>
+                <a className="knapp hvit liten" href={`/api/lonn/slipp?periode=${amKjoring.periode}&ansatt=${a.id}`} target="_blank" rel="noreferrer">PDF</a>
+              </div>
+            ))}
+          </div>
         </section>
       )}
       {vis === 'historikk' && (
