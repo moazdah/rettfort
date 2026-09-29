@@ -215,13 +215,14 @@ export async function byttForetak(orgId: string): Promise<void> {
 
 // ---------- Kontakter ----------
 
-export async function lagreKontaktFraBrreg(e: Enhet, type: 'kunde' | 'leverandor'): Promise<Resultat<{ id: string }>> {
+export async function lagreKontaktFraBrreg(e: Enhet, type: 'kunde' | 'leverandor'): Promise<Resultat<{ id: string; epost: string | null }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     const db = await getDb();
     const id = await db.tx(t => finnEllerLagKontakt(t, s.org.id, type, e.navn, e.orgnr, { adresse: e.adresse, postnr: e.postnr, poststed: e.poststed, mvaRegistrert: e.mvaRegistrert }));
     await db.q('update kontakt set adresse = coalesce(adresse, $2), postnr = coalesce(postnr, $3), poststed = coalesce(poststed, $4), mva_registrert = $5 where id = $1', [id, e.adresse, e.postnr, e.poststed, e.mvaRegistrert]);
-    return { id };
+    const k = await db.en<{ epost: string | null }>('select epost from kontakt where id = $1', [id]);
+    return { id, epost: k?.epost ?? null };
   });
 }
 
@@ -232,6 +233,19 @@ export async function lagreKontakt(k: { navn: string; adresse?: string; postnr?:
     const db = await getDb();
     const id = await db.tx(t => finnEllerLagKontakt(t, s.org.id, k.type, k.navn, null, { adresse: k.adresse, postnr: k.postnr, poststed: k.poststed, epost: k.epost }));
     return { id };
+  });
+}
+
+/** Endrer e-posten fakturaer sendes til for en kunde. */
+export async function settKontaktEpost(id: string, epost: string): Promise<Resultat<{ epost: string | null }>> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const e = epost.trim().toLowerCase();
+    if (e && !gyldigEpost(e)) throw new RegnskapsFeil('E-postadressen ser ikke riktig ut.');
+    const db = await getDb();
+    const r = await db.en<{ id: string }>('update kontakt set epost = $3 where id = $1 and organisasjon_id = $2 returning id', [id, s.org.id, e || null]);
+    if (!r) throw new RegnskapsFeil('Fant ikke kunden.');
+    return { epost: e || null };
   });
 }
 

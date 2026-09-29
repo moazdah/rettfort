@@ -10,7 +10,11 @@ export default async function NyFaktura({ searchParams }: { searchParams: Promis
   const d = await db();
   const sp = await searchParams;
   const org = await hentOrg(d, s.org.id) as Awaited<ReturnType<typeof hentOrg>> & { faktura_tekst: string | null };
-  const kunder = await d.q<Kontakt>(`select * from kontakt where organisasjon_id = $1 and type in ('kunde','begge') order by navn`, [s.org.id]);
+  // Kundene med den sist fakturerte først, så de vanligste ligger øverst.
+  const kunder = await d.q<Kontakt & { siste: string | null; antall: number }>(
+    `select k.*, f.siste, coalesce(f.antall, 0)::int as antall from kontakt k
+     left join (select kontakt_id, max(dato)::text as siste, count(*) as antall from faktura where organisasjon_id = $1 and status <> 'utkast' group by kontakt_id) f on f.kontakt_id = k.id
+     where k.organisasjon_id = $1 and k.type in ('kunde','begge') order by f.siste desc nulls last, k.navn`, [s.org.id]);
   let start: SalgStart | undefined;
   const kildeId = sp.utkast ?? sp.kopi ?? sp.tilbud;
   if (kildeId && /^[0-9a-f-]{36}$/.test(kildeId)) {

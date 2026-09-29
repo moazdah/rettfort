@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { BrregSok } from '@/components/BrregSok';
 import { Maskot } from '@/components/Logo';
 import { FakturaDokument, type DokAvsender } from '@/components/FakturaDokument';
-import { lagreKontaktFraBrreg, lagreKontakt, lagreUtkastSalg, sendSalgHandling, lagreInnstillinger } from '@/app/handlinger';
+import { lagreKontaktFraBrreg, lagreKontakt, lagreUtkastSalg, sendSalgHandling, lagreInnstillinger, settKontaktEpost } from '@/app/handlinger';
 import { mangler, forfallFra, type Kontakt, type Org, type SalgType } from '@/lib/tjenester/faktura';
 import { fakturaSummer, type FakturaLinje } from '@/lib/hovedbok';
 import { formaterOrgnr, type Enhet } from '@/lib/brreg';
@@ -23,9 +23,25 @@ const TYPER: [SalgType, string, string][] = [
   ['kvittering', 'Kvittering', 'Kunden har betalt nå, for eksempel med Vipps eller kort. Føres som betalt.'],
 ];
 
+export type KundeValg = Kontakt & { siste?: string | null; antall?: number };
+const initialer = (n: string) => n.replace(/\b(AS|ASA|ANS|DA|ENK|SA)\b/g, '').trim().split(/\s+/).map(x => x[0]).slice(0, 2).join('').toUpperCase();
+const datoKort = (d: string) => d.split('-').reverse().join('.');
+
+/** Én rad i kundelisten: kort info til venstre, når du sist fakturerte til høyre. */
+function KundeRad({ k, onVelg }: { k: KundeValg; onVelg: () => void }) {
+  const info = [k.orgnr ? `Org.nr ${formaterOrgnr(k.orgnr)}` : 'Privatperson', k.poststed, k.epost].filter(Boolean).join(' · ');
+  return (
+    <button type="button" className="linje kunde-rad" onClick={onVelg}>
+      <span className={`avatar ${k.orgnr ? '' : 'privat'}`} aria-hidden>{initialer(k.navn) || '?'}</span>
+      <span className="fyll"><span className="tittel">{k.navn}</span><span className="mut liten kunde-info">{info}</span>{k.siste && <span className="faint liten kunde-siste-mobil">Sist fakturert {datoKort(k.siste)}</span>}</span>
+      <span className="mut liten kunde-siste">{k.siste ? <>Sist {datoKort(k.siste)}<br />{k.antall} {k.antall === 1 ? 'faktura' : 'fakturaer'}</> : 'Ikke fakturert'}</span>
+    </button>
+  );
+}
+
 const tilLinje = (l: FakturaLinje): Linje => ({ beskrivelse: l.beskrivelse, antall: antallTekst(l.antallMilli), pris: kr(l.pris), sats: l.sats, konto: l.konto });
 
-export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org & { faktura_tekst: string | null }; kunder: Kontakt[]; start?: SalgStart; idag: string; videre: Videre[] }) {
+export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org & { faktura_tekst: string | null }; kunder: KundeValg[]; start?: SalgStart; idag: string; videre: Videre[] }) {
   const router = useRouter();
   const [type, setType] = useState<SalgType>(start?.type ?? 'faktura');
   const [kunde, setKunde] = useState<Kontakt | null>(start?.kunde ?? null);
@@ -47,6 +63,18 @@ export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org &
   const [venter, setVenter] = useState(false);
   const [sendt, setSendt] = useState<{ id: string; nr: number; kid: string | null; epostTil: string | null } | null>(null);
   const [soker, setSoker] = useState(false);
+  const [sok, setSok] = useState('');
+  const [alle, setAlle] = useState(false);
+  const [epostFelt, setEpostFelt] = useState<string | null>(null);
+  const q = sok.trim().toLowerCase();
+  const egne = q ? kunder.filter(k => [k.navn, k.orgnr ?? '', k.epost ?? '', k.poststed ?? ''].some(v => v.toLowerCase().includes(q) || v.replace(/\s/g, '').includes(q.replace(/\s/g, '')))) : kunder;
+  const synlige = q || alle ? egne : egne.slice(0, 4);
+  const lagreEpost = async () => {
+    if (!kunde || epostFelt == null) return;
+    const r = await settKontaktEpost(kunde.id, epostFelt);
+    if (!r.ok) { setFeil(r.feil); return; }
+    setKunde({ ...kunde, epost: r.data!.epost }); setEpostFelt(null); setFeil('');
+  };
 
   const fl: FakturaLinje[] = useMemo(() => linjer.map(l => ({ beskrivelse: l.beskrivelse, antallMilli: tilMilli(l.antall), pris: tilOre(l.pris) ?? 0, sats: org.mva_registrert ? l.sats : 0, konto: l.konto })), [linjer, org.mva_registrert]);
   const sum = fakturaSummer(fl.filter(l => l.beskrivelse.trim() || l.pris), org.mva_registrert);
@@ -62,7 +90,7 @@ export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org &
     const r = await lagreKontaktFraBrreg(e, 'kunde');
     setSoker(false);
     if (!r.ok) { setFeil(r.feil); return; }
-    setKunde({ id: r.data!.id, navn: e.navn, orgnr: e.orgnr, adresse: e.adresse, postnr: e.postnr, poststed: e.poststed, epost: null, kundenr: null });
+    setKunde({ id: r.data!.id, navn: e.navn, orgnr: e.orgnr, adresse: e.adresse, postnr: e.postnr, poststed: e.poststed, epost: r.data!.epost, kundenr: null });
   };
   const lagreManuell = async () => {
     const r = await lagreKontakt({ ...mk, type: 'kunde' });
@@ -130,24 +158,32 @@ export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org &
           <h2>{type === 'tilbud' ? 'Hvem er tilbudet til?' : 'Hvem skal betale?'}</h2>
           {!kunde && !manuell && (
             <>
-              <BrregSok onVelg={velgEnhet} autoFocus={!start} />
+              <BrregSok onVelg={velgEnhet} autoFocus={!start} onSok={setSok} plassholder="Søk etter kunde, navn eller org.nr" treffTittel="Fra Brønnøysund"
+                over={synlige.length > 0 ? (
+                  <div style={{ marginTop: 12 }}>
+                    <div className="rad" style={{ justifyContent: 'space-between' }}>
+                      <span className="stikk mut">{q ? 'Dine kunder' : 'Siste kunder'}</span>
+                      {!q && kunder.length > 4 && <button type="button" className="lenke liten" onClick={() => setAlle(!alle)}>{alle ? 'Vis færre' : `Vis alle (${kunder.length})`}</button>}
+                    </div>
+                    <div className={`liste kunde-liste ${alle || q ? 'rull' : ''}`} style={{ marginTop: 8 }}>
+                      {synlige.map(k => <KundeRad key={k.id} k={k} onVelg={() => { setKunde(k); setSok(''); setAlle(false); }} />)}
+                    </div>
+                  </div>
+                ) : null} />
               {soker && <span className="mut liten">Henter …</span>}
-              {kunder.length > 0 && (
-                <div className="stakk" style={{ gap: 6 }}>
-                  <span className="stikk mut">Tidligere kunder</span>
-                  <div className="rad" style={{ gap: 6 }}>{kunder.slice(0, 8).map(k => <button type="button" key={k.id} className="knapp hvit liten" onClick={() => setKunde(k)}>{k.navn}</button>)}</div>
-                </div>
-              )}
-              <button type="button" className="lenke" style={{ alignSelf: 'flex-start' }} onClick={() => setManuell(true)}>Privatperson eller utenlandsk kunde</button>
+              <div className="rad" style={{ gap: 8 }}>
+                <button type="button" className="knapp hvit liten" onClick={() => setManuell(true)}>+ Privatperson</button>
+                <button type="button" className="knapp hvit liten" onClick={() => setManuell(true)}>+ Utenlandsk kunde</button>
+              </div>
             </>
           )}
           {manuell && !kunde && (
             <div className="stakk">
-              <label className="felt"><span>Navn</span><input className="inndata" value={mk.navn} onChange={e => setMk({ ...mk, navn: e.target.value })} autoFocus /></label>
+              <label className="felt"><span>Fullt navn</span><input className="inndata" value={mk.navn} onChange={e => setMk({ ...mk, navn: e.target.value })} autoFocus /></label>
               <label className="felt"><span>Adresse</span><input className="inndata" value={mk.adresse} onChange={e => setMk({ ...mk, adresse: e.target.value })} /></label>
               <div className="rutenett to"><label className="felt"><span>Postnr</span><input className="inndata" value={mk.postnr} onChange={e => setMk({ ...mk, postnr: e.target.value })} /></label><label className="felt"><span>Sted</span><input className="inndata" value={mk.poststed} onChange={e => setMk({ ...mk, poststed: e.target.value })} /></label></div>
-              <label className="felt"><span>E-post (valgfritt)</span><input className="inndata" type="email" value={mk.epost} onChange={e => setMk({ ...mk, epost: e.target.value })} /></label>
-              <div className="rad"><button type="button" className="knapp liten" onClick={lagreManuell}>Bruk kunden</button><button type="button" className="lenke" onClick={() => setManuell(false)}>Søk i Brønnøysund i stedet</button></div>
+              <label className="felt"><span>E-post, så sendes fakturaen automatisk</span><input className="inndata" type="email" value={mk.epost} onChange={e => setMk({ ...mk, epost: e.target.value })} /></label>
+              <div className="rad"><button type="button" className="knapp liten" onClick={lagreManuell}>Bruk kunden</button><button type="button" className="lenke" onClick={() => setManuell(false)}>Tilbake</button></div>
             </div>
           )}
           {kunde && (
@@ -155,10 +191,20 @@ export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org &
               <div style={{ flex: 1 }}>
                 <b>{kunde.navn}</b>
                 <div className="mut liten">{[kunde.adresse, [kunde.postnr, kunde.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', ')}{kunde.orgnr ? ` · org.nr ${formaterOrgnr(kunde.orgnr)}` : ''}</div>
-                {kunde.epost && <div className="mut liten">Sendes til {kunde.epost}</div>}
+                {epostFelt == null ? (
+                  kunde.epost
+                    ? <div className="mut liten">Sendes på e-post til <b>{kunde.epost}</b> · <button type="button" className="lenke liten" onClick={() => setEpostFelt(kunde.epost ?? '')}>Endre</button></div>
+                    : <div className="liten"><span className="mut">Ingen e-post, så du må sende PDF-en selv.</span> <button type="button" className="lenke liten" onClick={() => setEpostFelt('')}>Legg til e-post</button></div>
+                ) : (
+                  <div className="rad" style={{ marginTop: 8, flexWrap: 'nowrap' }}>
+                    <input className="inndata" type="email" value={epostFelt} onChange={e => setEpostFelt(e.target.value)} placeholder="faktura@kunde.no" autoFocus onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); lagreEpost(); } }} />
+                    <button type="button" className="knapp liten" onClick={lagreEpost}>Lagre</button>
+                    <button type="button" className="lenke liten" onClick={() => setEpostFelt(null)}>Avbryt</button>
+                  </div>
+                )}
                 {kunde.orgnr && <div className="faint liten">Hentet fra Brønnøysund</div>}
               </div>
-              <button type="button" className="knapp hvit liten" onClick={() => setKunde(null)}>Bytt</button>
+              <button type="button" className="knapp hvit liten" onClick={() => { setKunde(null); setEpostFelt(null); }}>Bytt</button>
             </div>
           )}
           {forslag.map(v => (

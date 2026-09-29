@@ -251,3 +251,17 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
 .utfylling-verdi small { font-size: 11px; color: var(--mut); }
 .utfylling-verdi b { font-size: 14.5px; }
 @media (max-width: 900px) { .utfylling-rad { flex-wrap: wrap; } .utfylling-verdier { width: 100%; justify-content: flex-end; } }
+
+/* Kundevelger på ny faktura */
+.kunde-liste > .kunde-rad { width: 100%; border: 0; background: none; text-align: left; cursor: pointer; font: inherit; color: var(--ink); padding: 12px 16px; }
+.kunde-liste > .kunde-rad + .kunde-rad { border-top: 1px solid var(--linje-3); }
+.kunde-liste > .kunde-rad:hover { background: var(--kort-2); }
+.kunde-liste.rull { max-height: 340px; overflow-y: auto; }
+.kunde-rad .fyll { display: flex; flex-direction: column; gap: 2px; }
+.kunde-info { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kunde-siste { text-align: right; flex-shrink: 0; line-height: 1.35; }
+.avatar.privat { background: var(--gul); color: var(--ink); }
+.rutenett.delt > * { min-width: 0; }
+.kunde-rad .fyll { min-width: 0; }
+.kunde-siste-mobil { display: none; }
+@media (max-width: 560px) { .kunde-siste { display: none; } .kunde-siste-mobil { display: block; } .kunde-liste > .kunde-rad { padding: 12px 14px; gap: 12px; } }
