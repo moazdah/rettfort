@@ -18,6 +18,7 @@ a:hover{color:#16345E;}
 button{font-family:inherit;cursor:pointer;}
 input,textarea,select{font-family:inherit;}
 :focus-visible{outline:2px solid #0B2545;outline-offset:2px;}
+@keyframes rfTourPulse{0%{box-shadow:0 0 0 0 rgba(246,223,110,.7)}70%{box-shadow:0 0 0 14px rgba(246,223,110,0)}100%{box-shadow:0 0 0 0 rgba(246,223,110,0)}}
 @keyframes rfScanLine{0%{top:0}100%{top:100%}}
 @keyframes rfIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important;}}
@@ -1357,12 +1358,27 @@ input,textarea,select{font-family:inherit;}
     </sc-if>
 
     <sc-if value="{{ tourOn }}" hint-placeholder-val="{{ false }}">
-      <div style="position:fixed;right:24px;bottom:24px;z-index:80;width:min(380px,calc(100vw - 48px));background:#0B2545;color:#fff;border-radius:18px;padding:20px 22px;box-shadow:0 24px 60px -20px rgba(11,37,69,.6);display:flex;flex-direction:column;gap:10px">
-        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600;letter-spacing:.06em;color:#F6DF6E">DEMO · {{ tourNr }} AV {{ tourAnt }}</span><button onClick="{{ tourSlutt }}" style="border:none;background:none;color:#fff;opacity:.7;font-size:13px;padding:0;cursor:pointer">Avslutt</button></div>
-        <div style="font-size:19px;font-weight:600;letter-spacing:-0.01em">{{ tourT }}</div>
-        <div style="font-size:14px;line-height:1.5;opacity:.88">{{ tourTxt }}</div>
-        <div style="display:flex;gap:4px"><sc-for list="{{ tourPrikker }}" as="p" hint-placeholder-count="8"><span style="flex:1;height:4px;border-radius:99px;background:{{ p.c }}"></span></sc-for></div>
-        <div style="display:flex;justify-content:space-between;gap:10px;margin-top:4px"><button onClick="{{ tourForrige }}" style="height:40px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:14px;opacity:{{ tourForrigeOp }};cursor:pointer">Tilbake</button><button onClick="{{ tourNeste }}" style="height:40px;padding:0 18px;border-radius:10px;border:none;background:#F6DF6E;color:#0B2545;font-size:14px;font-weight:600;cursor:pointer">{{ tourNesteLbl }}</button></div>
+      <div onClick="{{ tourNeste }}" style="position:fixed;inset:0;z-index:84;cursor:pointer"></div>
+      <div style="position:fixed;z-index:85;left:{{ tRect.x }}px;top:{{ tRect.y }}px;width:{{ tRect.w }}px;height:{{ tRect.h }}px;border-radius:16px;box-shadow:0 0 0 9999px rgba(11,37,69,.55),0 0 0 3px #F6DF6E;transition:{{ tTr }};opacity:{{ tRect.o }};pointer-events:none"></div>
+      <div style="position:fixed;z-index:85;left:{{ tRect.x }}px;top:{{ tRect.y }}px;width:{{ tRect.w }}px;height:{{ tRect.h }}px;border-radius:16px;border:2px solid #F6DF6E;transition:{{ tTr }};opacity:{{ tRect.o }};pointer-events:none;animation:rfTourPulse 1.8s ease-out infinite"></div>
+      <div style="position:fixed;z-index:86;left:{{ tBub.x }}px;top:{{ tBub.y }}px;width:360px;max-width:calc(100vw - 32px);background:#fff;color:#0B2545;border-radius:18px;box-shadow:0 30px 60px -24px rgba(11,37,69,.6);overflow:hidden;transition:{{ tTr }};opacity:{{ tRect.o }}">
+        <div style="display:flex;gap:4px;padding:14px 18px 0">
+          <sc-for list="{{ tChaps }}" as="c" hint-placeholder-count="7"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px"><span style="height:4px;border-radius:99px;background:#EFEBE2;overflow:hidden;display:block"><span style="display:block;height:100%;width:{{ c.w }};background:#0B2545;transition:{{ c.tr }}"></span></span><span style="font-size:10.5px;font-weight:{{ c.fw }};color:{{ c.fg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.l }}</span></div></sc-for>
+        </div>
+        <div style="padding:14px 18px 16px;display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <img src="assets/mascot-hip.png" alt="" style="width:34px;height:auto;flex:none;margin-top:2px">
+            <div style="min-width:0"><div style="font-size:18px;font-weight:600;letter-spacing:-0.02em;line-height:1.2">{{ tourT }}</div><div style="font-size:14.5px;line-height:1.5;color:#3D4759;margin-top:6px;text-wrap:pretty">{{ tourTxt }}</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+            <button onClick="{{ tourSlutt }}" style="border:0;background:none;padding:0;font-size:13px;color:#8A909C;cursor:pointer">Avslutt</button>
+            <button onClick="{{ tourPause }}" style="border:0;background:none;padding:0;font-size:13px;color:#586174;cursor:pointer">{{ tourPauseLbl }}</button>
+            <span style="flex:1"></span>
+            <span style="font-size:12px;color:#8A909C;font-variant-numeric:tabular-nums">{{ tourNr }} / {{ tourAnt }}</span>
+            <button onClick="{{ tourForrige }}" style="height:36px;width:36px;border-radius:10px;border:1px solid #D9D3C6;background:#fff;color:#0B2545;font-size:15px;opacity:{{ tourForrigeOp }};cursor:pointer">←</button>
+            <button onClick="{{ tourNeste }}" style="height:36px;padding:0 16px;border-radius:10px;border:none;background:#0B2545;color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ tourNesteLbl }}</button>
+          </div>
+        </div>
       </div>
     </sc-if>
 
@@ -1669,33 +1685,81 @@ class Component extends DCLogic {
     };
   }
   TOUR = [
-    ['hjem', 'Dette er Hjem', 'Kari driver Havøy Fisk AS. Her ser hun hva som skjer i dag: frister, hva som mangler og det som sist er ført.'],
-    ['kjop', 'Kvitteringen leses av seg selv', 'Kari tar bilde av kvitteringen. Feltene fylles ut, konto foreslås, og kontrollen sjekker sum, leverandør og duplikater før noe føres.'],
-    ['faktura', 'Faktura på to minutter', 'Kunden hentes fra Brønnøysund. KID, forfall og alt loven krever kommer med. Kunden ser fakturaen til høyre mens du skriver.'],
-    ['bank', 'Banken stemmer av seg selv', 'Kari laster opp kontoutskriften. 4 av 6 bevegelser matches med kjøp og fakturaer. De 2 siste spør vi henne om, med enkle valg.'],
-    ['lonn', 'Lønn uten ekstra pris', 'Lønnslipp, overtid, feriepenger og utlegg. Skattetrekk og arbeidsgiveravgift regnes ut og havner på Frister.'],
-    ['rapp', 'Tallene forklart', 'Tjener jeg penger? Hva har jeg? Hva skylder jeg? Tre svar øverst, og tabellene for regnskapsføreren nederst.'],
-    ['mva', 'MVA klar til sending', 'Rettført viser hva som må ordnes før MVA-meldingen kan sendes, og hvor mye som skal betales.'],
-    ['rf', 'Regnskapsføreren er med', 'Kari kan invitere regnskapsføreren sin. Byrået ser Havøy Fisk i sin arbeidsliste, med de samme tallene.']
+    { scr: 'hjem', ch: 0, a: 'h2:Neste frist', t: 'Dette er Hjem', x: 'Kari driver Havøy Fisk AS. Her ser hun neste frist og hva som mangler, uten å lete.' },
+    { scr: 'hjem', ch: 0, a: 'h2:Send kvitteringer på e-post', t: 'Kvitteringer på e-post', x: 'Alle bedrifter får en egen adresse. Videresend kvitteringen, så havner den under Penger ut.' },
+    { scr: 'kjop', ch: 1, a: '[data-screen-label="02 Nytt kjøp"]', a2: [[3800, 'h2:Dette ble lest']], dur: 9000, t: 'Kvitteringen leses', x: 'Kari tar bilde av kvitteringen. Rettført leser leverandør, dato, beløp og MVA og fyller ut feltene selv.' },
+    { scr: 'kjop', ch: 1, a: 'h2:Kontroll før du registrerer', t: 'Sjekket før det føres', x: 'Summen, leverandøren og duplikater sjekkes før noe havner i regnskapet. Er noe feil, får hun beskjed her.' },
+    { scr: 'faktura', ch: 2, a: 'h2:Hva skal de betale for?', t: 'Faktura på to minutter', x: 'Kunden er hentet fra Brønnøysund. Kari skriver hva de skal betale for, og MVA regnes ut.' },
+    { scr: 'faktura', ch: 2, a: 'h2:Din info på', t: 'Alt loven krever er med', x: 'Logo, kontonummer, KID og forfall legges på av seg selv. Det kan endres for hver faktura.' },
+    { scr: 'bank', ch: 3, a: '[data-screen-label="09 Bank"] section', dur: 8000, t: 'Banken stemmer av seg selv', x: 'Kari laster opp kontoutskriften. Rettført finner kjøp og fakturaer som passer, og spør bare om resten.' },
+    { scr: 'lonn', ch: 4, a: '[data-screen-label="08 Lønn"] section', t: 'Lønn uten ekstra pris', x: 'Lønnslipp, overtid, feriepenger og utlegg. Skattetrekk og arbeidsgiveravgift havner på Frister.' },
+    { scr: 'rapp', ch: 5, a: 'h2:Hva pengene kommer fra og går til', t: 'Tallene forklart', x: 'Hvor pengene kommer fra og går til, på vanlig norsk. Tabellene for regnskapsføreren ligger lenger ned.' },
+    { scr: 'mva', ch: 5, a: '[data-screen-label="04 MVA"] section', t: 'MVA klar til sending', x: 'Rettført viser hva som må ordnes før meldingen kan sendes, og hvor mye som skal betales.' },
+    { scr: 'rf', ch: 6, a: '[data-screen-label="07 Regnskapsfører"] section', t: 'Regnskapsføreren er med', x: 'Kari inviterer regnskapsføreren sin. Byrået ser Havøy Fisk i sin arbeidsliste, med de samme tallene.' }
   ];
+  CHAPS = ['Hjem', 'Kjøp', 'Faktura', 'Bank', 'Lønn', 'Tall', 'Byrå'];
+  tFind(spec) {
+    if (!spec) return null;
+    if (spec.startsWith('h2:')) { const t = spec.slice(3); const h = [...document.querySelectorAll('h2')].find(e => e.textContent.trim().startsWith(t) && e.offsetParent); return h ? (h.closest('section') || h.parentElement) : null; }
+    return [...document.querySelectorAll(spec)].find(e => e.offsetParent) || null;
+  }
+  tClear() { (this.tTs || []).forEach(clearTimeout); this.tTs = []; clearInterval(this.tAuto); }
   tourGo(i) {
-    const st = this.TOUR[i]; if (!st) { this.setState({ tour: null }); return; }
+    const st = this.TOUR[i]; this.tClear();
+    if (!st) { this.setState({ tour: null, tRect: null }); return; }
+    const prev = this.state.tour != null ? this.TOUR[this.state.tour] : null;
     const extra = {};
-    if (st[0] === 'kjop') { extra.kStage = 'tom'; }
-    if (st[0] === 'faktura') { Object.assign(extra, { fListe: false, fSendt: false, fType: 'faktura', kunde: this.BRREG.find(b => b.n.startsWith('Kvam')) || null, linjer: [{ t: 'Konsulenttimer september', a: '12', p: '1150', m: '25' }] }); }
-    if (st[0] === 'bank') { Object.assign(extra, { bStage: 'klar', bValg: {}, bLukket: false }); }
-    this.setState({ tour: i, scr: st[0], det: null, ...extra });
-    try { window.scrollTo(0, 0); } catch (e) {}
-    if (st[0] === 'kjop') setTimeout(() => { if (this.state.tour === i) this.startKjop(); }, 500);
+    if (st.scr === 'kjop' && !(prev && prev.scr === 'kjop')) extra.kStage = 'tom';
+    if (st.scr === 'faktura' && !(prev && prev.scr === 'faktura')) Object.assign(extra, { fListe: false, fSendt: false, fType: 'faktura', kunde: this.BRREG.find(b => b.n.startsWith('Kvam')) || null, linjer: [{ t: 'Konsulenttimer september', a: '12', p: '1150', m: '25' }] });
+    if (st.scr === 'bank') Object.assign(extra, { bStage: 'tom', bValg: {}, bLukket: false });
+    const changed = this.state.scr !== st.scr;
+    this.setState({ tour: i, tSpec: st.a, tT0: Date.now(), scr: st.scr, det: null, ...extra });
+    if (changed) { try { window.scrollTo({ top: 0 }); } catch (e) {} }
+    const T = this.tTs;
+    if (st.scr === 'kjop' && extra.kStage === 'tom') T.push(setTimeout(() => this.startKjop(), 700));
+    if (st.scr === 'bank') T.push(setTimeout(() => { try { this.bankRender().bStart(); } catch (e) {} }, 900));
+    (st.a2 || []).forEach(([ms, spec]) => T.push(setTimeout(() => { this.setState({ tSpec: spec }); this.tScroll(); }, ms)));
+    T.push(setTimeout(() => this.tScroll(), changed ? 260 : 60));
+    if (!this.state.tPaused) this.tArm(st.dur || 6500);
+  }
+  tArm(ms) { clearInterval(this.tAuto); this.tDur = ms; this.setState({ tT0: Date.now() }); this.tAuto = setInterval(() => { if (this.state.tPaused || this.state.tour == null) return; const el = Date.now() - this.state.tT0; this.setState({ tEl: el }); if (el >= this.tDur) { clearInterval(this.tAuto); const n = this.state.tour + 1; n < this.TOUR.length ? this.tourGo(n) : this.tourEnd(); } }, 100); }
+  tourEnd() { this.tClear(); this.setState({ tour: null, tRect: null, scr: 'hjem' }); try { window.scrollTo({ top: 0 }); } catch (e) {} this.toast('Det var demoen. Prøv selv, alt kan klikkes.'); }
+  tScroll(tries = 0) {
+    const el = this.tFind(this.state.tSpec);
+    if (!el) { if (tries < 20) this.tTs.push(setTimeout(() => this.tScroll(tries + 1), 100)); return; }
+    const r = el.getBoundingClientRect(), vh = window.innerHeight;
+    if (r.top < 80 || r.bottom > vh - 40) { try { window.scrollTo({ top: window.scrollY + r.top - Math.max(90, (vh - r.height) / 3), behavior: 'smooth' }); } catch (e) {} this.tTs.push(setTimeout(() => this.tMeasure(), 420)); }
+    this.tMeasure();
+  }
+  tMeasure() {
+    if (this.state.tour == null) return; const el = this.tFind(this.state.tSpec); if (!el) return;
+    const vw = window.innerWidth, vh = window.innerHeight, p = 8, r = el.getBoundingClientRect();
+    const x = Math.max(8, r.left - p), y = Math.max(8, r.top - p), x2 = Math.min(vw - 8, r.right + p), y2 = Math.min(vh - 8, r.bottom + p);
+    const rect = { x: Math.round(x), y: Math.round(y), w: Math.round(Math.max(40, x2 - x)), h: Math.round(Math.max(40, y2 - y)) };
+    const BW = Math.min(360, vw - 32), BH = 230, g = 18; let bx, by;
+    if (rect.x + rect.w + g + BW < vw - 12) { bx = rect.x + rect.w + g; by = rect.y; }
+    else if (rect.x - g - BW > 12) { bx = rect.x - g - BW; by = rect.y; }
+    else if (rect.y + rect.h + g + BH < vh - 12) { bx = rect.x + rect.w / 2 - BW / 2; by = rect.y + rect.h + g; }
+    else if (rect.y - g - BH > 12) { bx = rect.x + rect.w / 2 - BW / 2; by = rect.y - g - BH; }
+    else { bx = vw - BW - 24; by = vh - BH - 24; }
+    bx = Math.max(16, Math.min(vw - BW - 16, bx)); by = Math.max(16, Math.min(vh - BH - 16, by));
+    const o = this.state.tRect; if (o && o.x === rect.x && o.y === rect.y && o.w === rect.w && o.h === rect.h) return;
+    this.setState({ tRect: rect, tBub: { x: Math.round(bx), y: Math.round(by) }, tAnim: !!o });
   }
   tourVals() {
-    const t = this.state.tour, n = this.TOUR.length, st = t != null ? this.TOUR[t] : null;
+    const s = this.state, t = s.tour, n = this.TOUR.length, st = t != null ? this.TOUR[t] : null;
+    if (!this.onTR) { this.onTR = () => { cancelAnimationFrame(this.tRaf); this.tRaf = requestAnimationFrame(() => this.tMeasure()); }; window.addEventListener('resize', this.onTR); window.addEventListener('scroll', this.onTR, true); }
+    const r = s.tRect, frac = st ? Math.min(1, (s.tEl || 0) / (this.tDur || 6500)) : 0;
+    const chSteps = c => this.TOUR.map((x, i) => [x, i]).filter(([x]) => x.ch === c).map(([, i]) => i);
     return {
-      tourOn: t != null, tourStart: () => this.tourGo(0), tourSlutt: () => this.setState({ tour: null }),
-      tourNr: String((t || 0) + 1), tourAnt: String(n), tourT: st ? st[1] : '', tourTxt: st ? st[2] : '',
-      tourPrikker: this.TOUR.map((_, i) => ({ c: t != null && i <= t ? '#F6DF6E' : 'rgba(255,255,255,.2)' })),
-      tourNeste: () => t + 1 < n ? this.tourGo(t + 1) : (this.setState({ tour: null, scr: 'hjem' }), this.toast('Det var demoen. Prøv selv, alt kan klikkes.')),
-      tourNesteLbl: t != null && t + 1 >= n ? 'Ferdig' : 'Neste', tourForrige: () => t > 0 && this.tourGo(t - 1), tourForrigeOp: t > 0 ? '1' : '.4'
+      tourOn: t != null, tourStart: () => { this.setState({ tPaused: false, tRect: null, tEl: 0 }); this.tourGo(0); }, tourSlutt: () => { this.tClear(); this.setState({ tour: null, tRect: null }); },
+      tourNr: String((t || 0) + 1), tourAnt: String(n), tourT: st ? st.t : '', tourTxt: st ? st.x : '',
+      tRect: r ? { ...r, o: 1 } : { x: -9999, y: -9999, w: 0, h: 0, o: 0 }, tBub: s.tBub || { x: -9999, y: -9999 },
+      tTr: s.tAnim ? 'left .55s cubic-bezier(.65,0,.25,1),top .55s cubic-bezier(.65,0,.25,1),width .55s cubic-bezier(.65,0,.25,1),height .55s cubic-bezier(.65,0,.25,1),opacity .3s' : 'opacity .3s',
+      tChaps: this.CHAPS.map((l, c) => { const ids = chSteps(c); const done = st && ids.every(i => i < t); const cur = st && st.ch === c; const w = done ? 100 : cur ? ((ids.indexOf(t) + frac) / ids.length) * 100 : 0; return { l, w: w + '%', tr: cur ? 'width .1s linear' : 'none', fw: cur ? '600' : '400', fg: cur ? '#0B2545' : '#8A909C' }; }),
+      tourNeste: () => t + 1 < n ? this.tourGo(t + 1) : this.tourEnd(),
+      tourNesteLbl: t != null && t + 1 >= n ? 'Ferdig' : 'Neste', tourForrige: () => t > 0 && this.tourGo(t - 1), tourForrigeOp: t > 0 ? '1' : '.4',
+      tourPause: () => { if (s.tPaused) { this.setState({ tPaused: false }); this.tArm(Math.max(1500, (this.tDur || 6500) - (s.tEl || 0))); } else { this.setState({ tPaused: true }); } }, tourPauseLbl: s.tPaused ? 'Spill av' : 'Pause'
     };
   }
   medDet(type, r) {
