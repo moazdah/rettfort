@@ -26,13 +26,13 @@ export function gyldigFnr(fnr: string): boolean {
 export const PASSORD_TEKST: Record<string, string> = { fnr: 'fødselsnummeret ditt (11 siffer)', eget: 'passordet du har fått av arbeidsgiveren' };
 
 type Rad = {
-  id: string; brutto: number; skatt: number; netto: number; feriepenger: number; linjer: LonnslippPdfData['linjer'] | string; token: string | null; feil: number; sperret: boolean;
+  id: string; brutto: number; skatt: number; netto: number; feriepenger: number; linjer: LonnslippPdfData['linjer'] | string; utlegg: number; utlegg_linjer: { tekst: string; belop: number }[] | string; token: string | null; feil: number; sperret: boolean;
   periode: string; utbetalingsdato: string; organisasjon_id: string;
   anavn: string; stilling: string | null; akonto: string | null; epost: string | null; skatteprosent: number; slipp_passord_hash: string | null; slipp_passord_type: string | null;
   onavn: string; orgnr: string | null; adresse: string | null; postnr: string | null; poststed: string | null; oepost: string | null; ferie_prosent: number;
 };
 
-const HENT = `select s.id, s.brutto, s.skatt, s.netto, s.feriepenger, s.linjer, s.token, s.feil, coalesce(s.sperret_til > now(), false) as sperret,
+const HENT = `select s.id, s.brutto, s.skatt, s.netto, s.feriepenger, s.linjer, s.utlegg, s.utlegg_linjer, s.token, s.feil, coalesce(s.sperret_til > now(), false) as sperret,
   l.periode, l.utbetalingsdato::text as utbetalingsdato, l.organisasjon_id,
   a.navn as anavn, a.stilling, a.kontonr as akonto, a.epost, a.skatteprosent, a.slipp_passord_hash, a.slipp_passord_type,
   o.navn as onavn, o.orgnr, o.adresse, o.postnr, o.poststed, o.epost as oepost, o.ferie_prosent
@@ -47,6 +47,7 @@ function pdfData(r: Rad): LonnslippPdfData {
     periodeTekst: manedNavn(r.periode), utbetalt: r.utbetalingsdato, skatteprosent: Number(r.skatteprosent),
     linjer: typeof r.linjer === 'string' ? JSON.parse(r.linjer) : r.linjer,
     brutto: Number(r.brutto), skatt: Number(r.skatt), netto: Number(r.netto), feriepenger: Number(r.feriepenger), feriePst: Number(r.ferie_prosent),
+    utlegg: typeof r.utlegg_linjer === 'string' ? JSON.parse(r.utlegg_linjer) : (r.utlegg_linjer ?? []),
   };
 }
 
@@ -78,7 +79,7 @@ export async function sendForfalte(db: Db, grunnadresse: string, orgId?: string)
       if (!r.token) await db.q('update lonnslipp set token = $2 where id = $1', [r.id, token]);
       lenke = `${grunnadresse}/lonnslipp/${token}`;
     }
-    const m = maler.lonnslipp({ navn: r.anavn.split(' ')[0], foretak: r.onavn, periode: manedNavn(r.periode), netto: kr(Number(r.netto)), utbetalt: dato(r.utbetalingsdato), lenke, passordTekst: PASSORD_TEKST[r.slipp_passord_type ?? 'fnr'] });
+    const m = maler.lonnslipp({ navn: r.anavn.split(' ')[0], foretak: r.onavn, periode: manedNavn(r.periode), netto: kr(Number(r.netto) + Number(r.utlegg ?? 0)), utbetalt: dato(r.utbetalingsdato), lenke, passordTekst: PASSORD_TEKST[r.slipp_passord_type ?? 'fnr'] });
     const vedlegg = beskyttet ? undefined : [{ filnavn: `lonnslipp-${r.periode}.pdf`, innhold: await lagLonnslippPdf(pdfData(r)) }];
     const ok = await sendEpost({ til: r.epost, ...m, svarTil: r.oepost ?? undefined, vedlegg });
     if (ok) sendt.push(r.anavn);

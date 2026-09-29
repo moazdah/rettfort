@@ -54,9 +54,10 @@ export function ApneLonnslipp({ token, foretak, periode, type, fornavn }: { toke
           <tbody>
             {d.linjer.map((l, i) => <tr key={i}><td>{l.tekst}{l.antall != null ? ` · ${String(l.antall).replace('.', ',')} t à ${kr(l.sats ?? 0)}` : ''}</td><td className="belop" style={{ textAlign: 'right' }}>{kr(l.belop)}</td></tr>)}
             <tr><td>Skattetrekk {String(d.skatteprosent).replace('.', ',')} %</td><td className="belop" style={{ textAlign: 'right' }}>−{kr(d.skatt)}</td></tr>
+            {(d.utlegg ?? []).map((u, i) => <tr key={`u${i}`}><td>Refusjon av utlegg: {u.tekst}</td><td className="belop" style={{ textAlign: 'right' }}>{kr(u.belop)}</td></tr>)}
           </tbody>
         </table>
-        <div className="rad" style={{ justifyContent: 'space-between', fontWeight: 700, fontSize: 15, marginTop: 10 }}><span>Utbetalt</span><span className="belop">{kr(d.netto)} kr</span></div>
+        <div className="rad" style={{ justifyContent: 'space-between', fontWeight: 700, fontSize: 15, marginTop: 10 }}><span>Utbetalt</span><span className="belop">{kr(d.netto + (d.utlegg ?? []).reduce((a, u) => a + u.belop, 0))} kr</span></div>
         <div className="mut liten" style={{ marginTop: 10 }}>Feriepenger opptjent denne måneden: {kr(d.feriepenger)} kr ({String(d.feriePst).replace('.', ',')} %)</div>
       </div>
       <button type="button" className="knapp" onClick={lastNed}>Last ned PDF</button>

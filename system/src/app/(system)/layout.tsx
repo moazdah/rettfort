@@ -4,6 +4,7 @@ import { harAssistent, erTestbruker } from '@/lib/pakker';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { aktuellTermin, mvaStatus } from '@/lib/tjenester/mva';
 import { sendKlareIBakgrunnen } from '@/lib/tjenester/utsending';
+import { antallIInnboks } from '@/lib/tjenester/innsending';
 
 export default async function SystemRamme({ children }: { children: React.ReactNode }) {
   const s = await kreverSelskap();
@@ -14,9 +15,10 @@ export default async function SystemRamme({ children }: { children: React.ReactN
     if (termin) { const st = await mvaStatus(d, s.org.id, termin); if (!st.sendt) mvaTeller = st.antallMangler; }
   } catch { /* telleren er ikke kritisk */ }
   await sendKlareIBakgrunnen().catch(() => {});
+  const innboksTeller = await antallIInnboks(d, s.org.id).catch(() => 0);
   return (
     <div className="ramme">
-      <Meny firma={s.org.navn} pakke={s.org.pakke} bruker={s.bruker.navn} rolle={s.rolle} mvaTeller={mvaTeller} harByra={s.medlemskap.some(m => m.type === 'byra')} testbruker={erTestbruker(s.bruker.epost)} foretak={s.medlemskap.filter(m => m.type === 'selskap')} orgId={s.org.id} epost={s.bruker.epost} />
+      <Meny firma={s.org.navn} pakke={s.org.pakke} bruker={s.bruker.navn} rolle={s.rolle} mvaTeller={mvaTeller} harByra={s.medlemskap.some(m => m.type === 'byra')} testbruker={erTestbruker(s.bruker.epost)} foretak={s.medlemskap.filter(m => m.type === 'selskap')} orgId={s.org.id} epost={s.bruker.epost} innboksTeller={innboksTeller} />
       <main className="innhold">
         {d.modus === 'testmodus' && <div className="testmodus ikke-utskrift">Testmodus: databasen er ikke koblet til ennå. Data kan bli nullstilt.</div>}
         {children}

@@ -26,6 +26,7 @@ import QRCode from 'qrcode';
 import { lagTestfirma, TESTFIRMA_ORGNR } from '@/lib/db/eksempel';
 import { gyldigFnr, planleggUtsending, sendForfalte, apneLonnslipp, type SendNar } from '@/lib/tjenester/lonnslipp';
 import type { LonnslippPdfData } from '@/lib/pdf';
+import { lagLenke, hentNye, etterRegistrering, hentInnsending, settTilbake, settFastTilbake, betalUtleggNa, avvis, slettLenke, type Tilbake } from '@/lib/tjenester/innsending';
 import { kr } from '@/lib/penger';
 
 async function settCookie(token: string) {
@@ -324,11 +325,17 @@ export async function slettUtkast(type: 'salg' | 'kjop', id: string): Promise<Re
 
 // ---------- Kjøp ----------
 
-export async function registrerKjopHandling(k: KjopInput): Promise<Resultat<{ id: string; bilagNr: number }>> {
+export async function registrerKjopHandling(k: KjopInput, innsendingId?: string | null): Promise<Resultat<{ id: string; bilagNr: number; utlegg?: { id: string; trengerValg: boolean; tilbake: Tilbake | null; navn: string | null } }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkKjopstilgang(s);
     const db = await getDb();
-    const r = await db.tx(t => registrerKjop(t, s.org.id, k, s.bruker.id));
+    const r = await db.tx(async t => {
+      const kj = await registrerKjop(t, s.org.id, k, s.bruker.id);
+      if (!innsendingId || !/^[0-9a-f-]{36}$/.test(innsendingId)) return kj;
+      const e = await etterRegistrering(t, s.org.id, innsendingId, kj.id);
+      const i = await hentInnsending(t, s.org.id, innsendingId);
+      return i?.type === 'utlegg' && i.betalt_med === 'eget' ? { ...kj, utlegg: { id: innsendingId, ...e, navn: i.fra_navn } } : kj;
+    });
     revalidatePath('/', 'layout');
     return r;
   });
@@ -539,6 +546,106 @@ export async function apneLonnslippHandling(token: string, passord: string): Pro
     const r = await apneLonnslipp(db, token, passord);
     return { data: r.data, pdf: Buffer.from(r.pdf).toString('base64') };
   });
+}
+
+// ---------- Skanning med mobil og innboks ----------
+
+/** QR-kode for å ta bilde med mobilen og få det rett inn på PC-en. Virker i 15 minutter. */
+export async function nyQrLenke(): Promise<Resultat<{ token: string; url: string; qr: string }>> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkKjopstilgang(s);
+    const db = await getDb();
+    const { token } = await db.tx(t => lagLenke(t, s.org.id, { type: 'egen', brukerId: s.bruker.id }));
+    const url = `${await grunnadresse()}/skann/${token}`;
+    return { token, url, qr: await QRCode.toDataURL(url, { margin: 1, width: 260, color: { dark: '#0B2545', light: '#FFFFFF' } }) };
+  });
+}
+
+/** PC-en spør om noe har kommet inn fra mobilen. */
+export async function hentSkannet(token: string): Promise<Resultat<{ id: string; vedleggId: string; filnavn: string }[]>> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkKjopstilgang(s);
+    if (!/^[\w-]{16,64}$/.test(token)) return [];
+    return hentNye(await getDb(), s.org.id, token);
+  });
+}
+
+export async function lagSkannelenke(o: { type: 'klient' | 'ansatt'; ansattId?: string; navn?: string; epost?: string; send?: boolean }): Promise<Resultat<{ url: string; sendt: boolean }>> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    if (o.type !== 'klient' && o.type !== 'ansatt') throw new RegnskapsFeil('Ugyldig type.');
+    const db = await getDb();
+    let navn = o.navn ?? null, epost = o.epost?.trim().toLowerCase() || null;
+    if (o.type === 'ansatt') {
+      const a = await db.en<{ navn: string; epost: string | null }>('select navn, epost from ansatt where id = $1 and organisasjon_id = $2', [o.ansattId, s.org.id]);
+      if (!a) throw new RegnskapsFeil('Fant ikke den ansatte.');
+      navn = a.navn; epost = epost ?? a.epost;
+    }
+    if (epost && !gyldigEpost(epost)) throw new RegnskapsFeil('E-postadressen ser ikke riktig ut.');
+    const { token } = await db.tx(t => lagLenke(t, s.org.id, { type: o.type, ansattId: o.ansattId, navn, epost, brukerId: s.bruker.id }));
+    const url = `${await grunnadresse()}/skann/${token}`;
+    let sendt = false;
+    if (o.send && epost) sendt = await sendEpost({ til: epost, ...maler.skannelenke({ navn, foretak: s.org.navn, type: o.type, lenke: url }), svarTil: s.bruker.epost });
+    revalidatePath('/kjop/innboks');
+    return { url, sendt };
+  });
+}
+
+export async function sendSkannelenkePaNytt(id: string): Promise<Resultat<{ til: string }>> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const db = await getDb();
+    const l = await db.en<{ token: string; type: 'klient' | 'ansatt'; navn: string | null; epost: string | null; ansatt_navn: string | null; ansatt_epost: string | null }>(
+      `select l.token, l.type, l.navn, l.epost, a.navn as ansatt_navn, a.epost as ansatt_epost from skannelenke l left join ansatt a on a.id = l.ansatt_id where l.id = $1 and l.organisasjon_id = $2 and not l.slettet`, [id, s.org.id]);
+    if (!l) throw new RegnskapsFeil('Fant ikke lenken.');
+    const til = l.epost ?? l.ansatt_epost;
+    if (!til) throw new RegnskapsFeil('Lenken har ingen e-postadresse. Kopier lenken og send den selv.');
+    if (!epostPa()) throw new RegnskapsFeil('E-post er ikke koblet til ennå. Kopier lenken og send den selv.');
+    const ok = await sendEpost({ til, ...maler.skannelenke({ navn: l.ansatt_navn ?? l.navn, foretak: s.org.navn, type: l.type, lenke: `${await grunnadresse()}/skann/${l.token}` }), svarTil: s.bruker.epost });
+    if (!ok) throw new RegnskapsFeil('E-posten kunne ikke sendes. Prøv igjen om litt.');
+    return { til };
+  }, 'Lenken er sendt.');
+}
+
+export async function slettSkannelenke(id: string): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    await slettLenke(await getDb(), s.org.id, id);
+    revalidatePath('/kjop/innboks');
+  }, 'Lenken er slettet. Den virker ikke lenger.');
+}
+
+export async function avvisInnsending(id: string, grunn: string): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkKjopstilgang(s);
+    await avvis(await getDb(), s.org.id, id, grunn);
+    revalidatePath('/', 'layout');
+  }, 'Avvist. Avsenderen ser beskjeden.');
+}
+
+export async function velgTilbakebetaling(id: string, tilbake: Tilbake, husk: boolean): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    await settTilbake(await getDb(), s.org.id, id, tilbake, husk);
+    revalidatePath('/', 'layout');
+  });
+}
+
+export async function settFastTilbakebetaling(tilbake: Tilbake | null): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    await settFastTilbake(await getDb(), s.org.id, tilbake);
+    revalidatePath('/', 'layout');
+  }, 'Lagret.');
+}
+
+export async function merkUtleggBetalt(id: string): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const db = await getDb();
+    await db.tx(t => betalUtleggNa(t, s.org.id, id, idag(), s.bruker.id));
+    revalidatePath('/', 'layout');
+  }, 'Utlegget er betalt tilbake og ført i regnskapet.');
 }
 
 // ---------- Innstillinger og regnskapsfører ----------

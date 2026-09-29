@@ -140,4 +140,19 @@ export const maler = {
       bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
     }),
   }),
+  skannelenke: (o: { navn: string | null; foretak: string; type: 'klient' | 'ansatt'; lenke: string }): Mal => {
+    const ansatt = o.type === 'ansatt';
+    const hva = ansatt ? `utlegg til ${o.foretak}` : `kvitteringer og fakturaer til ${o.foretak}`;
+    return {
+      emne: ansatt ? `Send utlegg til ${o.foretak}` : `Send bilag til ${o.foretak}`,
+      tekst: `Hei${o.navn ? ` ${o.navn.split(' ')[0]}` : ''}!\n\nMed denne lenken kan du sende ${hva} rett fra mobilen. Ta bilde av kvitteringen, så er det gjort.\n\n${o.lenke}\n\nLenken er personlig. Tips: legg den til på hjemskjermen, så har du den alltid for hånden.`,
+      html: ramme({
+        tittel: ansatt ? 'Send utlegg med mobilen' : 'Send bilag med mobilen', forhandsvisning: `Ta bilde av kvitteringen, så er det sendt til ${o.foretak}`,
+        innhold: avsnitt(`Hei${o.navn ? ` ${esc(o.navn.split(' ')[0])}` : ''}! Med denne lenken kan du sende ${esc(hva)} rett fra mobilen. Ta bilde av kvitteringen, så er det gjort.`)
+          + knapp(ansatt ? 'Send et utlegg' : 'Send en kvittering', o.lenke)
+          + liten(`${ansatt ? 'Du ser også om utleggene dine er godkjent og betalt. ' : ''}Lenken er personlig. Tips: legg den til på hjemskjermen, så har du den alltid for hånden.`),
+        bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
+      }),
+    };
+  },
 };

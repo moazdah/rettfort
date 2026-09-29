@@ -113,7 +113,20 @@ export async function kjorLonn(t: Sporring, orgId: string, periode: string, utbe
   const aga = beregnAgaSum(slipper, sats);
   const lk = await t.en<{ id: string }>('insert into lonnskjoring (organisasjon_id, periode, utbetalingsdato, bilag_id, brutto, skatt, netto, aga, feriepenger) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning id',
     [orgId, periode, utbetalingsdato, b.id, sum('brutto'), sum('skatt'), sum('netto'), aga, sum('feriepenger')]);
-  for (const s of slipper) await t.q('insert into lonnslipp (lonnskjoring_id, ansatt_id, brutto, skatt, netto, feriepenger, linjer) values ($1,$2,$3,$4,$5,$6,$7)', [lk!.id, s.ansattId, s.brutto, s.skatt, s.netto, s.feriepenger, JSON.stringify(s.linjer)]);
+  // Godkjente utlegg som skal betales tilbake med lønnen: egen linje på lønnslippen, uten skatt og feriepenger.
+  const utlegg = await t.q<{ id: string; ansatt_id: string; belop: number; tekst: string }>(`select i.id, l.ansatt_id, i.belop, coalesce(i.tekst, 'Utlegg') as tekst from innsending i join skannelenke l on l.id = i.lenke_id
+    where i.organisasjon_id = $1 and i.type = 'utlegg' and i.status = 'godkjent' and i.tilbake = 'neste_lonn' and i.lonnskjoring_id is null and i.belop > 0 order by i.opprettet`, [orgId]);
+  for (const s of slipper) {
+    const mine = utlegg.filter(u => u.ansatt_id === s.ansattId);
+    const sum = mine.reduce((a, u) => a + Number(u.belop), 0);
+    await t.q('insert into lonnslipp (lonnskjoring_id, ansatt_id, brutto, skatt, netto, feriepenger, linjer, utlegg, utlegg_linjer) values ($1,$2,$3,$4,$5,$6,$7,$8,$9)', [lk!.id, s.ansattId, s.brutto, s.skatt, s.netto, s.feriepenger, JSON.stringify(s.linjer), sum, JSON.stringify(mine.map(u => ({ tekst: u.tekst, belop: Number(u.belop) })))]);
+    if (sum > 0) {
+      await bokfor(t, orgId, { dato: utbetalingsdato, type: 'bank', beskrivelse: `Utlegg tilbakebetalt med lønn ${periode}, ${s.navn}`, brukerId, kilde: 'utlegg' }, [
+        { konto: 2910, debet: sum, kredit: 0 }, { konto: 1920, debet: 0, kredit: sum },
+      ]);
+      await t.q(`update innsending set status = 'betalt', lonnskjoring_id = $2, behandlet = now() where id = any($1::uuid[])`, [mine.map(u => u.id), lk!.id]);
+    }
+  }
   return { id: lk!.id, bilagNr: b.nr, slipper };
 }
 

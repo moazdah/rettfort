@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { KontoVelger, KJOPSKONTOER } from '@/components/KontoVelger';
 import { Maskot } from '@/components/Logo';
-import { registrerKjopHandling, lagreKjopUtkastHandling, rettKjopHandling, kontrollKjopHandling, lastOppVedlegg } from '@/app/handlinger';
+import { registrerKjopHandling, lagreKjopUtkastHandling, rettKjopHandling, kontrollKjopHandling, lastOppVedlegg, nyQrLenke, hentSkannet, velgTilbakebetaling } from '@/app/handlinger';
 import type { KjopInput, Funn } from '@/lib/tjenester/kjop';
 import { konto as finnKonto } from '@/lib/kontoplan';
 import { kr, tilOre, splittBrutto } from '@/lib/penger';
@@ -22,9 +22,92 @@ export interface KjopStart {
 const ore = (t: string) => tilOre(t) ?? 0;
 const tekstKr = (o: number | undefined) => (o ? kr(o) : '');
 
-export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, modus }: {
+export interface InnsendingStart { id: string; vedleggId: string; filnavn: string; type: string; fraNavn: string | null; tekst: string | null; betaltMed: string | null }
+type Tilbake = 'neste_lonn' | 'na';
+
+/** Hent en fil som allerede ligger i systemet (fra mobilen eller innboksen), så den kan leses som en opplastet fil. */
+async function hentFil(vedleggId: string, navn: string): Promise<File> {
+  const r = await fetch(`/api/vedlegg/${vedleggId}`);
+  if (!r.ok) throw new Error('Fant ikke filen.');
+  const b = await r.blob();
+  return new File([b], navn, { type: b.type });
+}
+
+/** QR-kode: ta bilde med mobilen, så dukker det opp her. Spør serveren hvert andre sekund. */
+function QrMobil({ onMottatt, onLukk }: { onMottatt: (i: { id: string; vedleggId: string; filnavn: string }, flere: number) => void; onLukk: () => void }) {
+  const [qr, setQr] = useState<{ token: string; url: string; qr: string } | null>(null);
+  const [feil, setFeil] = useState('');
+  const [utlopt, setUtlopt] = useState(false);
+  const lag = async () => {
+    setFeil(''); setUtlopt(false);
+    const r = await nyQrLenke();
+    if (!r.ok) { setFeil(r.feil); return; }
+    setQr(r.data!);
+  };
+  useEffect(() => { lag(); }, []);
+  useEffect(() => {
+    if (!qr || utlopt) return;
+    const slutt = Date.now() + 15 * 60 * 1000;
+    const t = setInterval(async () => {
+      if (Date.now() > slutt) { setUtlopt(true); clearInterval(t); return; }
+      const r = await hentSkannet(qr.token);
+      if (r.ok && r.data!.length) { clearInterval(t); onMottatt(r.data![0], r.data!.length - 1); }
+    }, 2000);
+    return () => clearInterval(t);
+  }, [qr, utlopt, onMottatt]);
+  return (
+    <div className="modal-bak" onClick={onLukk}>
+      <div className="modal kort stakk qr-modal" onClick={e => e.stopPropagation()} role="dialog" aria-label="Ta bilde med mobilen">
+        <div className="rad" style={{ justifyContent: 'space-between' }}><h2>Ta bilde med mobilen</h2><button type="button" className="lenke" onClick={onLukk}>Lukk</button></div>
+        <div className="qr-innhold">
+          <div className="qr-bilde">{utlopt ? <button type="button" className="knapp" onClick={lag}>Lag ny kode</button> : qr ? <img src={qr.qr} alt="QR-kode" width={220} height={220} data-url={qr.url} /> : <span className="mut">Lager kode …</span>}</div>
+          <ol className="qr-steg">
+            <li>Åpne kameraet på mobilen og pek på koden.</li>
+            <li>Trykk på lenken som dukker opp. Du trenger ikke logge inn.</li>
+            <li>Hold kvitteringen foran kameraet. Bildet tas av seg selv.</li>
+            <li>Kvitteringen dukker opp her og blir lest med en gang.</li>
+          </ol>
+        </div>
+        {feil && <div className="varsel rod">{feil}</div>}
+        <div className="rad mut liten" style={{ justifyContent: 'space-between' }}>
+          <span>{utlopt ? 'Koden er utløpt.' : 'Venter på bildet … Koden virker i 15 minutter.'}</span>
+          {qr && !utlopt && <button type="button" className="lenke liten" onClick={() => navigator.clipboard?.writeText(qr.url)}>Kopier lenken</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Etter godkjent utlegg: hvordan den ansatte får pengene tilbake. Valget kan huskes. */
+function UtleggTilbake({ u, total }: { u: { id: string; trengerValg: boolean; tilbake: Tilbake | null; navn: string | null }; total: number }) {
+  const [valgt, setValgt] = useState<Tilbake | null>(u.tilbake);
+  const [husk, setHusk] = useState(false);
+  const [feil, setFeil] = useState('');
+  const fornavn = u.navn?.split(' ')[0] ?? 'Den ansatte';
+  const velg = async (t: Tilbake) => {
+    setFeil('');
+    const r = await velgTilbakebetaling(u.id, t, husk);
+    if (!r.ok) { setFeil(r.feil); return; }
+    setValgt(t);
+  };
+  if (valgt && !u.trengerValg) return <div className="varsel info" style={{ marginTop: 12 }}>{fornavn} får {kr(total)} kr tilbake {valgt === 'neste_lonn' ? 'med neste lønn' : 'når du betaler i nettbanken (se Innboks)'}. Dette er valgt fast. <a href="/lonn?vis=oppsett">Endre</a></div>;
+  if (valgt) return <div className="varsel gronn" style={{ marginTop: 12 }}>{fornavn} får {kr(total)} kr tilbake {valgt === 'neste_lonn' ? 'med neste lønn. Det står på lønnslippen.' : 'når du betaler i nettbanken. Du finner det i Innboks.'}</div>;
+  return (
+    <div className="stakk" style={{ marginTop: 14, gap: 10 }}>
+      <b>Hvordan skal {fornavn} få {kr(total)} kr tilbake?</b>
+      <div className="lonnstyper to">
+        <button type="button" className="valgkort" onClick={() => velg('neste_lonn')}><b>Med neste lønn</b><span className="mut liten">Kommer som egen linje på lønnslippen, uten skatt.</span></button>
+        <button type="button" className="valgkort" onClick={() => velg('na')}><b>Med en gang</b><span className="mut liten">Du betaler i nettbanken og krysser av i Innboks.</span></button>
+      </div>
+      <label className="rad liten"><input type="checkbox" checked={husk} onChange={e => setHusk(e.target.checked)} /> Gjør dette fast, ikke spør igjen. Kan endres under Lønn → Oppsett.</label>
+      {feil && <div className="varsel rod">{feil}</div>}
+    </div>
+  );
+}
+
+export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, modus, innsending }: {
   start?: KjopStart; idag: string; mvaRegistrert: boolean; kunder: { id: string; navn: string }[]; bilagEpost: string;
-  modus: 'ny' | 'utkast' | 'rett'; pakke: string;
+  modus: 'ny' | 'utkast' | 'rett'; pakke: string; innsending?: InnsendingStart | null;
 }) {
   const router = useRouter();
   const [fase, setFase] = useState<'tom' | 'arbeid' | 'ferdig'>(start ? 'arbeid' : 'tom');
@@ -49,7 +132,10 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
   const [feil, setFeil] = useState('');
   const [venter, setVenter] = useState(false);
   const [laster, setLaster] = useState(false);
-  const [ferdig, setFerdig] = useState<{ bilagNr: number; id: string } | null>(null);
+  const [ferdig, setFerdig] = useState<{ bilagNr: number; id: string; utlegg?: { id: string; trengerValg: boolean; tilbake: Tilbake | null; navn: string | null } } | null>(null);
+  const [innsendingId, setInnsendingId] = useState<string | null>(innsending?.id ?? null);
+  const [visQr, setVisQr] = useState(false);
+  const [flereIInnboks, setFlereIInnboks] = useState(0);
   const [overstyr, setOverstyr] = useState(false);
   // Automatisk lesing: hva som ble lest, og om brukeren har sjekket tallene mot kvitteringen.
   const [lest, setLest] = useState<(Tolkning & { orig: Record<string, string> }) | null>(null);
@@ -100,7 +186,11 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
     const r = await lastOppVedlegg(fd);
     setLaster(false);
     if (!r.ok) { setFeil(r.feil); return; }
-    setVedlegg(r.data!); setKilde('kvittering'); setFase('arbeid'); setBekreftet(false); setLest(null);
+    await lesInn(f, r.data!);
+  };
+  /** Leser en fil som ligger i systemet som vedlegg, og fyller ut skjemaet. */
+  const lesInn = async (f: File, v: { id: string; navn: string }) => {
+    setVedlegg(v); setKilde('kvittering'); setFase('arbeid'); setBekreftet(false); setLest(null);
     if (!/^image\/|pdf$|xml$/.test(f.type) && !/\.(xml|pdf|jpe?g|png|heic|webp)$/i.test(f.name)) return;
     setLeser('Leser kvitteringen …');
     try {
@@ -109,7 +199,7 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
       if (t.lev) setLev(t.lev);
       if (t.orgnr) setOrgnr(t.orgnr);
       if (t.dato) setDato(t.dato);
-      if (t.beskrivelse && !tekst) setTekst(t.beskrivelse);
+      if (t.beskrivelse) setTekst(x => x || t.beskrivelse!);
       setTotal(v.total);
       if (t.sats != null && mvaRegistrert) setSats(t.sats);
       if (v.mva) { setMva(v.mva); setMvaRort(true); } else setMvaRort(false);
@@ -118,6 +208,21 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
       setFeil('Klarte ikke å lese kvitteringen. Skriv inn tallene selv.');
     } finally { setLeser(''); }
   };
+  // Fra innboksen: dokumentet ligger allerede i systemet. Utlegg med eget kort blir gjeld til den ansatte.
+  const innsendingLest = useRef(false);
+  useEffect(() => {
+    if (!innsending || innsendingLest.current) return;
+    innsendingLest.current = true;
+    if (innsending.tekst) setTekst(innsending.tekst);
+    if (innsending.type === 'utlegg') setBetaltMed(innsending.betaltMed === 'eget' ? 'privat' : 'bank');
+    hentFil(innsending.vedleggId, innsending.filnavn).then(f => lesInn(f, { id: innsending.vedleggId, navn: innsending.filnavn })).catch(() => setFeil('Fant ikke dokumentet.'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [innsending]);
+  const fraMobil = useCallback(async (i: { id: string; vedleggId: string; filnavn: string }, flere: number) => {
+    setVisQr(false); setInnsendingId(i.id); setFlereIInnboks(flere);
+    try { await lesInn(await hentFil(i.vedleggId, i.filnavn), { id: i.vedleggId, navn: i.filnavn }); } catch { setFeil('Fant ikke bildet fra mobilen.'); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const godkjentFil = (f: File) => /^image\/|pdf$|xml$/.test(f.type) || /\.(xml|pdf|jpe?g|png|heic|heif|webp|gif)$/i.test(f.name);
   const slipp = {
     onDragEnter: (e: React.DragEvent) => { if (!e.dataTransfer.types.includes('Files')) return; e.preventDefault(); dybde.current++; setDrar(true); },
@@ -168,10 +273,10 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
 
   const registrer = async () => {
     setVenter(true); setFeil('');
-    const r = modus === 'rett' && start?.id ? await rettKjopHandling(start.id, input()) : await registrerKjopHandling(input());
+    const r = modus === 'rett' && start?.id ? await rettKjopHandling(start.id, input()) : await registrerKjopHandling(input(), innsendingId);
     setVenter(false);
     if (!r.ok) { setFeil(r.feil); return; }
-    setFerdig({ bilagNr: r.data!.bilagNr, id: r.data!.id });
+    setFerdig({ bilagNr: r.data!.bilagNr, id: r.data!.id, utlegg: (r.data as { utlegg?: { id: string; trengerValg: boolean; tilbake: Tilbake | null; navn: string | null } }).utlegg });
     setFase('ferdig');
     router.refresh();
   };
@@ -192,10 +297,12 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
       <div style={{ flex: 1 }}>
         <h2>{modus === 'rett' ? 'Kjøpet er rettet.' : 'Kjøpet er registrert.'}</h2>
         <p className="mut" style={{ marginTop: 6 }}>{ferdig.bilagNr ? `Bilag ${ferdig.bilagNr} · ` : ''}{lev} · {kr(totalOre)} kr · ført på {finnKonto(konto)?.navn.toLowerCase()}.{vedlegg ? ' Kvitteringen er lagret sammen med bilaget.' : ''}</p>
+        {ferdig.utlegg && <UtleggTilbake u={ferdig.utlegg} total={totalOre} />}
+        {flereIInnboks > 0 && <div className="varsel info" style={{ marginTop: 12 }}>{flereIInnboks === 1 ? 'Ett bilde til' : `${flereIInnboks} bilder til`} fra mobilen ligger i <Link href="/kjop/innboks">Innboks</Link>.</div>}
         <div className="rad" style={{ marginTop: 14 }}>
           <button type="button" className="knapp" onClick={nullstill}>Nytt kjøp</button>
           <Link href={`/kjop/${ferdig.id}`} className="knapp hvit">Se kjøpet</Link>
-          <Link href="/kjop" className="knapp hvit">Gå til oversikt</Link>
+          <Link href={innsendingId ? '/kjop/innboks' : '/kjop'} className="knapp hvit">{innsendingId ? 'Tilbake til innboksen' : 'Gå til oversikt'}</Link>
         </div>
       </div>
     </div>
@@ -213,10 +320,12 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
       <p className="mut" style={{ maxWidth: 480 }}>Bilde, PDF eller EHF. Du kan også ta bilde med mobilen eller videresende til <span className="mono">{bilagEpost}</span>.</p>
       <div className="rad" style={{ justifyContent: 'center' }}>
         <button type="button" className="knapp" onClick={() => filRef.current?.click()} disabled={laster}>{laster ? 'Laster opp …' : 'Velg fil eller ta bilde'}</button>
+        <button type="button" className="knapp hvit" onClick={() => setVisQr(true)}>Ta bilde med mobilen</button>
         <button type="button" className="knapp hvit" onClick={eksempel}>Bruk eksempelkvittering</button>
         <button type="button" className="knapp hvit" onClick={() => { setKilde('uten_kvittering'); setFase('arbeid'); }}>Fyll ut uten kvittering</button>
       </div>
       {feil && <div className="varsel rod">{feil}</div>}
+      {visQr && <QrMobil onMottatt={fraMobil} onLukk={() => setVisQr(false)} />}
     </div>
   );
 

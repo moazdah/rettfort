@@ -30,7 +30,7 @@ function useNedtrekk() {
   return { apen, setApen, ref };
 }
 
-export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '' }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string }) {
+export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '', innboksTeller = 0 }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string; innboksTeller?: number }) {
   const sti = usePathname();
   const aktiv = (m: (typeof MENY)[number]) => m.aktivPa.some(p => sti === p || sti.startsWith(p + '/'));
   const initialer = bruker.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
@@ -43,7 +43,8 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
   // Lukk profilmenyen når foretaket byttes (adressen kan være den samme).
   const { setApen: lukkProfil } = profil;
   useEffect(() => { lukkProfil(false); setLager(false); }, [orgId, lukkProfil]);
-  const teller = (m: (typeof MENY)[number]) => m.href === '/mva' && mvaTeller > 0 && <span className="teller" aria-label={`${mvaTeller} ting mangler`}>{mvaTeller}</span>;
+  const teller = (m: (typeof MENY)[number]) => m.href === '/mva' && mvaTeller > 0 ? <span className="teller" aria-label={`${mvaTeller} ting mangler`}>{mvaTeller}</span>
+    : m.href === '/kjop/ny' && innboksTeller > 0 ? <span className="teller" aria-label={`${innboksTeller} i innboksen`}>{innboksTeller}</span> : null;
 
   return (
     <>
@@ -99,7 +100,7 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
       </header>
       <nav className="mobilmeny" aria-label="Meny">
         {[MENY[0], MENY[1], MENY[2], MENY[6]].map(m => (
-          <Link key={m.href} href={m.href} className={aktiv(m) ? 'aktiv' : ''}><span className="ikon">{m.ikon}</span>{m.navn}{m.href === '/mva' && mvaTeller > 0 ? ` (${mvaTeller})` : ''}</Link>
+          <Link key={m.href} href={m.href} className={aktiv(m) ? 'aktiv' : ''}><span className="ikon">{m.ikon}</span>{m.navn}{m.href === '/mva' && mvaTeller > 0 ? ` (${mvaTeller})` : m.href === '/kjop/ny' && innboksTeller > 0 ? ` (${innboksTeller})` : ''}</Link>
         ))}
         <Link href="/meny" className={sti === '/meny' ? 'aktiv' : ''}><span className="ikon">···</span>Mer</Link>
       </nav>

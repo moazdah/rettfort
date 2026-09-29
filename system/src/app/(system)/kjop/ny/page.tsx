@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { kreverSelskap, db, idag } from '@/lib/server';
-import { KjopSkjema, type KjopStart } from '../KjopSkjema';
+import { KjopSkjema, type KjopStart, type InnsendingStart } from '../KjopSkjema';
+import { hentInnsending, antallIInnboks } from '@/lib/tjenester/innsending';
 
 export const metadata = { title: 'Nytt kjøp' };
 
-export default async function NyttKjop({ searchParams }: { searchParams: Promise<{ utkast?: string; rett?: string; lev?: string; total?: string; dato?: string }> }) {
+export default async function NyttKjop({ searchParams }: { searchParams: Promise<{ utkast?: string; rett?: string; lev?: string; total?: string; dato?: string; innsending?: string }> }) {
   const s = await kreverSelskap();
   const d = await db();
   const sp = await searchParams;
@@ -23,19 +24,29 @@ export default async function NyttKjop({ searchParams }: { searchParams: Promise
     start = { leverandorNavn: sp.lev ?? '', total: Number(sp.total), dato: sp.dato && /^\d{4}-\d{2}-\d{2}$/.test(sp.dato) ? sp.dato : undefined, betaltMed: 'bank', kilde: 'bank' };
   }
   const modus = sp.rett && start ? 'rett' : sp.utkast && start ? 'utkast' : 'ny';
+  // Fra innboksen: et dokument sendt fra mobil, klient eller ansatt.
+  let innsending: InnsendingStart | null = null;
+  if (sp.innsending && /^[0-9a-f-]{36}$/.test(sp.innsending)) {
+    const i = await hentInnsending(d, s.org.id, sp.innsending);
+    if (i && i.vedlegg_id && ['ny', 'hentet'].includes(i.status)) innsending = { id: i.id, vedleggId: i.vedlegg_id, filnavn: i.filnavn ?? 'kvittering.jpg', type: i.type, fraNavn: i.fra_navn, tekst: i.tekst, betaltMed: i.betalt_med };
+  }
   const kunder = await d.q<{ id: string; navn: string }>(`select id, navn from kontakt where organisasjon_id = $1 and type in ('kunde','begge') order by navn`, [s.org.id]);
+  const innboksN = await antallIInnboks(d, s.org.id);
   const titt = await d.en<{ n: number }>(`select count(*)::int as n from kjop where organisasjon_id = $1 and status in ('utkast','trenger_titt')`, [s.org.id]);
   return (
     <div className="stakk" style={{ gap: 22 }}>
       <div className="hode">
         <div>
           <div className="stikk gronn">Penger ut</div>
-          <h1 style={{ marginTop: 4 }}>{modus === 'rett' ? 'Rett kjøpet' : 'Jeg har kjøpt noe'}</h1>
+          <h1 style={{ marginTop: 4 }}>{modus === 'rett' ? 'Rett kjøpet' : innsending?.type === 'utlegg' ? `Utlegg fra ${innsending.fraNavn ?? 'ansatt'}` : innsending?.type === 'klient' ? `Bilag fra ${innsending.fraNavn ?? 'klient'}` : 'Jeg har kjøpt noe'}</h1>
           <p className="mut">{modus === 'rett' ? 'Det gamle bilaget blir stående, og vi fører en korrigering i dag. Slik er regnskapet sporbart.' : 'Last opp kvitteringen eller fyll ut selv. Vi sjekker MVA og summen før noe blir ført.'}</p>
         </div>
-        <Link href="/kjop" className="knapp hvit">Alle kjøp{titt?.n ? <span className="merke gul">{titt.n}</span> : null}</Link>
+        <div className="rad" style={{ gap: 8 }}>
+          <Link href="/kjop/innboks" className="knapp hvit">Innboks{innboksN ? <span className="merke gul">{innboksN}</span> : null}</Link>
+          <Link href="/kjop" className="knapp hvit">Alle kjøp{titt?.n ? <span className="merke gul">{titt.n}</span> : null}</Link>
+        </div>
       </div>
-      <KjopSkjema key={id ?? 'ny'} start={start} idag={idag()} mvaRegistrert={s.org.mvaRegistrert} kunder={kunder} bilagEpost={`${s.org.bilagSlug ?? 'firma'}@bilag.rettfort.no`} modus={modus} pakke={s.org.pakke} />
+      <KjopSkjema key={id ?? sp.innsending ?? 'ny'} innsending={innsending} start={start} idag={idag()} mvaRegistrert={s.org.mvaRegistrert} kunder={kunder} bilagEpost={`${s.org.bilagSlug ?? 'firma'}@bilag.rettfort.no`} modus={modus} pakke={s.org.pakke} />
     </div>
   );
 }

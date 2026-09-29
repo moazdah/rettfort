@@ -120,6 +120,8 @@ export interface LonnslippPdfData {
   periodeTekst: string; utbetalt: string; skatteprosent: number;
   linjer: { tekst: string; antall?: number; sats?: number; belop: number }[];
   brutto: number; skatt: number; netto: number; feriepenger: number; feriePst: number;
+  /** Utlegg som betales tilbake sammen med lønnen. Skattefritt, legges til etter skattetrekket. */
+  utlegg?: { tekst: string; belop: number }[];
 }
 
 /** Lønnslipp som PDF (A4), samme oppsett som den den ansatte ser i systemet. */
@@ -157,9 +159,10 @@ export async function lagLonnslippPdf(l: LonnslippPdfData): Promise<Uint8Array> 
   for (const x of l.linjer) rad(`${x.tekst}${x.antall != null ? `  ·  ${String(x.antall).replace('.', ',')} t à ${kr(x.sats ?? 0)}` : ''}`, kr(x.belop));
   rad('Sum brutto', kr(l.brutto));
   rad(`Skattetrekk ${String(l.skatteprosent).replace('.', ',')} %`, `-${kr(l.skatt)}`);
+  for (const u of l.utlegg ?? []) rad(`Refusjon av utlegg: ${u.tekst}`, kr(u.belop));
   y -= 4;
   tekst('Utbetalt', V, y, { font: fet, size: 12 });
-  tekst(`${kr(l.netto)} kr`, H, y, { font: fet, size: 12, hoyre: true });
+  tekst(`${kr(l.netto + (l.utlegg ?? []).reduce((a, u) => a + u.belop, 0))} kr`, H, y, { font: fet, size: 12, hoyre: true });
   y -= 28;
   tekst(`Feriepenger opptjent denne måneden: ${kr(l.feriepenger)} kr (${String(l.feriePst).replace('.', ',')} %). De utbetales etter reglene i ferieloven.`, V, y, { size: 9, farge: MUT });
   tekst('Spørsmål om lønnen? Kontakt arbeidsgiveren din.', V, 90, { size: 9, farge: MUT });

@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { lagreLonnsoppsett } from '@/app/handlinger';
+import { lagreLonnsoppsett, settFastTilbakebetaling } from '@/app/handlinger';
 import { AGA_SONER } from '@/lib/tjenester/lonn';
 
-export function LonnOppsett({ start, forste }: { start: { ferie: number; lonningsdag: number | null; otp: string | null; agaSone: string }; forste: boolean }) {
+export function LonnOppsett({ start, forste }: { start: { ferie: number; lonningsdag: number | null; otp: string | null; agaSone: string; utleggTilbake?: string | null }; forste: boolean }) {
   const router = useRouter();
   const [ferie, setFerie] = useState(start.ferie);
   const [dag, setDag] = useState(start.lonningsdag ?? 20);
   const [otp, setOtp] = useState(start.otp ?? 'ingen');
   const [sone, setSone] = useState(start.agaSone);
+  const [tilbake, setTilbake] = useState<string | null>(start.utleggTilbake ?? null);
   const [feil, setFeil] = useState('');
   const [ok, setOk] = useState('');
   const lagre = async () => {
@@ -40,6 +41,15 @@ export function LonnOppsett({ start, forste }: { start: { ferie: number; lonning
         <select className="inndata" value={sone} onChange={e => setSone(e.target.value)}>{Object.entries(AGA_SONER).map(([k, v]) => <option key={k} value={k}>{v.navn} · {String(v.sats).replace('.', ',')} %</option>)}</select>
         <span className="hint">Bestemmes av kommunen der foretaket er registrert. Sone 1 gjelder det meste av Sør-Norge.</span>
       </label>
+      {!forste && (
+        <div className="stakk" style={{ gap: 8 }}>
+          <span className="mut liten">Utlegg fra ansatte: hvordan får de pengene tilbake?</span>
+          <div className="rad">{([[null, 'Spør hver gang'], ['neste_lonn', 'Alltid med neste lønn'], ['na', 'Alltid med en gang']] as const).map(([v, t]) => (
+            <button type="button" key={String(v)} className={`knapp ${tilbake === v ? '' : 'hvit'} liten`} onClick={async () => { const r = await settFastTilbakebetaling(v); if (r.ok) { setTilbake(v); router.refresh(); } }}>{t}</button>
+          ))}</div>
+          <span className="hint">Med neste lønn kommer utlegget som egen linje på lønnslippen, uten skatt. Med en gang betaler du i nettbanken og krysser av i Innboks.</span>
+        </div>
+      )}
       {feil && <div className="varsel rod">{feil}</div>}
       {ok && <div className="varsel gronn">{ok}</div>}
       <div><button type="button" className="knapp" onClick={lagre}>{forste ? 'Ferdig, vis lønn' : 'Lagre oppsettet'}</button></div>

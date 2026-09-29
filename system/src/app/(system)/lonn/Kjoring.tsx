@@ -11,7 +11,7 @@ import { formaterKontonr, manedNavn, nd } from '@/lib/vis';
 
 type A = AnsattData & { id: string };
 
-export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, orgnr, kanEndre }: { ansatte: A[]; periode: string; dato: string; ferie: number; agaSats: number; firma: string; orgnr: string | null; kanEndre: boolean }) {
+export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, orgnr, kanEndre, utlegg = [] }: { ansatte: A[]; periode: string; dato: string; ferie: number; agaSats: number; firma: string; orgnr: string | null; kanEndre: boolean; utlegg?: { ansattId: string; belop: number; tekst: string }[] }) {
   const router = useRouter();
   const [valgt, setValgt] = useState(ansatte[0]?.id ?? '');
   const [timer, setTimer] = useState<Record<string, string>>({});
@@ -32,7 +32,9 @@ export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, org
   const slipper = useMemo(() => ansatte.map(a => { try { return beregnLonnslipp(a, input.find(i => i.ansattId === a.id)!, ferie, agaSats); } catch { return null; } }), [ansatte, input, ferie, agaSats]);
   const a = ansatte.find(x => x.id === valgt);
   const slipp = slipper[ansatte.findIndex(x => x.id === valgt)];
-  const sumNetto = slipper.reduce((s, x) => s + (x?.netto ?? 0), 0);
+  const utleggFor = (id: string) => utlegg.filter(u => u.ansattId === id);
+  const utleggSum = (id: string) => utleggFor(id).reduce((s, u) => s + u.belop, 0);
+  const sumNetto = slipper.reduce((s, x) => s + (x?.netto ?? 0) + (x ? utleggSum(x.ansattId) : 0), 0);
   const sumAga = slipper.reduce((s, x) => s + (x?.aga ?? 0), 0);
   const kontroll: { t: string; ok: boolean }[] = [
     ...ansatte.filter(x => !x.kontonr).map(x => ({ t: `${x.navn} mangler kontonummer.`, ok: false })),
@@ -79,7 +81,7 @@ export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, org
               <button type="button" key={x.id} className={`valgkort ${valgt === x.id ? 'valgt' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: 12 }} onClick={() => setValgt(x.id)}>
                 <span className="avatar">{x.navn.split(' ').map(n => n[0]).slice(0, 2).join('')}</span>
                 <span style={{ flex: 1 }}><b style={{ display: 'block', fontWeight: 600 }}>{x.navn}</b><span className="mut liten">{x.lonn_type === 'fast' ? `Fast · ${kr(x.manedslonn)} kr` : x.lonn_type === 'time' ? `Timelønn · ${kr(x.timesats)} kr/t` : `Provisjon ${String(x.provisjon_prosent ?? 0).replace('.', ',')} %${x.manedslonn ? ` + ${kr(x.manedslonn)} kr fast` : ''}`}</span></span>
-                <span style={{ textAlign: 'right' }}><b className="belop" style={{ display: 'block' }}>{kr(slipper[i]?.netto ?? 0)}</b><span className="mut liten">utbetales</span></span>
+                <span style={{ textAlign: 'right' }}><b className="belop" style={{ display: 'block' }}>{kr((slipper[i]?.netto ?? 0) + utleggSum(x.id))}</b><span className="mut liten">{utleggSum(x.id) ? `utbetales, med ${kr(utleggSum(x.id))} i utlegg` : 'utbetales'}</span></span>
               </button>
             ))}
           </div>
@@ -145,9 +147,10 @@ export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, org
               <tbody>
                 {slipp.linjer.map((l, i) => <tr key={i}><td>{l.tekst}{l.antall != null ? ` · ${String(l.antall).replace('.', ',')} t à ${kr(l.sats ?? 0)}` : ''}</td><td className="belop" style={{ textAlign: 'right' }}>{kr(l.belop)}</td></tr>)}
                 <tr><td>Skattetrekk {String(a.skatteprosent).replace('.', ',')} %</td><td className="belop" style={{ textAlign: 'right' }}>−{kr(slipp.skatt)}</td></tr>
+                {utleggFor(a.id).map((u, i) => <tr key={`u${i}`}><td>Refusjon av utlegg: {u.tekst}</td><td className="belop" style={{ textAlign: 'right' }}>{kr(u.belop)}</td></tr>)}
               </tbody>
             </table>
-            <div className="rad" style={{ justifyContent: 'space-between', fontWeight: 700, fontSize: 15, marginTop: 10 }}><span>Utbetalt</span><span className="belop">{kr(slipp.netto)} kr</span></div>
+            <div className="rad" style={{ justifyContent: 'space-between', fontWeight: 700, fontSize: 15, marginTop: 10 }}><span>Utbetalt</span><span className="belop">{kr(slipp.netto + utleggSum(a.id))} kr</span></div>
             <div className="mut liten" style={{ marginTop: 10 }}>Feriepenger opptjent denne måneden: {kr(slipp.feriepenger)} kr ({String(ferie).replace('.', ',')} %)</div>
           </div>
         </div>

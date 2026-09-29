@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 6;
+export const SKJEMA_VERSJON = 7;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -381,6 +381,44 @@ alter table lonnslipp add column if not exists sendt_tid timestamptz;
 alter table lonnslipp add column if not exists apnet_tid timestamptz;
 alter table lonnslipp add column if not exists feil int not null default 0;
 alter table lonnslipp add column if not exists sperret_til timestamptz;
+
+-- Versjon 7: skanning med mobil. Lenker som bare kan sende inn dokumenter (egen QR, klient, ansatt),
+-- en innboks for det som kommer inn, og utlegg som betales tilbake med lønnen eller med en gang.
+create table if not exists skannelenke (
+  id uuid primary key default gen_random_uuid(),
+  organisasjon_id uuid not null references organisasjon(id) on delete cascade,
+  token text not null unique,
+  type text not null check (type in ('egen','klient','ansatt')),
+  ansatt_id uuid references ansatt(id),
+  navn text,
+  epost text,
+  utloper timestamptz,
+  slettet boolean not null default false,
+  opprettet_av uuid references bruker(id),
+  opprettet timestamptz not null default now()
+);
+create table if not exists innsending (
+  id uuid primary key default gen_random_uuid(),
+  organisasjon_id uuid not null references organisasjon(id) on delete cascade,
+  lenke_id uuid references skannelenke(id),
+  vedlegg_id uuid references vedlegg(id),
+  type text not null,
+  fra_navn text,
+  tekst text,
+  betalt_med text,
+  status text not null default 'ny' check (status in ('ny','hentet','registrert','godkjent','avvist','betalt')),
+  kjop_id uuid references kjop(id),
+  belop bigint,
+  tilbake text,
+  lonnskjoring_id uuid references lonnskjoring(id),
+  avvist_grunn text,
+  opprettet timestamptz not null default now(),
+  behandlet timestamptz
+);
+create index if not exists innsending_org on innsending (organisasjon_id, status);
+alter table organisasjon add column if not exists utlegg_tilbake text;
+alter table lonnslipp add column if not exists utlegg bigint not null default 0;
+alter table lonnslipp add column if not exists utlegg_linjer jsonb not null default '[]';
 
 -- Supabase gir tilgang til tabellene i «public» gjennom sitt eget API med en offentlig nøkkel.
 -- Systemet bruker ikke det API-et, så all slik tilgang stenges: radsikkerhet uten regler, og ingen rettigheter
