@@ -21,6 +21,11 @@ describe('e-post', () => {
     const body = JSON.parse(String(init.body));
     expect(body).toMatchObject({ to: ['post@kvam.no'], subject: 'Faktura 1044 fra Havøy Fisk AS', reply_to: 'post@havoy.no', attachments: [{ filename: 'faktura-1044.pdf', content: 'JVBERg==' }] });
     expect(body.text).toContain('KID: 0000104400');
+    // HTML-versjonen har logo, figur og betalingsinfo.
+    expect(body.html).toContain('/epost/logo.png');
+    expect(body.html).toContain('/epost/figur.png');
+    expect(body.html).toContain('0000104400');
+    expect(body.html).toContain('Fakturaen ligger vedlagt som PDF.');
     expect((init.headers as Record<string, string>).authorization).toBe('Bearer re_test');
   });
   it('feil fra tjenesten gir false, ikke unntak', async () => {
@@ -28,6 +33,12 @@ describe('e-post', () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('nei', { status: 422 })));
     vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(await sendEpost({ til: 'a@b.no', emne: 'x', tekst: 'y' })).toBe(false);
+  });
+  it('malene escaper navn fra brukeren', () => {
+    const m = maler.invitasjon('<script>x</script>', 'A & B AS', 'som regnskapsfører', 'https://min.xn--rettfrt-u1a.no/invitasjon/abc');
+    expect(m.html).not.toContain('<script>x');
+    expect(m.html).toContain('A &amp; B AS');
+    expect(m.html).toContain('Godta invitasjonen');
   });
   it('HTML-versjonen escaper tekst og lager lenker', () => {
     const h = somHtml('Hei <b>!\n\nhttps://min.xn--rettfrt-u1a.no/invitasjon/abc');
