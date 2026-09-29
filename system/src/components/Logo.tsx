@@ -10,5 +10,5 @@ export function Logo({ bredde = 104 }: { bredde?: number }) {
 }
 
 export function Maskot({ storrelse = 96 }: { storrelse?: number }) {
-  return <img src="/mascot-hip.png" alt="" width={storrelse} height={storrelse} style={{ width: storrelse, height: 'auto' }} />;
+  return <img src="/maskot.svg" alt="" width={storrelse} height={storrelse} style={{ width: storrelse, height: 'auto' }} />;
 }

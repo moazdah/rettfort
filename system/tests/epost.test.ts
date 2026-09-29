@@ -22,8 +22,7 @@ describe('e-post', () => {
     expect(body).toMatchObject({ to: ['post@kvam.no'], subject: 'Faktura 1044 fra Havøy Fisk AS', reply_to: 'post@havoy.no', attachments: [{ filename: 'faktura-1044.pdf', content: 'JVBERg==' }] });
     expect(body.text).toContain('KID: 0000104400');
     // HTML-versjonen har logo, figur og betalingsinfo.
-    expect(body.html).toContain('/epost/logo.png');
-    expect(body.html).toContain('/epost/figur.png');
+    expect(body.html).toContain('/epost/topp.png');
     expect(body.html).toContain('0000104400');
     expect(body.html).toContain('Fakturaen ligger vedlagt som PDF.');
     expect((init.headers as Record<string, string>).authorization).toBe('Bearer re_test');

@@ -71,10 +71,7 @@ export function ramme(o: { tittel: string; innhold: string; bunn?: string; forha
 ${o.forhandsvisning ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(o.forhandsvisning)}</div>` : ''}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BEIGE}"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px">
-<tr><td style="padding:0 4px 16px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-<td valign="bottom"><img src="${b}/epost/logo.png" width="118" height="30" alt="Rettført" style="display:block;border:0"></td>
-<td valign="bottom" align="right"><img src="${b}/epost/figur.png" width="56" height="56" alt="" style="display:block;border:0"></td>
-</tr></table></td></tr>
+<tr><td style="padding:0 0 12px"><img src="${b}/epost/topp.png" width="520" alt="Rettført" style="display:block;width:100%;max-width:520px;height:auto;border:0;border-radius:16px"></td></tr>
 <tr><td style="background:#ffffff;border:1px solid ${LINJE};border-radius:16px;padding:32px 28px;font-family:${FONT};color:${BLA}">
 <h1 style="margin:0 0 20px;font-size:22px;line-height:1.3;font-weight:700;color:${BLA}">${esc(o.tittel)}</h1>
 ${o.innhold}
