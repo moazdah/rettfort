@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="nb">
 <head>
+<script>
+// «Logg inn» og «Start gratis» går til systemet på min.rettført.no. Demoene blir liggende her.
+(function () { try {
+  var q = new URLSearchParams(location.search), S = 'https://min.xn--rettfrt-u1a.no';
+  if (q.has('logg-inn')) location.replace(S + '/logg-inn');
+  else if (q.has('venteliste')) { var v = q.get('venteliste'); location.replace(S + '/registrer' + (v === 'regnskapsforer' || v === 'bedrift' ? '?rolle=' + v : '')); }
+} catch (e) {} })();
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Rettført kontrollerer regnskapet før du godkjenner perioden. SAF-T, bank, lønn og bilag går gjennom 36 faste kontroller. Du vurderer de få funnene som gjenstår og signerer et kontrollbevis.">
