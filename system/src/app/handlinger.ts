@@ -71,7 +71,12 @@ export async function loggInn(_: unknown, fd: FormData): Promise<Resultat<string
       }
       await db.q('update bruker set totp_feil = 0, totp_sperret_til = null where id = $1', [b.id]);
     }
-    const m = await db.en<{ organisasjon_id: string; type: string }>('select m.organisasjon_id, o.type from medlemskap m join organisasjon o on o.id = m.organisasjon_id where m.bruker_id = $1 order by m.opprettet limit 1', [b.id]);
+    let m = await db.en<{ organisasjon_id: string; type: string }>('select m.organisasjon_id, o.type from medlemskap m join organisasjon o on o.id = m.organisasjon_id where m.bruker_id = $1 order by m.opprettet limit 1', [b.id]);
+    // Testbrukere uten eget foretak går rett inn i Testfirma AS i stedet for å opprette foretak.
+    if (!m && erTestbruker(epost)) {
+      const navn = await db.en<{ navn: string }>('select navn from bruker where id = $1', [b.id]);
+      m = { organisasjon_id: await lagTestfirma(db, b.id, navn?.navn.split(' ')[0] || 'Test', idag()), type: 'selskap' };
+    }
     const { token } = await db.tx(t => opprettSesjon(t, b.id, m?.organisasjon_id ?? null));
     await settCookie(token);
     return m?.type ?? null;

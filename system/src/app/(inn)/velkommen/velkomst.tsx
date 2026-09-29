@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Logo, Maskot } from '@/components/Logo';
 import { BrregSok } from '@/components/BrregSok';
-import { bekreftEpost, nyKode, byttEpost, opprettForetak, type NyttForetak } from '@/app/handlinger';
+import { bekreftEpost, nyKode, byttEpost, opprettForetak, loggUt, testfirma, type NyttForetak } from '@/app/handlinger';
 import type { Enhet } from '@/lib/brreg';
 import { fristerForAr, norskDato, type Orgform } from '@/lib/frister';
 import { lagSlugKlient } from './slug';
@@ -12,7 +12,8 @@ import { lagSlugKlient } from './slug';
 const ORGFORMER: [string, string][] = [['AS', 'Aksjeselskap (AS)'], ['ENK', 'Enkeltpersonforetak (ENK)'], ['ANS', 'Ansvarlig selskap (ANS)'], ['DA', 'Selskap med delt ansvar (DA)'], ['NUF', 'Norskregistrert utenlandsk foretak (NUF)'], ['ANNET', 'Annet']];
 const SYSTEMER = ['Fiken', 'Tripletex', 'PowerOffice Go', 'Visma eAccounting', 'Xledger', '24SevenOffice', 'Annet'];
 
-export function Velkomst({ navn, epost, bekreftet, testkode }: { navn: string; epost: string; bekreftet: boolean; testkode: string | null }) {
+export function Velkomst({ navn, epost, bekreftet, testkode, testbruker = false }: { navn: string; epost: string; bekreftet: boolean; testkode: string | null; testbruker?: boolean }) {
+  const [aapnerTest, setAapnerTest] = useState(false);
   const router = useRouter();
   const [steg, setSteg] = useState(bekreftet ? 3 : 2);
   const [kode, setKode] = useState('');
@@ -61,6 +62,18 @@ export function Velkomst({ navn, epost, bekreftet, testkode }: { navn: string; e
           <Logo bredde={110} />
           {steg < 6 && <span className="mut liten">Steg {steg - 1} av 4</span>}
         </div>
+        {steg >= 3 && steg < 6 && (
+          <div className="rad mut liten" style={{ justifyContent: 'space-between', marginTop: -12, marginBottom: 20 }}>
+            <span>Logget inn som <b>{adresse}</b>. Kontoen har ikke noe foretak ennå.</span>
+            <form action={loggUt}><button className="lenke">Logg ut</button></form>
+          </div>
+        )}
+        {testbruker && steg >= 3 && steg < 6 && (
+          <div className="kort" style={{ marginBottom: 20, padding: 14 }}>
+            <p style={{ margin: '0 0 8px' }}>Du har testtilgang. Vil du heller prøve systemet med et ferdig utfylt testfirma?</p>
+            <button type="button" className="knapp" disabled={aapnerTest} onClick={async () => { setAapnerTest(true); const r = await testfirma(); if (r && !r.ok) { setAapnerTest(false); setFeil(r.feil); } }}>{aapnerTest ? 'Lager testfirma …' : 'Åpne Testfirma AS med eksempeldata'}</button>
+          </div>
+        )}
 
         {steg === 2 && (
           <div className="stakk">
