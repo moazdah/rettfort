@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
-import { loggUt, settTestPakke, testByra } from '@/app/handlinger';
+import { loggUt, settTestPakke, testByra, testfirma, byttForetak } from '@/app/handlinger';
 
 import { MENY } from './menyvalg';
 export { MENY };
@@ -30,7 +30,7 @@ function useNedtrekk() {
   return { apen, setApen, ref };
 }
 
-export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean }) {
+export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '' }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string }) {
   const sti = usePathname();
   const aktiv = (m: (typeof MENY)[number]) => m.aktivPa.some(p => sti === p || sti.startsWith(p + '/'));
   const initialer = bruker.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
@@ -39,6 +39,10 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
   const merAktiv = mer.some(aktiv);
   const merMeny = useNedtrekk();
   const profil = useNedtrekk();
+  const [lager, setLager] = useState(false);
+  // Lukk profilmenyen når foretaket byttes (adressen kan være den samme).
+  const { setApen: lukkProfil } = profil;
+  useEffect(() => { lukkProfil(false); setLager(false); }, [orgId, lukkProfil]);
   const teller = (m: (typeof MENY)[number]) => m.href === '/mva' && mvaTeller > 0 && <span className="teller" aria-label={`${mvaTeller} ting mangler`}>{mvaTeller}</span>;
 
   return (
@@ -75,6 +79,15 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
                       {(['gratis', 'start', 'selskap'] as const).map(p => <button key={p} type="button" className={pakke === p ? 'valgt' : ''} onClick={() => settTestPakke(p)}>{PAKKE[p]}</button>)}
                       <button type="button" onClick={() => testByra()}>Byrå</button>
                     </div>
+                    <button type="button" className="testfirma-knapp" disabled={lager} onClick={async () => { setLager(true); const r = await testfirma(); if (r && !r.ok) { setLager(false); alert(r.feil); } }}>
+                      {lager ? 'Lager testfirma … (tar litt tid)' : 'Åpne Testfirma AS med eksempeldata'}
+                    </button>
+                  </div>
+                )}
+                {foretak.length > 1 && (
+                  <div className="foretak-bytt">
+                    <small>Bytt foretak</small>
+                    {foretak.map(f => <button key={f.orgId} type="button" role="menuitem" className={f.orgId === orgId ? 'valgt' : ''} disabled={f.orgId === orgId} onClick={() => byttForetak(f.orgId)}>{f.navn}{f.orgId === orgId ? ' ✓' : ''}</button>)}
                   </div>
                 )}
                 <Link href="/innstillinger" role="menuitem">Innstillinger</Link>

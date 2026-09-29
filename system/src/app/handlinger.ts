@@ -23,6 +23,7 @@ import { svar as assistentSvar, type Svar } from '@/lib/assistent';
 import { harAssistent, erTestbruker } from '@/lib/pakker';
 import { nyHemmelighet, sjekkTotp, otpauthUri } from '@/lib/totp';
 import QRCode from 'qrcode';
+import { lagTestfirma, TESTFIRMA_ORGNR } from '@/lib/db/eksempel';
 import { kr } from '@/lib/penger';
 
 async function settCookie(token: string) {
@@ -203,6 +204,7 @@ export async function byttForetak(orgId: string): Promise<void> {
   if (!ok) throw new RegnskapsFeil('Du har ikke tilgang til dette foretaket.');
   await db.q('update sesjon set organisasjon_id = $2 where token_hash = $1', [tokenHash(s.token), orgId]);
   const o = await db.en<{ type: string }>('select type from organisasjon where id = $1', [orgId]);
+  revalidatePath('/', 'layout');
   redirect(o?.type === 'byra' ? '/byra' : '/hjem');
 }
 
@@ -745,6 +747,21 @@ export async function testByra(): Promise<Resultat> {
   });
   if (!res.ok) return res;
   redirect('/byra');
+}
+
+/** Bare for testbrukere: lag Testfirma AS med fiktivt orgnr og et års aktivitet, og gå dit. Finnes det, åpnes det. */
+export async function testfirma(): Promise<Resultat> {
+  const res = await trygt(async () => {
+    const s = await kreverInnlogget();
+    if (!erTestbruker(s.bruker.epost)) throw new RegnskapsFeil('Ikke tilgang.');
+    const db = await getDb();
+    const finnes = await db.en<{ id: string }>(`select o.id from organisasjon o join medlemskap m on m.organisasjon_id = o.id where m.bruker_id = $1 and o.orgnr = $2 limit 1`, [s.bruker.id, TESTFIRMA_ORGNR]);
+    const orgId = finnes?.id ?? await lagTestfirma(db, s.bruker.id, s.bruker.navn.split(' ')[0] || 'Test', idag());
+    await db.q('update sesjon set organisasjon_id = $2 where token_hash = $1', [tokenHash(s.token), orgId]);
+    revalidatePath('/', 'layout');
+  });
+  if (!res.ok) return res;
+  redirect('/hjem');
 }
 
 // ---------- Totrinns innlogging ----------

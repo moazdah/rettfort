@@ -228,6 +228,13 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
 .testpakke .rad { gap: 4px; margin-top: 6px; }
 .testpakke button { border: 1px solid var(--linje-2); background: #fff; border-radius: 99px; padding: 4px 10px; font-size: 13px; cursor: pointer; font-family: inherit; color: var(--ink); }
 .testpakke button.valgt { background: var(--ink); color: #fff; border-color: var(--ink); }
+.testpakke .testfirma-knapp { display: block; width: 100%; margin-top: 8px; border-radius: 8px; padding: 7px 10px; background: var(--gul, #F6DF6E); border-color: transparent; font-weight: 600; text-align: left; }
+.testpakke .testfirma-knapp:disabled { opacity: .7; cursor: wait; }
+.foretak-bytt { padding: 8px 12px 6px; border-bottom: 1px solid var(--linje); margin-bottom: 6px; display: flex; flex-direction: column; }
+.foretak-bytt small { font-size: 11.5px; font-weight: 700; letter-spacing: .05em; color: var(--mut); text-transform: uppercase; margin-bottom: 4px; }
+.foretak-bytt button { text-align: left; background: none; border: 0; padding: 6px 0; font: inherit; font-size: 14px; color: var(--ink); cursor: pointer; }
+.foretak-bytt button:hover:not(:disabled) { text-decoration: underline; }
+.foretak-bytt button.valgt { font-weight: 700; cursor: default; }
 @media (max-width: 900px) { .assistent-knapp { bottom: calc(76px + env(safe-area-inset-bottom)); right: 12px; padding: 6px 14px 6px 8px; } .assistent-knapp small { display: none; } .assistent-panel { right: 8px; left: 8px; width: auto; max-width: none; bottom: calc(72px + env(safe-area-inset-bottom)); height: min(560px, calc(100vh - 150px)); } }
 /* Utfylling hos Skatteetaten/Altinn, felt for felt */
 .utfylling { display: flex; flex-direction: column; gap: 12px; }
