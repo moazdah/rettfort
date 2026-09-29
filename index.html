@@ -141,7 +141,15 @@ input,textarea{font-family:inherit}
 @media (max-width:760px){.rf-desk{display:none !important}.rf-mob{display:block !important}.rf-mobi{display:inline !important}
 [data-rf=hero]{text-align:center;padding-top:40px !important;padding-bottom:40px !important}[data-rf=hero] h1{font-size:37px !important}[data-rf=hero]>div>div:first-child{justify-content:center}
 [data-rf=heroBtns]{margin-top:28px !important}[data-rf=heroBtns]>button{width:100%;justify-content:center;font-size:17px !important;padding:17px 22px !important;border-radius:12px !important}
-[data-rf=plans]{display:flex !important;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px !important;padding:84px 18px 18px;gap:14px !important;scrollbar-width:none;align-items:stretch !important}[data-rf=plans]::-webkit-scrollbar{display:none}[data-rf=plans]>div{flex:0 0 86%;scroll-snap-align:center;min-width:0}
+[data-rf=planTabs]{position:relative;display:grid !important;grid-template-columns:repeat(4,1fr);gap:0;background:#EAE5DA;border-radius:99px;padding:5px;margin:-40px auto -44px;width:100%;max-width:420px}
+[data-rf=planTabs]>button{position:relative;z-index:1;border:0;background:transparent;height:42px;border-radius:99px;font-size:15px;font-weight:600;color:#586174;transition:color .3s;-webkit-tap-highlight-color:transparent}
+[data-rf=planTabs]>button.rf-gratis{box-shadow:inset 0 0 0 2px #F6DF6E;background:rgba(246,223,110,.28);color:#0B2545}
+[data-rf=planPill]{position:absolute;z-index:0;top:5px;bottom:5px;left:5px;width:calc((100% - 10px) / 4);border-radius:99px;background:#fff;box-shadow:0 2px 8px -3px rgba(11,37,69,.35);transition:transform .45s cubic-bezier(.3,.7,.2,1)}
+[data-rf=planTabs][data-aktiv="1"] [data-rf=planPill]{transform:translateX(100%)}
+[data-rf=planTabs][data-aktiv="2"] [data-rf=planPill]{transform:translateX(200%)}
+[data-rf=planTabs][data-aktiv="3"] [data-rf=planPill]{transform:translateX(300%)}
+[data-rf=planTabs][data-aktiv="0"] [data-i="0"],[data-rf=planTabs][data-aktiv="1"] [data-i="1"],[data-rf=planTabs][data-aktiv="2"] [data-i="2"],[data-rf=planTabs][data-aktiv="3"] [data-i="3"]{color:#0B2545}
+[data-rf=plans]{display:flex !important;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px !important;padding:30px 18px 18px;gap:14px !important;scrollbar-width:none;align-items:stretch !important}[data-rf=plans]::-webkit-scrollbar{display:none}[data-rf=plans]>div{flex:0 0 86%;scroll-snap-align:center;min-width:0}
 .rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}[data-rf=mobmenu]{margin-left:2px !important;margin-right:-8px}[data-rf=mlogin]{display:inline-flex !important}.rf-about{padding-top:20px !important}#om-meg{margin-bottom:40px !important}#om-meg .rf-acc-b>div{gap:16px !important;margin-top:4px !important}[data-rf=aboutPhoto]{max-width:230px !important}[data-rf=steps]{gap:56px !important}#slik{background:transparent !important;border:0 !important}#slik>[data-rf=sec]{padding-top:32px !important}[data-rf=hero]{padding-bottom:8px !important}#kontroller{padding-top:64px !important}}
 @media (max-width:760px){
 [data-rf=steps] .rf-desk{display:block !important}[data-rf=steps] .rf-drop{display:none !important}
@@ -457,6 +465,13 @@ input,textarea{font-family:inherit}
   <section id="priser" style="padding:104px 32px 88px">
     <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:64px">
       <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px"><h2 style="margin:0;font-size:clamp(38px,4.4vw,56px);line-height:1.04;letter-spacing:-0.04em;font-weight:600">Priser.</h2><p style="margin:0;font-size:18px;color:#3D4759;line-height:1.5;max-width:560px">Start gratis, eller prøv en betalt pakke gratis i 30 dager. Ingen binding, og du betaler ikke før du har valgt å fortsette.</p></div>
+      <div class="rf-mob" data-rf="planTabs" data-aktiv="2" role="tablist" aria-label="Pakker">
+        <span data-rf="planPill" aria-hidden="true"></span>
+        <button type="button" role="tab" data-i="0" class="rf-gratis">Gratis</button>
+        <button type="button" role="tab" data-i="1">Start</button>
+        <button type="button" role="tab" data-i="2">Selskap</button>
+        <button type="button" role="tab" data-i="3">Byrå</button>
+      </div>
       <div data-rf="plans" onMouseLeave="{{ pcReset }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,262px),1fr));gap:16px;align-items:stretch">
         <sc-for list="{{ pcards }}" as="p" hint-placeholder-count="4">
           <div onMouseEnter="{{ p.onEnter }}" style="position:relative;display:grid;grid-row:span 5;grid-template-rows:subgrid;row-gap:20px;background:{{ p.bg }};border:1px solid {{ p.border }};border-radius:24px;padding:34px 26px 32px;color:{{ p.fg }};box-shadow:{{ p.sh }};transform:{{ p.tf }};transition:background .3s,color .3s,box-shadow .3s,transform .3s,border-color .3s">
@@ -494,7 +509,7 @@ input,textarea{font-family:inherit}
   </section>
 
   <section style="padding:0 32px 88px">
-    <div style="max-width:1200px;margin:0 auto;background:#fff;border:1px solid #E4DFD4;border-radius:32px;padding:56px clamp(24px,5vw,64px);display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:32px;align-items:center" data-rf="endCta">
+    <div style="max-width:1200px;margin:0 auto;background:#fff;border:1px solid #E4DFD4;border-radius:32px;padding:56px clamp(24px,5vw,64px);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:center" data-rf="endCta">
       <div><div style="font-size:clamp(26px,3vw,36px);font-weight:600;letter-spacing:-0.025em;line-height:1.12">Se hva Rettført finner hos deg.</div><div style="font-size:17px;color:#3D4759;margin-top:8px">Koble til regnskapssystemet og få første kontroll på fem minutter.</div></div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><a href="/?venteliste=regnskapsforer" style="height:56px;padding:0 28px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;font-size:17px;font-weight:600;text-decoration:none;white-space:nowrap">Prøv gratis i 30 dager</a><a href="/?demo" style="font-size:14px;color:#3D4759">eller åpne demoen</a></div>
     </div>
@@ -1830,13 +1845,32 @@ body.rf-rolig #rfc{display:none!important}
   function center() {
     var el = document.querySelector('[data-rf=plans]');
     if (el && done && !done.has(el) && el.children.length >= 3 && el.scrollWidth > el.clientWidth) {
-      var mid = el.children[1];
+      var mid = el.children[2];
       var a = el.getBoundingClientRect(), b = mid.getBoundingClientRect();
       el.scrollLeft += b.left - a.left - (a.width - b.width) / 2;
       done.add(el);
     }
   }
   setInterval(center, 400);
+  function tabs() { return document.querySelector('[data-rf=planTabs]'); }
+  function tilKort(i) {
+    var el = document.querySelector('[data-rf=plans]'); if (!el || !el.children[i]) return;
+    var a = el.getBoundingClientRect(), b = el.children[i].getBoundingClientRect();
+    el.scrollTo({ left: el.scrollLeft + b.left - a.left - (a.width - b.width) / 2, behavior: 'smooth' });
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest && e.target.closest('[data-rf=planTabs] [data-i]'); if (!t) return;
+    var i = Number(t.getAttribute('data-i')); var tb = tabs(); if (tb) tb.setAttribute('data-aktiv', String(i)); tilKort(i);
+  });
+  var tik = null;
+  document.addEventListener('scroll', function (e) {
+    var el = e.target; if (!el || !el.getAttribute || el.getAttribute('data-rf') !== 'plans') return;
+    clearTimeout(tik); tik = setTimeout(function () {
+      var a = el.getBoundingClientRect(), midt = a.left + a.width / 2, best = 0, avst = 1e9;
+      for (var k = 0; k < el.children.length; k++) { var r = el.children[k].getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - midt); if (d < avst) { avst = d; best = k; } }
+      var tb = tabs(); if (tb) tb.setAttribute('data-aktiv', String(best));
+    }, 60);
+  }, true);
 })();
 </script>
 </body>
