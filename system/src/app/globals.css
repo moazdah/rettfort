@@ -223,6 +223,59 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
 .boble.feil { align-self: flex-start; background: var(--gul-bg); color: var(--gul-tekst); }
 .boble .kilder { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--linje); font-size: 12.5px; color: var(--mut); display: flex; gap: 8px; flex-wrap: wrap; }
 .assistent-skriv { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--linje); }
+.assistent-panel { transition: width .2s ease, height .2s ease; }
+.assistent-panel.bred { width: min(760px, calc(100vw - 40px)); height: calc(100vh - 60px); }
+.assistent-panel header .lenke { white-space: nowrap; }
+.assistent-panel header .lenke.liten { font-size: 13px; }
+.assistent-panel header .fyll { min-width: 0; }
+.assistent-panel header .fyll small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Kort i assistenten: forslag, grafer og tabeller */
+.ak-svar { display: flex; flex-direction: column; gap: 8px; align-self: stretch; }
+.ak-svar > .boble { align-self: flex-start; }
+.ak-kort { background: #fff; border: 1px solid var(--linje); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; box-shadow: 0 8px 20px -18px rgba(11,37,69,.5); }
+.ak-kort.ferdig { background: var(--kort-2, #F7F5EF); }
+.ak-topp { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ak-merke { font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--mut); }
+.ak-status { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--linje-3); color: var(--ink); }
+.ak-status.utfort { background: var(--gronn-bg); color: #174F36; }
+.ak-status.pa_vent { background: var(--gul-bg); color: var(--gul-tekst); }
+.ak-linjer { display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; }
+.ak-linjer > div { display: flex; justify-content: space-between; gap: 10px; }
+.ak-sum { display: flex; justify-content: space-between; align-items: baseline; padding-top: 6px; border-top: 1px solid var(--linje-3); }
+.ak-sum b { font-size: 16px; }
+.ak-rader { display: grid; grid-template-columns: auto 1fr; gap: 3px 14px; font-size: 13.5px; }
+.ak-rader > :nth-child(odd) { color: var(--mut); }
+.ak-rader > :nth-child(even) { text-align: right; }
+.ak-dokument { max-height: 520px; overflow: auto; border-radius: 8px; background: #EDEAE2; padding: 10px; }
+.ak-dokument .dokument { padding: 20px; }
+.ak-knapper { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 4px; }
+.ak-kort .lenke { align-self: flex-start; }
+.ak-graf { display: flex; align-items: flex-end; gap: 4px; height: 140px; }
+.ak-mnd { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 4px; background: none; border: 0; padding: 2px 0 0; border-radius: 6px; cursor: pointer; font-family: inherit; }
+.ak-mnd:hover, .ak-mnd.valgt { background: var(--linje-3); }
+.ak-mnd.valgt .ak-mnd-navn { color: var(--ink); font-weight: 700; }
+.ak-soyler { flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 2px; padding: 0 2px; }
+.ak-soyler > span { flex: 1; max-width: 12px; border-radius: 3px 3px 0 0; min-height: 1px; }
+.ak-soyler .inn, .ak-forklaring i.inn, .ak-bar .inn { background: var(--gronn-lys); }
+.ak-soyler .ut, .ak-forklaring i.ut, .ak-bar .ut { background: #C9C2B4; }
+.ak-mnd-navn { font-size: 11px; color: var(--mut); text-align: center; }
+.ak-forklaring { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--mut); }
+.ak-forklaring i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; }
+.ak-detalj { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 10px; background: #FBFAF6; border: 1px solid var(--linje-3); }
+.ak-tabell { display: flex; flex-direction: column; margin: 0 -6px; }
+.ak-rad { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 6px; border: 0; border-top: 1px solid var(--linje-3); background: none; font: inherit; font-size: 13.5px; color: var(--ink); text-align: left; text-decoration: none; cursor: pointer; border-radius: 6px; }
+.ak-tabell > :first-child .ak-rad, .ak-tabell > .ak-rad:first-child { border-top: 0; }
+.ak-rad:hover, .ak-rad.valgt { background: #FBFAF6; }
+.ak-rad .fyll { display: flex; flex-direction: column; min-width: 0; }
+.ak-rad small { font-size: 12px; }
+.ak-radvalg { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 6px 10px; }
+.ak-bar { display: block; height: 5px; background: var(--linje-3); border-radius: 99px; margin-top: 4px; overflow: hidden; }
+.ak-bar > span { display: block; height: 100%; border-radius: 99px; }
+.ak-tenker { display: flex; gap: 4px; }
+.ak-tenker span { width: 7px; height: 7px; border-radius: 99px; background: var(--mut); animation: ak-prikk 1s infinite ease-in-out; }
+.ak-tenker span:nth-child(2) { animation-delay: .15s; } .ak-tenker span:nth-child(3) { animation-delay: .3s; }
+@keyframes ak-prikk { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+.venter-pa-deg .linje { align-items: center; }
 .testpakke { padding: 8px 12px 10px; border-bottom: 1px solid var(--linje); margin-bottom: 6px; }
 .testpakke small { font-size: 11.5px; font-weight: 700; letter-spacing: .05em; color: var(--mut); text-transform: uppercase; }
 .testpakke .rad { gap: 4px; margin-top: 6px; }
@@ -235,7 +288,7 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
 .foretak-bytt button { text-align: left; background: none; border: 0; padding: 6px 0; font: inherit; font-size: 14px; color: var(--ink); cursor: pointer; }
 .foretak-bytt button:hover:not(:disabled) { text-decoration: underline; }
 .foretak-bytt button.valgt { font-weight: 700; cursor: default; }
-@media (max-width: 900px) { .assistent-knapp { bottom: calc(76px + env(safe-area-inset-bottom)); right: 12px; padding: 6px 14px 6px 8px; } .assistent-knapp small { display: none; } .assistent-panel { right: 8px; left: 8px; width: auto; max-width: none; bottom: calc(72px + env(safe-area-inset-bottom)); height: min(560px, calc(100vh - 150px)); } }
+@media (max-width: 900px) { .assistent-knapp { bottom: calc(76px + env(safe-area-inset-bottom)); right: 12px; padding: 6px 14px 6px 8px; } .assistent-knapp small { display: none; } .assistent-panel { right: 8px; left: 8px; width: auto; max-width: none; bottom: calc(72px + env(safe-area-inset-bottom)); height: min(560px, calc(100vh - 150px)); } .assistent-panel.bred { width: auto; height: calc(100vh - 150px); } .ak-graf { height: 110px; } }
 /* Utfylling hos Skatteetaten/Altinn, felt for felt */
 .utfylling { display: flex; flex-direction: column; gap: 12px; }
 .utfylling-rader { border: 1px solid var(--linje); border-radius: 12px; overflow: hidden; background: #fff; }

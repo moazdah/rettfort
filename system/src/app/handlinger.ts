@@ -4,10 +4,10 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getDb } from '@/lib/db';
-import { hashPassord, sjekkPassord, opprettSesjon, gyldigEpost, passordFeil, lagKode, lagSlug, tokenHash, SESJON_COOKIE, SESJON_DAGER } from '@/lib/auth';
+import { hashPassord, sjekkPassord, opprettSesjon, gyldigEpost, passordFeil, lagKode, lagSlug, tokenHash, SESJON_COOKIE, SESJON_DAGER, kanEndre } from '@/lib/auth';
 import { sesjon, trygt, idag, sjekkSkrivetilgang, type Resultat } from '@/lib/server';
 import { RegnskapsFeil } from '@/lib/hovedbok';
-import { lagreSalg, sendSalg, registrerBetaling, krediter, forfallFra, type FakturaInput } from '@/lib/tjenester/faktura';
+import { lagreSalg, sendSalg, registrerBetaling, krediter, forfallFra, hentOrg, type FakturaInput } from '@/lib/tjenester/faktura';
 import { registrerKjop, lagreKjopUtkast, betalKjop, finnEllerLagKontakt, type KjopInput } from '@/lib/tjenester/kjop';
 import { korriger } from '@/lib/tjenester/bokforing';
 import { importerKontoutskrift, behandleBevegelse, merkManedFerdig, type Handling } from '@/lib/tjenester/bank';
@@ -27,6 +27,10 @@ import { lagTestfirma, TESTFIRMA_ORGNR } from '@/lib/db/eksempel';
 import { gyldigFnr, planleggUtsending, sendForfalte, apneLonnslipp, type SendNar } from '@/lib/tjenester/lonnslipp';
 import type { LonnslippPdfData } from '@/lib/pdf';
 import { stripePa, startBetaling, sigOpp, portalLenke } from '@/lib/stripe';
+import { svarSomAgent, type Tur } from '@/lib/ai/agent';
+import { kjorVerktoy, type Kort } from '@/lib/ai/verktoy';
+import { utforForslag, type Valg } from '@/lib/ai/utfor';
+import { valgtLeverandor, leverandorKlar, settLeverandor, type Leverandor } from '@/lib/ai/modell';
 import { lagLenke, hentNye, etterRegistrering, hentInnsending, settTilbake, settFastTilbake, betalUtleggNa, avvis, slettLenke, type Tilbake } from '@/lib/tjenester/innsending';
 import { kr } from '@/lib/penger';
 
@@ -910,6 +914,77 @@ export async function sporAssistent(sporsmal: string): Promise<Resultat<Svar>> {
     const db = await getDb();
     return assistentSvar(q, await hentFakta(db, s.org.id, idag()));
   });
+}
+
+// ---------- Assistenten som agent ----------
+
+export interface AgentSvar { tekst: string; kort: Kort[]; kilder?: { tekst: string; href: string }[]; igjen?: number | null }
+
+const KVOTE: Record<string, number> = { selskap: 200, byra: 2000 };
+
+/** Chat med assistenten. Historikken er bare tekst; forslag og tall hentes på nytt fra regnskapet. */
+export async function chatMedAssistent(historikk: Tur[]): Promise<Resultat<AgentSvar>> {
+  return trygt(async () => {
+    const s = await kreverOrg();
+    const byra = s.medlemskap.some(m => m.type === 'byra');
+    if (!harAssistent(s.org.pakke) && !byra) throw new RegnskapsFeil('Assistenten er med i Selskap og Byrå.');
+    const tur = historikk.filter(t => (t.role === 'user' || t.role === 'assistant') && typeof t.content === 'string').slice(-14);
+    const siste = tur[tur.length - 1];
+    if (!siste || siste.role !== 'user' || !siste.content.trim()) throw new RegnskapsFeil('Skriv et spørsmål.');
+    if (siste.content.length > 2000) throw new RegnskapsFeil('Spørsmålet er for langt.');
+    const db = await getDb();
+    const dag = idag();
+    // Uten språkmodell (testmodus eller ikke satt opp): enkle svar fra tallene som før.
+    if (!leverandorKlar(await valgtLeverandor(db))) {
+      const v = assistentSvar(siste.content, await hentFakta(db, s.org.id, dag));
+      return { tekst: v.tekst, kort: [], kilder: v.kilder, igjen: null };
+    }
+    const test = erTestbruker(s.bruker.epost);
+    const maned = dag.slice(0, 7);
+    const grense = KVOTE[byra ? 'byra' : s.org.pakke] ?? 0;
+    const brukt = (await db.en<{ antall: number }>('select antall from ai_bruk where organisasjon_id = $1 and maned = $2', [s.org.id, maned]))?.antall ?? 0;
+    if (!test && brukt >= grense) throw new RegnskapsFeil(`Dere har brukt alle ${grense} svarene denne måneden. De fylles opp igjen den 1.`);
+    const org = await hentOrg(db, s.org.id);
+    const klokke = new Intl.DateTimeFormat('nb-NO', { timeZone: 'Europe/Oslo', hour: '2-digit', minute: '2-digit' }).format(new Date());
+    const k = { db, orgId: s.org.id, brukerId: s.bruker.id, idag: dag, kanEndre: kanEndre(s.rolle) };
+    const r = await svarSomAgent(k, { foretak: org.navn, orgform: org.orgform, mvaRegistrert: org.mva_registrert, bruker: s.bruker.navn.split(' ')[0], idag: dag, klokke, kanEndre: k.kanEndre }, tur);
+    await db.q('insert into ai_bruk (organisasjon_id, maned, antall) values ($1,$2,1) on conflict (organisasjon_id, maned) do update set antall = ai_bruk.antall + 1', [s.org.id, maned]);
+    return { ...r, igjen: test ? null : Math.max(0, grense - brukt - 1) };
+  });
+}
+
+/** Brukeren velger på et kort: utfør (send/registrer), sett på vent eller avbryt. */
+export async function velgForslag(id: string, valg: Valg): Promise<Resultat<{ melding: string; lenke?: string; status: string }>> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    if (!/^[0-9a-f-]{36}$/.test(id) || !['utfor', 'vent', 'avbryt'].includes(valg)) throw new RegnskapsFeil('Ugyldig valg.');
+    const r = await utforForslag(await getDb(), { orgId: s.org.id, brukerId: s.bruker.id, brukerEpost: s.bruker.epost, foretak: s.org.navn, idag: idag() }, id, valg);
+    revalidatePath('/', 'layout');
+    return r;
+  });
+}
+
+/** Knapper i tabeller (f.eks. «Send purring») lager forslag direkte, uten å gå via språkmodellen. */
+export async function forslagDirekte(verktoy: 'send_purring' | 'registrer_innbetaling', args: Record<string, unknown>): Promise<Resultat<Kort | null>> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    if (!['send_purring', 'registrer_innbetaling'].includes(verktoy)) throw new RegnskapsFeil('Ugyldig.');
+    const r = await kjorVerktoy({ db: await getDb(), orgId: s.org.id, brukerId: s.bruker.id, idag: idag(), kanEndre: true }, verktoy, args);
+    if (!r.kort) throw new RegnskapsFeil(String((r.svar as { feil?: string })?.feil ?? 'Kunne ikke lage forslaget.'));
+    return r.kort;
+  });
+}
+
+/** Bare administrator (testbruker): hvilken språkmodell assistenten bruker. */
+export async function settAiLeverandor(l: Leverandor): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverInnlogget();
+    if (!erTestbruker(s.bruker.epost)) throw new RegnskapsFeil('Ikke tilgang.');
+    if (l !== 'kina' && l !== 'eu') throw new RegnskapsFeil('Ugyldig.');
+    if (!leverandorKlar(l)) throw new RegnskapsFeil(l === 'eu' ? 'EU-versjonen er ikke satt opp ennå.' : 'Nøkkelen mangler.');
+    await settLeverandor(await getDb(), l);
+    revalidatePath('/', 'layout');
+  }, 'Byttet.');
 }
 
 // ---------- Testtilgang ----------

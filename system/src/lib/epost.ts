@@ -155,4 +155,18 @@ export const maler = {
       }),
     };
   },
+  purring: (o: { nr: number; foretak: string; kunde: string; belop: string; forfall: string; kid: string | null; kontonr: string | null }): Mal => {
+    const rad = (k: string, v: string, stor = false) => `<tr><td style="padding:10px 0;border-bottom:1px solid ${LINJE};font-size:14px;color:${MUT}">${k}</td><td align="right" style="padding:10px 0;border-bottom:1px solid ${LINJE};font-size:${stor ? 20 : 15}px;font-weight:${stor ? 700 : 600};color:${BLA};font-family:${stor ? FONT : "'SFMono-Regular',Menlo,Consolas,monospace"}">${esc(v)}</td></tr>`;
+    return {
+      emne: `Påminnelse: faktura ${o.nr} fra ${o.foretak}`,
+      tekst: `Hei ${o.kunde}!\n\nVi kan ikke se at faktura ${o.nr} er betalt. Den forfalt ${o.forfall}.\n\nÅ betale: ${o.belop} kr${o.kontonr ? `\nKontonummer: ${o.kontonr}` : ''}${o.kid ? `\nKID: ${o.kid}` : ''}\n\nHar du nylig betalt, kan du se bort fra denne påminnelsen. Har du spørsmål, svar på denne e-posten.\n\nVennlig hilsen\n${o.foretak}`,
+      html: ramme({
+        tittel: `Påminnelse om faktura ${o.nr}`, forhandsvisning: `${o.belop} kr forfalt ${o.forfall}`,
+        innhold: avsnitt(`Vi kan ikke se at faktura ${o.nr} er betalt. Den forfalt ${esc(o.forfall)}.`)
+          + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-top:1px solid ${LINJE}">${rad('Å betale', `${o.belop} kr`, true)}${o.kontonr ? rad('Kontonummer', o.kontonr) : ''}${o.kid ? rad('KID', o.kid) : ''}</table>`
+          + avsnitt('Fakturaen ligger vedlagt som PDF.', 'margin:0') + liten('Har du nylig betalt, kan du se bort fra denne påminnelsen. Har du spørsmål, svar på denne e-posten.'),
+        bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
+      }),
+    };
+  },
 };

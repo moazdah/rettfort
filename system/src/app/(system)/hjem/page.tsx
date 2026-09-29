@@ -8,6 +8,9 @@ import { kr, langDato, nd, kortManed } from '@/lib/vis';
 import { norskDato } from '@/lib/frister';
 import { cookies } from 'next/headers';
 import { PAKKER } from '@/lib/pakker';
+import { ventende } from '@/lib/ai/utfor';
+import { kanEndre } from '@/lib/auth';
+import { VenterPaDeg, type Ventende } from '@/components/VenterPaDeg';
 
 export const metadata = { title: 'Hjem' };
 
@@ -25,6 +28,13 @@ export default async function Hjem() {
   // Valgte pakke på forsiden før registrering: minn om betalingen.
   const valgt = (await cookies()).get('rf_pakke')?.value;
   const valgtPakke = (valgt === 'start' || valgt === 'selskap') && s.org.pakke === 'gratis' && s.rolle === 'eier' ? PAKKER.find(p => p.k === valgt) : null;
+  const venter: Ventende[] = (await ventende(d, s.org.id).catch(() => [])).map(v => {
+    const x = (typeof v.data === 'string' ? JSON.parse(v.data) : v.data) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (v.art === 'purring') return { id: v.id, art: v.art, tittel: 'Purring', tekst: `Faktura ${x.nr} til ${x.kunde}, ${kr(x.rest)} kr, sendes til ${x.epost}`, knapp: 'Send' };
+    if (v.art === 'betaling') return { id: v.id, art: v.art, tittel: 'Betaling', tekst: `Innbetaling på faktura ${x.nr} fra ${x.kunde}, ${kr(x.belop)} kr`, knapp: 'Registrer' };
+    if (v.art === 'kreditnota') return { id: v.id, art: v.art, tittel: 'Kreditnota', tekst: `Faktura ${x.nr} til ${x.kunde}, ${kr(x.belop)} kr. ${x.grunn}`, knapp: 'Lag kreditnota' };
+    return { id: v.id, art: v.art, tittel: 'MVA', tekst: `${x.termin?.tittel ?? 'MVA-melding'}: ${x.aBetale >= 0 ? 'betal' : 'til gode'} ${kr(Math.abs(x.aBetale))} kr`, knapp: 'Merk som sendt', sperret: mva && mva.antallMangler > 0 && x.termin?.tittel === mva.termin.tittel ? 'Noe mangler bilag. Se MVA-siden.' : undefined };
+  });
   const ubetalt = await d.en<{ n: number }>(`select count(*)::int as n from kjop where organisasjon_id = $1 and status = 'registrert'`, [s.org.id]);
 
   return (
@@ -37,6 +47,8 @@ export default async function Hjem() {
       {valgtPakke && (
         <div className="varsel gul"><div className="fyll">Du valgte <b>{valgtPakke.n}</b>. Fullfør betalingen, så får du alt som er med i pakken.</div><a href={`/pakke/${valgtPakke.k}`} className="knapp liten">Gå til betaling</a></div>
       )}
+
+      {venter.length > 0 && kanEndre(s.rolle) && <VenterPaDeg rader={venter} />}
 
       <div className="rutenett to">
         <Link href="/salg/ny" className="kort mork" style={{ textDecoration: 'none', display: 'block' }}>

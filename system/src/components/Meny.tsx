@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
-import { loggUt, settTestPakke, testByra, testfirma, byttForetak } from '@/app/handlinger';
+import { loggUt, settTestPakke, testByra, testfirma, byttForetak, settAiLeverandor } from '@/app/handlinger';
 
 import { MENY } from './menyvalg';
 export { MENY };
@@ -30,7 +30,7 @@ function useNedtrekk() {
   return { apen, setApen, ref };
 }
 
-export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '', innboksTeller = 0 }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string; innboksTeller?: number }) {
+export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '', innboksTeller = 0, ai }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string; innboksTeller?: number; ai?: { valgt: 'kina' | 'eu'; kina: boolean; eu: boolean } }) {
   const sti = usePathname();
   const aktiv = (m: (typeof MENY)[number]) => m.aktivPa.some(p => sti === p || sti.startsWith(p + '/'));
   const initialer = bruker.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
@@ -83,6 +83,14 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
                     <button type="button" className="testfirma-knapp" disabled={lager} onClick={async () => { setLager(true); const r = await testfirma(); if (r && !r.ok) { setLager(false); alert(r.feil); } }}>
                       {lager ? 'Lager testfirma … (tar litt tid)' : 'Åpne Testfirma AS med eksempeldata'}
                     </button>
+                    {ai && (
+                      <>
+                        <small style={{ display: 'block', marginTop: 10 }}>Assistentens språkmodell</small>
+                        <div className="rad">
+                          {(['kina', 'eu'] as const).map(l => <button key={l} type="button" className={ai.valgt === l ? 'valgt' : ''} disabled={!ai[l]} title={ai[l] ? undefined : 'Ikke satt opp'} onClick={async () => { const r = await settAiLeverandor(l); if (r && !r.ok) alert(r.feil); }}>{l === 'kina' ? 'Kina' : 'EU'}{ai[l] ? '' : ' (mangler)'}</button>)}
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
                 {foretak.length > 1 && (

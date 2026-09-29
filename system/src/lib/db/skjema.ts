@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 8;
+export const SKJEMA_VERSJON = 9;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -426,6 +426,22 @@ alter table organisasjon add column if not exists stripe_abonnement text;
 alter table organisasjon add column if not exists abonnement_status text;
 alter table organisasjon add column if not exists abonnement_slutt timestamptz;
 create table if not exists systeminnstilling (nokkel text primary key, verdi text not null);
+
+-- Versjon 9: assistenten som agent. Det assistenten foreslår å gjøre, lagres her og utføres først når
+-- brukeren velger «Send»/«Registrer». «Sett på vent» lager et utkast eller legger forslaget i listen på Hjem.
+create table if not exists ai_forslag (
+  id uuid primary key default gen_random_uuid(),
+  organisasjon_id uuid not null references organisasjon(id) on delete cascade,
+  bruker_id uuid references bruker(id),
+  art text not null,
+  data jsonb not null,
+  status text not null default 'venter' check (status in ('venter','pa_vent','utfort','avbrutt')),
+  resultat jsonb,
+  opprettet timestamptz not null default now(),
+  behandlet timestamptz
+);
+create index if not exists ai_forslag_org on ai_forslag (organisasjon_id, status);
+create table if not exists ai_bruk (organisasjon_id uuid not null references organisasjon(id) on delete cascade, maned text not null, antall int not null default 0, primary key (organisasjon_id, maned));
 
 -- Supabase gir tilgang til tabellene i «public» gjennom sitt eget API med en offentlig nøkkel.
 -- Systemet bruker ikke det API-et, så all slik tilgang stenges: radsikkerhet uten regler, og ingen rettigheter
