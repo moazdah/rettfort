@@ -141,6 +141,11 @@ input,textarea{font-family:inherit}
 @media (max-width:760px){.rf-desk{display:none !important}.rf-mob{display:block !important}.rf-mobi{display:inline !important}
 [data-rf=hero]{text-align:center;padding-top:40px !important;padding-bottom:40px !important}[data-rf=hero] h1{font-size:37px !important}[data-rf=hero]>div>div:first-child{justify-content:center}
 [data-rf=heroBtns]{margin-top:28px !important}[data-rf=heroBtns]>button{width:100%;justify-content:center;font-size:17px !important;padding:17px 22px !important;border-radius:12px !important}
+[data-rf=flerePunkter]{position:relative;transition:max-height .5s cubic-bezier(.3,.7,.2,1)}
+[data-rf=flerePunkter]:not([data-apen]){max-height:112px}
+[data-rf=flerePunkter]:not([data-apen])::after{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(rgba(11,37,69,0),#0B2545);pointer-events:none}
+[data-rf=flerePunkter][data-apen]{max-height:900px}
+[data-rf=seMer]{margin:4px auto -8px;height:42px;padding:0 22px;border-radius:99px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font-size:15px;font-weight:600}
 [data-rf=planTabs]{position:relative;display:grid !important;grid-template-columns:repeat(4,1fr);gap:0;background:#EAE5DA;border-radius:99px;padding:5px;margin:-40px auto -44px;width:100%;max-width:420px}
 [data-rf=planTabs]>button{position:relative;z-index:1;border:0;background:transparent;height:42px;border-radius:99px;font-size:15px;font-weight:600;color:#586174;transition:color .3s;-webkit-tap-highlight-color:transparent}
 [data-rf=planTabs]>button.rf-gratis{box-shadow:inset 0 0 0 2px #F6DF6E;background:rgba(246,223,110,.28);color:#0B2545}
@@ -361,12 +366,13 @@ input,textarea{font-family:inherit}
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1px;background:rgba(255,255,255,.14);border-radius:20px;overflow:hidden">
+    <div data-rf="flerePunkter" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1px;background:rgba(255,255,255,.14);border-radius:20px;overflow:hidden">
       <div style="background:#0B2545;padding:24px 26px"><div style="color:#fff;font-size:17px;font-weight:600">Faktura med din logo</div><div style="color:#C9D3E2;font-size:15px;line-height:1.5;margin-top:6px">Skriv hva du vil fakturere, så fylles den ut. PDF eller EHF.</div></div>
       <div style="background:#0B2545;padding:24px 26px"><div style="color:#fff;font-size:17px;font-weight:600">Månedsrapport til kunden</div><div style="color:#C9D3E2;font-size:15px;line-height:1.5;margin-top:6px">Nøkkeltall og hva som er gjort, klar til å sende.</div></div>
       <div style="background:#0B2545;padding:24px 26px"><div style="color:#fff;font-size:17px;font-weight:600">Alle klienter i én liste</div><div style="color:#C9D3E2;font-size:15px;line-height:1.5;margin-top:6px">For byrå: sortert etter hva som haster, på tvers av systemer.</div></div>
       <div style="background:#0B2545;padding:24px 26px"><div style="color:#fff;font-size:17px;font-weight:600">Innsikt i tallene</div><div style="color:#C9D3E2;font-size:15px;line-height:1.5;margin-top:6px">Spør om likviditet og hvem som skylder deg, og få svar med kilde.</div></div>
     </div>
+    <button type="button" class="rf-mob" data-rf="seMer" aria-expanded="false">Se mer</button>
 
     
   </div>
@@ -1858,6 +1864,13 @@ body.rf-rolig #rfc{display:none!important}
     var a = el.getBoundingClientRect(), b = el.children[i].getBoundingClientRect();
     el.scrollTo({ left: el.scrollLeft + b.left - a.left - (a.width - b.width) / 2, behavior: 'smooth' });
   }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-rf=seMer]'); if (!b) return;
+    var g = document.querySelector('[data-rf=flerePunkter]'); if (!g) return;
+    var apen = g.hasAttribute('data-apen');
+    if (apen) { g.removeAttribute('data-apen'); b.textContent = 'Se mer'; b.setAttribute('aria-expanded', 'false'); var r = g.getBoundingClientRect(); if (r.top < 0) scrollBy({ top: r.top - 90, behavior: 'smooth' }); }
+    else { g.setAttribute('data-apen', ''); b.textContent = 'Se mindre'; b.setAttribute('aria-expanded', 'true'); }
+  });
   document.addEventListener('click', function (e) {
     var t = e.target.closest && e.target.closest('[data-rf=planTabs] [data-i]'); if (!t) return;
     var i = Number(t.getAttribute('data-i')); var tb = tabs(); if (tb) tb.setAttribute('data-aktiv', String(i)); tilKort(i);
