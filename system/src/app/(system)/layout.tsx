@@ -14,7 +14,7 @@ export default async function SystemRamme({ children }: { children: React.ReactN
   } catch { /* telleren er ikke kritisk */ }
   return (
     <div className="ramme">
-      <Meny firma={s.org.navn} pakke={s.org.pakke} bruker={s.bruker.navn} rolle={s.rolle} mvaTeller={mvaTeller} harByra={s.medlemskap.some(m => m.type === 'byra')} testbruker={erTestbruker(s.bruker.epost)} foretak={s.medlemskap.filter(m => m.type === 'selskap')} orgId={s.org.id} />
+      <Meny firma={s.org.navn} pakke={s.org.pakke} bruker={s.bruker.navn} rolle={s.rolle} mvaTeller={mvaTeller} harByra={s.medlemskap.some(m => m.type === 'byra')} testbruker={erTestbruker(s.bruker.epost)} foretak={s.medlemskap.filter(m => m.type === 'selskap')} orgId={s.org.id} epost={s.bruker.epost} />
       <main className="innhold">
         {d.modus === 'testmodus' && <div className="testmodus ikke-utskrift">Testmodus: databasen er ikke koblet til ennå. Data kan bli nullstilt.</div>}
         {children}

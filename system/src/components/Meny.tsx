@@ -30,7 +30,7 @@ function useNedtrekk() {
   return { apen, setApen, ref };
 }
 
-export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '' }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string }) {
+export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '' }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string }) {
   const sti = usePathname();
   const aktiv = (m: (typeof MENY)[number]) => m.aktivPa.some(p => sti === p || sti.startsWith(p + '/'));
   const initialer = bruker.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
@@ -71,7 +71,7 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
             </button>
             {profil.apen && (
               <div className="nedtrekk-panel hoyre" role="menu">
-                <div className="profil-info"><b>{bruker}</b><span>{rolle ? ROLLE[rolle] ?? rolle : ''}</span><span>{firma} · Pakke: {PAKKE[pakke] ?? pakke}</span></div>
+                <div className="profil-info"><b>{bruker}</b>{epost && <span>{epost}</span>}<span>{rolle ? ROLLE[rolle] ?? rolle : ''}</span><span>{firma} · Pakke: {PAKKE[pakke] ?? pakke}</span></div>
                 {testbruker && (
                   <div className="testpakke">
                     <small>Testtilgang: se pakken som</small>
