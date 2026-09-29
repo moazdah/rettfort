@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Logo, Maskot } from '@/components/Logo';
 import { BrregSok } from '@/components/BrregSok';
-import { bekreftEpost, nyKode, opprettForetak, type NyttForetak } from '@/app/handlinger';
+import { bekreftEpost, nyKode, byttEpost, opprettForetak, type NyttForetak } from '@/app/handlinger';
 import type { Enhet } from '@/lib/brreg';
 import { fristerForAr, norskDato, type Orgform } from '@/lib/frister';
 import { lagSlugKlient } from './slug';
@@ -18,6 +18,15 @@ export function Velkomst({ navn, epost, bekreftet, testkode }: { navn: string; e
   const [kode, setKode] = useState('');
   const [visKode, setVisKode] = useState(testkode);
   const [nySendt, setNySendt] = useState(false);
+  const [adresse, setAdresse] = useState(epost);
+  const [endrer, setEndrer] = useState(false);
+  const [nyAdresse, setNyAdresse] = useState(epost);
+  const lagreAdresse = async () => {
+    setFeil('');
+    const r = await byttEpost(nyAdresse);
+    if (!r.ok) { setFeil(r.feil); return; }
+    setAdresse(r.data!.epost); setVisKode(r.data!.kode || null); setNySendt(true); setEndrer(false); setKode('');
+  };
   const [feil, setFeil] = useState('');
   const [f, setF] = useState<NyttForetak>({ navn: '', orgnr: '', orgform: 'AS', stiftet: '', mvaTermin: 'tomnd', start: 'nytt' });
   const [fraBrreg, setFraBrreg] = useState(false);
@@ -56,7 +65,13 @@ export function Velkomst({ navn, epost, bekreftet, testkode }: { navn: string; e
         {steg === 2 && (
           <div className="stakk">
             <h1>Bekreft e-posten</h1>
-            <p className="mut">Vi har sendt en kode på 6 siffer til <b>{epost}</b>.</p>
+            <p className="mut">Vi har sendt en kode på 6 siffer til <b>{adresse}</b>.</p>
+            {endrer && (
+              <div className="rad" style={{ flexWrap: 'nowrap' }}>
+                <input className="inndata" type="email" autoComplete="email" value={nyAdresse} onChange={e => setNyAdresse(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') lagreAdresse(); }} autoFocus aria-label="Riktig e-postadresse" />
+                <button type="button" className="knapp" onClick={lagreAdresse}>Send kode</button>
+              </div>
+            )}
             {visKode && <div className="testmodus">E-posten kom ikke frem ennå. Koden din er <b className="mono">{visKode}</b>.</div>}
             {nySendt && !visKode && <div className="varsel gronn liten">En ny kode er sendt. Sjekk også søppelposten.</div>}
             <input className="inndata mono" inputMode="numeric" autoComplete="one-time-code" maxLength={7} value={kode} onChange={e => sjekkKode(e.target.value)} placeholder="000000" style={{ fontSize: 22, letterSpacing: '.3em', textAlign: 'center' }} autoFocus />
@@ -64,7 +79,7 @@ export function Velkomst({ navn, epost, bekreftet, testkode }: { navn: string; e
             <div className="rad">
               <button type="button" className="lenke" onClick={async () => { const r = await nyKode(); if (r.ok) { setVisKode(r.data!.kode || null); setNySendt(true); } }}>Send på nytt</button>
               <span className="faint">·</span>
-              <a className="lenke" href="/registrer">Feil e-post?</a>
+              <button type="button" className="lenke" onClick={() => { setEndrer(true); setNyAdresse(adresse); }}>Feil e-post?</button>
             </div>
           </div>
         )}

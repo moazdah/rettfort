@@ -124,6 +124,23 @@ export async function bekreftEpost(kode: string): Promise<Resultat> {
   });
 }
 
+/** Retter e-postadressen før den er bekreftet, og sender en ny kode til den nye adressen. */
+export async function byttEpost(ny: string): Promise<Resultat<{ kode: string; epost: string }>> {
+  return trygt(async () => {
+    const s = await kreverInnlogget();
+    const epost = ny.trim().toLowerCase();
+    if (!gyldigEpost(epost)) throw new RegnskapsFeil('Skriv en gyldig e-postadresse.');
+    const db = await getDb();
+    const b = await db.en<{ epost_bekreftet: boolean }>('select epost_bekreftet from bruker where id = $1', [s.bruker.id]);
+    if (b?.epost_bekreftet) throw new RegnskapsFeil('E-posten er allerede bekreftet. Endre den under Innstillinger.');
+    if (epost !== s.bruker.epost && await db.en('select 1 from bruker where epost = $1', [epost])) throw new RegnskapsFeil('Det finnes allerede en bruker med denne e-posten.');
+    const kode = lagKode();
+    await db.q('update bruker set epost = $2, bekreftkode = $3 where id = $1', [s.bruker.id, epost, kode]);
+    const sendt = await sendEpost({ til: epost, ...maler.bekreftkode(s.bruker.navn.split(' ')[0], kode) });
+    return { kode: sendt ? '' : kode, epost };
+  });
+}
+
 export async function nyKode(): Promise<Resultat<{ kode: string }>> {
   return trygt(async () => {
     const s = await kreverInnlogget();
