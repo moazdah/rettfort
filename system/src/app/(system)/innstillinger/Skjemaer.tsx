@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { lagreInnstillinger, inviterBruker, byttPakke, laasPeriodeHandling, lagreApningsbalanse } from '@/app/handlinger';
+import { lagreInnstillinger, inviterBruker, byttPakke, apneKundeportal, laasPeriodeHandling, lagreApningsbalanse } from '@/app/handlinger';
+import { PAKKER } from '@/lib/pakker';
 import { KONTOPLAN } from '@/lib/kontoplan';
 import { kr, tilOre } from '@/lib/penger';
 
@@ -83,28 +84,60 @@ export function Inviter() {
   );
 }
 
-const PAKKER = [
-  { k: 'gratis', n: 'Gratis', pris: 0, d: 'Faktura, kjøp, MVA-melding, frister og lønn. Du fyller ut kvitteringer selv.' },
-  { k: 'start', n: 'Start', pris: 14900, d: 'Alt i Gratis, pluss automatisk lesing av kvitteringer og nattlig kontroll av regnskapet.' },
-  { k: 'selskap', n: 'Selskap', pris: 24900, d: 'Alt i Start, pluss bankavstemming med automatisk lesing og assistent.' },
-] as const;
-
-export function Pakker({ pakke, erEier }: { pakke: string; erEier: boolean }) {
-  const { kjor, vis, venter } = useLagre();
+export function Pakker({ pakke, erEier, betalingPa = false, intropris = null, status = null, slutt = null, harKunde = false, betalt = null, avbrutt = false }: {
+  pakke: string; erEier: boolean; betalingPa?: boolean; intropris?: number | null; status?: string | null; slutt?: string | null; harKunde?: boolean; betalt?: boolean | null; avbrutt?: boolean;
+}) {
+  const [venter, setVenter] = useState('');
+  const [feil, setFeil] = useState('');
+  const [melding, setMelding] = useState('');
+  const router = useRouter();
+  const velg = async (k: 'gratis' | 'start' | 'selskap') => {
+    if (k === 'gratis' && betalingPa && !confirm('Bytte til Gratis? Du beholder pakken du har betalt for ut perioden, og ingenting du har ført blir borte.')) return;
+    setVenter(k); setFeil(''); setMelding('');
+    const r = await byttPakke(k);
+    if (!r.ok) { setVenter(''); setFeil(r.feil); return; }
+    if (r.data?.url) { location.href = r.data.url; return; }
+    setVenter('');
+    setMelding(k === 'gratis' && r.data?.slutt ? `Abonnementet er sagt opp. Du har pakken til ${r.data.slutt.split('-').reverse().join('.')}, deretter Gratis.` : 'Pakken er byttet.');
+    router.refresh();
+  };
+  const portal = async () => {
+    setVenter('portal'); setFeil('');
+    const r = await apneKundeportal();
+    if (!r.ok) { setVenter(''); setFeil(r.feil); return; }
+    location.href = r.data!.url;
+  };
+  const dato = (d: string) => d.split('-').reverse().join('.');
   return (
     <div className="stakk">
+      {betalt === true && <div className="varsel gronn">Takk! Betalingen er mottatt, og pakken er aktivert.</div>}
+      {betalt === false && <div className="varsel gul">Vi fant ikke betalingen ennå. Last siden på nytt om litt.</div>}
+      {avbrutt && <div className="varsel info">Betalingen ble avbrutt. Ingenting er trukket.</div>}
+      {status === 'past_due' && <div className="varsel rod">Siste trekk feilet. Oppdater kortet, så beholder du pakken. {harKunde && erEier && <button type="button" className="lenke" onClick={portal}>Oppdater kortet</button>}</div>}
+      {slutt && pakke !== 'gratis' && <div className="varsel info">Abonnementet er sagt opp og gjelder til {dato(slutt)}. Deretter går du over til Gratis. Du kan velge pakken igjen for å fortsette.</div>}
+      {betalingPa && intropris != null && <div className="varsel gul"><b>Introduksjonspris:</b> {kr(intropris, { desimaler: false })} kr i måneden for alle pakker mens vi bygger ferdig. Du får beskjed i god tid før prisen endres.</div>}
       <div className="rutenett tre">
         {PAKKER.map(p => (
           <div key={p.k} className="kort stakk" style={{ borderColor: pakke === p.k ? 'var(--ink)' : undefined, gap: 8 }}>
             <div className="rad" style={{ justifyContent: 'space-between' }}><b>{p.n}</b>{pakke === p.k && <span className="merke gronn">Din pakke</span>}</div>
-            <div><span className="belop" style={{ fontSize: 22, fontWeight: 600 }}>{kr(p.pris, { desimaler: false })} kr</span><span className="mut liten"> /mnd eks. MVA</span>{p.pris > 0 && <div className="faint liten">{kr(Math.round(p.pris * 1.25), { desimaler: false })} kr inkl. MVA</div>}</div>
+            {p.pris > 0 && betalingPa && intropris != null ? (
+              <div><span className="belop" style={{ fontSize: 22, fontWeight: 600 }}>{kr(intropris, { desimaler: false })} kr</span><span className="mut liten"> /mnd</span><div className="faint liten"><s>{kr(p.pris, { desimaler: false })} kr</s> ordinær pris eks. MVA</div></div>
+            ) : (
+              <div><span className="belop" style={{ fontSize: 22, fontWeight: 600 }}>{kr(p.pris, { desimaler: false })} kr</span><span className="mut liten"> /mnd eks. MVA</span>{p.pris > 0 && <div className="faint liten">{kr(Math.round(p.pris * 1.25), { desimaler: false })} kr inkl. MVA</div>}</div>
+            )}
             <p className="mut liten" style={{ flex: 1 }}>{p.d}</p>
-            {erEier && pakke !== p.k && <button type="button" className="knapp hvit liten" disabled={venter} onClick={() => kjor(() => byttPakke(p.k))}>Bytt til {p.n}</button>}
+            {erEier && (pakke !== p.k || (slutt && p.k !== 'gratis')) && (
+              <button type="button" className={`knapp liten ${p.k === 'gratis' ? 'hvit' : ''}`} disabled={!!venter} onClick={() => velg(p.k)}>
+                {venter === p.k ? 'Et øyeblikk …' : pakke === p.k ? 'Fortsett abonnementet' : p.k === 'gratis' ? 'Bytt til Gratis' : betalingPa && !harKunde ? `Velg ${p.n} og betal` : `Bytt til ${p.n}`}
+              </button>
+            )}
           </div>
         ))}
       </div>
-      <p className="mut liten">Lønn er med i alle pakker, uten ekstra pris per ansatt. Ingen bindingstid. Bytter du ned, beholder du alt som er ført. Betaling med kort kobles på før lansering.</p>
-      {vis}
+      {feil && <div className="varsel rod">{feil}</div>}
+      {melding && <div className="varsel gronn">{melding}</div>}
+      {betalingPa && harKunde && erEier && <div><button type="button" className="knapp hvit" disabled={!!venter} onClick={portal}>{venter === 'portal' ? 'Åpner …' : 'Kort, kvitteringer og oppsigelse'}</button></div>}
+      <p className="mut liten">{betalingPa ? 'Du betaler med kort hos Stripe. Kortopplysningene lagres hos Stripe, ikke hos oss. ' : 'Betaling er ikke koblet til i testmodus. '}Lønn er med i alle pakker, uten ekstra pris per ansatt. Ingen bindingstid. Bytter du ned, beholder du alt som er ført.</p>
     </div>
   );
 }

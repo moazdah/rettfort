@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 7;
+export const SKJEMA_VERSJON = 8;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -419,6 +419,13 @@ create index if not exists innsending_org on innsending (organisasjon_id, status
 alter table organisasjon add column if not exists utlegg_tilbake text;
 alter table lonnslipp add column if not exists utlegg bigint not null default 0;
 alter table lonnslipp add column if not exists utlegg_linjer jsonb not null default '[]';
+
+-- Versjon 8: betaling med Stripe.
+alter table organisasjon add column if not exists stripe_kunde text;
+alter table organisasjon add column if not exists stripe_abonnement text;
+alter table organisasjon add column if not exists abonnement_status text;
+alter table organisasjon add column if not exists abonnement_slutt timestamptz;
+create table if not exists systeminnstilling (nokkel text primary key, verdi text not null);
 
 -- Supabase gir tilgang til tabellene i «public» gjennom sitt eget API med en offentlig nøkkel.
 -- Systemet bruker ikke det API-et, så all slik tilgang stenges: radsikkerhet uten regler, og ingen rettigheter

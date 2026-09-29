@@ -26,6 +26,7 @@ import QRCode from 'qrcode';
 import { lagTestfirma, TESTFIRMA_ORGNR } from '@/lib/db/eksempel';
 import { gyldigFnr, planleggUtsending, sendForfalte, apneLonnslipp, type SendNar } from '@/lib/tjenester/lonnslipp';
 import type { LonnslippPdfData } from '@/lib/pdf';
+import { stripePa, startBetaling, sigOpp, portalLenke } from '@/lib/stripe';
 import { lagLenke, hentNye, etterRegistrering, hentInnsending, settTilbake, settFastTilbake, betalUtleggNa, avvis, slettLenke, type Tilbake } from '@/lib/tjenester/innsending';
 import { kr } from '@/lib/penger';
 
@@ -664,15 +665,28 @@ export async function lagreInnstillinger(v: Record<string, string | number | boo
   }, 'Lagret.');
 }
 
-export async function byttPakke(pakke: 'gratis' | 'start' | 'selskap'): Promise<Resultat> {
+export async function byttPakke(pakke: 'gratis' | 'start' | 'selskap'): Promise<Resultat<{ url?: string; slutt?: string | null }>> {
   return trygt(async () => {
     const s = await kreverOrg();
     if (s.rolle !== 'eier') throw new RegnskapsFeil('Bare eieren kan bytte pakke.');
+    if (!['gratis', 'start', 'selskap'].includes(pakke)) throw new RegnskapsFeil('Ugyldig pakke.');
     const db = await getDb();
-    // Betaling (Stripe) er ikke koblet til ennå. Byttet registreres, og faktureres når betaling er på plass.
-    await db.q('update organisasjon set pakke = $2 where id = $1', [s.org.id, pakke]);
+    // Uten betaling koblet til (testmodus) byttes pakken direkte.
+    if (!stripePa()) { await db.q('update organisasjon set pakke = $2 where id = $1', [s.org.id, pakke]); revalidatePath('/', 'layout'); return {}; }
+    if (pakke === 'gratis') { const slutt = await sigOpp(db, s.org.id); revalidatePath('/', 'layout'); return { slutt }; }
+    const r = await startBetaling(db, s.org.id, pakke, s.bruker.epost, await grunnadresse());
     revalidatePath('/', 'layout');
-  }, 'Pakken er byttet.');
+    return 'url' in r ? { url: r.url } : {};
+  });
+}
+
+/** Kort, kvitteringer og oppsigelse hos Stripe. */
+export async function apneKundeportal(): Promise<Resultat<{ url: string }>> {
+  return trygt(async () => {
+    const s = await kreverOrg();
+    if (s.rolle !== 'eier') throw new RegnskapsFeil('Bare eieren kan endre abonnementet.');
+    return { url: await portalLenke(await getDb(), s.org.id, await grunnadresse()) };
+  });
 }
 
 export async function inviterRegnskapsforer(epost: string, rolle: 'regnskapsforer_full' | 'regnskapsforer_les'): Promise<Resultat<{ lenke: string; sendt: boolean }>> {

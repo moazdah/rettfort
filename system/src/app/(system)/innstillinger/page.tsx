@@ -8,6 +8,8 @@ import { Kopier } from '@/components/Kopier';
 import { Handling } from '@/components/Handling';
 import { trekkInvitasjon } from '@/app/handlinger';
 import { FirmaSkjema, FakturaInnstillinger, Inviter, Pakker, Laas, Apningsbalanse } from './Skjemaer';
+import { stripePa, fullforBetaling, synkAbonnement } from '@/lib/stripe';
+import { INTROPRIS } from '@/lib/pakker';
 
 export const metadata = { title: 'Innstillinger' };
 
@@ -15,12 +17,20 @@ const FANER = [['firma', 'Firma'], ['faktura', 'Faktura'], ['brukere', 'Brukere'
 const ORGFORM: Record<string, string> = { AS: 'Aksjeselskap', ENK: 'Enkeltpersonforetak', ANS: 'Ansvarlig selskap', DA: 'Selskap med delt ansvar', NUF: 'Norskregistrert utenlandsk foretak' };
 const ROLLE: Record<string, string> = { eier: 'Eier', full: 'Full tilgang', les: 'Kan se', kvittering: 'Kvitteringer', regnskapsforer_full: 'Regnskapsfører', regnskapsforer_les: 'Regnskapsfører (se)' };
 
-export default async function Innstillinger({ searchParams }: { searchParams: Promise<{ vis?: string }> }) {
+export default async function Innstillinger({ searchParams }: { searchParams: Promise<{ vis?: string; betaling?: string; avbrutt?: string }> }) {
   const s = await kreverSelskap();
   const d = await db();
   const sp = await searchParams;
   const vis = FANER.find(f => f[0] === sp.vis)?.[0] ?? 'firma';
-  const o = await d.en<Record<string, string | number | boolean | null> & { navn: string; orgnr: string | null; orgform: string; mva_registrert: boolean; bilag_slug: string | null; regnskap_fra: string | null; pakke: string }>('select *, regnskap_fra::text as regnskap_fra from organisasjon where id = $1', [s.org.id]);
+  // Abonnement: bekreft betalingen hos Stripe når kunden kommer tilbake, ellers hent siste status.
+  let betalt: boolean | null = null;
+  if (vis === 'abonnement' && stripePa()) {
+    try {
+      if (sp.betaling) betalt = await fullforBetaling(d, s.org.id, sp.betaling);
+      else await synkAbonnement(d, s.org.id);
+    } catch (e) { console.error('Abonnement:', e); }
+  }
+  const o = await d.en<Record<string, string | number | boolean | null> & { navn: string; orgnr: string | null; orgform: string; mva_registrert: boolean; bilag_slug: string | null; regnskap_fra: string | null; pakke: string }>('select *, regnskap_fra::text as regnskap_fra, abonnement_slutt::text as abonnement_slutt from organisasjon where id = $1', [s.org.id]);
   const endre = kanEndre(s.rolle);
   const brukere = await d.q<{ navn: string; epost: string; rolle: string }>('select b.navn, b.epost, m.rolle from medlemskap m join bruker b on b.id = m.bruker_id where m.organisasjon_id = $1 order by m.opprettet', [s.org.id]);
   const inv = await d.q<{ id: string; epost: string; rolle: string }>(`select id, epost, rolle from invitasjon where organisasjon_id = $1 and status = 'venter' and rolle not like 'regnskapsforer%' order by opprettet`, [s.org.id]);
@@ -67,7 +77,7 @@ export default async function Innstillinger({ searchParams }: { searchParams: Pr
       )}
 
       {vis === 'sikkerhet' && <section className="kort stakk"><h2>Totrinns innlogging</h2><Totrinn pa={totrinnPa} /></section>}
-      {vis === 'abonnement' && <section className="kort stakk"><h2>Abonnement</h2><Pakker pakke={o?.pakke ?? 'gratis'} erEier={s.rolle === 'eier'} /></section>}
+      {vis === 'abonnement' && <section className="kort stakk"><h2>Abonnement</h2><Pakker pakke={o?.pakke ?? 'gratis'} erEier={s.rolle === 'eier'} betalingPa={stripePa()} intropris={INTROPRIS} status={(o?.abonnement_status as string | null) ?? null} slutt={o?.abonnement_slutt ? String(o.abonnement_slutt).slice(0, 10) : null} harKunde={!!o?.stripe_kunde} betalt={betalt} avbrutt={!!sp.avbrutt} /></section>}
 
       {vis === 'avansert' && (
         <>
