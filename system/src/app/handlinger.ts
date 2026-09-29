@@ -21,6 +21,8 @@ import { fakturaPdf } from '@/lib/tjenester/fakturaPdf';
 import { hentFakta } from '@/lib/tjenester/assistent';
 import { svar as assistentSvar, type Svar } from '@/lib/assistent';
 import { harAssistent, erTestbruker } from '@/lib/pakker';
+import { nyHemmelighet, sjekkTotp, otpauthUri } from '@/lib/totp';
+import QRCode from 'qrcode';
 import { kr } from '@/lib/penger';
 
 async function settCookie(token: string) {
@@ -48,19 +50,32 @@ async function kreverOrg() {
 
 // ---------- Innlogging ----------
 
-export async function loggInn(_: unknown, fd: FormData): Promise<Resultat> {
+export async function loggInn(_: unknown, fd: FormData): Promise<Resultat<string | null> & { totrinn?: boolean }> {
   const epost = String(fd.get('epost') ?? '').trim().toLowerCase();
   const passord = String(fd.get('passord') ?? '');
+  const kode = String(fd.get('kode') ?? '').trim();
+  let totrinn = false;
   const res = await trygt(async () => {
     const db = await getDb();
-    const b = await db.en<{ id: string; passord_hash: string }>('select id, passord_hash from bruker where epost = $1', [epost]);
+    const b = await db.en<{ id: string; passord_hash: string; totp_hemmelig: string | null; totp_feil: number; sperret: boolean }>('select id, passord_hash, totp_hemmelig, totp_feil, coalesce(totp_sperret_til > now(), false) as sperret from bruker where epost = $1', [epost]);
     if (!b || !(await sjekkPassord(passord, b.passord_hash))) throw new RegnskapsFeil('Feil e-post eller passord.');
+    // Totrinns innlogging: passordet er riktig, men koden fra autentiseringsappen må også stemme.
+    if (b.totp_hemmelig) {
+      totrinn = true;
+      if (b.sperret) throw new RegnskapsFeil('For mange feil koder. Vent 10 minutter og prøv igjen.');
+      if (!kode) throw new RegnskapsFeil('Skriv koden fra autentiseringsappen.');
+      if (!sjekkTotp(b.totp_hemmelig, kode)) {
+        await db.q(`update bruker set totp_feil = totp_feil + 1, totp_sperret_til = case when totp_feil + 1 >= 5 then now() + interval '10 minutes' else totp_sperret_til end where id = $1`, [b.id]);
+        throw new RegnskapsFeil('Koden stemmer ikke. Koden byttes hvert 30. sekund, bruk den som vises nå.');
+      }
+      await db.q('update bruker set totp_feil = 0, totp_sperret_til = null where id = $1', [b.id]);
+    }
     const m = await db.en<{ organisasjon_id: string; type: string }>('select m.organisasjon_id, o.type from medlemskap m join organisasjon o on o.id = m.organisasjon_id where m.bruker_id = $1 order by m.opprettet limit 1', [b.id]);
     const { token } = await db.tx(t => opprettSesjon(t, b.id, m?.organisasjon_id ?? null));
     await settCookie(token);
     return m?.type ?? null;
   });
-  if (!res.ok) return res;
+  if (!res.ok) return { ...res, totrinn };
   const neste = String(fd.get('neste') ?? '');
   if (/^\/invitasjon\/[\w-]+$/.test(neste)) redirect(neste);
   redirect(res.data === 'byra' ? '/byra' : res.data ? '/hjem' : '/velkommen');
@@ -730,4 +745,42 @@ export async function testByra(): Promise<Resultat> {
   });
   if (!res.ok) return res;
   redirect('/byra');
+}
+
+// ---------- Totrinns innlogging ----------
+
+/** Starter oppsett: lager en ny hemmelighet og viser QR-koden. Slås ikke på før koden er bekreftet. */
+export async function startTotrinn(): Promise<Resultat<{ qr: string; hemmelighet: string; uri: string }>> {
+  return trygt(async () => {
+    const s = await kreverInnlogget();
+    const h = nyHemmelighet();
+    const db = await getDb();
+    await db.q('update bruker set totp_ny = $2 where id = $1', [s.bruker.id, h]);
+    const uri = otpauthUri(h, s.bruker.epost);
+    return { qr: await QRCode.toDataURL(uri, { margin: 1, width: 220, color: { dark: '#0B2545', light: '#ffffff' } }), hemmelighet: h.replace(/(.{4})/g, '$1 ').trim(), uri };
+  });
+}
+
+export async function bekreftTotrinn(kode: string): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverInnlogget();
+    const db = await getDb();
+    const b = await db.en<{ totp_ny: string | null }>('select totp_ny from bruker where id = $1', [s.bruker.id]);
+    if (!b?.totp_ny) throw new RegnskapsFeil('Start oppsettet på nytt.');
+    if (!sjekkTotp(b.totp_ny, kode)) throw new RegnskapsFeil('Koden stemmer ikke. Sjekk at klokken på telefonen er riktig, og bruk koden som vises nå.');
+    await db.q('update bruker set totp_hemmelig = totp_ny, totp_ny = null, totp_feil = 0 where id = $1', [s.bruker.id]);
+    revalidatePath('/innstillinger');
+  }, 'Totrinns innlogging er slått på.');
+}
+
+export async function slaAvTotrinn(kode: string): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverInnlogget();
+    const db = await getDb();
+    const b = await db.en<{ totp_hemmelig: string | null }>('select totp_hemmelig from bruker where id = $1', [s.bruker.id]);
+    if (!b?.totp_hemmelig) return;
+    if (!sjekkTotp(b.totp_hemmelig, kode)) throw new RegnskapsFeil('Koden stemmer ikke.');
+    await db.q('update bruker set totp_hemmelig = null, totp_ny = null where id = $1', [s.bruker.id]);
+    revalidatePath('/innstillinger');
+  }, 'Totrinns innlogging er slått av.');
 }

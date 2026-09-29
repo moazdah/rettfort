@@ -31,6 +31,7 @@ export function SalgHandlinger({ id, type, status, rest, idag, kanEndre }: { id:
     <div className="stakk ikke-utskrift" style={{ gap: 10 }}>
       <div className="rad">
         <a href={`/api/faktura/${id}/pdf`} className="knapp hvit">Last ned PDF</a>
+        {(type === 'faktura' || type === 'kreditnota') && status !== 'utkast' && <a href={`/api/faktura/${id}/ehf`} className="knapp hvit" title="Peppol BIS Billing 3.0. Last den opp i kundens fakturaportal, eller send den som vedlegg.">Last ned EHF</a>}
         <button type="button" className="knapp hvit" onClick={() => window.print()}>Skriv ut</button>
         {kanEndre && type === 'faktura' && rest > 0 && ['sendt', 'delvis_betalt'].includes(status) && <button type="button" className="knapp" onClick={() => setApen(apen === 'betal' ? '' : 'betal')}>Registrer betaling</button>}
         {kanEndre && aktivFaktura && status !== 'kreditert' && <button type="button" className="knapp hvit" onClick={() => setApen(apen === 'krediter' ? '' : 'krediter')}>Lag kreditnota</button>}

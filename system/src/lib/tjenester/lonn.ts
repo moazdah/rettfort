@@ -83,8 +83,22 @@ function beregnAgaSum(s: Lonnslipp[], sats: number): number {
   return s.reduce((a, x) => a + beregnAga(x.brutto, sats) + beregnAga(x.feriepenger, sats), 0);
 }
 
-/** Skattetrekk og AGA som skal betales for en termin (fra lønnskjøringene i terminen). */
+/**
+ * Skattetrekk og AGA som skal betales for en termin (fra lønnskjøringene i terminen).
+ * AGA er bare avgiften på utbetalt lønn (konto 2770). Avgiften på avsatte feriepenger (2785) forfaller
+ * først når feriepengene utbetales, og tas ikke med her.
+ */
 export async function trekkOgAga(t: Sporring, orgId: string, fra: string, til: string): Promise<{ skatt: number; aga: number }> {
-  const r = await t.en<{ skatt: number; aga: number }>(`select coalesce(sum(skatt),0)::bigint as skatt, coalesce(sum(aga),0)::bigint as aga from lonnskjoring where organisasjon_id = $1 and utbetalingsdato between $2 and $3`, [orgId, fra, til]);
+  const r = await t.en<{ skatt: number; aga: number }>(
+    `select coalesce(sum(l.skatt),0)::bigint as skatt,
+       coalesce((select sum(p.kredit - p.debet) from postering p where p.organisasjon_id = $1 and p.konto = 2770 and p.bilag_id in
+         (select bilag_id from lonnskjoring where organisasjon_id = $1 and utbetalingsdato between $2 and $3 and bilag_id is not null)),0)::bigint as aga
+     from lonnskjoring l where l.organisasjon_id = $1 and l.utbetalingsdato between $2 and $3`, [orgId, fra, til]);
   return r ?? { skatt: 0, aga: 0 };
+}
+
+/** AGA på utbetalt lønn for én lønnskjøring (det som skal i a-meldingen). */
+export async function agaForKjoring(t: Sporring, orgId: string, periode: string): Promise<number> {
+  const r = await t.en<{ aga: number }>(`select coalesce(sum(p.kredit - p.debet),0)::bigint as aga from postering p join lonnskjoring l on l.bilag_id = p.bilag_id where l.organisasjon_id = $1 and l.periode = $2 and p.konto = 2770`, [orgId, periode]);
+  return r?.aga ?? 0;
 }

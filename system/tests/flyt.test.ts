@@ -4,7 +4,7 @@ import { lagreSalg, sendSalg, hentSalg } from '@/lib/tjenester/faktura';
 import { registrerKjop, finnEllerLagKontakt } from '@/lib/tjenester/kjop';
 import { importerKontoutskrift, behandleBevegelse, avstemming, merkManedFerdig } from '@/lib/tjenester/bank';
 import { mvaStatus, sendMva, terminFor, aktuellTermin } from '@/lib/tjenester/mva';
-import { kjorLonn, forhandsvisLonn, beregnLonnslipp } from '@/lib/tjenester/lonn';
+import { kjorLonn, forhandsvisLonn, beregnLonnslipp, trekkOgAga, agaForKjoring } from '@/lib/tjenester/lonn';
 import { kontrollFunn, vurderFunn } from '@/lib/tjenester/kontroll';
 import { hentPosteringer, bokfor } from '@/lib/tjenester/bokforing';
 import { balanse, saldobalanse } from '@/lib/rapporter';
@@ -36,6 +36,10 @@ describe('en hel termin', () => {
     expect(s[0]).toMatchObject({ brutto: 4500000, skatt: 1440000, netto: 3060000, feriepenger: 459000, aga: 355500 });
     await db.tx(t => kjorLonn(t, org, '2026-09', '2026-09-25', []));
     await expect(db.tx(t => kjorLonn(t, org, '2026-09', '2026-09-25', []))).rejects.toThrow(/allerede kjørt/);
+    // Det som skal betales og rapporteres i a-meldingen, er AGA på utbetalt lønn. AGA på avsatte feriepenger
+    // (459 000 kr × 7,9 % i sone 4a) forfaller først når feriepengene utbetales.
+    expect(await trekkOgAga(db, org, '2026-09-01', '2026-10-31')).toEqual({ skatt: 1440000, aga: 355500 });
+    expect(await agaForKjoring(db, org, '2026-09')).toBe(355500);
   });
   it('kontoutskrift: KID-innbetaling, Telenor allerede ført, gebyr og en ukjent post', async () => {
     const csv = [

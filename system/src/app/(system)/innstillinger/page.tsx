@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Totrinn } from './Totrinn';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { kanEndre } from '@/lib/auth';
 import { laastTil } from '@/lib/tjenester/bokforing';
@@ -10,7 +11,7 @@ import { FirmaSkjema, FakturaInnstillinger, Inviter, Pakker, Laas, Apningsbalans
 
 export const metadata = { title: 'Innstillinger' };
 
-const FANER = [['firma', 'Firma'], ['faktura', 'Faktura'], ['brukere', 'Brukere'], ['abonnement', 'Abonnement'], ['avansert', 'Avansert']] as const;
+const FANER = [['firma', 'Firma'], ['faktura', 'Faktura'], ['brukere', 'Brukere'], ['sikkerhet', 'Sikkerhet'], ['abonnement', 'Abonnement'], ['avansert', 'Avansert']] as const;
 const ORGFORM: Record<string, string> = { AS: 'Aksjeselskap', ENK: 'Enkeltpersonforetak', ANS: 'Ansvarlig selskap', DA: 'Selskap med delt ansvar', NUF: 'Norskregistrert utenlandsk foretak' };
 const ROLLE: Record<string, string> = { eier: 'Eier', full: 'Full tilgang', les: 'Kan se', kvittering: 'Kvitteringer', regnskapsforer_full: 'Regnskapsfører', regnskapsforer_les: 'Regnskapsfører (se)' };
 
@@ -24,6 +25,7 @@ export default async function Innstillinger({ searchParams }: { searchParams: Pr
   const brukere = await d.q<{ navn: string; epost: string; rolle: string }>('select b.navn, b.epost, m.rolle from medlemskap m join bruker b on b.id = m.bruker_id where m.organisasjon_id = $1 order by m.opprettet', [s.org.id]);
   const inv = await d.q<{ id: string; epost: string; rolle: string }>(`select id, epost, rolle from invitasjon where organisasjon_id = $1 and status = 'venter' and rolle not like 'regnskapsforer%' order by opprettet`, [s.org.id]);
   const laast = await laastTil(d, s.org.id);
+  const totrinnPa = !!(await d.en<{ pa: boolean }>('select totp_hemmelig is not null as pa from bruker where id = $1', [s.bruker.id]))?.pa;
   const harApning = await d.en(`select 1 from bilag where organisasjon_id = $1 and type = 'apningsbalanse'`, [s.org.id]);
   const dagForStart = o?.regnskap_fra ? new Date(Date.parse(o.regnskap_fra) - 86400000).toISOString().slice(0, 10) : `${Number(idag().slice(0, 4)) - 1}-12-31`;
 
@@ -64,6 +66,7 @@ export default async function Innstillinger({ searchParams }: { searchParams: Pr
         </>
       )}
 
+      {vis === 'sikkerhet' && <section className="kort stakk"><h2>Totrinns innlogging</h2><Totrinn pa={totrinnPa} /></section>}
       {vis === 'abonnement' && <section className="kort stakk"><h2>Abonnement</h2><Pakker pakke={o?.pakke ?? 'gratis'} erEier={s.rolle === 'eier'} /></section>}
 
       {vis === 'avansert' && (

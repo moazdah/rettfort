@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { kanEndre } from '@/lib/auth';
-import { AGA_SONER } from '@/lib/tjenester/lonn';
+import { AGA_SONER, agaForKjoring } from '@/lib/tjenester/lonn';
 import { kr, nd, manedNavn } from '@/lib/vis';
 import { LonnOppsett } from './Oppsett';
 import { LonnKjoring } from './Kjoring';
@@ -35,6 +35,7 @@ export default async function Lonn({ searchParams }: { searchParams: Promise<{ v
   const amKjoring = kjoringer.find(k => k.periode === amPeriode);
   const amSlipper = amPeriode ? await d.q<{ navn: string; brutto: number; skatt: number }>(`select a.navn, ls.brutto, ls.skatt from lonnslipp ls join lonnskjoring l on l.id = ls.lonnskjoring_id join ansatt a on a.id = ls.ansatt_id where l.organisasjon_id = $1 and l.periode = $2 order by a.navn`, [s.org.id, amPeriode]) : [];
   const sone = AGA_SONER[o?.aga_sone ?? '1'];
+  const amAga = amPeriode ? await agaForKjoring(d, s.org.id, amPeriode) : 0;
   const amFrist = amPeriode ? (() => { const [y, m] = amPeriode.split('-').map(Number); return m === 12 ? `05.01.${y + 1}` : `05.${String(m + 1).padStart(2, '0')}.${y}`; })() : '';
 
   return (
@@ -59,7 +60,7 @@ export default async function Lonn({ searchParams }: { searchParams: Promise<{ v
           <Utfylling id={`amelding-${s.org.id}-${amKjoring.periode}`} lenke="https://www.altinn.no/" lenketekst="Gå til Altinn"
             rader={[
               ...amSlipper.map(a => ({ tekst: `${a.navn}: lønn og forskuddstrekk`, verdier: [{ etikett: 'Lønn', verdi: kr(a.brutto) }, { etikett: 'Forskuddstrekk', verdi: kr(a.skatt) }] })),
-              { tekst: `Arbeidsgiveravgift, sone ${o?.aga_sone ?? '1'} (${sone?.sats ?? 14.1} %)`, verdier: [{ etikett: 'Grunnlag', verdi: kr(amKjoring.brutto) }, { etikett: 'Avgift', verdi: kr(amKjoring.aga) }] },
+              { tekst: `Arbeidsgiveravgift, sone ${o?.aga_sone ?? '1'} (${sone?.sats ?? 14.1} %)`, verdier: [{ etikett: 'Grunnlag', verdi: kr(amKjoring.brutto) }, { etikett: 'Avgift', verdi: kr(amAga) }] },
               { tekst: 'Sum forskuddstrekk for virksomheten', verdier: [{ etikett: 'Sum', verdi: kr(amKjoring.skatt) }] },
             ]} />
         </section>
