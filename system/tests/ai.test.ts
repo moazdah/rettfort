@@ -151,3 +151,28 @@ describe('assistenten som agent', () => {
     await expect(svarSomAgent(k, { foretak: 'X', orgform: 'AS', mvaRegistrert: false, bruker: 'T', idag: IDAG, klokke: '10:00', kanEndre: true }, [{ role: 'user', content: 'hei' }])).rejects.toThrow(/svarer ikke akkurat nå/);
   });
 });
+
+describe('tidligere samtaler', () => {
+  it('lagres per bruker, kan søkes i og får oppdatert status på forslag', async () => {
+    const { lagreSamtale, listSamtaler, hentSamtale } = await import('@/lib/ai/samtale');
+    const f = forslag(await kjorVerktoy(k, 'registrer_kostnad', { leverandor: 'Biltema', beskrivelse: 'Lyspære', total_inkl_mva: 99 }));
+    const tid = new Date().toISOString();
+    const id = await lagreSamtale(db, org, bruker, null, 'Kostnad fra Biltema', [
+      { fra: 'bruker', tekst: 'Før lyspæra fra Biltema', tid },
+      { fra: 'assistent', tekst: 'Her er forslaget.', tid, kort: [f] },
+    ]);
+    expect(await lagreSamtale(db, org, bruker, id, 'x', [{ fra: 'bruker', tekst: 'Før lyspæra fra Biltema', tid }, { fra: 'assistent', tekst: 'Her er forslaget.', tid, kort: [f] }])).toBe(id);
+    const l = await listSamtaler(db, org, bruker);
+    expect(l[0]).toMatchObject({ id, tittel: 'Kostnad fra Biltema', siste: 'Her er forslaget.', sisteFraBruker: false });
+    expect((await listSamtaler(db, org, bruker, 'lyspæra')).map(x => x.id)).toContain(id);
+    expect(await listSamtaler(db, org, bruker, 'finnes-ikke')).toHaveLength(0);
+    // En annen bruker ser den ikke
+    const annen = (await db.en<{ id: string }>(`insert into bruker (epost, navn, passord_hash, epost_bekreftet) values ('annen@example.com', 'Annen', 'x', true) returning id`))!.id;
+    expect(await hentSamtale(db, org, annen, id)).toBeNull();
+    // Forslaget registreres et annet sted: samtalen viser ny status
+    await utforForslag(db, o(), f.id, 'utfor');
+    const s = await hentSamtale(db, org, bruker, id);
+    const kort = (s!.meldinger[1] as { kort: Kort[] }).kort[0] as Extract<Kort, { type: 'forslag' }>;
+    expect(kort.status).toBe('utfort');
+  });
+});

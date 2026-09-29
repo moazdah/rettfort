@@ -16,7 +16,7 @@ import { splittBrutto } from '../penger';
 export interface Ktx { db: Db; orgId: string; brukerId: string; idag: string; kanEndre: boolean }
 
 export type Kort =
-  | { type: 'forslag'; id: string; art: Art; status: string; data: Record<string, unknown> }
+  | { type: 'forslag'; id: string; art: Art; status: string; data: Record<string, unknown>; melding?: string; lenke?: string }
   | { type: 'graf_maned'; ar: number; maneder: { maned: number; inn: number; ut: number; resultat: number; topp: { navn: string; belop: number }[]; bilag: number }[] }
   | { type: 'tabell_fakturaer'; tittel: string; rader: { id: string; nr: number; kunde: string; forfall: string | null; rest: number; forfalt: boolean }[] }
   | { type: 'liste'; tittel: string; rader: { navn: string; belop: number; lenke?: string }[] };

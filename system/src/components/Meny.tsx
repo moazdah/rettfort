@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
+import { AssistentKnapp } from './Assistent';
 import { loggUt, settTestPakke, testByra, testfirma, byttForetak, settAiLeverandor } from '@/app/handlinger';
 
 import { MENY } from './menyvalg';
@@ -30,7 +31,7 @@ function useNedtrekk() {
   return { apen, setApen, ref };
 }
 
-export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '', innboksTeller = 0, ai }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string; innboksTeller?: number; ai?: { valgt: 'kina' | 'eu'; kina: boolean; eu: boolean } }) {
+export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '', innboksTeller = 0, ai, assistent = false }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string; innboksTeller?: number; ai?: { valgt: 'kina' | 'eu'; kina: boolean; eu: boolean }; assistent?: boolean }) {
   const sti = usePathname();
   const aktiv = (m: (typeof MENY)[number]) => m.aktivPa.some(p => sti === p || sti.startsWith(p + '/'));
   const initialer = bruker.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
@@ -65,6 +66,7 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
               )}
             </div>
           </nav>
+          {assistent && <AssistentKnapp />}
           <div className="nedtrekk profil" ref={profil.ref}>
             <button type="button" className="profil-knapp" aria-expanded={profil.apen} aria-haspopup="true" onClick={() => profil.setApen(!profil.apen)}>
               <span className="firma-navn">{firma}</span>

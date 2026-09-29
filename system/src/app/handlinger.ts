@@ -30,6 +30,7 @@ import { stripePa, startBetaling, sigOpp, portalLenke } from '@/lib/stripe';
 import { svarSomAgent, type Tur } from '@/lib/ai/agent';
 import { kjorVerktoy, type Kort } from '@/lib/ai/verktoy';
 import { utforForslag, type Valg } from '@/lib/ai/utfor';
+import { listSamtaler, hentSamtale as hentSamtaleDb, lagreSamtale as lagreSamtaleDb, type SamtaleMelding, type SamtaleListe } from '@/lib/ai/samtale';
 import { valgtLeverandor, leverandorKlar, settLeverandor, type Leverandor } from '@/lib/ai/modell';
 import { lagLenke, hentNye, etterRegistrering, hentInnsending, settTilbake, settFastTilbake, betalUtleggNa, avvis, slettLenke, type Tilbake } from '@/lib/tjenester/innsending';
 import { kr } from '@/lib/penger';
@@ -972,6 +973,30 @@ export async function forslagDirekte(verktoy: 'send_purring' | 'registrer_innbet
     const r = await kjorVerktoy({ db: await getDb(), orgId: s.org.id, brukerId: s.bruker.id, idag: idag(), kanEndre: true }, verktoy, args);
     if (!r.kort) throw new RegnskapsFeil(String((r.svar as { feil?: string })?.feil ?? 'Kunne ikke lage forslaget.'));
     return r.kort;
+  });
+}
+
+/** Tidligere samtaler med assistenten, nyeste først. Søker i tittel og innhold. */
+export async function samtaler(sok = ''): Promise<Resultat<SamtaleListe[]>> {
+  return trygt(async () => { const s = await kreverOrg(); return listSamtaler(await getDb(), s.org.id, s.bruker.id, String(sok)); });
+}
+
+export async function hentSamtale(id: string): Promise<Resultat<{ id: string; tittel: string; meldinger: SamtaleMelding[] }>> {
+  return trygt(async () => {
+    const s = await kreverOrg();
+    if (!/^[0-9a-f-]{36}$/.test(id)) throw new RegnskapsFeil('Ugyldig.');
+    const r = await hentSamtaleDb(await getDb(), s.org.id, s.bruker.id, id);
+    if (!r) throw new RegnskapsFeil('Fant ikke samtalen.');
+    return r;
+  });
+}
+
+export async function lagreSamtale(id: string | null, tittel: string, meldinger: SamtaleMelding[]): Promise<Resultat<string>> {
+  return trygt(async () => {
+    const s = await kreverOrg();
+    if (id !== null && !/^[0-9a-f-]{36}$/.test(id)) throw new RegnskapsFeil('Ugyldig.');
+    if (!Array.isArray(meldinger) || JSON.stringify(meldinger).length > 1_500_000) throw new RegnskapsFeil('Samtalen er for lang. Start en ny.');
+    return lagreSamtaleDb(await getDb(), s.org.id, s.bruker.id, id, String(tittel), meldinger);
   });
 }
 

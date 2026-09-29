@@ -43,7 +43,8 @@ export async function utforForslag(db: Db, o: { orgId: string; brukerId: string;
       if (await sendEpost({ til: p.f.kunde.epost, ...m, svarTil: p.avsender.epost ? String(p.avsender.epost) : o.brukerEpost, vedlegg: [{ filnavn: p.filnavn, innhold: p.pdf }] })) epostTil = p.f.kunde.epost;
     }
     await ferdig('utfort', { fakturaId: r.fid, nr: r.nr, epostTil });
-    return { melding: `Faktura ${r.nr} er laget og ført${epostTil ? `, og sendt til ${epostTil}` : '. Kunden har ingen e-post, så last ned PDF-en og send den selv'}.`, lenke: `/salg/${r.fid}`, status: 'utfort' };
+    const hvorfor = p?.f.kunde?.epost ? 'E-posten kunne ikke sendes' : 'Kunden har ingen e-post';
+    return { melding: `Faktura ${r.nr} er laget og ført${epostTil ? `, og sendt til ${epostTil}` : `. ${hvorfor}, så last ned PDF-en og send den selv`}.`, lenke: `/salg/${r.fid}`, status: 'utfort' };
   }
 
   if (f.art === 'kostnad') {

@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 9;
+export const SKJEMA_VERSJON = 10;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -442,6 +442,8 @@ create table if not exists ai_forslag (
 );
 create index if not exists ai_forslag_org on ai_forslag (organisasjon_id, status);
 create table if not exists ai_bruk (organisasjon_id uuid not null references organisasjon(id) on delete cascade, maned text not null, antall int not null default 0, primary key (organisasjon_id, maned));
+create table if not exists ai_samtale (id uuid primary key default gen_random_uuid(), organisasjon_id uuid not null references organisasjon(id) on delete cascade, bruker_id uuid not null references bruker(id) on delete cascade, tittel text not null, meldinger jsonb not null default '[]', opprettet timestamptz not null default now(), oppdatert timestamptz not null default now());
+create index if not exists ai_samtale_bruker on ai_samtale (organisasjon_id, bruker_id, oppdatert desc);
 
 -- Supabase gir tilgang til tabellene i «public» gjennom sitt eget API med en offentlig nøkkel.
 -- Systemet bruker ikke det API-et, så all slik tilgang stenges: radsikkerhet uten regler, og ingen rettigheter
