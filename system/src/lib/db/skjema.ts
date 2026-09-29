@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 2;
+export const SKJEMA_VERSJON = 3;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -355,4 +355,25 @@ create trigger postering_periodelaas before insert on postering for each row exe
 
 -- Versjon 2: hemmelig lenke til kalenderabonnement på frister.
 alter table organisasjon add column if not exists kalender_token text unique;
+
+-- Supabase gir tilgang til tabellene i «public» gjennom sitt eget API med en offentlig nøkkel.
+-- Systemet bruker ikke det API-et, så all slik tilgang stenges: radsikkerhet uten regler, og ingen rettigheter
+-- for rollene anon og authenticated. Systemet selv kobler til som eier av tabellene og påvirkes ikke.
+do $$
+declare r record;
+begin
+  for r in select tablename from pg_tables where schemaname = 'public' loop
+    execute format('alter table public.%I enable row level security', r.tablename);
+  end loop;
+  if exists (select 1 from pg_roles where rolname = 'anon') then
+    execute 'revoke all on all tables in schema public from anon';
+    execute 'revoke all on all sequences in schema public from anon';
+    execute 'alter default privileges in schema public revoke all on tables from anon';
+  end if;
+  if exists (select 1 from pg_roles where rolname = 'authenticated') then
+    execute 'revoke all on all tables in schema public from authenticated';
+    execute 'revoke all on all sequences in schema public from authenticated';
+    execute 'alter default privileges in schema public revoke all on tables from authenticated';
+  end if;
+end $$;
 `;

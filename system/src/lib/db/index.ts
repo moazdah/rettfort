@@ -1,4 +1,4 @@
-// Databasetilkobling. Bruker Postgres (Neon) når DATABASE_URL finnes, ellers
+// Databasetilkobling. Bruker Postgres (Supabase) når POSTGRES_URL eller DATABASE_URL finnes, ellers
 // PGlite (Postgres i prosessen) som testmodus. Samme SQL i begge.
 
 import { SKJEMA, SKJEMA_VERSJON } from './skjema';
@@ -24,7 +24,11 @@ async function lagPostgres(url: string): Promise<Db> {
   types.setTypeParser(20, v => Number(v)); // bigint → number (beløp i øre er trygt under 2^53)
   types.setTypeParser(1700, v => Number(v)); // numeric
   types.setTypeParser(1082, v => v); // date som tekst
-  const pool = new Pool({ connectionString: url, max: 5, ssl: url.includes('localhost') ? undefined : { rejectUnauthorized: false } });
+  // sslmode i adressen overstyrer ssl-valget under og gir feil mot Supabase sin sertifikatkjede, så det fjernes.
+  const u = new URL(url);
+  for (const k of ['sslmode', 'sslrootcert', 'supa', 'pgbouncer']) u.searchParams.delete(k);
+  const lokal = ['localhost', '127.0.0.1'].includes(u.hostname);
+  const pool = new Pool({ connectionString: u.toString(), max: 3, idleTimeoutMillis: 10_000, ssl: lokal ? undefined : { rejectUnauthorized: false } });
   const lag = (c: { query: (s: string, p?: unknown[]) => Promise<{ rows: unknown[] }> }): Sporring => ({
     q: async <T,>(s: string, p?: unknown[]) => (await c.query(s, p)).rows as T[],
     en: async <T,>(s: string, p?: unknown[]) => ((await c.query(s, p)).rows[0] as T) ?? null,
@@ -76,6 +80,8 @@ async function migrer(db: Db): Promise<void> {
     if (v && v.v >= SKJEMA_VERSJON) return;
   }
   await db.tx(async t => {
+    // Flere serverinstanser kan starte samtidig. Låsen gjør at bare én oppdaterer skjemaet om gangen.
+    if (db.modus === 'postgres') await t.q('select pg_advisory_xact_lock(7340211)');
     for (const setning of delSql(SKJEMA)) await t.q(setning);
     await t.q('insert into skjema_versjon (versjon) values ($1) on conflict do nothing', [SKJEMA_VERSJON]);
   });
