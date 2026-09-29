@@ -48,7 +48,7 @@ export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, org
   if (ferdig != null) return (
     <div className="kort rad" style={{ flexWrap: 'nowrap', alignItems: 'flex-start', gap: 18 }}>
       <Maskot storrelse={72} />
-      <div><h2>Lønn for {manedNavn(periode)} er kjørt.</h2><p className="mut" style={{ marginTop: 6 }}>Ført som bilag {ferdig}. Betal {kr(sumNetto)} kr til de ansatte {nd(utbetaling)}. Skattetrekk og arbeidsgiveravgift finner du under Frister. A-meldingen sendes innen den 5. i neste måned. Innsending rett til Altinn slås på når koblingen er klar.</p></div>
+      <div><h2>Lønn for {manedNavn(periode)} er kjørt.</h2><p className="mut" style={{ marginTop: 6 }}>Ført som bilag {ferdig}. Betal {kr(sumNetto)} kr til de ansatte {nd(utbetaling)}. Skattetrekk og arbeidsgiveravgift finner du under Frister. A-meldingen sendes innen den 5. i neste måned. Tallene står klare under «Tidligere».</p></div>
     </div>
   );
   if (ny || !ansatte.length) return ny || kanEndre ? <AnsattSkjema onFerdig={() => setNy(false)} /> : <p className="mut">Ingen ansatte.</p>;

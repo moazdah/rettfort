@@ -229,3 +229,18 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
 .testpakke button { border: 1px solid var(--linje-2); background: #fff; border-radius: 99px; padding: 4px 10px; font-size: 13px; cursor: pointer; font-family: inherit; color: var(--ink); }
 .testpakke button.valgt { background: var(--ink); color: #fff; border-color: var(--ink); }
 @media (max-width: 900px) { .assistent-knapp { bottom: calc(76px + env(safe-area-inset-bottom)); right: 12px; padding: 6px 14px 6px 8px; } .assistent-knapp small { display: none; } .assistent-panel { right: 8px; left: 8px; width: auto; max-width: none; bottom: calc(72px + env(safe-area-inset-bottom)); height: min(560px, calc(100vh - 150px)); } }
+/* Utfylling hos Skatteetaten/Altinn, felt for felt */
+.utfylling { display: flex; flex-direction: column; gap: 12px; }
+.utfylling-rader { border: 1px solid var(--linje); border-radius: 12px; overflow: hidden; background: #fff; }
+.utfylling-rad { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--linje-3); }
+.utfylling-rad:first-child { border-top: 0; }
+.utfylling-rad.gjort { background: #F4FBF6; }
+.utfylling-rad.gjort .fyll { color: var(--mut); text-decoration: line-through; }
+.utfylling-kryss input { width: 18px; height: 18px; }
+.utfylling-kode { display: inline-block; min-width: 34px; margin-right: 8px; padding: 1px 6px; border-radius: 6px; background: var(--noyt-bg); font-size: 12.5px; text-align: center; }
+.utfylling-verdier { display: flex; gap: 6px; flex-shrink: 0; }
+.utfylling-verdi { display: flex; flex-direction: column; align-items: flex-end; border: 1px solid var(--linje-2); background: #fff; border-radius: 8px; padding: 4px 10px; cursor: pointer; font-family: inherit; color: var(--ink); min-width: 104px; }
+.utfylling-verdi:hover { border-color: var(--ink); }
+.utfylling-verdi small { font-size: 11px; color: var(--mut); }
+.utfylling-verdi b { font-size: 14.5px; }
+@media (max-width: 900px) { .utfylling-rad { flex-wrap: wrap; } .utfylling-verdier { width: 100%; justify-content: flex-end; } }

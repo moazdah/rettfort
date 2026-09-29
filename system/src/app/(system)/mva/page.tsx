@@ -6,6 +6,7 @@ import { dagerTil, norskDato } from '@/lib/frister';
 import { kr, nd } from '@/lib/vis';
 import { Handling } from '@/components/Handling';
 import { Maskot } from '@/components/Logo';
+import { Utfylling } from '@/components/Utfylling';
 import { sendMvaHandling, vurderFunnHandling } from '@/app/handlinger';
 
 export const metadata = { title: 'MVA' };
@@ -89,18 +90,11 @@ export default async function Mva({ searchParams }: { searchParams: Promise<{ fr
               <div className="kort" style={{ padding: 14 }}><div className="mut liten">MVA på kjøp</div><div className="belop" style={{ fontSize: 22, fontWeight: 600 }}>{kr(tall.inngaende)}</div></div>
               <div className="kort mork" style={{ padding: 14 }}><div className="mut liten">{tall.aBetale >= 0 ? 'Du skal betale' : 'Du får tilbake'}</div><div className="belop" style={{ fontSize: 22, fontWeight: 600 }}>{kr(Math.abs(tall.aBetale))}</div></div>
             </div>
-            <details>
-              <summary className="lenke" style={{ cursor: 'pointer' }}>Tallene post for post, slik de føres i meldingen</summary>
-              <table className="tabell" style={{ marginTop: 8 }}>
-                <thead><tr><th>Kode</th><th>Post</th><th className="h">Grunnlag</th><th className="h">MVA</th></tr></thead>
-                <tbody>{tall.linjer.map(l => <tr key={l.kode}><td className="mono">{l.kode}</td><td>{l.navn}</td><td className="h belop">{kr(l.grunnlag)}</td><td className="h belop">{kr(l.mva)}</td></tr>)}</tbody>
-              </table>
-            </details>
           </>
         )}
       </Steg>
 
-      <Steg nr={4} tittel={sendt ? 'Sendt' : 'Send meldingen'} ferdig={sendt} aktiv={klar && !sendt} tekst={sendt ? `Registrert som sendt ${nd(st.sendt!.tid)}. Terminen er låst.` : 'Innsending rett til Altinn slås på når koblingen til Skatteetaten er på plass.'}>
+      <Steg nr={4} tittel={sendt ? 'Sendt' : 'Send meldingen'} ferdig={sendt} aktiv={klar && !sendt} tekst={sendt ? `Registrert som sendt ${nd(st.sendt!.tid)}. Terminen er låst.` : 'Du sender selv hos Skatteetaten. Tallene står klare under, post for post. Trykk på et tall for å kopiere det.'}>
         {sendt ? (
           <div className="rad" style={{ flexWrap: 'nowrap' }}>
             <Maskot storrelse={56} />
@@ -109,10 +103,14 @@ export default async function Mva({ searchParams }: { searchParams: Promise<{ fr
         ) : klar && terminAvsluttet && endre ? (
           <div className="stakk">
             <ol className="mut liten" style={{ margin: 0, paddingLeft: 18 }}>
-              <li>Logg inn på Altinn med BankID og åpne MVA-meldingen for {termin.tittel.replace('MVA for ', '')}.</li>
-              <li>Fyll inn tallene post for post fra listen over.</li>
-              <li>Send, og trykk så på knappen under. Vi fører oppgjøret og låser terminen.</li>
+              <li>Åpne MVA-meldingen hos Skatteetaten og logg inn med BankID. Velg {s.org.navn} og terminen {termin.tittel.replace('MVA for ', '')}.</li>
+              <li>Fyll inn postene under. Trykk på et tall for å kopiere det, og kryss av når posten er fylt inn.</li>
+              <li>Kontroller at summen hos Skatteetaten blir {tall.aBetale >= 0 ? `${kr(tall.aBetale)} kr å betale` : `${kr(-tall.aBetale)} kr til gode`}, og send.</li>
+              <li>Trykk på knappen nederst. Vi fører oppgjøret og låser terminen.</li>
             </ol>
+            <Utfylling id={`mva-${s.org.id}-${termin.fra}`} lenke="https://www.skatteetaten.no/bedrift-og-organisasjon/avgifter/mva/" lenketekst="Gå til MVA hos Skatteetaten"
+              rader={[...tall.linjer.filter(l => l.grunnlag !== 0 || l.mva !== 0).map(l => ({ kode: l.kode, tekst: l.navn, verdier: [{ etikett: 'Grunnlag', verdi: kr(l.grunnlag) }, { etikett: 'MVA', verdi: kr(l.mva) }] })),
+                { tekst: tall.aBetale >= 0 ? 'Å betale (sjekk at summen stemmer)' : 'Til gode (sjekk at summen stemmer)', verdier: [{ etikett: 'Sum', verdi: kr(Math.abs(tall.aBetale)) }] }]} />
             <div><Handling handling={sendMvaHandling.bind(null, termin)} tekst="Jeg har sendt meldingen i Altinn" bekreft="Registrere meldingen som sendt? Terminen låses, og rettelser må føres i neste termin." /></div>
           </div>
         ) : !terminAvsluttet ? <p className="mut liten">Terminen er ikke over ennå. Du kan sende fra {nd(new Date(Date.parse(termin.til) + 86400000).toISOString().slice(0, 10))}.</p> : null}

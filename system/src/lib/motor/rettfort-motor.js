@@ -387,7 +387,7 @@ function runPayroll(A, B, F, st, ck) {
 // ── Bank ────────────────────────────────────────────────────────────────
 // Kontoutskrift som CAMT.053 (bankenes XML-standard) eller CSV fra nettbanken
 // (DNB, Nordea, SpareBank 1, Handelsbanken m.fl.). Beløp: positivt = inn på konto.
-const BANKF = [['date', n => /^(bokforingsdato|bokfort|bokfortdato|dato|date|bookingdate|transaksjonsdato|reskontrodato|utfortdato)$/.test(n)], ['vdate', n => /^(rentedato|valuteringsdato|valutadato|valuedate)$/.test(n)], ['amount', n => /^(belop|belopnok|amount|sum|belopinnut)$/.test(n)], ['in', n => /^(inn|innskudd|innpakonto|inngaende|kredit|credit|innbetaling)$/.test(n)], ['out', n => /^(ut|uttak|utfrakonto|utgaende|debet|debit|utbetaling)$/.test(n)], ['balance', n => /^(saldo|balance|bokfortsaldo|disponibeltbelop)$/.test(n)], ['ref', n => /^(kid|referanse|ref|arkivreferanse|arkivref|reference)$/.test(n)], ['text', n => /forklaring|beskrivelse|tekst|tittel|melding|description|^text$|navn|mottaker|avsender/.test(n)]];
+const BANKF = [['date', n => /^(bokforingsdato|bokfort|bokfortdato|dato|date|bookingdate|transaksjonsdato|reskontrodato|utfortdato)$/.test(n)], ['vdate', n => /^(rentedato|valuteringsdato|valutadato|valuedate)$/.test(n)], ['amount', n => /^(belop|belopnok|amount|sum|belopinnut)$/.test(n)], ['in', n => /^(inn|innskudd|innpakonto|innskuddpakonto|innkonto|inngaende|kredit|credit|innbetaling|belopinn)$/.test(n)], ['out', n => /^(ut|uttak|utfrakonto|uttakfrakonto|utkonto|utgaende|debet|debit|utbetaling|beloput)$/.test(n)], ['balance', n => /^(saldo|balance|bokfortsaldo|disponibeltbelop)$/.test(n)], ['ref', n => /^(kid|referanse|ref|arkivreferanse|arkivref|reference)$/.test(n)], ['text', n => /forklaring|beskrivelse|tekst|tittel|melding|description|^text$/.test(n)], ['navn', n => /^navn$/.test(n)], ['navn2', n => /mottaker|avsender|motpart|name/.test(n)]];
 export function parseBank(text) {
   if (!String(text).trim()) throw new Error('Filen er tom.');
   sniff(text, 'bank');
@@ -444,7 +444,7 @@ function parseBankCsv(text) {
     let a;
     if (col.amount != null) a = numW(G(r, 'amount'), true, w);
     else { const inn = numW(G(r, 'in'), true, w), ut = numW(G(r, 'out'), true, w); a = Math.abs(inn) - Math.abs(ut); }
-    lines.push({ date: d, vdate: isoDate(G(r, 'vdate')), amount: a, text: G(r, 'text').slice(0, 160), ref: G(r, 'ref'), balance: col.balance != null && G(r, 'balance') ? numW(G(r, 'balance'), true, w) : null });
+    const nv = G(r, 'navn') || G(r, 'navn2'), tt = G(r, 'text'); lines.push({ date: d, vdate: isoDate(G(r, 'vdate')), amount: a, text: (tt && nv && !normTxt(tt).includes(normTxt(nv)) ? `${tt} · ${nv}` : tt || nv).slice(0, 160), ref: G(r, 'ref'), balance: col.balance != null && G(r, 'balance') ? numW(G(r, 'balance'), true, w) : null });
   });
   if (!lines.length) throw new Error('Kontoutskriften har ingen transaksjoner med gyldig dato.');
   // Saldo: fra saldokolonnen når den finnes (siste linje etter dato).
