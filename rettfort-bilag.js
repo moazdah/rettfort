@@ -62,6 +62,14 @@ async function recognize(src) {
   return best;
 }
 
+// Leser et bilde to ganger (vanlig og ren svart-hvitt) og gir begge tekstene. Den som gir tall som stemmer
+// med hverandre, velges av tolkeren. Dette fanger flere lesefeil enn å velge ut fra gjenkjenningssikkerhet alene.
+export async function lesBildeToGanger(src) {
+  const a = await ocrOnce(await prepare(src));
+  const b = await ocrOnce(await prepare(src, true));
+  return [a, b];
+}
+
 // Setter tekstbitene fra pdf.js sammen til linjer, ovenfra og ned.
 function linesOf(items) {
   const rows = [];
@@ -70,7 +78,7 @@ function linesOf(items) {
 }
 
 // Returnerer { name, kind, xml? | text?, conf?, error? } til kontrollmotoren.
-export async function readBilag(file, onStep) {
+export async function readBilag(file, onStep, opts) {
   const name = file.name, ext = (name.split('.').pop() || '').toLowerCase(), type = (file.type || '').toLowerCase();
   try {
     const buf = new Uint8Array(await file.arrayBuffer());
@@ -91,6 +99,7 @@ export async function readBilag(file, onStep) {
     }
     if (/heic|heif/.test(ext + type)) return { name, error: 'HEIC-bilder (iPhone) støttes ikke. Ta bildet som JPG, eller eksporter det som JPG først.' };
     if (/^image\//.test(type) || /^(png|jpe?g|webp|gif|bmp)$/.test(ext)) {
+      if (opts && opts.alle) { onStep && onStep(`Tekstgjenkjenning av «${name}»`); const v = await lesBildeToGanger(new Blob([buf], { type: type || 'image/' + (ext === 'jpg' ? 'jpeg' : ext) })); return { name, kind: 'bilde', text: v[0].text, conf: v[0].conf, varianter: v }; }
       onStep && onStep(`Tekstgjenkjenning av «${name}»`);
       return { name, kind: 'bilde', ...(await recognize(new Blob([buf], { type: type || 'image/' + (ext === 'jpg' ? 'jpeg' : ext) }))) };
     }
