@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
@@ -10,29 +11,70 @@ export { MENY };
 
 const PAKKE: Record<string, string> = { gratis: 'Gratis', start: 'Start', selskap: 'Selskap', byra: 'Byrå' };
 const ROLLE: Record<string, string> = { eier: 'Eier', full: 'Full tilgang', les: 'Kan se', kvittering: 'Kvitteringer', regnskapsforer_full: 'Regnskapsfører', regnskapsforer_les: 'Regnskapsfører (se)' };
+// Valgene som står direkte i linjen. Resten ligger under «Mer».
+const HOVED = ['/hjem', '/kjop/ny', '/salg/ny', '/bank', '/lonn', '/rapporter', '/mva'];
+
+/** Lukker en nedtrekksmeny ved klikk utenfor, Escape eller når siden byttes. */
+function useNedtrekk() {
+  const [apen, setApen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const sti = usePathname();
+  useEffect(() => { setApen(false); }, [sti]);
+  useEffect(() => {
+    if (!apen) return;
+    const klikk = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setApen(false); };
+    const tast = (e: KeyboardEvent) => { if (e.key === 'Escape') setApen(false); };
+    document.addEventListener('mousedown', klikk); document.addEventListener('keydown', tast);
+    return () => { document.removeEventListener('mousedown', klikk); document.removeEventListener('keydown', tast); };
+  }, [apen]);
+  return { apen, setApen, ref };
+}
 
 export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean }) {
   const sti = usePathname();
   const aktiv = (m: (typeof MENY)[number]) => m.aktivPa.some(p => sti === p || sti.startsWith(p + '/'));
   const initialer = bruker.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
+  const hoved = MENY.filter(m => HOVED.includes(m.href));
+  const mer = MENY.filter(m => !HOVED.includes(m.href));
+  const merAktiv = mer.some(aktiv);
+  const merMeny = useNedtrekk();
+  const profil = useNedtrekk();
+  const teller = (m: (typeof MENY)[number]) => m.href === '/mva' && mvaTeller > 0 && <span className="teller" aria-label={`${mvaTeller} ting mangler`}>{mvaTeller}</span>;
+
   return (
     <>
-      <nav className="meny" aria-label="Hovedmeny">
-        <Link href="/hjem" className="logo" aria-label="Rettført, til Hjem"><Logo bredde={96} /></Link>
-        <div className="firma"><b>{firma}</b>Pakke: {PAKKE[pakke] ?? pakke}</div>
-        {harByra && <Link href="/byra" className="valg"><span className="ikon">←</span>Alle kunder</Link>}
-        {MENY.map(m => (
-          <Link key={m.href} href={m.href} className={`valg ${aktiv(m) ? 'aktiv' : ''}`} aria-current={aktiv(m) ? 'page' : undefined}>
-            <span className="ikon">{m.ikon}</span>{m.navn}
-            {m.href === '/mva' && mvaTeller > 0 && <span className="teller" aria-label={`${mvaTeller} ting mangler`}>{mvaTeller}</span>}
-          </Link>
-        ))}
-        <div className="bunn">
-          <span className="avatar">{initialer}</span>
-          <div style={{ flex: 1, minWidth: 0, lineHeight: 1.25 }}><b style={{ display: 'block', fontWeight: 600 }}>{bruker}</b><span className="faint">{rolle ? ROLLE[rolle] ?? rolle : ''}</span></div>
-          <form action={loggUt}><button className="knapp hvit liten">Logg ut</button></form>
+      <header className="toppmeny">
+        <div className="toppmeny-indre">
+          <Link href="/hjem" className="logo" aria-label="Rettført, til Hjem"><Logo bredde={92} /></Link>
+          <nav className="valg-rad" aria-label="Hovedmeny">
+            {harByra && <Link href="/byra" className="valg tilbake">← Alle kunder</Link>}
+            {hoved.map(m => (
+              <Link key={m.href} href={m.href} className={`valg ${aktiv(m) ? 'aktiv' : ''}`} aria-current={aktiv(m) ? 'page' : undefined}>{m.navn}{teller(m)}</Link>
+            ))}
+            <div className="nedtrekk" ref={merMeny.ref}>
+              <button type="button" className={`valg ${merAktiv ? 'aktiv' : ''}`} aria-expanded={merMeny.apen} aria-haspopup="true" onClick={() => merMeny.setApen(!merMeny.apen)}>Mer <span className="pil" aria-hidden>▾</span></button>
+              {merMeny.apen && (
+                <div className="nedtrekk-panel" role="menu">
+                  {mer.map(m => <Link key={m.href} href={m.href} role="menuitem" className={aktiv(m) ? 'aktiv' : ''}>{m.navn}</Link>)}
+                </div>
+              )}
+            </div>
+          </nav>
+          <div className="nedtrekk profil" ref={profil.ref}>
+            <button type="button" className="profil-knapp" aria-expanded={profil.apen} aria-haspopup="true" onClick={() => profil.setApen(!profil.apen)}>
+              <span className="firma-navn">{firma}</span>
+              <span className="avatar">{initialer}</span>
+            </button>
+            {profil.apen && (
+              <div className="nedtrekk-panel hoyre" role="menu">
+                <div className="profil-info"><b>{bruker}</b><span>{rolle ? ROLLE[rolle] ?? rolle : ''}</span><span>{firma} · Pakke: {PAKKE[pakke] ?? pakke}</span></div>
+                <Link href="/innstillinger" role="menuitem">Innstillinger</Link>
+                <form action={loggUt}><button className="logg-ut" role="menuitem">Logg ut</button></form>
+              </div>
+            )}
+          </div>
         </div>
-      </nav>
+      </header>
       <nav className="mobilmeny" aria-label="Meny">
         {[MENY[0], MENY[1], MENY[2], MENY[6]].map(m => (
           <Link key={m.href} href={m.href} className={aktiv(m) ? 'aktiv' : ''}><span className="ikon">{m.ikon}</span>{m.navn}{m.href === '/mva' && mvaTeller > 0 ? ` (${mvaTeller})` : ''}</Link>
