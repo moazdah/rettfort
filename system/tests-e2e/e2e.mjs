@@ -14,8 +14,8 @@ const tekst = async t => p.getByText(t, { exact: false }).first().waitFor({ time
 
 await steg('logg inn', async () => {
   await p.goto(B + '/logg-inn');
-  await p.fill('input[name=epost]', 'demo@rettfort.no'); await p.fill('input[name=passord]', 'rettfort-demo');
-  await Promise.all([p.waitForURL(/hjem/, { timeout: 60000 }), p.click('button:has-text("Logg inn")')]);
+  // Testmodus: rett inn uten passord.
+  await Promise.all([p.waitForURL(/hjem/, { timeout: 60000 }), p.click('button:has-text("Gå inn som bedrift")')]);
 });
 for (const s of ['/hjem', '/kjop', '/salg', '/bank', '/lonn', '/rapporter', '/mva', '/frister', '/aarsavslutning', '/regnskapsforer', '/innstillinger', '/meny', '/rapporter?tab=bal', '/rapporter?tab=sb', '/rapporter?tab=hb', '/innstillinger?vis=faktura', '/innstillinger?vis=brukere', '/innstillinger?vis=abonnement', '/innstillinger?vis=avansert', '/lonn?vis=historikk', '/lonn?vis=oppsett', '/mva?fra=2026-05-01', '/bank?maned=2026-08'])
   await steg('side ' + s, async () => { const r = await p.goto(B + s); if (r.status() !== 200) throw new Error('status ' + r.status()); await p.locator('h1').first().waitFor(); });
@@ -56,7 +56,22 @@ for (const [navn, total, forventet] of [['kvittering-ok', '1 800,00', 'Kontrolle
   await steg(`kjøp fra bilde (${navn})`, async () => {
     const fil = await kvitteringsbilde(navn, total, '1 800,00');
     await p.goto(B + '/kjop/ny');
-    await p.locator('input[type=file]').setInputFiles(fil);
+    if (navn === 'kvittering-ok') {
+      // Dra og slipp: sonen skal lyses opp når filen holdes over, og ta imot bildet.
+      const data = (await import('node:fs')).readFileSync(fil).toString('base64');
+      const lyst = await p.evaluate(async d => {
+        const bytes = Uint8Array.from(atob(d), c => c.charCodeAt(0));
+        const dt = new DataTransfer(); dt.items.add(new File([bytes], 'kvittering.jpg', { type: 'image/jpeg' }));
+        const sone = document.querySelector('.slippsone');
+        sone.dispatchEvent(new DragEvent('dragenter', { dataTransfer: dt, bubbles: true, cancelable: true }));
+        sone.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true }));
+        await new Promise(r => setTimeout(r, 100));
+        const over = sone.classList.contains('over');
+        sone.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+        return over;
+      }, data);
+      if (!lyst) throw new Error('slippsonen ble ikke lyst opp');
+    } else await p.locator('input[type=file]').setInputFiles(fil);
     await tekst('Fyll ut fra kvitteringen');
     await p.waitForFunction(() => !document.body.innerText.includes('Leser') && /Kontrollert|Sjekk dette|Lest fra/.test(document.body.innerText), null, { timeout: 180000 });
     const belop = await p.getByLabel(/Beløp med MVA/).inputValue();
@@ -179,6 +194,7 @@ p2.on('pageerror', e => feil.push('pageerror ' + e.message));
 p2.on('response', r => { if (r.status() >= 500) feil.push(`${r.status()} ${r.url()}`); });
 await steg('byrå', async () => {
   await p2.goto(B + '/logg-inn');
+  await p2.click('summary:has-text("Logg inn med e-post")');
   await p2.fill('input[name=epost]', 'regnskap@rettfort.no'); await p2.fill('input[name=passord]', 'rettfort-demo');
   await Promise.all([p2.waitForURL(/byra/, { timeout: 60000 }), p2.click('button:has-text("Logg inn")')]);
   await p2.screenshot({ path: `${S}/byra.png`, fullPage: true });

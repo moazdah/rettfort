@@ -57,6 +57,9 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
   const [bekreftet, setBekreftet] = useState(false);
   const filRef = useRef<HTMLInputElement>(null);
   const kontrollNr = useRef(0);
+  // Dra og slipp: området lyses opp mens en fil holdes over det.
+  const [drar, setDrar] = useState(false);
+  const dybde = useRef(0);
 
   const totalOre = ore(total);
   // MVA regnes ut fra totalen til brukeren skriver et eget beløp.
@@ -114,6 +117,19 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
     } catch {
       setFeil('Klarte ikke å lese kvitteringen. Skriv inn tallene selv.');
     } finally { setLeser(''); }
+  };
+  const godkjentFil = (f: File) => /^image\/|pdf$|xml$/.test(f.type) || /\.(xml|pdf|jpe?g|png|heic|heif|webp|gif)$/i.test(f.name);
+  const slipp = {
+    onDragEnter: (e: React.DragEvent) => { if (!e.dataTransfer.types.includes('Files')) return; e.preventDefault(); dybde.current++; setDrar(true); },
+    onDragOver: (e: React.DragEvent) => { if (!e.dataTransfer.types.includes('Files')) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; },
+    onDragLeave: () => { dybde.current = Math.max(0, dybde.current - 1); if (!dybde.current) setDrar(false); },
+    onDrop: (e: React.DragEvent) => {
+      e.preventDefault(); dybde.current = 0; setDrar(false);
+      const f = e.dataTransfer.files?.[0];
+      if (!f) return;
+      if (!godkjentFil(f)) { setFeil('Slipp et bilde, en PDF eller en EHF-faktura (XML).'); return; }
+      lastOpp(f);
+    },
   };
   const utfor = (f: Funn) => {
     if (f.kode === 'mva_sum') { setMvaRort(false); }
@@ -189,11 +205,11 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
 
   if (fase === 'tom') return (
     <div
-      className="kort tom stakk" style={{ borderStyle: 'dashed', borderWidth: 2, alignItems: 'center', padding: '44px 20px' }}
-      onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) lastOpp(f); }}
+      className={`kort tom stakk slippsone${drar ? ' over' : ''}`} style={{ borderStyle: 'dashed', borderWidth: 2, alignItems: 'center', padding: '44px 20px' }}
+      {...slipp}
     >
       {filfelt}
-      <h2>Slipp kvitteringen her</h2>
+      <h2>{drar ? 'Slipp for å lese kvitteringen' : 'Slipp kvitteringen her'}</h2>
       <p className="mut" style={{ maxWidth: 480 }}>Bilde, PDF eller EHF. Du kan også ta bilde med mobilen eller videresende til <span className="mono">{bilagEpost}</span>.</p>
       <div className="rad" style={{ justifyContent: 'center' }}>
         <button type="button" className="knapp" onClick={() => filRef.current?.click()} disabled={laster}>{laster ? 'Laster opp …' : 'Velg fil eller ta bilde'}</button>
@@ -205,8 +221,9 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
   );
 
   return (
-    <div className={`rutenett ${vedlegg ? 'delt kvittering' : ''}`}>
+    <div className={`rutenett ${vedlegg ? 'delt kvittering' : ''} slippflate${drar ? ' over' : ''}`} {...slipp}>
       {filfelt}
+      {drar && <div className="slippmerke" aria-hidden>Slipp for å {vedlegg ? 'bytte kvittering' : 'legge ved kvitteringen'}</div>}
       {vedlegg && (
         <div className="forhandsvisning">
           <div className="rad" style={{ justifyContent: 'space-between', marginBottom: 10 }}><b className="liten">{vedlegg.navn}</b><a className="lenke liten" href={`/api/vedlegg/${vedlegg.id}`} target="_blank" rel="noreferrer">Åpne</a></div>

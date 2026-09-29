@@ -186,3 +186,8 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
 .feltmerke.endret { background: #EEF2F7; color: #3A4F6B; }
 .felthint { font-size: 12.5px; color: var(--gul-tekst); }
 .felthint.mut { color: #5B6B80; }
+.slippsone { transition: background .15s, border-color .15s, transform .15s; }
+.slippsone.over { background: var(--gronn-bg); border-color: var(--gronn-lys); transform: scale(1.01); }
+.slippflate { position: relative; }
+.slippflate.over::after { content: ''; position: absolute; inset: -8px; border: 2px dashed var(--gronn-lys); background: rgba(53,174,116,.08); border-radius: 16px; pointer-events: none; z-index: 5; }
+.slippmerke { position: absolute; left: 50%; top: 24px; transform: translateX(-50%); background: var(--gronn); color: #fff; font-weight: 600; padding: 8px 16px; border-radius: 99px; z-index: 6; pointer-events: none; white-space: nowrap; }

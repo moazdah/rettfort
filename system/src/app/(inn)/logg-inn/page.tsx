@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { Logo } from '@/components/Logo';
 import { sesjon, db } from '@/lib/server';
 import { LoggInnSkjema } from './skjema';
+import { demoInn } from '@/app/handlinger';
 
 export const metadata = { title: 'Logg inn' };
 
@@ -18,12 +19,16 @@ export default async function LoggInn({ searchParams }: { searchParams: Promise<
         <div style={{ marginBottom: 28 }}><Logo bredde={130} /></div>
         <h1>Logg inn</h1>
         <p className="mut" style={{ marginTop: 8 }}>Regnskap som sjekker seg selv.</p>
-        {d.modus === 'testmodus' && (
-          <div className="testmodus" style={{ marginTop: 18 }}>
-            Testmodus: databasen er ikke koblet til ennå, så alt nullstilles med jevne mellomrom. Prøv med <b>demo@rettfort.no</b> (bedrift) eller <b>regnskap@rettfort.no</b> (regnskapsfører), passord <b>rettfort-demo</b>.
-          </div>
-        )}
-        <LoggInnSkjema neste={neste} />
+        {d.modus === 'testmodus' ? (
+          <>
+            <div className="testmodus" style={{ marginTop: 18 }}>Testmodus: alt er eksempeldata og nullstilles med jevne mellomrom. Du trenger ikke passord.</div>
+            <form action={demoInn} className="stakk" style={{ marginTop: 8 }}>
+              <button className="knapp" name="rolle" value="bedrift">Gå inn som bedrift</button>
+              <button className="knapp hvit" name="rolle" value="regnskapsforer">Gå inn som regnskapsfører</button>
+            </form>
+            <details style={{ marginTop: 18 }}><summary className="mut liten" style={{ cursor: 'pointer' }}>Logg inn med e-post og passord</summary><LoggInnSkjema neste={neste} /></details>
+          </>
+        ) : <LoggInnSkjema neste={neste} />}
         <p className="mut liten" style={{ marginTop: 22 }}>Ny her? <Link href="/registrer">Lag en konto</Link> · <Link href="/registrer?rolle=bedrift">Start gratis for bedriften</Link></p>
       </div>
     </main>

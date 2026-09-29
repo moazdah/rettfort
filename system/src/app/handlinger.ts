@@ -60,6 +60,19 @@ export async function loggInn(_: unknown, fd: FormData): Promise<Resultat> {
   redirect(res.data === 'byra' ? '/byra' : res.data ? '/hjem' : '/velkommen');
 }
 
+/** Bare i testmodus: gå rett inn i demo-foretaket uten passord. */
+export async function demoInn(fd: FormData) {
+  const db = await getDb();
+  if (db.modus !== 'testmodus') redirect('/logg-inn');
+  const epost = fd.get('rolle') === 'regnskapsforer' ? 'regnskap@rettfort.no' : 'demo@rettfort.no';
+  const b = await db.en<{ id: string }>('select id from bruker where epost = $1', [epost]);
+  if (!b) redirect('/logg-inn');
+  const m = await db.en<{ organisasjon_id: string; type: string }>('select m.organisasjon_id, o.type from medlemskap m join organisasjon o on o.id = m.organisasjon_id where m.bruker_id = $1 order by m.opprettet limit 1', [b.id]);
+  const { token } = await db.tx(t => opprettSesjon(t, b.id, m?.organisasjon_id ?? null));
+  await settCookie(token);
+  redirect(m?.type === 'byra' ? '/byra' : '/hjem');
+}
+
 export async function loggUt() {
   const c = await cookies();
   const tok = c.get(SESJON_COOKIE)?.value;
