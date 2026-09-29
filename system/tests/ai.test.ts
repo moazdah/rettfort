@@ -7,7 +7,7 @@ import { hentPosteringer } from '@/lib/tjenester/bokforing';
 import { balanse } from '@/lib/rapporter';
 import { kjorVerktoy, type Ktx, type Kort } from '@/lib/ai/verktoy';
 import { svarSomAgent, systemtekst } from '@/lib/ai/agent';
-import { utforForslag, ventende } from '@/lib/ai/utfor';
+import { utforForslag, ventende, forslagPdf } from '@/lib/ai/utfor';
 import { sendEpost } from '@/lib/epost';
 
 const IDAG = '2026-09-29';
@@ -57,7 +57,12 @@ describe('assistentens verktøy', () => {
     expect((await db.en<{ status: string }>(`select status from faktura where id = $1`, [v.lenke!.split('=')[1]]))!.status).toBe('utkast');
 
     const b = forslag(await lag());
+    const utkastPdf = await forslagPdf(db, org, b.id);
+    expect(utkastPdf!.filnavn).toBe('faktura-forslag.pdf');
+    expect(new TextDecoder().decode(utkastPdf!.pdf.slice(0, 5))).toBe('%PDF-');
     const s = await utforForslag(db, o(), b.id, 'utfor');
+    expect((await forslagPdf(db, org, b.id))!.filnavn).toMatch(/^faktura-\d+\.pdf$/);
+    expect(await forslagPdf(db, 'ffffffff-ffff-ffff-ffff-ffffffffffff', b.id)).toBeNull();
     expect(s.status).toBe('utfort');
     expect(s.melding).toMatch(/Faktura \d+ er laget og ført/);
     await expect(utforForslag(db, o(), b.id, 'utfor')).rejects.toThrow(/allerede gjort/);

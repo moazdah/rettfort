@@ -7,6 +7,7 @@ import { lagreSalg, sendSalg, registrerBetaling, krediter } from '../tjenester/f
 import { registrerKjop, lagreKjopUtkast } from '../tjenester/kjop';
 import { sendMva, type Termin } from '../tjenester/mva';
 import { fakturaPdf } from '../tjenester/fakturaPdf';
+import { lagFakturaPdf, type PdfData } from '../pdf';
 import { sendEpost, maler } from '../epost';
 import { kr } from '../penger';
 
@@ -92,4 +93,17 @@ export async function utforForslag(db: Db, o: { orgId: string; brukerId: string;
 export async function ventende(db: Db, orgId: string) {
   return db.q<{ id: string; art: string; data: Record<string, unknown>; opprettet: string }>(
     `select id, art, data, opprettet::text as opprettet from ai_forslag where organisasjon_id = $1 and status = 'pa_vent' and art not in ('faktura','kostnad') order by opprettet desc limit 20`, [orgId]);
+}
+
+/** PDF av fakturaen i et forslag. Er den laget (sendt eller utkast), brukes den ekte fakturaen med nummer og KID. */
+export async function forslagPdf(db: Db, orgId: string, id: string): Promise<{ pdf: Uint8Array; filnavn: string } | null> {
+  const f = await db.en<{ art: string; data: Record<string, unknown> | string; resultat: Record<string, unknown> | string | null }>('select art, data, resultat from ai_forslag where id = $1 and organisasjon_id = $2', [id, orgId]);
+  if (!f) return null;
+  const d = (typeof f.data === 'string' ? JSON.parse(f.data) : f.data) as Record<string, unknown>;
+  const res = (typeof f.resultat === 'string' ? JSON.parse(f.resultat) : f.resultat ?? {}) as Record<string, unknown>;
+  const ekte = res.fakturaId ?? res.kreditnotaId ?? d.fakturaId;
+  if (ekte) { const p = await fakturaPdf(db, orgId, String(ekte)); return p && { pdf: p.pdf, filnavn: p.filnavn }; }
+  if (f.art !== 'faktura') return null;
+  const pdf = await lagFakturaPdf({ type: 'faktura', nr: null, dato: String(d.dato), forfall: String(d.forfall), levert: null, referanse: (d.referanse as string | null) ?? null, kid: null, avsender: d.avsender as PdfData['avsender'], kunde: d.kunde as PdfData['kunde'], linjer: d.linjer as FakturaLinje[] });
+  return { pdf, filnavn: 'faktura-forslag.pdf' };
 }

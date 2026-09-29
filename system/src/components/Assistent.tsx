@@ -109,7 +109,7 @@ export function Assistent() {
     <section className={`assistent-panel ikke-utskrift ${bred ? 'bred' : ''}`} aria-label="Assistent">
       <header>
         <Maskot storrelse={30} />
-        <div className="fyll"><b>Assistenten</b><small>{igjen != null ? `${igjen} svar igjen denne måneden` : 'Spør, eller be meg gjøre noe'}</small></div>
+        <div className="fyll"><b>Assistenten</b><small>{igjen != null ? `${igjen} svar igjen denne måneden` : 'Spør eller be om hjelp'}</small></div>
         {meldinger.length > 0 && <button type="button" className="lenke liten" onClick={() => { setMeldinger([]); setBehandlet({}); }}>Ny samtale</button>}
         <button type="button" className="lenke liten skjul-mobil" onClick={() => setBred(!bred)} aria-pressed={bred}>{bred ? 'Smalere' : 'Utvid'}</button>
         <button type="button" className="lenke" onClick={() => setApen(false)} aria-label="Lukk">Lukk</button>

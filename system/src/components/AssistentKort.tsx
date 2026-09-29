@@ -43,6 +43,8 @@ export function ForslagKort({ k, onUtvid, onFerdig, utlos }: { k: Forslag; onUtv
     router.refresh();
   };
   const aapen = status === 'venter';
+  const pdf = (last: boolean) => `/api/assistent/forslag/${k.id}/pdf?s=${status}${last ? '&last=1' : ''}`;
+  const fakturaPdf = <a className="lenke liten" href={pdf(true)} download>Last ned fakturaen (PDF)</a>;
   // Brukeren skrev «send»/«vent»/«avbryt» i chatten i stedet for å trykke.
   useEffect(() => { if (utlos && aapen) velg(utlos); }, [utlos]); // eslint-disable-line react-hooks/exhaustive-deps
   const mvaMangler = k.art === 'mva' && Number(d.mangler) > 0;
@@ -58,7 +60,10 @@ export function ForslagKort({ k, onUtvid, onFerdig, utlos }: { k: Forslag; onUtv
           {d.sum.mva > 0 && <div className="ak-linjer mut"><div><span>MVA</span><span className="mono">{kr(d.sum.mva)}</span></div></div>}
           <div className="ak-sum"><span>Totalt inkl. MVA</span><b className="mono">{kr(d.sum.total)} kr</b></div>
           <div className="mut liten">Forfall {nd(d.forfall)} · {d.kunde.epost ? `sendes til ${d.kunde.epost}` : 'kunden har ikke e-post, du må sende PDF-en selv'}</div>
-          <button type="button" className="lenke liten" onClick={() => { setVis(!vis); if (!vis) onUtvid?.(); }}>{vis ? 'Skjul fakturaen' : 'Se fakturaen'}</button>
+          <div className="ak-valg">
+            <button type="button" className="lenke liten" onClick={() => { setVis(!vis); if (!vis) onUtvid?.(); }}>{vis ? 'Skjul fakturaen' : 'Se fakturaen'}</button>
+            <a className="lenke liten" href={pdf(true)} download>Last ned PDF</a>
+          </div>
           {vis && <div className="ak-dokument"><FakturaDokument type="faktura" dato={d.dato} forfall={d.forfall} referanse={d.referanse} avsender={d.avsender as DokAvsender} kunde={d.kunde} linjer={d.linjer} /></div>}
         </>
       )}
@@ -76,9 +81,9 @@ export function ForslagKort({ k, onUtvid, onFerdig, utlos }: { k: Forslag; onUtv
           {d.duplikat && <div className="varsel gul liten">Ligner bilag {d.duplikat.nr} fra {nd(d.duplikat.dato)}. Sjekk at det ikke er ført to ganger.</div>}
         </>
       )}
-      {k.art === 'betaling' && <><b>Faktura {d.nr} · {d.kunde}</b><div className="ak-sum"><span>Innbetalt {nd(d.dato)}</span><b className="mono">{kr(d.belop)} kr</b></div>{d.belop < d.rest && <div className="mut liten">Delbetaling. {kr(d.rest - d.belop)} kr står igjen.</div>}</>}
-      {k.art === 'purring' && <><b>Faktura {d.nr} · {d.kunde}</b><div className="ak-sum"><span>Forfalt {nd(d.forfall)}</span><b className="mono">{kr(d.rest)} kr</b></div><div className="mut liten">Påminnelse med fakturaen vedlagt sendes til {d.epost}.</div></>}
-      {k.art === 'kreditnota' && <><b>Kreditnota på faktura {d.nr} · {d.kunde}</b><div className="ak-sum"><span>Krediteres</span><b className="mono">{kr(d.belop)} kr</b></div><div className="mut liten">Grunn: {d.grunn}</div></>}
+      {k.art === 'betaling' && <><b>Faktura {d.nr} · {d.kunde}</b><div className="ak-sum"><span>Innbetalt {nd(d.dato)}</span><b className="mono">{kr(d.belop)} kr</b></div>{d.belop < d.rest && <div className="mut liten">Delbetaling. {kr(d.rest - d.belop)} kr står igjen.</div>}{fakturaPdf}</>}
+      {k.art === 'purring' && <><b>Faktura {d.nr} · {d.kunde}</b><div className="ak-sum"><span>Forfalt {nd(d.forfall)}</span><b className="mono">{kr(d.rest)} kr</b></div><div className="mut liten">Påminnelse med fakturaen vedlagt sendes til {d.epost}.</div>{fakturaPdf}</>}
+      {k.art === 'kreditnota' && <><b>Kreditnota på faktura {d.nr} · {d.kunde}</b><div className="ak-sum"><span>Krediteres</span><b className="mono">{kr(d.belop)} kr</b></div><div className="mut liten">Grunn: {d.grunn}</div>{status === 'utfort' ? <a className="lenke liten" href={pdf(true)} download>Last ned kreditnotaen (PDF)</a> : fakturaPdf}</>}
       {k.art === 'mva' && (
         <>
           <b>{d.termin.tittel}</b>
