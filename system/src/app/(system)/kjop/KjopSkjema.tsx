@@ -10,6 +10,8 @@ import type { KjopInput, Funn } from '@/lib/tjenester/kjop';
 import { konto as finnKonto } from '@/lib/kontoplan';
 import { kr, tilOre, splittBrutto } from '@/lib/penger';
 import type { BetaltMed } from '@/lib/hovedbok';
+import { lesKvittering, type Tolkning, type FeltStatus } from '@/lib/lesKvittering';
+import { kronerIOrd } from '@/lib/kvittering.js';
 
 export interface KjopStart {
   id?: string; leverandorNavn?: string; leverandorOrgnr?: string | null; dato?: string; forfall?: string | null; tekst?: string | null;
@@ -20,7 +22,7 @@ export interface KjopStart {
 const ore = (t: string) => tilOre(t) ?? 0;
 const tekstKr = (o: number | undefined) => (o ? kr(o) : '');
 
-export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, modus, pakke }: {
+export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, modus }: {
   start?: KjopStart; idag: string; mvaRegistrert: boolean; kunder: { id: string; navn: string }[]; bilagEpost: string;
   modus: 'ny' | 'utkast' | 'rett'; pakke: string;
 }) {
@@ -49,7 +51,12 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
   const [laster, setLaster] = useState(false);
   const [ferdig, setFerdig] = useState<{ bilagNr: number; id: string } | null>(null);
   const [overstyr, setOverstyr] = useState(false);
+  // Automatisk lesing: hva som ble lest, og om brukeren har sjekket tallene mot kvitteringen.
+  const [lest, setLest] = useState<(Tolkning & { orig: Record<string, string> }) | null>(null);
+  const [leser, setLeser] = useState('');
+  const [bekreftet, setBekreftet] = useState(false);
   const filRef = useRef<HTMLInputElement>(null);
+  const kontrollNr = useRef(0);
 
   const totalOre = ore(total);
   // MVA regnes ut fra totalen til brukeren skriver et eget beløp.
@@ -61,13 +68,17 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
     total: totalOre, mva: sats ? ore(mva) : 0, sats, konto,
     deler: deler ? deler.map(d => ({ konto: d.konto, brutto: ore(d.brutto), sats })) : undefined,
     betaltMed, fradrag: sats > 0, vedleggId: vedlegg?.id ?? null, viderefakturerKontaktId: vf || null, kilde,
+    lestAutomatisk: !!lest, bekreftetAvBruker: bekreftet,
   });
 
   // Live kontroll mens brukeren skriver.
   useEffect(() => {
     if (fase !== 'arbeid') return;
     const h = setTimeout(async () => {
+      const nr = ++kontrollNr.current;
       const r = await kontrollKjopHandling(input(), modus === 'rett' ? start?.id : undefined);
+      // Et eldre svar skal ikke overskrive kontrollen av det brukeren ser nå.
+      if (nr !== kontrollNr.current) return;
       if (r.ok && r.data) {
         setFunn(r.data.funn); setForslag(r.data.forslag);
         if (r.data.forslag && !kontoValgt) setKonto(r.data.forslag.nr);
@@ -86,7 +97,23 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
     const r = await lastOppVedlegg(fd);
     setLaster(false);
     if (!r.ok) { setFeil(r.feil); return; }
-    setVedlegg(r.data!); setKilde('kvittering'); setFase('arbeid');
+    setVedlegg(r.data!); setKilde('kvittering'); setFase('arbeid'); setBekreftet(false); setLest(null);
+    if (!/^image\/|pdf$|xml$/.test(f.type) && !/\.(xml|pdf|jpe?g|png|heic|webp)$/i.test(f.name)) return;
+    setLeser('Leser kvitteringen …');
+    try {
+      const t = await lesKvittering(f, idag, steg => setLeser(steg));
+      const v = { lev: t.lev ?? lev, dato: t.dato ?? dato, total: t.total ? kr(t.total) : '', mva: t.mva != null && t.sats ? kr(t.mva) : '' };
+      if (t.lev) setLev(t.lev);
+      if (t.orgnr) setOrgnr(t.orgnr);
+      if (t.dato) setDato(t.dato);
+      if (t.beskrivelse && !tekst) setTekst(t.beskrivelse);
+      setTotal(v.total);
+      if (t.sats != null && mvaRegistrert) setSats(t.sats);
+      if (v.mva) { setMva(v.mva); setMvaRort(true); } else setMvaRort(false);
+      setLest({ ...t, orig: v });
+    } catch {
+      setFeil('Klarte ikke å lese kvitteringen. Skriv inn tallene selv.');
+    } finally { setLeser(''); }
   };
   const utfor = (f: Funn) => {
     if (f.kode === 'mva_sum') { setMvaRort(false); }
@@ -96,7 +123,32 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
 
   const blokkerer = funn.filter(f => ['leverandor', 'total', 'deling'].includes(f.kode));
   const advarsler = funn.filter(f => f.alvor === 'hoy' && !blokkerer.includes(f));
-  const kanRegistrere = !blokkerer.length && (!advarsler.length || overstyr) && !venter;
+  const maBekrefte = kilde === 'kvittering';
+  const kanRegistrere = !blokkerer.length && (!advarsler.length || overstyr) && !venter && !leser && (!maBekrefte || bekreftet);
+
+  // Merke og hjelpetekst per felt som ble lest fra kvitteringen.
+  const naa: Record<string, string> = { lev, dato, total, mva: sats ? mva : '' };
+  const feltStatus = (k: string): FeltStatus | 'endret' | null => {
+    if (!lest) return null;
+    const endret = k === 'lev' || k === 'dato' ? naa[k] !== lest.orig[k] : ore(naa[k]) !== ore(lest.orig[k]);
+    return endret ? 'endret' : lest.status[k] ?? null;
+  };
+  const merke = (k: string) => {
+    const st = feltStatus(k);
+    if (!st) return null;
+    const tekster: Record<string, string> = { bekreftet: 'Kontrollert', lest: 'Lest fra kvittering', sjekk: 'Sjekk dette', mangler: 'Fant ikke', endret: 'Endret av deg' };
+    return <span className={`feltmerke ${st === 'mangler' ? 'sjekk' : st}`}>{tekster[st]}</span>;
+  };
+  const gul = (k: string) => (['sjekk', 'mangler'].includes(feltStatus(k) ?? '') ? ' sjekk' : '');
+  const hint = (k: string) => {
+    const st = feltStatus(k);
+    if (!st) return null;
+    const deler: string[] = [];
+    if (st !== 'endret' && st !== 'bekreftet' && lest?.grunn[k]) deler.push(lest.grunn[k]);
+    // Beløpet i ord gjør en null for mye eller for lite lett å se.
+    if (k === 'total' && totalOre) deler.push(`Det er ${kronerIOrd(totalOre)}.`);
+    return deler.length ? <span className={`felthint ${st === 'sjekk' || st === 'mangler' ? '' : 'mut'}`}>{deler.join(' ')}</span> : null;
+  };
 
   const registrer = async () => {
     setVenter(true); setFeil('');
@@ -114,7 +166,7 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
     if (!r.ok) { setFeil(r.feil); return; }
     router.push('/kjop');
   };
-  const nullstill = () => { router.push('/kjop/ny'); router.refresh(); setFase('tom'); setLev(''); setOrgnr(''); setTotal(''); setMva(''); setMvaRort(false); setTekst(''); setVedlegg(null); setDeler(null); setKontoValgt(false); setFunn([]); setFerdig(null); setOverstyr(false); setKilde('manuell'); };
+  const nullstill = () => { router.push('/kjop/ny'); router.refresh(); setFase('tom'); setLest(null); setBekreftet(false); setLev(''); setOrgnr(''); setTotal(''); setMva(''); setMvaRort(false); setTekst(''); setVedlegg(null); setDeler(null); setKontoValgt(false); setFunn([]); setFerdig(null); setOverstyr(false); setKilde('manuell'); };
 
   const delSum = deler ? deler.reduce((s, d) => s + ore(d.brutto), 0) : 0;
 
@@ -169,20 +221,24 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
             <h2>{kilde === 'kvittering' ? 'Fyll ut fra kvitteringen' : kilde === 'eksempel' ? 'Eksempelkvittering' : 'Om kjøpet'}</h2>
             {!vedlegg && <button type="button" className="lenke" onClick={() => filRef.current?.click()}>{laster ? 'Laster opp …' : 'Legg ved kvittering'}</button>}
           </div>
-          {kilde === 'kvittering' && <div className="varsel info liten">Automatisk lesing av kvitteringen slås på når AI-lesing er koblet til{pakke === 'gratis' ? ' (med i Start)' : ''}. Skriv inn tallene i mellomtiden. Kontrollen under sjekker summen.</div>}
+          {leser && <div className="varsel info liten" role="status">{leser}</div>}
+          {lest && !leser && (lest.sikker
+            ? <div className="varsel gronn liten">Tallene er lest og kontrollert mot hverandre på kvitteringen. Se likevel over at de stemmer.</div>
+            : <div className="varsel gul liten">Noen tall kunne ikke kontrolleres sikkert. Sjekk de gule feltene mot kvitteringen før du registrerer.</div>)}
+          {kilde === 'kvittering' && !lest && !leser && <div className="varsel info liten">Skriv inn tallene fra kvitteringen. Kontrollen under sjekker summen.</div>}
           <div className="rutenett to">
-            <label className="felt"><span>Hvem har du kjøpt fra?</span><input className="inndata" value={lev} onChange={e => setLev(e.target.value)} placeholder="Butikk eller firma" /></label>
-            <label className="felt"><span>Dato på kvitteringen</span><input className="inndata" type="date" value={dato} onChange={e => setDato(e.target.value)} /></label>
+            <label className="felt"><span>Hvem har du kjøpt fra?{merke('lev')}</span><input className={`inndata${gul('lev')}`} value={lev} onChange={e => setLev(e.target.value)} placeholder="Butikk eller firma" /></label>
+            <label className="felt"><span>Dato på kvitteringen{merke('dato')}</span><input className={`inndata${gul('dato')}`} type="date" value={dato} onChange={e => setDato(e.target.value)} />{hint('dato')}</label>
           </div>
           <label className="felt"><span>Hva kjøpte du? (valgfritt)</span><input className="inndata" value={tekst} onChange={e => setTekst(e.target.value)} placeholder="For eksempel toner og papir" /></label>
           <div className="rutenett tre">
-            <label className="felt"><span>Beløp med MVA</span><input className="inndata mono" inputMode="decimal" value={total} onChange={e => setTotal(e.target.value)} onBlur={() => totalOre && setTotal(kr(totalOre))} placeholder="0,00" /></label>
+            <label className="felt"><span>Beløp med MVA{merke('total')}</span><input className={`inndata mono${gul('total')}`} inputMode="decimal" value={total} onChange={e => setTotal(e.target.value)} onBlur={() => totalOre && setTotal(kr(totalOre))} placeholder="0,00" />{hint('total')}</label>
             <label className="felt"><span>MVA-sats</span>
               <select className="inndata" value={sats} onChange={e => { setSats(Number(e.target.value)); setMvaRort(false); }} disabled={!mvaRegistrert}>
                 <option value={25}>25 %</option><option value={15}>15 % (mat)</option><option value={12}>12 % (transport, hotell)</option><option value={0}>Ingen MVA</option>
               </select>
             </label>
-            <label className="felt"><span>Herav MVA</span><input className="inndata mono" inputMode="decimal" value={sats ? mva : ''} disabled={!sats} onChange={e => { setMva(e.target.value); setMvaRort(true); }} placeholder="0,00" /></label>
+            <label className="felt"><span>Herav MVA{merke('mva')}</span><input className={`inndata mono${gul('mva')}`} inputMode="decimal" value={sats ? mva : ''} disabled={!sats} onChange={e => { setMva(e.target.value); setMvaRort(true); }} placeholder="0,00" />{hint('mva')}</label>
           </div>
           {!mvaRegistrert && <p className="hint">Foretaket er ikke MVA-registrert, så hele beløpet føres som kostnad.</p>}
 
@@ -237,6 +293,12 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
               {f.handling && ['mva_sum', 'ikke_mva_reg', 'kvittering'].includes(f.kode) && <button type="button" className="knapp hvit liten" onClick={() => utfor(f)}>{f.handling}</button>}
             </div>
           ))}
+          {maBekrefte && (
+            <label className={`rad liten varsel ${bekreftet ? 'gronn' : 'gul'}`} style={{ cursor: 'pointer', flexWrap: 'nowrap' }}>
+              <input type="checkbox" checked={bekreftet} onChange={e => setBekreftet(e.target.checked)} />
+              <span className="fyll"><b>Jeg har sjekket tallene mot kvitteringen.</b> Tekstgjenkjenning kan lese feil, for eksempel en null for mye eller for lite.</span>
+            </label>
+          )}
           {advarsler.length > 0 && !blokkerer.length && (
             <label className="rad liten"><input type="checkbox" checked={overstyr} onChange={e => setOverstyr(e.target.checked)} /> Jeg har sjekket dette og vil registrere likevel</label>
           )}
@@ -246,7 +308,7 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
         <div className="rad" style={{ justifyContent: 'flex-end' }}>
           <button type="button" className="lenke" onClick={() => (modus === 'ny' ? nullstill() : router.back())}>Avbryt</button>
           {modus !== 'rett' && <button type="button" className="knapp hvit" disabled={venter} onClick={lagreUtkast}>Lagre som utkast</button>}
-          <button type="button" className="knapp" disabled={!kanRegistrere} onClick={registrer}>{venter ? 'Registrerer …' : modus === 'rett' ? 'Lagre rettelsen' : `Registrer kjøpet${totalOre ? ` · ${kr(totalOre)} kr` : ''}`}</button>
+          <button type="button" className="knapp" disabled={!kanRegistrere} onClick={registrer}>{venter ? 'Registrerer …' : maBekrefte && !bekreftet ? 'Sjekk tallene først' : modus === 'rett' ? 'Lagre rettelsen' : `Registrer kjøpet${totalOre ? ` · ${kr(totalOre)} kr` : ''}`}</button>
         </div>
       </div>
     </div>

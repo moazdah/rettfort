@@ -27,6 +27,10 @@ describe('en hel termin', () => {
     fakturaId = await db.tx(t => lagreSalg(t, org, { type: 'faktura', kontaktId: kunde, dato: '2026-09-05', forfall: '2026-09-19', linjer: [{ beskrivelse: 'Konsulenttimer', antallMilli: 12000, pris: 115000, sats: 25 }] }));
     kid = (await db.tx(t => sendSalg(t, org, fakturaId))).kid!;
     await db.tx(t => registrerKjop(t, org, { leverandorNavn: 'Telenor Norge AS', dato: '2026-09-01', total: 44900, mva: 8980, sats: 25, konto: 6900, betaltMed: 'bank', vedleggId: null, kilde: 'uten_kvittering' }));
+    // Tall lest fra en kvittering kan ikke føres før brukeren har sjekket dem.
+    const lestKjop = { leverandorNavn: 'Kiwi', dato: '2026-09-02', total: 16380, mva: 2137, sats: 15, konto: 6800, betaltMed: 'bank' as const, kilde: 'kvittering', lestAutomatisk: true };
+    await expect(db.tx(t => registrerKjop(t, org, lestKjop))).rejects.toThrow(/Sjekk tallene/);
+    await expect(db.tx(t => registrerKjop(t, org, { ...lestKjop, lestAutomatisk: false }))).rejects.toThrow(/Sjekk tallene/);
     await db.q(`insert into ansatt (organisasjon_id, navn, lonn_type, manedslonn, skatteprosent) values ($1, 'Sara Havøy', 'fast', 4500000, 32)`, [org]);
     const s = await db.tx(t => forhandsvisLonn(t, org, []));
     expect(s[0]).toMatchObject({ brutto: 4500000, skatt: 1440000, netto: 3060000, feriepenger: 459000, aga: 355500 });

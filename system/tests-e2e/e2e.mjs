@@ -43,6 +43,41 @@ await steg('duplikat oppdages', async () => {
   if (await p.locator('button:has-text("Registrer kjøpet")').isEnabled()) throw new Error('knappen skulle vært låst');
 });
 
+// Ekte bilde av en kvittering: lest med tekstgjenkjenning, kryss-sjekket, og låst til brukeren har sjekket tallene.
+const kvitteringsbilde = async (navn, total, kort) => {
+  const k = await b.newPage({ viewport: { width: 420, height: 640 }, deviceScaleFactor: 2 });
+  await k.setContent(`<body style="margin:0;background:#999;display:flex;justify-content:center;padding:20px"><div style="background:#fff;width:340px;padding:24px;font:15px/1.6 monospace;color:#111;transform:rotate(-1.5deg)">
+<div style="text-align:center"><b>ELKJØP OSLO CITY</b><br>Elkjøp Norge AS<br>Org.nr 962 404 147 MVA</div><br>Dato: 28.09.2026 kl 13:05<br>--------------------------------<br>
+Skjerm 27 tommer &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 800,00<br>--------------------------------<br><b>TOTALT &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${total}</b><br>Herav MVA 25% &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 360,00<br>Bankkort &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${kort}</div></body>`);
+  await k.screenshot({ path: `${S}/${navn}.jpg`, type: 'jpeg', quality: 80 }); await k.close();
+  return `${S}/${navn}.jpg`;
+};
+for (const [navn, total, forventet] of [['kvittering-ok', '1 800,00', 'Kontrollert'], ['kvittering-feil', '180,00', 'Sjekk dette']]) {
+  await steg(`kjøp fra bilde (${navn})`, async () => {
+    const fil = await kvitteringsbilde(navn, total, '1 800,00');
+    await p.goto(B + '/kjop/ny');
+    await p.locator('input[type=file]').setInputFiles(fil);
+    await tekst('Fyll ut fra kvitteringen');
+    await p.waitForFunction(() => !document.body.innerText.includes('Leser') && /Kontrollert|Sjekk dette|Lest fra/.test(document.body.innerText), null, { timeout: 180000 });
+    const belop = await p.getByLabel(/Beløp med MVA/).inputValue();
+    if (belop !== '1 800,00') throw new Error('beløpet ble ' + belop);
+    const side = await p.evaluate(() => document.body.innerText);
+    if (!side.includes(forventet)) throw new Error('mangler merket ' + forventet);
+    if (!side.includes('ett tusen åtte hundre kroner')) throw new Error('beløpet i ord mangler');
+    const knapp = p.locator('button', { hasText: /Sjekk tallene først|Registrer kjøpet/ });
+    await p.waitForTimeout(1500);
+    if (await knapp.isEnabled() || !(await knapp.textContent()).includes('Sjekk tallene først')) throw new Error('kunne registrere uten å sjekke tallene');
+    if ((await p.evaluate(() => document.body.innerText)).includes('Skriv beløpet med MVA')) throw new Error('kontrollen viser gammelt resultat');
+    if (navn === 'kvittering-ok') {
+      await p.getByLabel(/Jeg har sjekket tallene/).check();
+      await p.waitForTimeout(800);
+      await p.locator('button:has-text("Registrer kjøpet")').click();
+      await tekst('Kjøpet er registrert.');
+    }
+    await p.screenshot({ path: `${S}/${navn}-side.png`, fullPage: true });
+  });
+}
+
 let fakturaUrl = '';
 await steg('faktura', async () => {
   await p.goto(B + '/salg/ny');

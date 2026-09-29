@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-// @ts-expect-error JS-modul uten typer
 import { tolkKvittering, kronerIOrd, gyldigOrgnr } from '@/lib/kvittering.js';
 
 const IDAG = { idag: '2026-10-05' };
@@ -152,5 +151,14 @@ describe('nettsiden bruker samme tolker', () => {
     const a = fs.readFileSync(new URL('../src/lib/kvittering.js', import.meta.url), 'utf8');
     const b = fs.readFileSync(new URL('../../rettfort-kvittering.js', import.meta.url), 'utf8').split('\n').slice(1).join('\n');
     expect(b).toBe(a);
+  });
+});
+
+describe('systemet bruker samme leser som nettsiden', () => {
+  it('public/les er kopier av filene i roten', async () => {
+    const fs = await import('node:fs');
+    for (const f of ['rettfort-bilag.js', 'rettfort-engine.js']) {
+      expect(fs.readFileSync(new URL(`../public/les/${f}`, import.meta.url), 'utf8')).toBe(fs.readFileSync(new URL(`../../${f}`, import.meta.url), 'utf8'));
+    }
   });
 });

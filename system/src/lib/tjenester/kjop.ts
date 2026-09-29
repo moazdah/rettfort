@@ -30,6 +30,10 @@ export interface KjopInput {
   vedleggId?: string | null;
   viderefakturerKontaktId?: string | null;
   kilde?: string;
+  /** Tallene ble lest automatisk fra kvitteringen eller fakturaen. */
+  lestAutomatisk?: boolean;
+  /** Brukeren har krysset av for at tallene er sjekket mot kvitteringen. */
+  bekreftetAvBruker?: boolean;
 }
 
 export interface Funn { kode: string; alvor: 'hoy' | 'middels' | 'info'; tekst: string; handling?: string }
@@ -98,6 +102,7 @@ export async function registrerKjop(t: Sporring, orgId: string, k: KjopInput, br
   if (!k.leverandorNavn.trim()) throw new RegnskapsFeil('Skriv hvem du har kjøpt fra.');
   if (!(k.total > 0)) throw new RegnskapsFeil('Skriv beløpet med MVA.');
   if (!k.dato) throw new RegnskapsFeil('Dato mangler.');
+  if ((k.lestAutomatisk || k.kilde === 'kvittering') && !k.bekreftetAvBruker) throw new RegnskapsFeil('Sjekk tallene mot kvitteringen og kryss av før du registrerer.');
   if (k.deler?.length && k.deler.reduce((a, d) => a + d.brutto, 0) !== k.total) throw new RegnskapsFeil('Delene summerer ikke til totalen.');
   const kontaktId = k.kontaktId ?? await finnEllerLagKontakt(t, orgId, 'leverandor', k.leverandorNavn, k.leverandorOrgnr);
   const tekst = `${k.leverandorNavn}${k.tekst ? ' · ' + k.tekst : ''}`;
