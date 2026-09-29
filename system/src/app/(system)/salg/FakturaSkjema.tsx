@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { BrregSok } from '@/components/BrregSok';
 import { Maskot } from '@/components/Logo';
 import { FakturaDokument, type DokAvsender } from '@/components/FakturaDokument';
-import { lagreKontaktFraBrreg, lagreKontakt, lagreUtkastSalg, sendSalgHandling, lagreInnstillinger, settKontaktEpost } from '@/app/handlinger';
+import { lagreKontaktFraBrreg, lagreKontakt, lagreUtkastSalg, sendSalgHandling, lagreInnstillinger, oppdaterKontakt } from '@/app/handlinger';
 import { mangler, forfallFra, type Kontakt, type Org, type SalgType } from '@/lib/tjenester/faktura';
 import { fakturaSummer, type FakturaLinje } from '@/lib/hovedbok';
 import { formaterOrgnr, type Enhet } from '@/lib/brreg';
@@ -65,15 +65,17 @@ export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org &
   const [soker, setSoker] = useState(false);
   const [sok, setSok] = useState('');
   const [alle, setAlle] = useState(false);
-  const [epostFelt, setEpostFelt] = useState<string | null>(null);
+  const [endrerKunde, setEndrerKunde] = useState<{ navn: string; adresse: string; postnr: string; poststed: string; epost: string } | null>(null);
   const q = sok.trim().toLowerCase();
   const egne = q ? kunder.filter(k => [k.navn, k.orgnr ?? '', k.epost ?? '', k.poststed ?? ''].some(v => v.toLowerCase().includes(q) || v.replace(/\s/g, '').includes(q.replace(/\s/g, '')))) : kunder;
   const synlige = q || alle ? egne : egne.slice(0, 4);
-  const lagreEpost = async () => {
-    if (!kunde || epostFelt == null) return;
-    const r = await settKontaktEpost(kunde.id, epostFelt);
+  const apneEndring = () => kunde && setEndrerKunde({ navn: kunde.navn, adresse: kunde.adresse ?? '', postnr: kunde.postnr ?? '', poststed: kunde.poststed ?? '', epost: kunde.epost ?? '' });
+  const lagreKunde = async () => {
+    if (!kunde || !endrerKunde) return;
+    const r = await oppdaterKontakt(kunde.id, endrerKunde);
     if (!r.ok) { setFeil(r.feil); return; }
-    setKunde({ ...kunde, epost: r.data!.epost }); setEpostFelt(null); setFeil('');
+    setKunde({ ...kunde, ...r.data! }); setEndrerKunde(null); setFeil('');
+    router.refresh();
   };
 
   const fl: FakturaLinje[] = useMemo(() => linjer.map(l => ({ beskrivelse: l.beskrivelse, antallMilli: tilMilli(l.antall), pris: tilOre(l.pris) ?? 0, sats: org.mva_registrert ? l.sats : 0, konto: l.konto })), [linjer, org.mva_registrert]);
@@ -186,25 +188,30 @@ export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org &
               <div className="rad"><button type="button" className="knapp liten" onClick={lagreManuell}>Bruk kunden</button><button type="button" className="lenke" onClick={() => setManuell(false)}>Tilbake</button></div>
             </div>
           )}
-          {kunde && (
-            <div className="rad" style={{ border: '1px solid var(--linje)', borderRadius: 12, padding: '12px 14px', flexWrap: 'nowrap', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1 }}>
+          {kunde && !endrerKunde && (
+            <div className="valgt-kunde">
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <b>{kunde.navn}</b>
-                <div className="mut liten">{[kunde.adresse, [kunde.postnr, kunde.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', ')}{kunde.orgnr ? ` · org.nr ${formaterOrgnr(kunde.orgnr)}` : ''}</div>
-                {epostFelt == null ? (
-                  kunde.epost
-                    ? <div className="mut liten">Sendes på e-post til <b>{kunde.epost}</b> · <button type="button" className="lenke liten" onClick={() => setEpostFelt(kunde.epost ?? '')}>Endre</button></div>
-                    : <div className="liten"><span className="mut">Ingen e-post, så du må sende PDF-en selv.</span> <button type="button" className="lenke liten" onClick={() => setEpostFelt('')}>Legg til e-post</button></div>
-                ) : (
-                  <div className="rad" style={{ marginTop: 8, flexWrap: 'nowrap' }}>
-                    <input className="inndata" type="email" value={epostFelt} onChange={e => setEpostFelt(e.target.value)} placeholder="faktura@kunde.no" autoFocus onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); lagreEpost(); } }} />
-                    <button type="button" className="knapp liten" onClick={lagreEpost}>Lagre</button>
-                    <button type="button" className="lenke liten" onClick={() => setEpostFelt(null)}>Avbryt</button>
-                  </div>
-                )}
-                {kunde.orgnr && <div className="faint liten">Hentet fra Brønnøysund</div>}
+                <div className="mut liten">{[kunde.adresse, [kunde.postnr, kunde.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', ') || 'Ingen adresse'}{kunde.orgnr ? ` · org.nr ${formaterOrgnr(kunde.orgnr)}` : ' · Privatperson'}</div>
+                {kunde.epost
+                  ? <div className="mut liten">Sendes på e-post til <b>{kunde.epost}</b></div>
+                  : <div className="liten"><span className="mut">Ingen e-post, så du må sende PDF-en selv.</span> <button type="button" className="lenke liten" onClick={apneEndring}>Legg til e-post</button></div>}
               </div>
-              <button type="button" className="knapp hvit liten" onClick={() => { setKunde(null); setEpostFelt(null); }}>Bytt</button>
+              <div className="rad" style={{ gap: 6, flexWrap: 'nowrap' }}>
+                <button type="button" className="knapp hvit liten" onClick={apneEndring}>Endre informasjon</button>
+                <button type="button" className="knapp hvit liten" onClick={() => { setKunde(null); setEndrerKunde(null); }}>Bytt kunde</button>
+              </div>
+            </div>
+          )}
+          {kunde && endrerKunde && (
+            <div className="stakk valgt-kunde-endre">
+              <div className="rad" style={{ justifyContent: 'space-between' }}><b>Endre informasjon om kunden</b>{kunde.orgnr && <span className="mut liten">Org.nr {formaterOrgnr(kunde.orgnr)}</span>}</div>
+              <label className="felt"><span>Navn</span><input className="inndata" value={endrerKunde.navn} onChange={e => setEndrerKunde({ ...endrerKunde, navn: e.target.value })} /></label>
+              <label className="felt"><span>E-post fakturaen sendes til</span><input className="inndata" type="email" value={endrerKunde.epost} onChange={e => setEndrerKunde({ ...endrerKunde, epost: e.target.value })} placeholder="faktura@kunde.no" autoFocus /></label>
+              <label className="felt"><span>Adresse</span><input className="inndata" value={endrerKunde.adresse} onChange={e => setEndrerKunde({ ...endrerKunde, adresse: e.target.value })} /></label>
+              <div className="rutenett to"><label className="felt"><span>Postnr</span><input className="inndata" inputMode="numeric" value={endrerKunde.postnr} onChange={e => setEndrerKunde({ ...endrerKunde, postnr: e.target.value })} /></label><label className="felt"><span>Sted</span><input className="inndata" value={endrerKunde.poststed} onChange={e => setEndrerKunde({ ...endrerKunde, poststed: e.target.value })} /></label></div>
+              <p className="mut liten" style={{ margin: 0 }}>Navn og adresse endres på nye fakturaer. Fakturaer som er sendt, beholder det de ble sendt med. Ny e-post brukes også når du sender en gammel faktura på nytt.</p>
+              <div className="rad"><button type="button" className="knapp liten" onClick={lagreKunde}>Lagre endringene</button><button type="button" className="lenke liten" onClick={() => setEndrerKunde(null)}>Avbryt</button></div>
             </div>
           )}
           {forslag.map(v => (

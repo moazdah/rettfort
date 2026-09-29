@@ -18,7 +18,15 @@ export const AGA_SONER: Record<string, { navn: string; sats: number }> = {
 
 export interface LonnTillegg { tekst: string; belop: number; feriepengegrunnlag?: boolean }
 
-export interface LonnInput { ansattId: string; timer?: number; tillegg?: LonnTillegg[] }
+export type LonnType = 'fast' | 'time' | 'provisjon';
+
+/** Det som legges inn for hver ansatt når lønnen kjøres. */
+export interface LonnInput { ansattId: string; timer?: number; overtidTimer?: number; provisjonGrunnlag?: number; tillegg?: LonnTillegg[] }
+
+export interface AnsattLonn {
+  id: string; navn: string; lonn_type: LonnType; manedslonn: number; timesats: number; skatteprosent: number;
+  provisjon_prosent?: number; overtid_prosent?: number; faste_tillegg?: LonnTillegg[] | string | null;
+}
 
 export interface Lonnslipp {
   ansattId: string; navn: string; brutto: number; skatt: number; netto: number; feriepenger: number; aga: number;
@@ -26,29 +34,59 @@ export interface Lonnslipp {
   advarsler: string[];
 }
 
-export function beregnLonnslipp(a: { id: string; navn: string; lonn_type: 'fast' | 'time'; manedslonn: number; timesats: number; skatteprosent: number }, inn: LonnInput, feriePst: number, agaSats: number): Lonnslipp {
+/** Normal arbeidstid per måned ved 37,5 timers uke. Brukes for timesatsen til fastlønnede ved overtid. */
+export const TIMER_PER_MANED = 162.5;
+
+/** Timelønnen overtid regnes ut fra: timesatsen, eller månedslønnen delt på normal arbeidstid. */
+export function grunntimesats(a: Pick<AnsattLonn, 'lonn_type' | 'manedslonn' | 'timesats'>): number {
+  return a.lonn_type === 'time' ? a.timesats : Math.round(a.manedslonn / TIMER_PER_MANED);
+}
+
+export function fasteTillegg(a: Pick<AnsattLonn, 'faste_tillegg'>): LonnTillegg[] {
+  const v = typeof a.faste_tillegg === 'string' ? JSON.parse(a.faste_tillegg) : a.faste_tillegg;
+  return Array.isArray(v) ? v.filter(t => t && t.tekst && Number.isFinite(t.belop)) : [];
+}
+
+export function beregnLonnslipp(a: AnsattLonn, inn: LonnInput, feriePst: number, agaSats: number): Lonnslipp {
   const linjer: Lonnslipp['linjer'] = [];
   const advarsler: string[] = [];
   let grunnlagFerie = 0;
-  if (a.lonn_type === 'fast') {
-    linjer.push({ tekst: 'Fastlønn', belop: a.manedslonn });
-    grunnlagFerie += a.manedslonn;
-  } else {
+  // Prosenter kan komme som tekst fra databasen (numeric).
+  const provPst = Number(a.provisjon_prosent ?? 0), otPst = Number(a.overtid_prosent ?? 40), skattPst = Number(a.skatteprosent);
+  if (a.lonn_type === 'time') {
     const timer = inn.timer ?? 0;
     if (timer < 0) throw new RegnskapsFeil('Antall timer kan ikke være negativt.');
     if (timer > 250) advarsler.push(`${a.navn} har ${timer} timer denne måneden. Det er uvanlig mye.`);
     const belop = Math.round(timer * a.timesats);
     linjer.push({ tekst: 'Timelønn', antall: timer, sats: a.timesats, belop });
     grunnlagFerie += belop;
+  } else if (a.manedslonn > 0) {
+    linjer.push({ tekst: 'Fastlønn', belop: a.manedslonn });
+    grunnlagFerie += a.manedslonn;
   }
-  for (const t of inn.tillegg ?? []) {
+  if (a.lonn_type === 'provisjon') {
+    const grunnlag = inn.provisjonGrunnlag ?? 0;
+    if (grunnlag < 0) throw new RegnskapsFeil('Salget som gir provisjon kan ikke være negativt.');
+    const belop = Math.round((grunnlag * provPst) / 100);
+    if (belop > 0) { linjer.push({ tekst: `Provisjon ${String(provPst).replace('.', ',')} % av ${(grunnlag / 100).toLocaleString('nb-NO')} kr`, belop }); grunnlagFerie += belop; }
+  }
+  const ot = inn.overtidTimer ?? 0;
+  if (ot < 0) throw new RegnskapsFeil('Overtidstimer kan ikke være negativt.');
+  if (ot > 0) {
+    const sats = Math.round(grunntimesats(a) * (1 + otPst / 100));
+    const belop = Math.round(ot * sats);
+    linjer.push({ tekst: `Overtid (${String(otPst).replace('.', ',')} % tillegg)`, antall: ot, sats, belop });
+    grunnlagFerie += belop;
+    if (ot > 50) advarsler.push(`${a.navn} har ${ot} overtidstimer denne måneden. Loven setter grenser for overtid.`);
+  }
+  for (const t of [...fasteTillegg(a), ...(inn.tillegg ?? [])]) {
     linjer.push({ tekst: t.tekst, belop: t.belop });
     if (t.feriepengegrunnlag !== false) grunnlagFerie += t.belop;
   }
   const brutto = linjer.reduce((s, l) => s + l.belop, 0);
   if (brutto < 0) throw new RegnskapsFeil('Lønnen kan ikke være negativ.');
   // Prosenttrekk rundes ned til hele kroner.
-  const skatt = Math.floor((brutto * a.skatteprosent) / 100 / 100) * 100;
+  const skatt = Math.floor((brutto * skattPst) / 100 / 100) * 100;
   const feriepenger = Math.round((grunnlagFerie * feriePst) / 100);
   const aga = beregnAga(brutto, agaSats);
   return { ansattId: a.id, navn: a.navn, brutto, skatt, netto: brutto - skatt, feriepenger, aga, linjer, advarsler };
@@ -56,7 +94,7 @@ export function beregnLonnslipp(a: { id: string; navn: string; lonn_type: 'fast'
 
 export async function forhandsvisLonn(t: Sporring, orgId: string, input: LonnInput[]): Promise<Lonnslipp[]> {
   const org = await t.en<{ ferie_prosent: number; aga_sone: string }>('select ferie_prosent, aga_sone from organisasjon where id = $1', [orgId]);
-  const ansatte = await t.q<{ id: string; navn: string; lonn_type: 'fast' | 'time'; manedslonn: number; timesats: number; skatteprosent: number }>('select * from ansatt where organisasjon_id = $1 and aktiv order by navn', [orgId]);
+  const ansatte = await t.q<AnsattLonn>('select * from ansatt where organisasjon_id = $1 and aktiv order by navn', [orgId]);
   const sats = AGA_SONER[org!.aga_sone]?.sats ?? 14.1;
   return ansatte.map(a => beregnLonnslipp(a, input.find(i => i.ansattId === a.id) ?? { ansattId: a.id }, org!.ferie_prosent, sats));
 }

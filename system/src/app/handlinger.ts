@@ -236,17 +236,22 @@ export async function lagreKontakt(k: { navn: string; adresse?: string; postnr?:
   });
 }
 
-/** Endrer e-posten fakturaer sendes til for en kunde. */
-export async function settKontaktEpost(id: string, epost: string): Promise<Resultat<{ epost: string | null }>> {
+/** Endrer navn, adresse og e-post på en kunde eller leverandør. Org.nr fra Brønnøysund endres ikke her. */
+export async function oppdaterKontakt(id: string, k: { navn: string; adresse: string; postnr: string; poststed: string; epost: string }): Promise<Resultat<{ navn: string; adresse: string | null; postnr: string | null; poststed: string | null; epost: string | null }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
-    const e = epost.trim().toLowerCase();
-    if (e && !gyldigEpost(e)) throw new RegnskapsFeil('E-postadressen ser ikke riktig ut.');
+    const navn = k.navn.trim();
+    if (!navn) throw new RegnskapsFeil('Skriv et navn.');
+    const epost = k.epost.trim().toLowerCase();
+    if (epost && !gyldigEpost(epost)) throw new RegnskapsFeil('E-postadressen ser ikke riktig ut.');
+    const postnr = k.postnr.trim();
+    if (postnr && !/^\d{4}$/.test(postnr)) throw new RegnskapsFeil('Postnummeret skal ha 4 siffer.');
+    const v = { navn, adresse: k.adresse.trim() || null, postnr: postnr || null, poststed: k.poststed.trim() || null, epost: epost || null };
     const db = await getDb();
-    const r = await db.en<{ id: string }>('update kontakt set epost = $3 where id = $1 and organisasjon_id = $2 returning id', [id, s.org.id, e || null]);
+    const r = await db.en<{ id: string }>('update kontakt set navn = $3, adresse = $4, postnr = $5, poststed = $6, epost = $7 where id = $1 and organisasjon_id = $2 returning id', [id, s.org.id, v.navn, v.adresse, v.postnr, v.poststed, v.epost]);
     if (!r) throw new RegnskapsFeil('Fant ikke kunden.');
-    return { epost: e || null };
-  });
+    return v;
+  }, 'Kunden er oppdatert.');
 }
 
 // ---------- Salg ----------
@@ -458,15 +463,24 @@ export async function lagreLonnsoppsett(v: { ferie: number; lonningsdag: number;
   });
 }
 
-export async function lagreAnsatt(a: { id?: string; navn: string; epost?: string; stilling?: string; lonnType: 'fast' | 'time'; manedslonn: number; timesats: number; skatteprosent: number; kontonr?: string; startdato?: string }): Promise<Resultat> {
+export async function lagreAnsatt(a: { id?: string; navn: string; epost?: string; stilling?: string; lonnType: 'fast' | 'time' | 'provisjon'; manedslonn: number; timesats: number; skatteprosent: number; kontonr?: string; startdato?: string; provisjonProsent?: number; overtidProsent?: number; stillingsprosent?: number; fasteTillegg?: { tekst: string; belop: number; feriepengegrunnlag?: boolean }[] }): Promise<Resultat> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     if (!a.navn.trim()) throw new RegnskapsFeil('Skriv navnet til den ansatte.');
-    if (a.skatteprosent < 0 || a.skatteprosent > 60) throw new RegnskapsFeil('Skatteprosenten må være mellom 0 og 60.');
+    if (!['fast', 'time', 'provisjon'].includes(a.lonnType)) throw new RegnskapsFeil('Velg hvordan den ansatte får lønn.');
+    if (!(a.skatteprosent >= 0 && a.skatteprosent <= 60)) throw new RegnskapsFeil('Skatteprosenten må være mellom 0 og 60.');
+    if (a.lonnType === 'fast' && a.manedslonn <= 0) throw new RegnskapsFeil('Skriv månedslønnen.');
+    if (a.lonnType === 'time' && a.timesats <= 0) throw new RegnskapsFeil('Skriv timelønnen.');
+    const prov = a.provisjonProsent ?? 0, ot = a.overtidProsent ?? 40, st = a.stillingsprosent ?? 100;
+    if (a.lonnType === 'provisjon' && !(prov > 0 && prov <= 100)) throw new RegnskapsFeil('Provisjonen må være mellom 0 og 100 prosent.');
+    if (!(ot >= 0 && ot <= 200)) throw new RegnskapsFeil('Overtidstillegget må være mellom 0 og 200 prosent.');
+    if (!(st > 0 && st <= 100)) throw new RegnskapsFeil('Stillingsprosenten må være mellom 1 og 100.');
+    const faste = (a.fasteTillegg ?? []).filter(t => t.tekst.trim() && t.belop).map(t => ({ tekst: t.tekst.trim(), belop: Math.round(t.belop), feriepengegrunnlag: t.feriepengegrunnlag !== false }));
+    if (faste.some(t => t.belop < 0)) throw new RegnskapsFeil('Faste tillegg kan ikke være negative.');
     const db = await getDb();
-    const v = [a.navn.trim(), a.epost || null, a.stilling || null, a.lonnType, a.manedslonn, a.timesats, a.skatteprosent, a.kontonr || null, a.startdato || null];
-    if (a.id) await db.q('update ansatt set navn=$3, epost=$4, stilling=$5, lonn_type=$6, manedslonn=$7, timesats=$8, skatteprosent=$9, kontonr=$10, startdato=$11 where id=$1 and organisasjon_id=$2', [a.id, s.org.id, ...v]);
-    else await db.q('insert into ansatt (organisasjon_id, navn, epost, stilling, lonn_type, manedslonn, timesats, skatteprosent, kontonr, startdato) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)', [s.org.id, ...v]);
+    const v = [a.navn.trim(), a.epost || null, a.stilling || null, a.lonnType, a.lonnType === 'time' ? 0 : a.manedslonn, a.lonnType === 'time' ? a.timesats : 0, a.skatteprosent, a.kontonr || null, a.startdato || null, a.lonnType === 'provisjon' ? prov : 0, ot, st, JSON.stringify(faste)];
+    if (a.id) await db.q('update ansatt set navn=$3, epost=$4, stilling=$5, lonn_type=$6, manedslonn=$7, timesats=$8, skatteprosent=$9, kontonr=$10, startdato=$11, provisjon_prosent=$12, overtid_prosent=$13, stillingsprosent=$14, faste_tillegg=$15 where id=$1 and organisasjon_id=$2', [a.id, s.org.id, ...v]);
+    else await db.q('insert into ansatt (organisasjon_id, navn, epost, stilling, lonn_type, manedslonn, timesats, skatteprosent, kontonr, startdato, provisjon_prosent, overtid_prosent, stillingsprosent, faste_tillegg) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)', [s.org.id, ...v]);
     revalidatePath('/lonn');
   }, 'Den ansatte er lagret.');
 }

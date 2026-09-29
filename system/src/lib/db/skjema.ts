@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 4;
+export const SKJEMA_VERSJON = 5;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -361,6 +361,16 @@ alter table bruker add column if not exists totp_hemmelig text;
 alter table bruker add column if not exists totp_ny text;
 alter table bruker add column if not exists totp_feil int not null default 0;
 alter table bruker add column if not exists totp_sperret_til timestamptz;
+
+-- Versjon 5: flere lønnsformer (provisjon), overtid, stillingsprosent og faste tillegg per ansatt.
+alter table ansatt drop constraint if exists ansatt_lonn_type_check;
+alter table ansatt add constraint ansatt_lonn_type_check check (lonn_type in ('fast','time','provisjon'));
+alter table ansatt add column if not exists provisjon_prosent numeric not null default 0;
+alter table ansatt add column if not exists overtid_prosent numeric not null default 40;
+alter table ansatt add column if not exists stillingsprosent numeric not null default 100;
+alter table ansatt add column if not exists faste_tillegg jsonb not null default '[]';
+-- Kunden slik den var da dokumentet ble sendt. Senere endringer på kunden påvirker ikke sendte fakturaer.
+alter table faktura add column if not exists mottaker jsonb;
 
 -- Supabase gir tilgang til tabellene i «public» gjennom sitt eget API med en offentlig nøkkel.
 -- Systemet bruker ikke det API-et, så all slik tilgang stenges: radsikkerhet uten regler, og ingen rettigheter

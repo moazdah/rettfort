@@ -89,7 +89,11 @@ export async function hentSalg(t: Sporring, orgId: string, id: string) {
     `select *, dato::text as dato, forfall::text as forfall, opprettet::text as opprettet, sendt_tid::text as sendt_tid, apnet_tid::text as apnet_tid from faktura where id = $1 and organisasjon_id = $2`, [id, orgId]);
   if (!f) return null;
   const linjer = await t.q<{ beskrivelse: string; antall_milli: number; pris: number; mva_sats: number; konto: number | null }>('select * from faktura_linje where faktura_id = $1 order by linje', [id]);
-  const kunde = f.kontakt_id ? await t.en<Kontakt>('select * from kontakt where id = $1', [f.kontakt_id]) : null;
+  const naa = f.kontakt_id ? await t.en<Kontakt>('select * from kontakt where id = $1', [f.kontakt_id]) : null;
+  // Sendte dokumenter viser kunden slik den var da de ble sendt. E-posten er alltid den nyeste, så purringer og nye sendinger når fram.
+  const lagret = (f as { mottaker?: Partial<Kontakt> | string | null }).mottaker;
+  const fast = typeof lagret === 'string' ? JSON.parse(lagret) as Partial<Kontakt> : lagret;
+  const kunde = naa && fast ? { ...naa, ...fast, epost: naa.epost } : naa;
   return { ...f, linjer: linjer.map(l => ({ beskrivelse: l.beskrivelse, antallMilli: l.antall_milli, pris: l.pris, sats: l.mva_sats, konto: l.konto ?? undefined })), kunde };
 }
 
@@ -129,7 +133,9 @@ export async function sendSalg(t: Sporring, orgId: string, id: string, brukerId?
     bilagNr = b.nr; bilagId = b.id;
   }
   const status = f.type === 'kvittering' ? 'betalt' : 'sendt';
-  await t.q('update faktura set nr=$3, kid=$4, status=$5, bilag_id=$6, sendt_tid=now(), betalt=$7 where id=$1 and organisasjon_id=$2', [id, orgId, nr, kid, status, bilagId, f.type === 'kvittering' ? f.total : 0]);
+  const k = f.kunde;
+  const mottaker = k ? JSON.stringify({ navn: k.navn, orgnr: k.orgnr, adresse: k.adresse, postnr: k.postnr, poststed: k.poststed, epost: k.epost }) : null;
+  await t.q('update faktura set nr=$3, kid=$4, status=$5, bilag_id=$6, sendt_tid=now(), betalt=$7, mottaker=$8 where id=$1 and organisasjon_id=$2', [id, orgId, nr, kid, status, bilagId, f.type === 'kvittering' ? f.total : 0, mottaker]);
   return { nr, kid, bilagNr };
 }
 
