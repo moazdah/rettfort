@@ -18,6 +18,9 @@ import type { Enhet } from '@/lib/brreg';
 import { randomBytes } from 'node:crypto';
 import { sendEpost, maler, grunnadresse } from '@/lib/epost';
 import { fakturaPdf } from '@/lib/tjenester/fakturaPdf';
+import { hentFakta } from '@/lib/tjenester/assistent';
+import { svar as assistentSvar, type Svar } from '@/lib/assistent';
+import { harAssistent, erTestbruker } from '@/lib/pakker';
 import { kr } from '@/lib/penger';
 
 async function settCookie(token: string) {
@@ -676,4 +679,55 @@ export async function opprettKlient(e: { navn: string; orgnr?: string | null; or
     revalidatePath('/byra');
     return { id };
   }, 'Kunden er lagt til.');
+}
+
+// ---------- Assistent ----------
+
+/** Svarer på spørsmål om egne tall. Bare for pakkene som har assistent. */
+export async function sporAssistent(sporsmal: string): Promise<Resultat<Svar>> {
+  return trygt(async () => {
+    const s = await kreverOrg();
+    if (!harAssistent(s.org.pakke) && !s.medlemskap.some(m => m.type === 'byra')) throw new RegnskapsFeil('Assistenten er med i Selskap og Byrå.');
+    const q = sporsmal.trim().slice(0, 500);
+    if (!q) throw new RegnskapsFeil('Skriv et spørsmål.');
+    const db = await getDb();
+    return assistentSvar(q, await hentFakta(db, s.org.id, idag()));
+  });
+}
+
+// ---------- Testtilgang ----------
+
+/** Bare for testbrukere: bytt pakke fritt, uten betaling, for å se hvordan hver pakke ser ut. */
+export async function settTestPakke(pakke: 'gratis' | 'start' | 'selskap'): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg();
+    if (!erTestbruker(s.bruker.epost)) throw new RegnskapsFeil('Ikke tilgang.');
+    const db = await getDb();
+    await db.q('update organisasjon set pakke = $2 where id = $1', [s.org.id, pakke]);
+    revalidatePath('/', 'layout');
+  }, 'Pakken er byttet.');
+}
+
+/** Bare for testbrukere: lag et testbyrå der eget foretak er kunde, og gå dit. */
+export async function testByra(): Promise<Resultat> {
+  const res = await trygt(async () => {
+    const s = await kreverInnlogget();
+    if (!erTestbruker(s.bruker.epost)) throw new RegnskapsFeil('Ikke tilgang.');
+    const db = await getDb();
+    const finnes = s.medlemskap.find(m => m.type === 'byra');
+    await db.tx(async t => {
+      let byraId = finnes?.orgId;
+      if (!byraId) {
+        const o = await t.en<{ id: string }>(`insert into organisasjon (type, navn, pakke) values ('byra', $1, 'byra') returning id`, [`${s.bruker.navn.split(' ')[0]}s testbyrå`]);
+        byraId = o!.id;
+        await t.q(`insert into medlemskap (bruker_id, organisasjon_id, rolle) values ($1,$2,'eier')`, [s.bruker.id, byraId]);
+      }
+      for (const m of s.medlemskap.filter(m => m.type === 'selskap')) {
+        await t.q(`insert into byra_kunde (byra_id, selskap_id, status, rolle) values ($1,$2,'aktiv','regnskapsforer_full') on conflict (byra_id, selskap_id) do update set status = 'aktiv'`, [byraId, m.orgId]);
+      }
+    });
+    revalidatePath('/', 'layout');
+  });
+  if (!res.ok) return res;
+  redirect('/byra');
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from './Logo';
-import { loggUt } from '@/app/handlinger';
+import { loggUt, settTestPakke, testByra } from '@/app/handlinger';
 
 import { MENY } from './menyvalg';
 export { MENY };
@@ -30,7 +30,7 @@ function useNedtrekk() {
   return { apen, setApen, ref };
 }
 
-export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean }) {
+export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean }) {
   const sti = usePathname();
   const aktiv = (m: (typeof MENY)[number]) => m.aktivPa.some(p => sti === p || sti.startsWith(p + '/'));
   const initialer = bruker.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
@@ -68,6 +68,15 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra }: { firm
             {profil.apen && (
               <div className="nedtrekk-panel hoyre" role="menu">
                 <div className="profil-info"><b>{bruker}</b><span>{rolle ? ROLLE[rolle] ?? rolle : ''}</span><span>{firma} · Pakke: {PAKKE[pakke] ?? pakke}</span></div>
+                {testbruker && (
+                  <div className="testpakke">
+                    <small>Testtilgang: se pakken som</small>
+                    <div className="rad">
+                      {(['gratis', 'start', 'selskap'] as const).map(p => <button key={p} type="button" className={pakke === p ? 'valgt' : ''} onClick={() => settTestPakke(p)}>{PAKKE[p]}</button>)}
+                      <button type="button" onClick={() => testByra()}>Byrå</button>
+                    </div>
+                  </div>
+                )}
                 <Link href="/innstillinger" role="menuitem">Innstillinger</Link>
                 <form action={loggUt}><button className="logg-ut" role="menuitem">Logg ut</button></form>
               </div>
