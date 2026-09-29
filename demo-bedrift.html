@@ -211,8 +211,9 @@ input,textarea,select{font-family:inherit;}
                 <sc-if value="{{ visGratisNote }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#586174;background:#FBFAF6;border:1px solid #EFEBE2;border-radius:10px;padding:10px 12px;line-height:1.45">Automatisk lesing av kvitteringer er med i Start. I Gratis fyller du ut selv. Kontrollen under sjekker fortsatt summen.</div></sc-if>
                 <sc-for list="{{ kFelt }}" as="f" hint-placeholder-count="5">
                   <label style="display:flex;flex-direction:column;gap:5px">
-                    <span style="display:flex;justify-content:space-between;font-size:13px;color:#586174"><span>{{ f.l }}</span><span style="color:#1F7D52;opacity:{{ f.lestOp }};transition:opacity .3s">Lest fra kvittering</span></span>
+                    <span style="display:flex;justify-content:space-between;font-size:13px;color:#586174"><span>{{ f.l }}</span><span style="color:{{ f.merkeFg }};font-weight:{{ f.merkeFw }};opacity:{{ f.lestOp }};transition:opacity .3s">{{ f.merke }}</span></span>
                     <input value="{{ f.v }}" onChange="{{ f.on }}" placeholder="{{ f.ph }}" style="height:42px;padding:0 12px;border-radius:10px;border:1px solid {{ f.bd }};background:{{ f.bg }};font-size:15px;color:#0B2545;outline:none;transition:background .3s,border-color .3s">
+                    <sc-if value="{{ f.harHint }}"><span style="font-size:12.5px;line-height:1.4;color:{{ f.hintFg }}">{{ f.hint }}</span></sc-if>
                   </label>
                 </sc-for>
                 <div style="display:flex;flex-direction:column;gap:6px">
@@ -277,6 +278,7 @@ input,textarea,select{font-family:inherit;}
                 </sc-for>
               </section>
 
+              <sc-if value="{{ maaBekrefte }}"><label style="display:flex;gap:10px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:{{ bekreftBg }};border:1px solid {{ bekreftBd }};font-size:14.5px;line-height:1.45;cursor:pointer"><input type="checkbox" checked="{{ bekreftet }}" onChange="{{ toggleBekreftet }}" style="margin-top:3px;width:18px;height:18px;flex:none"><span><b>Jeg har sjekket tallene mot kvitteringen.</b> Beløp, MVA og dato er lest automatisk og kan være feil.</span></label></sc-if>
               <div style="display:flex;gap:10px;justify-content:flex-end">
                 <button onClick="{{ nyttKjop }}" style="height:44px;padding:0 16px;border-radius:12px;border:1px solid #D9D3C6;background:#fff;color:#0B2545;font-size:15px">Avbryt</button>
                 <button onClick="{{ registrer }}" style="height:44px;padding:0 20px;border-radius:12px;border:none;background:{{ regBg }};color:#fff;font-size:15px;font-weight:600">{{ regLbl }}</button>
@@ -1942,36 +1944,36 @@ class Component extends DCLogic {
     const url = bilde ? URL.createObjectURL(file) : '';
     if (this.state.egen && this.state.egen.url) { try { URL.revokeObjectURL(this.state.egen.url); } catch (e) {} }
     const tomt = { lev: '', dato: '', tot: '', mva: '', tekst: '' };
-    if (this.gratis()) { this.setState({ egen: { url, bilde, navn: file.name, funnet: {} }, kStage: 'klar', kvitt: true, shown: 0, kv: tomt, levFix: false }); return; }
-    this.setState({ egen: { url, bilde, navn: file.name, funnet: {} }, kStage: 'leser', kvitt: true, shown: 0, kv: tomt, levFix: false, mva0: false });
-    const kr2 = n => (n == null || isNaN(n)) ? '' : Math.abs(n).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const start = { egen: { url, bilde, navn: file.name, funnet: {} }, kvitt: true, shown: 0, kv: tomt, levFix: false, mva0: false, bekreftet: false };
+    if (this.gratis()) { this.setState({ ...start, kStage: 'klar' }); return; }
+    this.setState({ ...start, kStage: 'leser' });
+    const kr2 = o => (o == null) ? '' : (Math.abs(o) / 100).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     const nd = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso || '') ? iso.split('-').reverse().join('.') : '';
     try {
-      const [B, E] = await Promise.all([import('/rettfort-bilag.js'), import('/rettfort-engine.js')]);
-      const r = await B.readBilag(file, t => this.toast(t));
+      const [B, E, K] = await Promise.all([import('/rettfort-bilag.js'), import('/rettfort-engine.js'), import('/rettfort-kvittering.js')]);
+      this.ord = K.kronerIOrd;
+      const r = await B.readBilag(file, t => this.toast(t), { alle: true });
       if (r.error) throw new Error(r.error);
-      const p = r.kind === 'ehf' ? E.parseEhf(r.xml) : E.parseInvoiceText(r.text || '', r.conf == null ? 1 : r.conf);
-      const f = (p && p.fields) || {};
-      const tekst = String(r.text || '');
-      let dato = f.date;
-      if (!dato) { const m = tekst.match(/\b(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})\b/); if (m) { const y = m[3].length === 2 ? '20' + m[3] : m[3]; dato = y + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0'); } }
-      let tot = f.total;
-      if (tot == null) { const tall = [...tekst.matchAll(/(?:sum|totalt?|å betale|beløp)[^\n\d]{0,20}(\d{1,3}(?:[ .]\d{3})*,\d{2})/gi)].map(m => E.parseNum(m[1], true)).filter(x => !isNaN(x)); if (tall.length) tot = Math.max(...tall); }
-      let mva = f.vat;
-      if (mva != null && tot != null && Math.abs(mva) >= Math.abs(tot)) mva = null;
-      // Varelinjer: tekst etterfulgt av et beløp, uten summer, MVA og betalingsmåte.
-      const varer = tekst.split('\n').map(l => l.trim()).map(l => l.match(/^([A-Za-zÆØÅæøå].{2,40}?)\s+-?\d{1,3}(?:[ .]\d{3})*,\d{2}\s*$/)).filter(Boolean).map(m => m[1].trim())
-        .filter(v => !/sum|total|mva|moms|herav|bank|kort|visa|master|kontant|vipps|betal|veksel|rabatt|avrund/i.test(v));
-      const beskr = f.description || varer.slice(0, 3).join(', ');
-      const kv = { lev: (f.supplier || '').replace(/\s+/g, ' ').trim(), dato: nd(dato), tot: kr2(tot), mva: kr2(mva), tekst: beskr.slice(0, 80) };
+      let t;
+      if (r.kind === 'ehf') {
+        // EHF er strukturert og leses eksakt.
+        const f = (E.parseEhf(r.xml) || {}).fields || {};
+        const ore = x => x == null || isNaN(x) ? null : Math.round(x * 100);
+        t = { lev: f.supplier || null, dato: f.date || null, total: ore(f.total), mva: ore(f.vat), beskrivelse: f.description || null, status: { lev: 'bekreftet', dato: 'bekreftet', total: 'bekreftet', mva: 'bekreftet' }, grunn: { total: 'Lest fra EHF-fakturaen.' }, sikker: true };
+      } else {
+        const tekster = r.varianter ? r.varianter.map(v => v.text) : [r.text || ''];
+        t = K.tolkBeste(tekster, { idag: new Date().toISOString().slice(0, 10) });
+      }
+      const kv = { lev: t.lev || '', dato: nd(t.dato), tot: kr2(t.total), mva: kr2(t.mva), tekst: t.beskrivelse || '' };
       const funnet = {}; Object.keys(kv).forEach(k => { if (kv[k]) funnet[k] = true; });
-      // Kontoforslag: søkeordene i kontoplanen mot leverandør og varer.
-      const ord = (kv.lev + ' ' + varer.join(' ') + ' ' + beskr).toLowerCase();
+      const st = { lev: t.status.lev, dato: t.status.dato, tot: t.status.total, mva: t.status.mva, tekst: 'lest' };
+      const gr = { lev: t.grunn.lev, dato: t.grunn.dato, tot: t.grunn.total, mva: t.grunn.mva };
+      const ord = (kv.lev + ' ' + (t.varer || []).map(v => v.tekst).join(' ') + ' ' + kv.tekst).toLowerCase();
       let best = null, bestP = 0;
       this.KONTOER.forEach(k => { const p = String(k[3] || '').split(' ').filter(w => w.length > 2 && ord.includes(w)).length; if (p > bestP) { bestP = p; best = k[0]; } });
-      this.setState(st => ({ kStage: 'klar', shown: this.LES.length, kv, ...(best ? { konto: best } : {}), egen: st.egen ? { ...st.egen, funnet, kontoFunnet: !!best } : st.egen }));
-      const n = Object.keys(funnet).length;
-      this.toast(n >= 3 ? 'Kvitteringen er lest. Se over feltene.' : n ? 'Deler av kvitteringen ble lest. Fyll inn resten.' : 'Fant ikke teksten på kvitteringen. Fyll inn selv, eller ta et nytt bilde i bedre lys.');
+      this.setState(s0 => ({ kStage: 'klar', shown: this.LES.length, kv, ...(best ? { konto: best } : {}), egen: s0.egen ? { ...s0.egen, funnet, status: st, grunn: gr, orig: { ...kv }, kontoFunnet: !!best } : s0.egen }));
+      const antSjekk = Object.values(st).filter(v => v === 'sjekk').length;
+      this.toast(!Object.keys(funnet).length ? 'Fant ikke teksten på kvitteringen. Fyll inn selv, eller ta et nytt bilde i bedre lys.' : antSjekk ? `Kvitteringen er lest. ${antSjekk === 1 ? 'Ett tall' : antSjekk + ' tall'} må sjekkes.` : 'Kvitteringen er lest, og tallene stemmer med hverandre. Sjekk likevel før du registrerer.');
     } catch (e) {
       this.setState({ kStage: 'klar', shown: this.LES.length });
       this.toast((e && e.message) ? e.message : 'Kunne ikke lese kvitteringen. Fyll inn selv.');
@@ -2019,7 +2021,15 @@ class Component extends DCLogic {
     const hlOn = k => s.egen ? 'transparent' : (lev && this.LES[s.shown - 1] && this.LES[s.shown - 1][0] === k) ? '#FBEFA8' : (kv[k] && s.kvitt && !gratis ? '#E2F1E8' : 'transparent');
     const felt = [['lev', 'Leverandør', 'Hvem har du kjøpt fra?'], ['dato', 'Dato', 'dd.mm.åååå'], ['tekst', 'Hva er kjøpt', 'Kort beskrivelse'], ['tot', 'Totalt (kr)', '0,00'], ['mva', 'Herav MVA (kr)', '0,00']].map(([k, l, ph]) => {
       const lest = s.egen ? !!(s.egen.funnet || {})[k] : !gratis && s.kvitt && this.LES.findIndex(x => x[0] === k) < s.shown;
-      return { l, ph, v: kv[k], lestOp: lest ? 1 : 0, bg: lest ? '#F4FAF6' : '#fff', bd: lest ? '#CFE7D9' : '#D9D3C6', on: e => { const v = e.target.value; this.setState(st => ({ kv: { ...st.kv, [k]: v } })); } };
+      const st = s.egen && s.egen.status ? s.egen.status[k] : null, endret = s.egen && s.egen.orig && s.egen.orig[k] !== kv[k];
+      const sjekk = st === 'sjekk' && !endret, ok = st === 'bekreftet' && !endret;
+      const merke = !lest ? '' : endret ? 'Endret av deg' : sjekk ? 'Sjekk dette' : ok ? 'Kontrollert' : 'Lest fra kvittering';
+      let hint = s.egen && s.egen.grunn && lest && !endret && (sjekk || ok) ? (s.egen.grunn[k] || '') : '';
+      if (k === 'tot' && kv.tot && s.egen) { const o = Math.round(this.num(kv.tot) * 100); if (this.ord) hint = (hint ? hint + ' ' : '') + '(' + this.ord(o) + ')'; }
+      return { l, ph, v: kv[k], lestOp: lest ? 1 : 0, merke, merkeFg: sjekk ? '#8A6A00' : '#1F7D52', merkeFw: sjekk ? 700 : 400,
+        bg: sjekk ? '#FFF8D6' : lest ? '#F4FAF6' : '#fff', bd: sjekk ? '#E8C95A' : lest ? '#CFE7D9' : '#D9D3C6',
+        harHint: !!hint, hint, hintFg: sjekk ? '#8A6A00' : '#586174',
+        on: e => { const v = e.target.value; this.setState(st2 => ({ kv: { ...st2.kv, [k]: v } })); } };
     });
     const ko = this.KONTOER.find(k => k[0] === s.konto) || this.KONTOER[0];
     const kanReg = !lev && kv.lev && kv.tot;
@@ -2078,7 +2088,8 @@ class Component extends DCLogic {
       konto: s.konto, setKonto: e => this.setState({ konto: e.target.value }), kontoer: this.KONTOER.map(k => ({ v: k[0], l: k[1] + ' · ' + k[0] })), kontoHint: ko[2] + (s.kvitt && !gratis && (!s.egen || s.egen.kontoFunnet) ? '. Foreslått ut fra varene på kvitteringen.' : '.'), kontoNavn: ko[1] + ' (' + ko[0] + ')',
       betalt: s.betalt, toggleBetalt: () => this.setState({ betalt: !s.betalt }),
       kSjekk: sjekk.map(c => ({ harKnapp: false, ...c })),
-      regBg: kanReg ? '#0B2545' : '#B9B2A4', regLbl: aapne ? 'Registrer likevel' : 'Registrer kjøp', registrer: () => { if (kanReg) this.setState(st => ({ kStage: 'reg', kDelt: false, kVf: false, vf: st.kVf ? [...st.vf, { id: 'v' + Date.now(), kunde: st.kVfKunde, t: (kv.lev || 'Kjøp') + (kv.tekst ? ', ' + kv.tekst.toLowerCase() : '') + ' (viderefakturert)', p: this.nok(this.num(kv.tot) - this.num(kv.mva)), m: '25', b: kv.tot }] : st.vf, kjopReg: [{ ...kv, konto: st.kDelt ? 'Delt på ' + st.kDeler.length + ' typer' : ko[1] + ' (' + ko[0] + ')', ikkeBetalt: !st.betalt, vf: st.kVf ? st.kVfKunde : null }, ...st.kjopReg] })); if (s.kVf) this.toast('Lagt til for viderefakturering til ' + s.kVfKunde); },
+      maaBekrefte: !!s.egen && s.kStage === 'klar', bekreftet: !!s.bekreftet, toggleBekreftet: () => this.setState({ bekreftet: !s.bekreftet }), bekreftBg: s.bekreftet ? '#E2F1E8' : '#FFF8D6', bekreftBd: s.bekreftet ? '#BFE0CC' : '#E8C95A',
+      regBg: kanReg && (!s.egen || s.bekreftet) ? '#0B2545' : '#B9B2A4', regLbl: s.egen && !s.bekreftet ? 'Sjekk tallene først' : aapne ? 'Registrer likevel' : 'Registrer kjøp', registrer: () => { if (s.egen && !s.bekreftet) { this.toast('Sjekk tallene mot kvitteringen og kryss av før du registrerer.'); return; } if (kanReg) this.setState(st => ({ kStage: 'reg', kDelt: false, kVf: false, vf: st.kVf ? [...st.vf, { id: 'v' + Date.now(), kunde: st.kVfKunde, t: (kv.lev || 'Kjøp') + (kv.tekst ? ', ' + kv.tekst.toLowerCase() : '') + ' (viderefakturert)', p: this.nok(this.num(kv.tot) - this.num(kv.mva)), m: '25', b: kv.tot }] : st.vf, kjopReg: [{ ...kv, konto: st.kDelt ? 'Delt på ' + st.kDeler.length + ' typer' : ko[1] + ' (' + ko[0] + ')', ikkeBetalt: !st.betalt, vf: st.kVf ? st.kVfKunde : null }, ...st.kjopReg] })); if (s.kVf) this.toast('Lagt til for viderefakturering til ' + s.kVfKunde); },
       ...this.kjopEkstra(kv), ...this.kontoPick(kv),
       kListe: s.kStage === 'liste', kjopOversikt: () => this.setState({ kStage: 'liste', kTab: s.titt.length && s.kStage === 'tom' ? 'titt' : 'alle' }),
       kjopListe: this._kl = s.kTab === 'titt' ? s.titt.map(k => ({ t: k.lev, d: k.tekst + ' · ' + k.dato + ' · forslag: ' + k.konto, b: k.tot, p: k.kilde, pBg: '#EFEBE2', pFg: '#3D4759', bg: '#fff', harKnapp: true, knapp: 'Godkjenn', on: () => { this.setState(st => ({ titt: st.titt.filter(x => x.id !== k.id), kjopReg: [{ lev: k.lev, tekst: k.tekst, dato: k.dato, tot: k.tot, konto: k.konto }, ...(st.kjopReg || [])] })); this.toast(k.lev + ' er registrert'); } })) : [...s.kjopReg.map(k => ({ t: k.lev, d: (k.tekst ? k.tekst + ' · ' : '') + k.dato + ' · ' + k.konto + (k.vf ? ' · faktureres videre til ' + k.vf : ''), b: k.tot, p: k.ikkeBetalt ? 'Ikke betalt' : 'Registrert nå', pBg: k.ikkeBetalt ? '#FBEFA8' : '#EEF2F8', pFg: k.ikkeBetalt ? '#8A6A00' : '#16345E', bg: '#FBFAF6' })), { t: 'Nordlys Kontor AS', d: 'Faktura · kontormøbler · 04.10.2026 · forfall 18.10 · Inventar (6540)', b: '2 990,00', p: 'Ikke betalt', pBg: '#FBEFA8', pFg: '#8A6A00', bg: '#fff' }, { t: 'Telenor', d: 'Mobilabonnement · 01.10.2026 · Telefon (6900)', b: '449,00', p: 'Betalt', pBg: '#E2F1E8', pFg: '#1F7D52', bg: '#fff' }, { t: 'Circle K', d: 'Drivstoff · 30.09.2026 · Drivstoff (7000)', b: '812,40', p: 'Betalt', pBg: '#E2F1E8', pFg: '#1F7D52', bg: '#fff' }, { t: 'Adobe', d: 'Programvare · 15.08.2026 · Programvare (6420)', b: '239,00', p: s.mvaFix.adobe ? 'Betalt' : 'Mangler kvittering', pBg: s.mvaFix.adobe ? '#E2F1E8' : '#FBEFA8', pFg: s.mvaFix.adobe ? '#1F7D52' : '#8A6A00', bg: '#fff' }].filter(r => this.kFilt(r.p)).filter(r => !s.slettet[r.t + r.b]).map(r => this.medDet('k', r)), kTomFilter: s.kTab === 'alle' && !this._kl.length, kTomTxt: s.kFilter === 'ikke' ? 'Alt er betalt.' : 'Alle kjøp har kvittering.',
