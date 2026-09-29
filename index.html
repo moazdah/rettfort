@@ -50,6 +50,16 @@ a{color:#0B2545;text-decoration:none}a:hover{color:#1F7D52}
 button{font-family:inherit;cursor:pointer}
 input,textarea{font-family:inherit}
 ::selection{background:#F6DF6E}
+@keyframes rfStampArm{0%,30%{transform:translate(0,-14px) rotate(-6deg)}44%{transform:translate(0,2px) rotate(0)}52%{transform:translate(0,0) rotate(0)}66%,100%{transform:translate(0,-14px) rotate(-6deg)}}
+@keyframes rfMark{0%,43%{opacity:0;transform:rotate(-9deg) scale(1.5)}47%{opacity:1;transform:rotate(-9deg) scale(1)}88%{opacity:1;transform:rotate(-9deg) scale(1)}100%{opacity:0;transform:rotate(-9deg) scale(1)}}
+@keyframes rfBeam{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(12deg)}}
+@keyframes rfPoint{0%,60%,100%{transform:translate(0,0)}68%{transform:translate(-5px,2px)}76%{transform:translate(0,0)}84%{transform:translate(-5px,2px)}}
+@keyframes rfHl{0%,20%{background-size:0% 100%}45%,90%{background-size:100% 100%}100%{background-size:0% 100%}}
+@keyframes rfDay{0%{background:#fff;color:#586174;border-color:#EFEBE2}5%,88%{background:#E2F1E8;color:#1F7D52;border-color:#CFE7D9}100%{background:#fff;color:#586174;border-color:#EFEBE2}}
+@keyframes rfDayFix{0%{background:#fff;color:#586174;border-color:#EFEBE2}5%,22%{background:#F6DF6E;color:#0B2545;border-color:#E6CF5C}30%,88%{background:#E2F1E8;color:#1F7D52;border-color:#CFE7D9}100%{background:#fff;color:#586174;border-color:#EFEBE2}}
+@keyframes rfDue{0%,62%{box-shadow:0 0 0 0 rgba(53,174,116,0)}70%{box-shadow:0 0 0 4px rgba(53,174,116,.45)}80%,100%{box-shadow:0 0 0 0 rgba(53,174,116,0)}}
+@keyframes rfReady{0%,60%{opacity:0;transform:translateY(4px)}68%,92%{opacity:1;transform:none}100%{opacity:0}}
+@keyframes rfZ{0%{opacity:0;transform:translate(0,6px)}25%{opacity:1}70%{opacity:1}100%{opacity:0;transform:translate(6px,-10px)}}
 @keyframes rfIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes rfFade{from{opacity:0}to{opacity:1}}
 @keyframes rfSpin{to{transform:rotate(360deg)}}
@@ -103,17 +113,17 @@ input,textarea{font-family:inherit}
 @keyframes rfTag{0%{opacity:0;transform:rotate(var(--r)) translateY(10px) scale(.8)}100%{opacity:1;transform:rotate(var(--r))}}
 @keyframes rfTagF{0%,100%{translate:0 0}50%{translate:0 -5px}}
 @keyframes rfSpark{0%,100%{opacity:.25;transform:scale(.7) rotate(0)}50%{opacity:1;transform:scale(1.1) rotate(45deg)}}
-.rf-tag{position:absolute;background:#0B2545;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:8px 13px;border-radius:4px;box-shadow:0 10px 20px -12px rgba(11,37,69,.6);white-space:nowrap;animation:rfTag .5s var(--d) cubic-bezier(.3,.7,.2,1.3) both,rfTagF 3.2s calc(var(--d) + .5s) ease-in-out infinite}
+.rf-tag{position:absolute;background:#0B2545;color:#fff;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:8px 13px;border-radius:4px;box-shadow:0 10px 20px -12px rgba(11,37,69,.6);white-space:nowrap;animation:rfTag .5s var(--d) cubic-bezier(.3,.7,.2,1.3) both,rfTagF 3.2s calc(var(--d) + .5s) ease-in-out infinite}
 .rf-tag b{color:#6FD39F;margin-left:4px}
 .rf-spark{position:absolute;color:#F2C94C;font-size:16px;animation:rfSpark 2.6s var(--d) ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.rf-tag,.rf-spark{animation:none}}
 .rf-pd summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:16px 0 2px;font-size:15px;font-weight:600}.rf-pd summary::-webkit-details-marker{display:none}.rf-pd-c{font-size:14px;transition:transform .2s}.rf-pd[open] .rf-pd-c{transform:rotate(180deg)}.rf-pd[open] .rf-pd-b{animation:rfIn .3s ease both;margin-top:14px}
-.rf-drop{position:absolute;left:calc(50% + var(--x) - 22px);top:0;background:#0B2545;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:4px 8px;border-radius:4px;opacity:0;animation:rfDrop 2.7s var(--d) ease-in infinite}
+.rf-drop{position:absolute;left:calc(50% + var(--x) - 22px);top:0;background:#0B2545;color:#fff;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:11px;font-weight:600;padding:4px 8px;border-radius:4px;opacity:0;animation:rfDrop 2.7s var(--d) ease-in infinite}
 @keyframes rfDrop{0%{opacity:0;transform:translateY(-10px) rotate(-6deg)}15%{opacity:1}55%{opacity:1;transform:translateY(96px) rotate(4deg)}70%,100%{opacity:0;transform:translateY(118px) rotate(0)}}
 @media (prefers-reduced-motion:reduce){.rf-drop{animation:none;opacity:1}}
 .rf-chip{display:inline-flex;align-items:center;gap:8px;border:1px solid #E4DFD4;border-radius:99px;padding:8px 12px 8px 14px;font-size:15px;font-weight:500;cursor:pointer;transition:background-color .22s,color .22s,border-color .22s,box-shadow .22s,transform .12s;-webkit-tap-highlight-color:transparent}
 .rf-chip:active{transform:scale(.96)}
-.rf-chip-n{font-family:'IBM Plex Mono',monospace;font-size:12.5px;border-radius:99px;padding:1px 7px;transition:background-color .22s,color .22s}
+.rf-chip-n{font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;border-radius:99px;padding:1px 7px;transition:background-color .22s,color .22s}
 .rf-chip-v{opacity:.55;transition:transform .25s ease}
 .rf-cp{display:grid;transition:grid-template-rows .38s cubic-bezier(.3,.7,.2,1)}
 .rf-cp-in{overflow:hidden;min-height:0}
@@ -122,7 +132,7 @@ input,textarea{font-family:inherit}
 .rf-cp-row{display:grid;grid-template-columns:22px minmax(0,1fr);gap:12px;padding:14px 0;border-top:1px solid #EFEBE2}
 .rf-cp-row:first-child{border-top:0}
 .rf-cp-tick{width:22px;height:22px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;margin-top:1px}
-.rf-cp-rule{display:inline-block;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#586174;background:#F4F1EA;border-radius:6px;padding:3px 8px}
+.rf-cp-rule{display:inline-block;margin-top:8px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:11.5px;color:#586174;background:#F4F1EA;border-radius:6px;padding:3px 8px}
 .rf-cp-more{margin:4px 0 4px;background:transparent;border:0;padding:8px 0;font-size:14.5px;font-weight:600;color:#0B2545;display:flex;align-items:center;gap:8px}
 @media (prefers-reduced-motion:reduce){.rf-cp,.rf-cp-card,.rf-chip,.rf-chip-v{transition:none}.rf-cp-row{animation:none !important}}
 @media (max-width:1080px){[data-rf=cta]{padding-right:200px !important}}
@@ -132,8 +142,16 @@ input,textarea{font-family:inherit}
 [data-rf=hero]{text-align:center;padding-top:40px !important;padding-bottom:40px !important}[data-rf=hero] h1{font-size:37px !important}[data-rf=hero]>div>div:first-child{justify-content:center}
 [data-rf=heroBtns]{margin-top:28px !important}[data-rf=heroBtns]>button{width:100%;justify-content:center;font-size:17px !important;padding:17px 22px !important;border-radius:12px !important}
 [data-rf=plans]{display:flex !important;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -18px !important;padding:84px 18px 18px;gap:14px !important;scrollbar-width:none;align-items:stretch !important}[data-rf=plans]::-webkit-scrollbar{display:none}[data-rf=plans]>div{flex:0 0 86%;scroll-snap-align:center;min-width:0}
-.rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=mobmenu]{margin-left:2px !important;margin-right:-8px}[data-rf=mlogin]{display:inline-flex !important}.rf-about{padding-top:20px !important}#om-meg{margin-bottom:40px !important}#om-meg .rf-acc-b>div{gap:16px !important;margin-top:4px !important}[data-rf=aboutPhoto]{max-width:230px !important}[data-rf=steps]{gap:56px !important}[data-rf=tray]{left:calc(50% - 54px) !important}[data-rf=scan]{left:calc(50% - 85px) !important}[data-rf=s3card]{left:calc(50% - 88px) !important}#slik{background:transparent !important;border:0 !important}#slik>[data-rf=sec]{padding-top:32px !important}[data-rf=hero]{padding-bottom:8px !important}#kontroller{padding-top:64px !important}}
+.rfc-pl{display:none !important}.rfc-pill{padding:0 7px !important}.rfc-teaser{display:none !important}[data-rf=steps]{margin-top:40px !important}[data-rf=mobmenu]{margin-left:2px !important;margin-right:-8px}[data-rf=mlogin]{display:inline-flex !important}.rf-about{padding-top:20px !important}#om-meg{margin-bottom:40px !important}#om-meg .rf-acc-b>div{gap:16px !important;margin-top:4px !important}[data-rf=aboutPhoto]{max-width:230px !important}[data-rf=steps]{gap:56px !important}#slik{background:transparent !important;border:0 !important}#slik>[data-rf=sec]{padding-top:32px !important}[data-rf=hero]{padding-bottom:8px !important}#kontroller{padding-top:64px !important}}
+@media (max-width:760px){
+[data-rf=steps] .rf-desk{display:block !important}[data-rf=steps] .rf-drop{display:none !important}
+[data-rf=featSec]{padding:40px 12px !important}[data-rf=featBox]{padding:44px 16px 24px !important;border-radius:28px !important;gap:36px !important}
+[data-rf=endCta]{grid-template-columns:minmax(0,1fr) !important;justify-items:center !important;text-align:center !important;padding:36px 22px !important;gap:18px !important}[data-rf=endCta]>img{width:76px !important}[data-rf=endCta]>div:last-child,[data-rf=endCta]>div:last-child>a{width:100% !important;justify-content:center !important}
+[data-rf=foot]{grid-template-columns:1fr 1fr !important;gap:28px 16px !important}[data-rf=foot]>div:first-child{grid-column:1 / -1}
+}
 @media (max-width:520px){[data-rf=hdr]{padding:0 18px !important;gap:12px !important}[data-rf=login]{display:none !important}[data-rf=sec]{padding-left:18px !important;padding-right:18px !important}[data-rf=hero]{padding-left:18px !important;padding-right:18px !important}[data-rf=steps]{gap:48px !important}}
+[data-rf=nav]{align-items:center}.rf-fn{flex:none}.rf-fn>button{white-space:nowrap}.rf-fn:hover>button,.rf-fn:focus-within>button{background:#EAE5DA;color:#0B2545}.rf-fn-m{display:none}.rf-fn:hover .rf-fn-m,.rf-fn:focus-within .rf-fn-m{display:block}.rf-fn-i:hover{background:#FBFAF6}@media (max-width:900px){.rf-fn{display:none !important}}
+@keyframes rfBar{from{width:0}to{width:100%}}@keyframes rfOut{0%,86%{opacity:1}100%{opacity:0;visibility:hidden}}@keyframes rfIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.rf-an-ov{animation:rfOut 3.1s forwards}.rf-an-bar{width:0;animation:rfBar 2.5s cubic-bezier(.3,.7,.2,1) .2s forwards}.rf-an-in{opacity:0;animation:rfIn .45s cubic-bezier(.3,.7,.2,1) forwards}@media (prefers-reduced-motion:reduce){.rf-an-ov{display:none}.rf-an-in{opacity:1;animation:none}}
 </style>
 </helmet>
 
@@ -142,15 +160,36 @@ input,textarea{font-family:inherit}
   <header style="position:sticky;top:0;z-index:20;background:rgba(244,241,234,.9);backdrop-filter:blur(10px);border-bottom:1px solid #E4DFD4">
     <div data-rf="hdr" style="max-width:1240px;margin:0 auto;padding:0 32px;height:70px;display:flex;align-items:center;gap:40px">
       <div onClick="{{ toLanding }}" style="width:103px;height:26px;overflow:hidden;position:relative;flex-shrink:0;cursor:pointer"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;max-width:none;left:-14.6px;top:-8.3px;width:131px;height:43.7px"></div>
-      <nav data-rf="nav" style="display:flex;gap:22px;font-size:15px;flex:1;min-width:0;overflow:hidden;white-space:nowrap">
-        <a onClick="{{ goHow }}" style="cursor:pointer;color:#3D4759">Slik fungerer det</a>
-        <a onClick="{{ goCtrl }}" style="cursor:pointer;color:#3D4759">Kontroller</a>
-        <a onClick="{{ goPrice }}" style="cursor:pointer;color:#3D4759">Priser</a>
-        <a onClick="{{ toAbout }}" style="cursor:pointer;color:#3D4759">Om prosjektet</a>
+      <nav data-rf="nav" style="display:flex;align-items:center;gap:22px;font-size:15px;flex:1;min-width:0;overflow:visible;white-space:nowrap">
+        <div class="rf-fn" style="position:relative">
+          <button style="background:none;border:0;padding:8px 14px;margin:0 -14px;border-radius:99px;font:inherit;line-height:1.2;color:#3D4759;cursor:pointer;display:flex;align-items:center">Funksjoner<span style="display:inline-block;width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg) translateY(-3px);margin-left:8px"></span></button>
+          <div class="rf-fn-m" style="position:absolute;top:100%;left:-14px;padding-top:14px;z-index:30">
+            <div style="width:320px;background:#fff;border:1px solid #E4DFD4;border-radius:18px;box-shadow:0 24px 50px -28px rgba(11,37,69,.35);padding:14px;white-space:normal">
+              <a href="#slik" class="rf-fn-i" style="display:block;padding:12px 14px;border-radius:12px;color:#0B2545;text-decoration:none"><span style="display:block;font-size:16px;font-weight:600">Kontroll</span><span style="display:block;font-size:14px;color:#586174;margin-top:2px">Finn feilene før perioden lukkes</span></a>
+              <a href="#funksjoner" class="rf-fn-i" style="display:block;padding:12px 14px;border-radius:12px;color:#0B2545;text-decoration:none"><span style="display:block;font-size:16px;font-weight:600">Bilag og kvitteringer</span><span style="display:block;font-size:14px;color:#586174;margin-top:2px">Ta bilde, så er bilaget tolket</span></a>
+              <a href="#funksjoner" class="rf-fn-i" style="display:block;padding:12px 14px;border-radius:12px;color:#0B2545;text-decoration:none"><span style="display:block;font-size:16px;font-weight:600">Kundeportal</span><span style="display:block;font-size:14px;color:#586174;margin-top:2px">Kunden svarer rett fra mobilen</span></a>
+              <a href="#funksjoner" class="rf-fn-i" style="display:block;padding:12px 14px;border-radius:12px;color:#0B2545;text-decoration:none"><span style="display:block;font-size:16px;font-weight:600">Faktura</span><span style="display:block;font-size:14px;color:#586174;margin-top:2px">Send faktura med din egen logo</span></a>
+              <a href="#funksjoner" class="rf-fn-i" style="display:block;padding:12px 14px;border-radius:12px;color:#0B2545;text-decoration:none"><span style="display:block;font-size:16px;font-weight:600">Rapporter og innsikt</span><span style="display:block;font-size:14px;color:#586174;margin-top:2px">Oversikt for deg, rapport til kunden</span></a>
+              <a href="#priser" class="rf-fn-i" style="display:block;padding:12px 14px;border-radius:12px;color:#0B2545;text-decoration:none"><span style="display:block;font-size:16px;font-weight:600">Årsoppgjør</span><span style="display:block;font-size:14px;color:#586174;margin-top:2px">Egen kontroll før årsregnskapet</span></a>
+              <a href="#slik" class="rf-fn-i" style="display:block;padding:12px 14px;border-radius:12px;color:#0B2545;text-decoration:none"><span style="display:block;font-size:16px;font-weight:600">Integrasjoner</span><span style="display:block;font-size:14px;color:#586174;margin-top:2px">Tripletex, Fiken, PowerOffice, Visma og Xledger</span></a>
+            </div>
+          </div>
+        </div>
+        <div class="rf-fn" style="position:relative">
+          <button style="background:none;border:0;padding:8px 14px;margin:0 -14px;border-radius:99px;font:inherit;line-height:1.2;color:#3D4759;cursor:pointer;display:flex;align-items:center">Passer for<span style="display:inline-block;width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg) translateY(-3px);margin-left:8px"></span></button>
+          <div class="rf-fn-m" style="position:absolute;top:100%;left:-14px;padding-top:14px;z-index:30">
+            <div style="width:300px;background:#fff;border:1px solid #E4DFD4;border-radius:18px;box-shadow:0 24px 50px -28px rgba(11,37,69,.35);padding:14px;white-space:normal">
+              <a href="#passer" class="rf-fn-i" style="display:block;padding:12px 14px;border-radius:12px;color:#0B2545;text-decoration:none"><span style="display:block;font-size:16px;font-weight:600">Regnskapsbyrå</span><span style="display:block;font-size:14px;color:#586174;margin-top:2px">Alle klientene i én arbeidsliste</span></a>
+              <a href="#passer" class="rf-fn-i" style="display:block;padding:12px 14px;border-radius:12px;color:#0B2545;text-decoration:none"><span style="display:block;font-size:16px;font-weight:600">Bedrifter</span><span style="display:block;font-size:14px;color:#586174;margin-top:2px">For deg som driver én bedrift</span></a>
+            </div>
+          </div>
+        </div>
+        <a onClick="{{ goPrice }}" style="cursor:pointer;color:#3D4759;display:flex;align-items:center;padding:8px 0;line-height:1.2">Priser</a>
+        <a onClick="{{ toAbout }}" style="cursor:pointer;color:#3D4759;display:flex;align-items:center;padding:8px 0;line-height:1.2">Om prosjektet</a>
       </nav>
       <div data-rf="deskact" style="display:flex;gap:8px;align-items:center;margin-left:auto">
-        <button data-rf="login" onClick="{{ toLogin }}" style="background:transparent;border:0;font-size:15px;color:#0B2545;padding:9px 14px;border-radius:8px" style-hover="background:#EAE5DA">Logg inn</button>
-        <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:15px;font-weight:500;padding:10px 16px;border-radius:8px" style-hover="background:#16345E">Prøv Rettført</button>
+        <button data-rf="login" onClick="{{ toLogin }}" style="background:transparent;border:1.5px solid #0B2545;font-size:15px;color:#0B2545;padding:9px 18px;border-radius:99px" style-hover="background:#EAE5DA">Logg inn</button>
+        <button onClick="{{ goSignup }}" style="background:#0B2545;color:#fff;border:0;font-size:15px;font-weight:500;padding:11px 20px;border-radius:99px" style-hover="background:#16345E">Prøv gratis</button>
       </div>
       <button class="rf-mobi" data-rf="mlogin" onClick="{{ toLogin }}" style="margin-left:auto;background:transparent;border:1.5px solid #0B2545;border-radius:99px;padding:8px 18px;font-size:15px;font-weight:600;color:#0B2545;white-space:nowrap">Logg inn</button>
       <button data-rf="mobmenu" onClick="{{ mobToggle }}" aria-label="Åpne meny" aria-expanded="{{ mobMenuOpen }}" style="margin-left:auto;width:44px;height:44px;border:0;border-radius:10px;background:transparent;align-items:center;justify-content:center;flex-direction:column;gap:5px;padding:0">
@@ -174,14 +213,39 @@ input,textarea{font-family:inherit}
     </sc-if>
   </header>
 
-  <section data-rf="hero" style="max-width:1240px;margin:0 auto;padding:104px 32px 96px;overflow-x:clip;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:72px;align-items:center">
+  <section class="rf-desk" style="padding:88px 32px 96px;text-align:center;overflow-x:clip">
+    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;align-items:center">
+      <h1 style="margin:0;font-size:clamp(56px,6.4vw,88px);line-height:1;letter-spacing:-0.045em;font-weight:600">Rettført leter.<br><span style="background:linear-gradient(transparent 64%,#F6DF6E 64%);padding:0 6px">Du vurderer.</span></h1>
+      <p style="margin:28px 0 0;font-size:20px;line-height:1.5;color:#3D4759;max-width:680px;text-wrap:pretty">Regnskap som sjekker seg selv. Bedrifter fører faktura, kjøp og MVA med kontrollen innebygd. Regnskapsførere får alle kundene i én arbeidsliste.</p>
+      <div style="margin-top:36px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <a href="/demo-bedrift?ny" style="height:60px;padding:0 30px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#16345E">Start gratis for bedriften</a>
+        <a href="/demo?signup" style="height:60px;padding:0 30px;border-radius:99px;border:1.5px solid #0B2545;color:#0B2545;display:flex;align-items:center;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#fff">Jeg er regnskapsfører</a>
+      </div>
+      <div style="margin-top:16px;font-size:15px;color:#3D4759">Vil du se det først? <a href="/demo" style="color:#0B2545;border-bottom:1.5px solid #0B2545;font-weight:600;text-decoration:none">Åpne demoen</a> med ferdige tall, uten konto.</div>
+      <div style="position:relative;width:min(820px,100%);margin-top:64px">
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:18px;box-shadow:0 30px 60px -40px rgba(11,37,69,.45);text-align:left;overflow:hidden;position:relative"><div class="rf-an-ov" style="position:absolute;inset:0;background:#fff;z-index:2;padding:22px 26px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-size:12px;color:#586174">Nordhavn Drift AS · september</div>
+            <div style="font-size:19px;font-weight:600">Analyserer <span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-weight:500">3 006</span> posteringer …</div>
+            <div style="height:5px;border-radius:99px;background:#EFEBE2;overflow:hidden"><div class="rf-an-bar" style="height:100%;background:#35AE74;border-radius:99px"></div></div>
+            <div class="rf-an-in" style="animation-delay:0.4s;display:flex;align-items:center;gap:10px;font-size:15px;color:#3D4759"><span style="width:20px;height:20px;border-radius:99px;background:#E2F1E8;color:#1F7D52;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span>Leser SAF-T, bank og lønn</div><div class="rf-an-in" style="animation-delay:1.1s;display:flex;align-items:center;gap:10px;font-size:15px;color:#3D4759"><span style="width:20px;height:20px;border-radius:99px;background:#E2F1E8;color:#1F7D52;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span>Kjører 36 kontroller</div><div class="rf-an-in" style="animation-delay:1.8s;display:flex;align-items:center;gap:10px;font-size:15px;color:#3D4759"><span style="width:20px;height:20px;border-radius:99px;background:#E2F1E8;color:#1F7D52;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span>Sjekker bilagene mot banken</div>
+          </div>
+          <div style="padding:16px 22px;border-bottom:1px solid #EFEBE2;display:flex;justify-content:space-between;align-items:center;gap:12px"><div><div style="font-size:12px;color:#586174">I natt 02:10 · Nordhavn Drift AS · september</div><div style="font-size:16px;font-weight:600;margin-top:2px">36 kontroller · 3 006 posteringer</div></div><div class="rf-an-in" style="animation-delay:3.45s;display:flex;gap:6px"><span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;background:#E2F1E8;color:#1F7D52">31 stemmer</span><span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;background:#FBEFA8;color:#6B5200">5 trenger deg</span></div></div>
+          <div class="rf-an-in" style="animation-delay:2.75s;display:flex;align-items:center;gap:12px;padding:13px 22px;"><span style="width:9px;height:9px;border-radius:99px;background:#C4553F"></span><span style="flex:1;font-size:15px">5 forhold trenger din vurdering</span><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px">114 486,00</span></div><div class="rf-an-in" style="animation-delay:3s;display:flex;align-items:center;gap:12px;padding:13px 22px;border-top:1px solid #EFEBE2"><span style="width:9px;height:9px;border-radius:99px;background:#35AE74"></span><span style="flex:1;font-size:15px">23 bilag tolket og matchet mot banken</span><span style="font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:#E2F1E8;color:#1F7D52">21 klare</span></div><div class="rf-an-in" style="animation-delay:3.25s;display:flex;align-items:center;gap:12px;padding:13px 22px;border-top:1px solid #EFEBE2"><span style="width:9px;height:9px;border-radius:99px;background:#35AE74"></span><span style="flex:1;font-size:15px">Kari sendte kvitteringen for Biltema</span><span style="font-size:12px;color:#586174">i dag 09:12</span></div>
+        </div>
+        <img src="assets/mascot-hip.png" alt="" style="position:absolute;right:-78px;top:-58px;width:96px;height:auto">
+      </div>
+    </div>
+    </section>
+
+  <div class="rf-mob"><section data-rf="hero" style="max-width:1240px;margin:0 auto;padding:104px 32px 96px;overflow-x:clip;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:72px;align-items:center">
     <div style="animation:rfIn .7s ease both">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:15px;color:#586174"><span style="font-size:12.5px;font-weight:600;color:#0B2545;background:#F6DF6E;padding:3px 10px;border-radius:99px">Tidlig versjon</span><span class="rf-desk">Et ekstra kontrollag før godkjenning</span></div>
       <h1 style="font-size:clamp(42px,5.4vw,70px);line-height:1.02;letter-spacing:-0.035em;font-weight:600;margin:22px 0 0;text-wrap:balance">Se det som fortjener <span style="background:linear-gradient(transparent 60%,#F6DF6E 60%,#F6DF6E 92%,transparent 92%)">en ekstra vurdering.</span></h1>
-      <p class="rf-mob" style="font-size:18px;line-height:1.5;color:#3D4759;margin:20px auto 0;max-width:340px;text-wrap:pretty">{{ nCtrl }} kontroller av regnskapet før perioden lukkes. Du ser bare det som trenger din vurdering.</p>
-      <p class="rf-desk" style="font-size:19px;line-height:1.55;color:#3D4759;margin:26px 0 0;max-width:540px;text-wrap:pretty">Før en periode lukkes, må tusenvis av posteringer sjekkes på nytt. Rettført leser SAF-T, bank, lønn og bilag, kjører 36 faste kontroller og viser bare de få forholdene som trenger din vurdering. Du vurderer, dokumenterer og signerer i ett kontrollbevis.</p>
+      <p class="rf-mob" style="font-size:18px;line-height:1.5;color:#3D4759;margin:20px auto 0;max-width:340px;text-wrap:pretty">Regnskap som sjekker seg selv. For bedriften din og for regnskapsføreren.</p>
+      <p class="rf-desk" style="font-size:19px;line-height:1.55;color:#3D4759;margin:26px 0 0;max-width:540px;text-wrap:pretty">Rettført er arbeidsflaten rundt regnskapssystemet ditt. Bilag tolkes med AI, 36 faste kontroller kjører hver natt, kunden svarer fra mobilen, og hver periode ender i et signert kontrollbevis. AI gjør forarbeidet og viser hvorfor. Du bestemmer.</p>
       <div data-rf="heroBtns" style="display:flex;gap:10px;margin-top:38px;flex-wrap:wrap">
         <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:16px;font-weight:500;padding:14px 22px;border-radius:9px;display:flex;align-items:center;gap:10px" style-hover="background:#16345E"><span class="rf-desk">Prøv Rettført</span><span class="rf-mobi">Prøv demoen gratis</span> {{ iArrow }}</button>
+        <a class="rf-mobi" href="/demo-bedrift?ny" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;font-size:16px;font-weight:500;padding:14px 22px;border-radius:9px;text-decoration:none;display:flex;justify-content:center">Start gratis for bedriften</a>
         <button class="rf-desk" onClick="{{ toUpload }}" style="background:#fff;color:#0B2545;border:1px solid #D9D3C6;font-size:16px;padding:14px 22px;border-radius:9px" style-hover="border-color:#A9A294">Last opp egen fil</button>
       </div>
       <div class="rf-mob" style="margin-top:18px;font-size:15.5px;color:#0B2545">Har du egne filer? <a onClick="{{ toUpload }}" style="cursor:pointer;color:#0B2545;font-weight:600;border-bottom:1.5px solid #0B2545;padding-bottom:1px">Last opp her</a></div>
@@ -195,7 +259,7 @@ input,textarea{font-family:inherit}
           <span class="rf-spark" style="right:-4px;top:78px;--d:1.1s">✦</span>
         </div>
       </div>
-      <div class="rf-desk" style="margin-top:40px;display:flex;gap:28px;font-size:14px;color:#586174;flex-wrap:wrap"><span>SAF-T fra fem regnskapssystemer</span><span>36 faste kontroller</span><span>Kontrollbevis med signering</span><span>Råfilene lastes ikke opp</span></div>
+      <div class="rf-desk" style="margin-top:40px;display:flex;gap:28px;font-size:14px;color:#586174;flex-wrap:wrap"><span>Fungerer med fem regnskapssystemer</span><span>Bilag med AI</span><span>Kontroll hver natt</span><span>Råfilene lastes ikke opp</span></div>
     </div>
 
     <div class="rf-desk" style="position:relative;animation:rfIn .9s .15s ease both">
@@ -206,7 +270,7 @@ input,textarea{font-family:inherit}
           <sc-if value="{{ heroDone }}"><span style="font-size:12.5px;color:#1F7D52;background:#E2F1E8;padding:4px 10px;border-radius:99px">Ferdig</span></sc-if>
         </div>
         <div style="padding:24px">
-          <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.25"><span style="font-family:'IBM Plex Mono',monospace;font-weight:500">{{ heroLinesS }}</span> posteringer analysert.</div>
+          <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.25"><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-weight:500">{{ heroLinesS }}</span> posteringer analysert.</div>
           <div style="font-size:24px;font-weight:600;letter-spacing:-0.02em;line-height:1.25;opacity:{{ heroSumOp }};transition:opacity .4s">{{ heroOkS }} kontroller bestått. {{ heroOpenS }} forhold bør vurderes.</div>
           <div style="height:4px;background:#EFEBE2;border-radius:2px;margin-top:18px;overflow:hidden"><div style="height:100%;width:{{ heroW }};background:#35AE74;transition:width .35s linear"></div></div>
           <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px">
@@ -214,261 +278,247 @@ input,textarea{font-family:inherit}
               <div style="display:flex;align-items:center;gap:12px;border:1px solid #EFEBE2;border-radius:9px;padding:11px 14px;font-size:14px;opacity:{{ h.op }};transform:translateY({{ h.y }});transition:opacity .45s,transform .45s;background:linear-gradient(#FBEFA8,#FBEFA8) no-repeat;background-size:{{ h.w }} 100%;transition-property:opacity,transform,background-size;transition-duration:.45s,.45s,.7s">
                 <span style="font-size:11.5px;font-weight:500;color:{{ h.c }};background:{{ h.bg }};padding:2px 8px;border-radius:4px;flex-shrink:0">{{ h.sev }}</span>
                 <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.t }}</span>
-                <span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;white-space:nowrap">{{ h.a }}</span>
+                <span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;white-space:nowrap">{{ h.a }}</span>
               </div>
             </sc-for>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </section></div>
 
   <section id="slik" ref="{{ slikRef }}" style="background:#fff;border-top:1px solid #E4DFD4;border-bottom:1px solid #E4DFD4">
     <div data-rf="sec" style="max-width:1240px;margin:0 auto;padding:120px 32px 112px">
-      <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0 auto;max-width:760px;text-align:center;text-wrap:balance">Last opp. Analyser. Vurder.</h2>
+      <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0 auto;max-width:760px;text-align:center;text-wrap:balance">Regnskap du kan stole på.</h2>
       <div data-rf="steps" style="margin-top:80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:64px 40px;text-align:center">
         <div>
           <div style="height:200px;position:relative">
-            <div data-rf="tray" style="position:absolute;left:calc(50% + 34px);bottom:14px;width:108px;height:62px;background:#fff;border:1px solid #D9D3C6;border-radius:8px 8px 10px 10px;box-shadow:0 14px 26px -18px rgba(11,37,69,.35);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9px;animation:{{ s1Tray }}">
-              <div style="position:absolute;top:-7px;left:10px;right:10px;height:7px;background:#EAE5DA;border-radius:4px 4px 0 0"></div>
-              <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:#586174">SAF-T · CSV</div>
+            <div data-rf="tray" style="position:absolute;left:calc(50% - 40px);bottom:12px;width:124px;height:70px;background:#FFFEF8;border:1px solid #D9D3C6;border-radius:4px;box-shadow:0 14px 26px -18px rgba(11,37,69,.35);padding:9px 10px;display:flex;flex-direction:column;gap:5px;animation:{{ s1Tray }}">
+              <span style="height:4px;width:55%;background:#0B2545;border-radius:2px"></span><span style="height:3px;width:80%;background:#DDD7CA;border-radius:2px"></span><span style="height:3px;width:70%;background:#DDD7CA;border-radius:2px"></span><span style="height:3px;width:40%;background:#DDD7CA;border-radius:2px;margin-left:auto"></span>
+              <span class="rf-desk" style="position:absolute;left:4px;top:14px;border:2px solid #1F7D52;color:#1F7D52;font-size:10px;font-weight:700;letter-spacing:.08em;padding:2px 6px;border-radius:4px;background:rgba(226,241,232,.9);animation:rfMark 3.2s cubic-bezier(.5,0,.3,1) infinite">✓ GODKJENT</span>
             </div>
             <div class="rf-desk" style="position:absolute;left:calc(50% - 150px);bottom:0;animation:{{ s1Walk }}">{{ mStep1 }}</div>
-            <span class="rf-mob rf-drop" style="--x:-28px;--d:0s">SAF-T</span><span class="rf-mob rf-drop" style="--x:0px;--d:.9s">Bank</span><span class="rf-mob rf-drop" style="--x:24px;--d:1.8s">Bilag</span>
+            <span class="rf-mob rf-drop" style="--x:-28px;--d:0s">Bilag</span><span class="rf-mob rf-drop" style="--x:0px;--d:.9s">Faktura</span><span class="rf-mob rf-drop" style="--x:24px;--d:1.8s">Lønn</span>
           </div>
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">01</div>
-          <div style="font-size:20px;font-weight:600;margin-top:8px">Last opp</div>
-          <p class="rf-mob" style="font-size:16px;line-height:1.5;color:#3D4759;margin:8px auto 0;max-width:300px">SAF-T, bank, lønn og bilag fra regnskapssystemet du bruker.</p>
-          <p class="rf-desk" style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">SAF-T fra Tripletex, PowerOffice Go, Fiken, Visma eller Xledger. I tillegg forrige periode, bankutskrift, lønn og bilag.</p>
+          <div style="font-size:22px;font-weight:600;margin-top:28px">Bilagene fører seg nesten selv</div>
+          <p style="font-size:16px;line-height:1.55;color:#3D4759;margin:10px auto 0;max-width:320px;text-wrap:pretty">Kvitteringer, fakturaer og lønn kommer inn ett sted. Rettført leser dem og foreslår føringen, du godkjenner.</p>
         </div>
         <div>
           <div style="height:200px;position:relative;display:flex;align-items:flex-end;justify-content:center">
-            <div data-rf="scan" style="position:absolute;left:calc(50% - 150px);top:22px;width:170px;height:168px;overflow:hidden;text-align:left;-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent)">
-              <div style="display:flex;flex-direction:column;gap:7px;animation:{{ scanAn }}">
-                <sc-for list="{{ scanRows }}" as="r" hint-placeholder-count="6">
-                  <div style="height:28px;flex-shrink:0;background:#fff linear-gradient(#F6DF6E,#F6DF6E) no-repeat;background-size:0% 100%;border:1px solid #E4DFD4;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 7px 0 9px;font-size:12px;font-weight:500;animation:{{ r.an }}">
-                    <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;animation:{{ r.tan }}">{{ r.t }}</span>
-                    <span style="width:14px;height:14px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:{{ r.kan }}">{{ iTickS }}</span>
-                  </div>
-                </sc-for>
-              </div>
+            <div data-rf="scan" style="position:absolute;left:calc(50% - 150px);top:26px;width:172px;background:#fff;border:1px solid #E4DFD4;border-radius:12px;padding:12px 12px 14px;text-align:left;box-shadow:0 14px 30px -18px rgba(11,37,69,.3)">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12px;font-weight:600">Desember</span><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:9.5px;color:#586174">MVA-frist 10.</span></div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:9px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums"><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;background:#fff;border:1px solid #EFEBE2;color:#586174;animation:rfDay 7s ease 0.42s infinite both">1</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;background:#fff;border:1px solid #EFEBE2;color:#586174;animation:rfDay 7s ease 0.84s infinite both">2</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;background:#fff;border:1px solid #EFEBE2;color:#586174;animation:rfDay 7s ease 1.26s infinite both">3</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;background:#fff;border:1px solid #EFEBE2;color:#586174;animation:rfDayFix 7s ease 1.68s infinite both">4</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;background:#fff;border:1px solid #EFEBE2;color:#586174;animation:rfDay 7s ease 2.10s infinite both">5</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;background:#fff;border:1px solid #EFEBE2;color:#586174;animation:rfDay 7s ease 2.52s infinite both">6</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;background:#fff;border:1px solid #EFEBE2;color:#586174;animation:rfDay 7s ease 2.94s infinite both">7</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;background:#fff;border:1px solid #EFEBE2;color:#586174;animation:rfDay 7s ease 3.36s infinite both">8</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;background:#fff;border:1px solid #EFEBE2;color:#586174;animation:rfDay 7s ease 3.78s infinite both">9</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;background:#0B2545;color:#fff;animation:rfDue 7s ease infinite">10</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;color:#B9B2A4">11</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;color:#B9B2A4">12</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;color:#B9B2A4">13</span><span style="height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9.5px;color:#B9B2A4">14</span></div>
+              <div style="margin-top:10px;display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:500;color:#1F7D52;background:#E2F1E8;padding:3px 8px;border-radius:99px;animation:rfReady 7s ease infinite">{{ iTickS }}Klar til fristen</div>
             </div>
             <div class="rf-desk" style="position:absolute;left:calc(50% + 4px);top:52px;transform-origin:30% 90%;animation:{{ s2Lean }}">{{ mStep2 }}</div>
           </div>
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">02</div>
-          <div style="font-size:20px;font-weight:600;margin-top:8px">Analyser</div>
-          <p class="rf-mob" style="font-size:16px;line-height:1.5;color:#3D4759;margin:8px auto 0;max-width:300px">{{ nCtrl }} kontroller på sekunder. Det som stemmer, hukes av.</p>
-          <p class="rf-desk" style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">{{ nCtrl }} kontroller kjøres på sekunder, på tvers av hovedbok, MVA, bank, reskontro, periodisering og lønn. Det som stemmer, huker Rettført av. Resten blir en kort arbeidsliste.</p>
+          <div style="font-size:22px;font-weight:600;margin-top:28px">Ingen overraskelser ved fristen</div>
+          <p style="font-size:16px;line-height:1.55;color:#3D4759;margin:10px auto 0;max-width:320px;text-wrap:pretty">Rettført sjekker regnskapet hver dag. Feil dukker opp mens de er enkle å rette, ikke kvelden før MVA-meldingen skal inn.</p>
         </div>
         <div>
           <div style="height:200px;position:relative;display:flex;align-items:flex-end;justify-content:center">
-            <div data-rf="s3card" style="position:absolute;left:calc(50% - 160px);top:46px;width:176px;background:#fff;border:1px solid #E4DFD4;border-radius:10px;padding:12px;text-align:left;box-shadow:0 14px 30px -18px rgba(11,37,69,.3)">
-              <div style="font-size:12px;font-weight:600">{{ ex3t }}</div>
-              <div style="font-size:11px;color:#586174;margin-top:4px;line-height:1.4">{{ ex3d }}</div>
-              <div style="font-size:10.5px;color:#8A909C;margin-top:6px">{{ ex3o }}</div>
-              <div style="margin-top:9px;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:#1F7D52;background:#E2F1E8;padding:3px 8px;border-radius:99px;animation:rfChip 5s ease infinite">{{ iTickS }}Avklart</div>
+            <div data-rf="s3card" style="position:absolute;left:calc(50% - 160px);top:40px;width:176px;background:#fff;border:1px solid #E4DFD4;border-radius:10px;padding:12px;text-align:left;box-shadow:0 14px 30px -18px rgba(11,37,69,.3)">
+              <div style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:10.5px;color:#586174">Bokføringsforskriften</div>
+              <div style="font-size:18px;font-weight:700;margin-top:2px">§ 5-1-1</div>
+              <div style="font-size:11.5px;line-height:1.45;margin-top:6px"><span style="background:linear-gradient(#FBEFA8,#FBEFA8) no-repeat;background-size:0% 100%;animation:rfHl 3s ease infinite">Bilaget skal vise hvem som solgte, hva, når og beløpet.</span></div>
             </div>
             <div class="rf-desk" style="position:absolute;left:calc(50% + 24px);top:40px;transform-origin:20% 90%;animation:{{ s3Nod }}">{{ mStep3 }}</div>
           </div>
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;margin-top:24px">03</div>
-          <div style="font-size:20px;font-weight:600;margin-top:8px">Vurder</div>
-          <p class="rf-mob" style="font-size:16px;line-height:1.5;color:#3D4759;margin:8px auto 0;max-width:300px">Vurder de få funnene og signer ett kontrollbevis.</p>
-          <p class="rf-desk" style="font-size:15.5px;line-height:1.6;color:#3D4759;margin:10px auto 0;max-width:320px">Hvert funn viser hva som ble sjekket, hvorfor og sporingen til bilaget. Du vurderer det som rettet, forventet avvik, oppfølging eller ikke relevant, og signerer kontrollbeviset.</p>
+          <div style="font-size:22px;font-weight:600;margin-top:28px">Du ser hvorfor</div>
+          <p style="font-size:16px;line-height:1.55;color:#3D4759;margin:10px auto 0;max-width:320px;text-wrap:pretty">Hvert funn forklares med vanlige ord og henviser til loven det gjelder. Ingen gjetting, ingen svart boks.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="losning" data-rf="sec" class="rf-desk" style="max-width:1240px;margin:0 auto;padding:120px 32px 0">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:48px;align-items:end">
+  <section id="funksjoner" data-rf="featSec" style="font-family:'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;background:#F4F1EA;padding:88px 32px">
+  <div data-rf="featBox" style="max-width:1320px;margin:0 auto;background:#0B2545;border-radius:36px;padding:clamp(48px,6vw,96px) clamp(24px,5vw,80px) clamp(48px,5vw,80px);display:flex;flex-direction:column;gap:56px">
+    <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <h2 style="margin:0;color:#fff;font-size:clamp(34px,4.2vw,56px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;max-width:900px;text-wrap:balance">Fire timer arbeid. <span style="color:#F6DF6E">Tolv minutter</span> av dem er dine.</h2>
+      <p style="margin:0;color:#C9D3E2;font-size:19px;line-height:1.5;max-width:620px;text-wrap:pretty">Rettført legger seg oppå regnskapssystemet du har, og gjør forarbeidet før du begynner.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px">
+      <div style="background:#fff;border-radius:28px;padding:40px 36px 36px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:23px;font-weight:600;letter-spacing:-0.015em">Kontroll som ikke tar fri</div>
+        <div style="font-size:17px;line-height:1.55;color:#3D4759">36 kontroller går gjennom regnskapet og kjører på nytt hver natt. Retter du noe, ser du neste morgen at det er løst.</div>
+        <div style="margin-top:auto;padding-top:28px;display:flex;justify-content:center"><div style="width:260px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#EEF1F6"><span style="width:22px;height:22px;border-radius:99px;background:#35AE74;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span><span style="flex:1;font-size:15px">31 kontroller stemmer</span></div><div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#E2F1E8"><span style="width:22px;height:22px;border-radius:99px;background:#1F7D52;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">↻</span><span style="flex:1;font-size:15px">I natt: 2 funn løst</span></div><div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#FBEFA8"><span style="width:22px;height:22px;border-radius:99px;background:#E0B43C;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">!</span><span style="flex:1;font-size:15px">3 gjenstår</span></div></div></div>
+      </div>
+      <div style="background:#fff;border-radius:28px;padding:40px 36px 36px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:23px;font-weight:600;letter-spacing:-0.015em">Kvitteringer uten jakt</div>
+        <div style="font-size:17px;line-height:1.55;color:#3D4759">Ta bilde, eller la kunden svare på mobilen. Rettført leser kvitteringen og finner betalingen i banken.</div>
+        <div style="margin-top:auto;padding-top:28px;display:flex;justify-content:center;position:relative;height:230px">
+          <div style="position:absolute;left:calc(50% + 6px);top:36px;width:110px;height:170px;background:#EEF1F6;border-radius:4px;padding:14px 12px;display:flex;flex-direction:column;gap:7px"><span style="height:4px;width:70%;background:#C9D3E2;border-radius:2px"></span><span style="height:4px;background:#C9D3E2;border-radius:2px"></span><span style="height:4px;width:85%;background:#C9D3E2;border-radius:2px"></span><span style="height:4px;width:60%;background:#C9D3E2;border-radius:2px"></span></div>
+          <div style="position:absolute;left:calc(50% - 96px);top:20px;width:124px;height:210px;border:3px solid #0B2545;border-radius:22px;background:#fff;padding:22px 10px 12px;display:flex;flex-direction:column;align-items:center;gap:8px">
+            <span style="position:absolute;top:7px;width:34px;height:6px;border-radius:99px;background:#0B2545"></span>
+            <div style="width:100%;background:#F4F1EA;border-radius:6px;padding:8px 7px;display:flex;flex-direction:column;gap:5px"><span style="align-self:flex-start;font-size:8px;font-weight:600;padding:2px 5px;border-radius:4px;background:#1F7D52;color:#fff">✓ Esso Helgeland</span><span style="height:3px;background:#D9D3C6;border-radius:2px"></span><span style="height:3px;width:80%;background:#D9D3C6;border-radius:2px"></span><span style="align-self:flex-end;font-size:8px;font-weight:600;padding:2px 5px;border-radius:4px;background:#1F7D52;color:#fff">✓ 1 102,30</span></div>
+            <span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13px">1 102,30</span>
+            <span style="margin-top:auto;width:26px;height:26px;border-radius:99px;background:#0B2545"></span>
+          </div>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:28px;padding:40px 36px 36px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:23px;font-weight:600;letter-spacing:-0.015em">Kunden svarer selv</div>
+        <div style="font-size:17px;line-height:1.55;color:#3D4759">Mangler en kvittering, spør Rettført kunden på SMS. Kunden tar bilde uten å logge inn, og svaret havner rett i bilagene.</div>
+        <div style="margin-top:auto;padding-top:28px;display:flex;justify-content:center"><div style="width:270px;display:flex;flex-direction:column;gap:8px"><div style="align-self:flex-end;max-width:88%;padding:10px 13px;border-radius:14px;background:#0B2545;color:#fff;font-size:14px;line-height:1.4">Hei Kari! Vi mangler kvittering for Biltema, 1 489,00.</div><div style="align-self:flex-start;padding:10px 13px;border-radius:14px;background:#EEF1F6;font-size:14px">Her er den.</div><div style="align-self:center;margin-top:4px;font-size:12px;font-weight:600;padding:5px 11px;border-radius:99px;background:#E2F1E8;color:#1F7D52">✓ Mottatt og matchet mot banken</div></div></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:1px;background:rgba(255,255,255,.14);border-radius:20px;overflow:hidden">
+      <div style="background:#0B2545;padding:24px 26px"><div style="color:#fff;font-size:17px;font-weight:600">Faktura med din logo</div><div style="color:#C9D3E2;font-size:15px;line-height:1.5;margin-top:6px">Skriv hva du vil fakturere, så fylles den ut. PDF eller EHF.</div></div>
+      <div style="background:#0B2545;padding:24px 26px"><div style="color:#fff;font-size:17px;font-weight:600">Månedsrapport til kunden</div><div style="color:#C9D3E2;font-size:15px;line-height:1.5;margin-top:6px">Nøkkeltall og hva som er gjort, klar til å sende.</div></div>
+      <div style="background:#0B2545;padding:24px 26px"><div style="color:#fff;font-size:17px;font-weight:600">Alle klienter i én liste</div><div style="color:#C9D3E2;font-size:15px;line-height:1.5;margin-top:6px">For byrå: sortert etter hva som haster, på tvers av systemer.</div></div>
+      <div style="background:#0B2545;padding:24px 26px"><div style="color:#fff;font-size:17px;font-weight:600">Innsikt i tallene</div><div style="color:#C9D3E2;font-size:15px;line-height:1.5;margin-top:6px">Spør om likviditet og hvem som skylder deg, og få svar med kilde.</div></div>
+    </div>
+
+    
+  </div>
+</section>
+
+  <section class="rf-desk" style="font-family:'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;background:#F4F1EA;padding:104px 32px 96px">
+  <div style="max-width:1160px;margin:0 auto;display:flex;flex-direction:column;gap:48px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:24px 56px;align-items:end">
       <div>
-        <div style="font-size:15px;color:#586174">Hva Rettført løser</div>
-        <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:14px 0 0;text-wrap:balance">Mindre leting. Mer tid til vurdering.</h2>
+        <div style="font-size:15px;color:#586174">Nordhavn Drift AS · september · 3 006 posteringer</div>
+        <h2 style="margin:12px 0 0;font-size:clamp(38px,4.6vw,60px);line-height:1.03;letter-spacing:-0.04em;font-weight:600;text-wrap:balance">Den fant <span style="background:linear-gradient(transparent 64%,#F6DF6E 64%);padding:0 4px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-weight:500;letter-spacing:-0.03em">114 486 kr</span> som kunne gått feil.</h2>
       </div>
-      <p style="font-size:17px;line-height:1.6;color:#3D4759;margin:0;max-width:480px">Periodeavslutning handler om å finne de få postene som ikke stemmer, og å kunne vise at de er vurdert. Rettført gjør letingen og dokumentasjonen. Den faglige vurderingen er fortsatt din.</p>
+      <p style="margin:0;font-size:19px;line-height:1.55;color:#3D4759;max-width:520px;text-wrap:pretty">Regnskapet så riktig ut. Rettført kjørte 36 kontroller og fant fem forhold som hadde gått rett gjennom en vanlig gjennomgang. Trykk på et funn for å se hvordan det ble oppdaget.</p>
     </div>
-    <div style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
-        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:26px 24px">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C">01</div>
-          <div style="font-size:15px;color:#8A2E1F;margin-top:12px;line-height:1.45">«De samme sjekkene hver måned tar timer.»</div>
-          <div style="font-size:19px;font-weight:600;letter-spacing:-0.015em;margin-top:10px;line-height:1.3">Faste kontroller gjør rutinearbeidet</div>
-          <p style="font-size:15px;line-height:1.6;color:#3D4759;margin:8px 0 0">Dobbeltføringer, MVA-koder, bankdifferanser, periodisering og lønn mot regnskap sjekkes likt hver gang, med kjent terskel og regelgrunnlag.</p>
-        </div>
-        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:26px 24px">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C">02</div>
-          <div style="font-size:15px;color:#8A2E1F;margin-top:12px;line-height:1.45">«Avvikene drukner i tusenvis av posteringer.»</div>
-          <div style="font-size:19px;font-weight:600;letter-spacing:-0.015em;margin-top:10px;line-height:1.3">Bare det som trenger deg</div>
-          <p style="font-size:15px;line-height:1.6;color:#3D4759;margin:8px 0 0">I demoen blir 4 812 posteringer til fem funn. Hvert funn viser grunnlaget, sporingen tilbake til bilaget og hva som bør sjekkes.</p>
-        </div>
-        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:26px 24px">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C">03</div>
-          <div style="font-size:15px;color:#8A2E1F;margin-top:12px;line-height:1.45">«Vurderingene blir ikke dokumentert.»</div>
-          <div style="font-size:19px;font-weight:600;letter-spacing:-0.015em;margin-top:10px;line-height:1.3">Et kontrollbevis for hver periode</div>
-          <p style="font-size:15px;line-height:1.6;color:#3D4759;margin:8px 0 0">Hver vurdering lagres med kommentar, tidspunkt og hvem som gjorde den. Perioden signeres, låses og kan sendes til oppdragsansvarlig.</p>
-        </div>
-    </div>
-    <div style="margin-top:64px;background:#fff;border:1px solid #E4DFD4;border-radius:20px;padding:clamp(24px,4vw,40px)">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px 24px;flex-wrap:wrap">
-        <div>
-          <div style="font-size:14px;color:#586174">Nytt i demoen</div>
-          <h3 style="font-size:clamp(24px,2.6vw,30px);line-height:1.15;letter-spacing:-0.025em;font-weight:600;margin:8px 0 0">Hele arbeidsflyten, fra fil til signert kontroll.</h3>
-        </div>
-        <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 20px;font-size:15px;font-weight:500;display:flex;align-items:center;gap:10px" style-hover="background:#16345E">Se det i demoen {{ iArrow }}</button>
+
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ fnList }}" as="f" hint-placeholder-count="5">
+          <button onClick="{{ f.onClick }}" style="display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:14px;align-items:center;text-align:left;padding:18px 20px;border-radius:16px;border:1.5px solid {{ f.border }};background:{{ f.bg }};color:#0B2545;transition:all .2s" style-hover="border-color:#0B2545">
+            <span style="width:10px;height:10px;border-radius:99px;background:{{ f.dot }}"></span>
+            <span style="min-width:0"><span style="display:block;font-size:17px;font-weight:600">{{ f.t }}</span><span style="display:block;font-size:14px;color:#586174;margin-top:3px">{{ f.risk }}</span></span>
+            <span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:17px">{{ f.belop }}</span>
+          </button>
+        </sc-for>
       </div>
-      <div style="margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px">
-        <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
-          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Gjennomgang med sporing</span></div>
-          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Arbeidsliste over funn. Hvert funn viser hva, hvorfor og mulig effekt, med sporing til kilde, grunnlag og bilagsleser.</p>
+
+      <div style="background:#fff;border:1px solid #E4DFD4;border-radius:22px;padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;gap:18px;position:sticky;top:20px;box-shadow:0 30px 60px -44px rgba(11,37,69,.45)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px">
+          <div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;background:{{ fnC.sevBg }};color:{{ fnC.sevFg }}">{{ fnC.sev }}</span><span style="font-size:13px;color:#586174">{{ fnC.omr }}</span></div><h3 style="margin:10px 0 0;font-size:26px;line-height:1.15;letter-spacing:-0.02em;font-weight:600">{{ fnC.t }}</h3></div>
+          <span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:22px;white-space:nowrap">{{ fnC.belop }}</span>
         </div>
-        <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
-          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Assistent med kilder</span></div>
-          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Forklarer funnet, foreslår hva du bør sjekke og skriver utkast til e-post til kunden. Den endrer aldri tallene.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:#EFEBE2;border:1px solid #EFEBE2;border-radius:14px;overflow:hidden">
+          <div style="background:#fff;padding:14px 16px"><div style="font-size:11px;letter-spacing:.07em;color:#8A909C;font-weight:600">HVA RETTFØRT SÅ</div><div style="font-size:15px;line-height:1.5;margin-top:6px">{{ fnC.saa }}</div></div>
+          <div style="background:#fff;padding:14px 16px"><div style="font-size:11px;letter-spacing:.07em;color:#8A909C;font-weight:600">HVA SOM KUNNE SKJEDD</div><div style="font-size:15px;line-height:1.5;margin-top:6px">{{ fnC.kunne }}</div></div>
         </div>
-        <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
-          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Kontrollbevis</span></div>
-          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Oppsummering av perioden, vurderte forhold, aktivitetslogg og signering som låser perioden.</p>
+        <div><div style="font-size:11px;letter-spacing:.07em;color:#8A909C;font-weight:600;margin-bottom:8px">SPOR TIL KILDEN</div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><sc-for list="{{ fnC.spor }}" as="sp" hint-placeholder-count="4"><span style="display:flex;align-items:center;gap:8px"><sc-if value="{{ sp.arrow }}" hint-placeholder-val="{{ false }}"><span style="color:#8A909C">→</span></sc-if><span style="padding:7px 11px;border-radius:9px;border:1px solid {{ sp.border }};background:{{ sp.bg }}"><span style="display:block;font-size:13px;font-weight:600">{{ sp.t }}</span><span style="display:block;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:11px;color:#586174">{{ sp.d }}</span></span></span></sc-for></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-top:14px;border-top:1px solid #EFEBE2"><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12px;color:#586174;background:#F4F1EA;border-radius:6px;padding:4px 8px">{{ fnC.regel }}</span><span style="font-size:13px;color:#586174">Du vurderer. Rettført endrer ingenting selv.</span></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1px;background:#E4DFD4;border:1px solid #E4DFD4;border-radius:20px;overflow:hidden">
+      <div style="background:#fff;padding:28px 28px 30px"><div style="font-size:19px;font-weight:600">Oppå systemet du har</div><div style="font-size:15px;line-height:1.55;color:#3D4759;margin-top:8px">Tripletex, PowerOffice Go, Fiken, Visma og Xledger. Du bytter ikke regnskapssystem, du får et kontrollag over det.</div></div>
+      <div style="background:#fff;padding:28px 28px 30px"><div style="font-size:19px;font-weight:600">En regel bak hvert funn</div><div style="font-size:15px;line-height:1.55;color:#3D4759;margin-top:8px">Ingen svart boks. Hver kontroll har fast terskel og henvisning til lov eller forskrift, og du ser sporet tilbake til bilaget.</div></div>
+      <div style="background:#fff;padding:28px 28px 30px"><div style="font-size:19px;font-weight:600">Dokumentert når noen spør</div><div style="font-size:15px;line-height:1.55;color:#3D4759;margin-top:8px">Vurderinger lagres med navn og tidspunkt, og perioden signeres. Kontrollbeviset er klart ved tilsyn eller revisjon.</div></div>
+    </div>
+
+    <div style="text-align:center"><a href="/demo" style="font-size:16px;font-weight:600;color:#0B2545;text-decoration:none;border-bottom:1.5px solid #0B2545;padding-bottom:2px">Se funnene i demoen →</a></div>
+  </div>
+</section>
+
+  <div id="passer" class="rf-desk" style="font-family:'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;background:#F4F1EA">
+  <section style="padding:104px 32px 40px">
+    <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:48px">
+      <div style="text-align:center"><div style="font-size:15px;color:#586174">Passer for</div><h2 style="margin:12px 0 0;font-size:clamp(34px,4vw,52px);line-height:1.05;letter-spacing:-0.035em;font-weight:600">Laget for den som fører, og den som eier.</h2></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:24px">
+
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:28px;padding:40px 40px 0;display:flex;flex-direction:column;overflow:hidden">
+          <div style="font-size:14px;font-weight:600;color:#1E3A66">Regnskapsbyrå</div>
+          <div style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin-top:8px;line-height:1.15">Mange klienter. Én arbeidsliste.</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;font-size:16px;line-height:1.45;color:#3D4759">
+            <div style="display:flex;gap:10px"><span style="color:#1F7D52;font-weight:700">✓</span>Alle klienter sortert etter hva som haster, på tvers av fem systemer</div>
+            <div style="display:flex;gap:10px"><span style="color:#1F7D52;font-weight:700">✓</span>Bytt klient med ⌘K, og Rettført foreslår hvem du bør ta neste</div>
+            <div style="display:flex;gap:10px"><span style="color:#1F7D52;font-weight:700">✓</span>Ansatte med roller, og fire øyne før signering</div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:24px"><a href="#priser" style="height:46px;padding:0 20px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;font-size:15px;font-weight:600;text-decoration:none">Se Byrå-pakken</a></div>
+          <div style="margin:36px -8px 0;background:#F4F1EA;border:1px solid #E4DFD4;border-bottom:none;border-radius:18px 18px 0 0;padding:14px 16px 6px">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-radius:12px;margin-bottom:6px"><span style="width:28px;height:28px;border-radius:8px;background:#0B2545;color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center">KT</span><span style="flex:1;font-size:14px;font-weight:600">Kvam Transport AS</span><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:#F6E1DC;color:#8A2E1F">Frist i dag</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-radius:12px;margin-bottom:6px"><span style="width:28px;height:28px;border-radius:8px;background:#0B2545;color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center">ND</span><span style="flex:1;font-size:14px;font-weight:600">Nordhavn Drift AS</span><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:#FBEFA8;color:#6B5200">5 funn</span></div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-radius:12px;margin-bottom:6px;opacity:.6"><span style="width:28px;height:28px;border-radius:8px;background:#0B2545;color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center">ST</span><span style="flex:1;font-size:14px;font-weight:600">Solberg Tannklinikk</span><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:#E3EAF5;color:#1E3A66">Klar til signering</span></div>
+          </div>
         </div>
-        <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:22px">
-          <div style="display:flex;align-items:center;gap:10px"><span style="width:20px;height:20px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span><span style="font-size:16.5px;font-weight:600">Portefølje</span></div>
-          <p style="font-size:14.5px;line-height:1.55;color:#3D4759;margin:10px 0 0">Flere klienter i én oversikt, på tvers av fem regnskapssystemer.</p>
+
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:28px;padding:40px 40px 0;display:flex;flex-direction:column;overflow:hidden">
+          <div style="font-size:14px;font-weight:600;color:#1F7D52">Bedriften</div>
+          <div style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin-top:8px;line-height:1.15">Én bedrift. Oversikt uten regnskapskunnskap.</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;font-size:16px;line-height:1.45;color:#3D4759">
+            <div style="display:flex;gap:10px"><span style="color:#1F7D52;font-weight:700">✓</span>Ta bilde av kvitteringen, så er den tolket og klar</div>
+            <div style="display:flex;gap:10px"><span style="color:#1F7D52;font-weight:700">✓</span>Send faktura med egen logo, og se hvem som skylder deg penger</div>
+            <div style="display:flex;gap:10px"><span style="color:#1F7D52;font-weight:700">✓</span>Kontrollene kjører hver natt, også om du har regnskapsfører</div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:24px"><a href="#priser" style="height:46px;padding:0 20px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;font-size:15px;font-weight:600;text-decoration:none">Se Selskap-pakken</a></div>
+          <div style="margin:36px -8px 0;background:#F4F1EA;border:1px solid #E4DFD4;border-bottom:none;border-radius:18px 18px 0 0;padding:16px 18px 10px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:#fff;border-radius:12px;padding:12px 14px"><div style="font-size:11px;color:#586174">Bank 30.09</div><div style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:19px;margin-top:4px">433 880</div><div style="font-size:11px;color:#1F7D52;margin-top:2px">Holder ca. 9 uker</div></div>
+            <div style="background:#fff;border-radius:12px;padding:12px 14px"><div style="font-size:11px;color:#586174">Kunder skylder</div><div style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:19px;margin-top:4px">55 000</div><div style="font-size:11px;color:#8A2E1F;margin-top:2px">1 faktura forfalt</div></div>
+            <div style="grid-column:1 / -1;background:#fff;border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px"><span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px;background:#0B2545;color:#fff">AI</span><span style="font-size:13px;color:#3D4759">Hvordan ligger vi an på likviditet?</span></div>
+          </div>
         </div>
-                                      </div>
+
+      </div>
     </div>
   </section>
 
-  <section id="kontroller" data-rf="sec" class="{{ ctrlSectionClass }}" style="max-width:1240px;margin:0 auto;padding:120px 32px">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:48px;align-items:end">
-      <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0;text-wrap:balance">{{ nCtrl }} kontroller med kjent regelgrunnlag.</h2>
-      <p style="font-size:17px;line-height:1.6;color:#3D4759;margin:0;max-width:480px">Hver kontroll har en fast terskel og en henvisning. Du ser alltid hva som ble sjekket, og hvorfor noe ble markert.</p>
-    </div>
-    <div class="rf-mob" style="margin-top:28px">
-      <div style="font-size:13.5px;color:#586174;margin-bottom:12px">Trykk på et område for å se kontrollene.</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px">
-        <sc-for list="{{ ctrlCards }}" as="g" hint-placeholder-count="6"><button type="button" class="rf-chip" onClick="{{ g.pick }}" aria-expanded="{{ g.openS }}" style="background:{{ g.cBg }};color:{{ g.cFg }};border-color:{{ g.cBd }};box-shadow:{{ g.cSh }}">{{ g.t }}<span class="rf-chip-n" style="background:{{ g.nBg }};color:{{ g.nFg }}">{{ g.c }}</span><svg class="rf-chip-v" style="transform:{{ g.rot }}" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></sc-for>
-      </div>
-      <sc-for list="{{ ctrlCards }}" as="g" hint-placeholder-count="0">
-        <div class="rf-cp" style="grid-template-rows:{{ g.rows }}">
-          <div class="rf-cp-in">
-            <div class="rf-cp-card" style="opacity:{{ g.op }};transform:{{ g.tf }}">
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-                <div style="min-width:0">
-                  <div style="font-size:18px;font-weight:600;letter-spacing:-0.01em">{{ g.t }}</div>
-                  <div style="font-size:14px;color:#586174;margin-top:3px;line-height:1.45">{{ g.d }}</div>
-                </div>
-                <button type="button" onClick="{{ g.pick }}" aria-label="Lukk" class="rf-cp-x">×</button>
-              </div>
-              <div style="margin-top:6px">
-                <sc-for list="{{ g.items }}" as="x" hint-placeholder-count="0">
-                  <div class="rf-cp-row" style="animation:{{ x.an }}">
-                    <span class="rf-cp-tick">{{ iTickS }}</span>
-                    <div style="min-width:0">
-                      <div style="font-size:15.5px;font-weight:600;line-height:1.35">{{ x.t }}</div>
-                      <div style="font-size:13.5px;color:#3D4759;line-height:1.5;margin-top:3px"><span style="color:#8A909C">Markeres når: </span>{{ x.th }}</div>
-                      <span class="rf-cp-rule">{{ x.rule }}</span>
-                    </div>
-                  </div>
-                </sc-for>
-              </div>
-              <sc-if value="{{ g.hasMore }}"><button type="button" onClick="{{ toControls }}" class="rf-cp-more">{{ g.moreL }} {{ iArrow }}</button></sc-if>
+  
+</div>
+
+  <section id="priser" style="padding:104px 32px 88px">
+    <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:64px">
+      <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px"><h2 style="margin:0;font-size:clamp(38px,4.4vw,56px);line-height:1.04;letter-spacing:-0.04em;font-weight:600">Priser.</h2><p style="margin:0;font-size:18px;color:#3D4759;line-height:1.5;max-width:560px">Start gratis, eller prøv en betalt pakke gratis i 30 dager. Ingen binding, og du betaler ikke før du har valgt å fortsette.</p></div>
+      <div data-rf="plans" onMouseLeave="{{ pcReset }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,262px),1fr));gap:16px;align-items:stretch">
+        <sc-for list="{{ pcards }}" as="p" hint-placeholder-count="4">
+          <div onMouseEnter="{{ p.onEnter }}" style="position:relative;display:grid;grid-row:span 5;grid-template-rows:subgrid;row-gap:20px;background:{{ p.bg }};border:1px solid {{ p.border }};border-radius:24px;padding:34px 26px 32px;color:{{ p.fg }};box-shadow:{{ p.sh }};transform:{{ p.tf }};transition:background .3s,color .3s,box-shadow .3s,transform .3s,border-color .3s">
+            <sc-if value="{{ p.rec }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-12px;left:26px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:#F6DF6E;color:#0B2545">Anbefalt</span><img src="assets/mascot-hip.png" alt="" style="position:absolute;right:24px;top:-66px;width:78px;height:auto"></sc-if>
+            <div><div style="font-size:22px;font-weight:600">{{ p.n }}</div><div style="font-size:15px;color:{{ p.sub }};margin-top:6px;line-height:1.45;transition:color .3s">{{ p.d }}</div></div>
+            <div><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span style="font-size:52px;font-weight:600;letter-spacing:-0.045em;line-height:1">{{ p.pris }}</span><span style="font-size:15px;color:{{ p.sub }};transition:color .3s">{{ p.unit }}</span></div><div style="font-size:14px;margin-top:10px">{{ p.vat }}</div></div>
+            <a href="{{ p.href }}" style="height:48px;border-radius:12px;background:{{ p.btnBg }};color:{{ p.btnFg }};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;text-decoration:none;transition:background .3s,color .3s">{{ p.cta }}</a>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:15px;padding-bottom:18px;border-bottom:1px solid {{ p.line }};transition:border-color .3s"><sc-for list="{{ p.lim }}" as="l" hint-placeholder-count="3"><div>{{ l }}</div></sc-for></div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ p.feat }}" as="x" hint-placeholder-count="15"><div style="display:flex;gap:12px;align-items:center;font-size:15px;color:{{ x.fg }};transition:color .3s"><span style="width:20px;height:20px;border-radius:99px;flex:none;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:{{ x.bg }};color:{{ x.ic }};transition:background .3s,color .3s">{{ x.sym }}</span>{{ x.t }}</div></sc-for>
             </div>
           </div>
-        </div>
-      </sc-for>
-    </div>
-    <div class="rf-desk" style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px">
-      <sc-for list="{{ ctrlCards }}" as="g" hint-placeholder-count="4">
-        <div class="{{ g.mobileClass }}" style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:24px;display:flex;flex-direction:column">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:18px;font-weight:600">{{ g.t }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#586174">{{ g.n }}</span></div>
-          <div style="font-size:14px;color:#586174;margin-top:6px;line-height:1.5">{{ g.d }}</div>
-          <div style="margin-top:18px;display:flex;flex-direction:column;gap:8px">
-            <sc-for list="{{ g.ex }}" as="x" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;font-size:14.5px"><span style="width:18px;height:18px;border-radius:50%;background:#E2F1E8;color:#1F7D52;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ iTickS }}</span>{{ x.t }}</div></sc-for>
-          </div>
-          <div style="font-size:13px;color:#8A909C;margin-top:12px">{{ g.more }}</div>
-        </div>
-      </sc-for>
-    </div>
-    <button data-rf="ctrlToggle" class="rf-desk" onClick="{{ ctrlToggle }}" aria-expanded="{{ ctrlExpanded }}" style="margin-top:16px;width:100%;background:#fff;border:1px solid #D9D3C6;border-radius:10px;padding:12px 14px;font-size:14.5px;font-weight:600;color:#0B2545;align-items:center;justify-content:center;gap:8px">{{ ctrlToggleLabel }} <span aria-hidden="true">{{ ctrlToggleArrow }}</span></button>
-    <button onClick="{{ toControls }}" style="margin-top:28px;background:transparent;border:0;border-bottom:1px solid #0B2545;padding:0 0 2px;font-size:15px;font-weight:500;color:#0B2545;display:flex;align-items:center;gap:8px"><span class="rf-desk">Se alle kontroller med terskel og regelgrunnlag</span><span class="rf-mobi">Se alle {{ nCtrl }} kontroller</span> {{ iArrow }}</button>
-  </section>
-
-  <section id="priser" data-rf="sec" style="max-width:1240px;margin:0 auto;padding:128px 32px 24px">
-    <div style="text-align:center">
-      <h2 style="font-size:clamp(32px,3.8vw,50px);line-height:1.06;letter-spacing:-0.035em;font-weight:600;margin:0 auto;max-width:720px;text-wrap:balance">Planlagte priser.</h2>
-      <p style="font-size:17px;line-height:1.6;color:#3D4759;margin:18px auto 0;max-width:560px">Rettført er under utvikling. Demoen er åpen for alle. Meld deg på, så får du beskjed når du kan ta det i bruk med egne data.</p>
-    </div>
-    <p class="rf-mob" style="text-align:center;font-size:14px;color:#586174;margin:20px 0 0">← Sveip for å se alle tre →</p>
-    <div data-rf="plans" onMouseLeave="{{ planReset }}" style="margin-top:80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:20px;align-items:start">
-      <sc-for list="{{ plans }}" as="p" hint-placeholder-count="3">
-        <div style="position:relative;background:{{ p.bg }};color:{{ p.fg }};border:1px solid {{ p.bd }};border-radius:18px;padding:32px 28px 28px;box-shadow:{{ p.shadow }};transform:translateY({{ p.lift }});transition:transform .35s cubic-bezier(.3,.7,.2,1),box-shadow .35s ease,border-color .35s ease,background-color .35s ease,color .35s ease" onMouseEnter="{{ p.enter }}">
-          <sc-if value="{{ p.pop }}">
-            <div style="position:absolute;right:18px;top:-74px">{{ mPrice }}</div>
-            <div style="position:absolute;left:28px;top:-13px;background:#F6DF6E;color:#0B2545;font-size:12.5px;font-weight:600;padding:4px 11px;border-radius:99px">Anbefalt</div>
-          </sc-if>
-          <div style="font-size:21px;font-weight:600;letter-spacing:-0.015em">{{ p.k }}</div>
-          <div style="font-size:14.5px;line-height:1.5;color:{{ p.sub }};margin-top:6px;min-height:44px">{{ p.d }}</div>
-          <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;margin-top:20px"><span style="font-size:clamp(38px,3.6vw,48px);font-weight:600;letter-spacing:-0.04em;line-height:1;white-space:nowrap">{{ p.price }}</span><span style="font-size:14.5px;color:{{ p.sub }};white-space:nowrap">{{ p.unit }}</span></div>
-          <div style="font-size:14px;font-weight:500;margin-top:8px">{{ p.vat }}</div>
-          <div style="font-size:13px;color:{{ p.sub }};margin-top:4px">{{ p.note }}</div>
-          <button onClick="{{ p.fn }}" style="margin-top:22px;width:100%;background:{{ p.btnBg }};color:{{ p.btnFg }};border:0;border-radius:9px;padding:13px;font-size:15px;font-weight:500;transition:background-color .35s,color .35s" style-hover="opacity:.88">{{ p.cta }}</button>
-          <div style="margin-top:24px;display:flex;flex-direction:column;gap:8px">
-            <sc-for list="{{ p.limits }}" as="l" hint-placeholder-count="3"><div style="font-size:14.5px;font-weight:500">{{ l.l }}</div></sc-for>
-          </div>
-          <div class="rf-desk" style="height:1px;background:{{ p.line }};margin:22px 0"></div>
-          <div class="rf-desk" style="display:flex;flex-direction:column;gap:12px">
-            <sc-for list="{{ p.feats }}" as="f" hint-placeholder-count="12">
-              <div style="display:flex;align-items:center;gap:12px;font-size:14.5px;color:{{ f.txt }}">
-                <span style="width:20px;height:20px;border-radius:50%;background:{{ f.icBg }};color:{{ f.icFg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background-color .35s,color .35s">
-                  <sc-if value="{{ f.on }}" hint-placeholder-val="{{ true }}">{{ iTickS }}</sc-if>
-                  <sc-if value="{{ f.off }}">{{ iXs }}</sc-if>
-                </span>
-                <span>{{ f.l }}</span>
-              </div>
-            </sc-for>
-          </div>
-          <details class="rf-mob rf-pd" style="margin-top:20px;border-top:1px solid {{ p.line }}">
-            <summary style="color:{{ p.fg }}"><span>Se hva som er med</span><span class="rf-pd-c" aria-hidden="true">▾</span></summary>
-            <div class="rf-pd-b" style="display:flex;flex-direction:column;gap:12px">
-              <sc-for list="{{ p.feats }}" as="f" hint-placeholder-count="12">
-                <div style="display:flex;align-items:center;gap:12px;font-size:14.5px;color:{{ f.txt }}">
-                  <span style="width:20px;height:20px;border-radius:50%;background:{{ f.icBg }};color:{{ f.icFg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background-color .35s,color .35s">
-                    <sc-if value="{{ f.on }}" hint-placeholder-val="{{ true }}">{{ iTickS }}</sc-if>
-                    <sc-if value="{{ f.off }}">{{ iXs }}</sc-if>
-                  </span>
-                  <span>{{ f.l }}</span>
-                </div>
-              </sc-for>
-            </div>
-          </details>
-        </div>
-      </sc-for>
-    </div>
-    <p style="text-align:center;font-size:13.5px;color:#586174;margin:40px 0 0">Prisene gjelder fra lansering. Store tall er eks. MVA, med pris inkl. 25 % MVA under. Ingen binding. Byrå: 79 kr (98,75 kr inkl. MVA) per ekstra kunde utover 15.</p>
-  </section>
-
-  <section data-rf="sec" class="rf-desk" style="max-width:1240px;margin:0 auto;padding:120px 32px 40px">
-    <div data-rf="card44" style="background:#fff;border:1px solid #E4DFD4;border-radius:20px;padding:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:40px;align-items:center">
-      <div>
-        <div style="font-size:14px;color:#586174">For arbeidsgivere</div>
-        <h3 style="font-size:30px;line-height:1.15;letter-spacing:-0.025em;font-weight:600;margin:10px 0 0;text-wrap:balance">Et prosjekt om kontroll, sporbarhet og vurdering.</h3>
-        <p style="font-size:16px;line-height:1.6;color:#3D4759;margin:14px 0 0;max-width:520px">Hvorfor jeg laget Rettført, hvordan kontrollene er bygget, og hvilke regler de bygger på.</p>
+        </sc-for>
       </div>
-      <div style="display:flex;justify-content:flex-end"><button onClick="{{ toAbout }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:14px 20px;font-size:15.5px;font-weight:500;display:flex;align-items:center;gap:10px">Les om prosjektet {{ iArrow }}</button></div>
+      <div style="text-align:center;font-size:14px;color:#586174;line-height:1.6">Priser eks. MVA. Byrå: 79 kr (98,75 kr inkl. MVA) per ekstra kunde utover 15.<br>Kundeportalen er gratis for sluttkundene.</div>
     </div>
   </section>
 
-  <section data-rf="sec" style="max-width:1240px;margin:0 auto;padding:96px 32px 72px">
-    <h2 class="rf-desk" style="font-size:clamp(32px,4vw,52px);line-height:1.05;letter-spacing:-0.035em;font-weight:600;margin:0;max-width:680px;text-wrap:balance">Se hva en kontrollrapport finner i ditt regnskap.</h2>
-    <div data-rf="cta" style="position:relative;margin-top:104px;background:#E2F1E8;border-radius:20px;padding:28px 32px;display:flex;align-items:center;gap:16px 24px;flex-wrap:wrap">
-      <div data-rf="ctaM" style="position:absolute;right:40px;top:-128px;pointer-events:none">{{ mCta }}</div>
-      <button onClick="{{ trySample }}" style="background:#0B2545;color:#fff;border:0;font-size:15.5px;font-weight:500;padding:13px 20px;border-radius:9px" style-hover="background:#16345E">Prøv Rettført</button>
-      <span data-rf="ctaText" style="font-size:16px;color:#174F36;flex:1 1 260px;min-width:0">Ingen innlogging. En ferdig analysert demo med fiktive data.</span>
-      <sc-if value="{{ nfOpen }}" hint-placeholder-val="{{ true }}"><form data-rf="ctaForm" onSubmit="{{ nfSubmit }}" style="display:flex;gap:8px;flex:1 1 300px;max-width:380px;min-width:0"><input type="email" value="{{ nfEmail }}" onChange="{{ nfType }}" placeholder="E-post" aria-label="E-post" style="flex:1;min-width:0;border:1px solid #B9DCC8;border-radius:9px;padding:12px 14px;font-size:15px;outline:none;color:#0B2545;background:#fff"><button type="submit" style="background:#fff;color:#0B2545;border:1px solid #0B2545;border-radius:9px;padding:12px 16px;font-size:15px;font-weight:500;white-space:nowrap">Varsle meg ved lansering</button></form></sc-if>
-      <sc-if value="{{ nfDone }}"><span style="font-size:15px;font-weight:500;color:#174F36;display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;border-radius:50%;background:#fff;color:#1F7D52;display:flex;align-items:center;justify-content:center">{{ iTickS }}</span>{{ nfMsg }}</span></sc-if>
+  <section style="padding:72px 32px 104px">
+    <div style="max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:32px">
+      <h2 style="margin:0;text-align:center;font-size:clamp(30px,3.4vw,44px);line-height:1.08;letter-spacing:-0.03em;font-weight:600">Vanlige spørsmål</h2>
+      <div style="background:#fff;border:1px solid #E4DFD4;border-radius:22px;overflow:hidden">
+        <sc-for list="{{ faq }}" as="q" hint-placeholder-count="6">
+          <div style="border-top:1px solid {{ q.sep }}">
+            <button onClick="{{ q.onClick }}" aria-expanded="{{ q.open }}" style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 26px;border:none;background:{{ q.bg }};text-align:left;font-size:18px;font-weight:600;color:#0B2545;transition:background .25s" style-hover="background:#FBFAF6">{{ q.q }}<span style="width:30px;height:30px;border-radius:99px;border:1px solid {{ q.ring }};background:{{ q.chipBg }};color:{{ q.chipFg }};display:flex;align-items:center;justify-content:center;flex:none;transform:{{ q.rot }};transition:transform .55s cubic-bezier(.34,1.8,.5,1),background .25s,color .25s,border-color .25s"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></span></button>
+            <div style="display:grid;grid-template-rows:{{ q.rows }};transition:grid-template-rows .45s cubic-bezier(.3,.7,.2,1)">
+              <div style="overflow:hidden;min-height:0">
+                <div style="padding:0 26px 24px;font-size:16px;line-height:1.6;color:#3D4759;opacity:{{ q.op }};transform:{{ q.ty }};transition:opacity .35s ease .08s,transform .45s cubic-bezier(.3,.7,.2,1)">{{ q.a }}</div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
     </div>
   </section>
-  <footer style="max-width:1240px;margin:0 auto;padding:40px 32px;border-top:1px solid #E4DFD4;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;font-size:14px;color:#586174">
-    <div style="width:79px;height:20px;overflow:hidden;position:relative"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;max-width:none;left:-11.2px;top:-6.4px;width:100.8px;height:33.6px"></div>
-    <div style="display:flex;gap:24px;flex-wrap:wrap"><span>rettført.no</span><a onClick="{{ toAbout }}" style="cursor:pointer;color:#586174">Om prosjektet</a><a onClick="{{ toControls }}" style="cursor:pointer;color:#586174">Kontroller</a><a href="/personvern.html" style="color:#586174">Personvern</a></div>
+
+  <section style="padding:0 32px 88px">
+    <div style="max-width:1200px;margin:0 auto;background:#fff;border:1px solid #E4DFD4;border-radius:32px;padding:56px clamp(24px,5vw,64px);display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:32px;align-items:center" data-rf="endCta">
+      <img src="assets/mascot-hip.png" alt="" style="width:96px;height:auto">
+      <div><div style="font-size:clamp(26px,3vw,36px);font-weight:600;letter-spacing:-0.025em;line-height:1.12">Se hva Rettført finner hos deg.</div><div style="font-size:17px;color:#3D4759;margin-top:8px">Koble til regnskapssystemet og få første kontroll på fem minutter.</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><a href="/demo?signup" style="height:56px;padding:0 28px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;font-size:17px;font-weight:600;text-decoration:none;white-space:nowrap">Prøv gratis i 30 dager</a><a href="/demo" style="font-size:14px;color:#3D4759">eller åpne demoen</a></div>
+    </div>
+  </section>
+  <footer style="border-top:1px solid #E4DFD4;padding:56px 32px 40px">
+    <div data-rf="foot" style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr));gap:32px">
+      <div><img src="assets/rettfort-logo.png" alt="Rettført" style="height:24px;width:auto"><div style="font-size:15px;color:#586174;margin-top:14px;line-height:1.5;max-width:300px">Kontroll, bilag og kundeoppfølging oppå regnskapssystemet du har.</div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><div style="font-size:13px;color:#8A909C;font-weight:600;margin-bottom:2px">Produkt</div><a href="/#funksjoner" style="text-decoration:none">Funksjoner</a><a href="/#priser" style="text-decoration:none">Priser</a><a href="/demo" style="text-decoration:none">Demo</a></div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><div style="font-size:13px;color:#8A909C;font-weight:600;margin-bottom:2px">Passer for</div><a href="/#priser" style="text-decoration:none">Regnskapsbyrå</a><a href="/#priser" style="text-decoration:none">Bedrifter</a></div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:15px"><div style="font-size:13px;color:#8A909C;font-weight:600;margin-bottom:2px">Rettført</div><a href="/#om" style="text-decoration:none">Om prosjektet</a><a href="/personvern.html" style="text-decoration:none">Personvern</a><a href="/demo?login" style="text-decoration:none">Logg inn</a></div>
+    </div>
+    <div style="max-width:1200px;margin:40px auto 0;padding-top:20px;border-top:1px solid #E4DFD4;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:#8A909C"><span>© 2026 Rettført</span><span>Regnskapsfiler leses i nettleseren og lastes ikke opp.</span></div>
   </footer>
 </div>
 </sc-if>
@@ -630,7 +680,7 @@ input,textarea{font-family:inherit}
       <div onClick="{{ toLanding }}" style="width:103px;height:26px;overflow:hidden;position:relative;flex-shrink:0;cursor:pointer"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;max-width:none;left:-14.6px;top:-8.3px;width:131px;height:43.7px"></div>
       <nav style="display:flex;gap:4px;flex:1;overflow-x:auto">
         <sc-for list="{{ appNav }}" as="n" hint-placeholder-count="4">
-          <button onClick="{{ n.fn }}" style="background:{{ n.bg }};color:{{ n.col }};border:0;border-radius:7px;padding:8px 13px;font-size:14.5px;font-weight:{{ n.fw }};white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="background:#F1EDE4">{{ n.l }}<sc-if value="{{ n.hasBadge }}"><span style="font-size:11.5px;font-family:'IBM Plex Mono',monospace;background:#F6DF6E;color:#0B2545;border-radius:4px;padding:1px 6px">{{ n.badge }}</span></sc-if></button>
+          <button onClick="{{ n.fn }}" style="background:{{ n.bg }};color:{{ n.col }};border:0;border-radius:7px;padding:8px 13px;font-size:14.5px;font-weight:{{ n.fw }};white-space:nowrap;display:flex;align-items:center;gap:7px" style-hover="background:#F1EDE4">{{ n.l }}<sc-if value="{{ n.hasBadge }}"><span style="font-size:11.5px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:#F6DF6E;color:#0B2545;border-radius:4px;padding:1px 6px">{{ n.badge }}</span></sc-if></button>
         </sc-for>
       </nav>
       <sc-if value="{{ hasResult }}"><span data-rf="co" style="font-size:14px;color:#586174;white-space:nowrap">{{ rCompany }}</span></sc-if>
@@ -662,7 +712,7 @@ input,textarea{font-family:inherit}
           <sc-for list="{{ drops }}" as="z" hint-placeholder-count="3">
             <label onDragOver="{{ z.over }}" onDragLeave="{{ z.leave }}" onDrop="{{ z.drop }}" style="display:flex;flex-direction:column;background:{{ z.bg }};border:1.5px dashed {{ z.bd }};border-radius:14px;padding:22px;cursor:pointer;min-height:190px;transition:background .15s,border-color .15s">
               <input type="file" accept="{{ z.accept }}" onChange="{{ z.pick }}" style="display:none">
-              <div style="font-size:12.5px;color:#586174;font-family:'IBM Plex Mono',monospace">{{ z.tag }}</div>
+              <div style="font-size:12.5px;color:#586174;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums">{{ z.tag }}</div>
               <div style="font-size:17px;font-weight:600;margin-top:6px">{{ z.title }}</div>
               <div style="font-size:14px;color:#586174;margin-top:4px;line-height:1.45">{{ z.sub }}</div>
               <div style="flex:1"></div>
@@ -687,7 +737,7 @@ input,textarea{font-family:inherit}
           <sc-if value="{{ fmtOpen }}">
             <div style="padding:18px 0;font-size:14.5px;line-height:1.6;color:#3D4759;animation:rfFade .25s ease both">
               <p style="margin:0">CSV med semikolon eller komma, én rad per lønnslinje. Påkrevde kolonner er <b style="font-weight:600">ansattnr</b> og <b style="font-weight:600">beløp</b>. Resten brukes når de finnes.</p>
-              <div style="margin-top:12px;background:#fff;border:1px solid #E4DFD4;border-radius:9px;padding:14px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;overflow-x:auto;white-space:pre">ansattnr;navn;periode;lonnsart;type;antall;sats;belop;startdato;sluttdato
+              <div style="margin-top:12px;background:#fff;border:1px solid #E4DFD4;border-radius:9px;padding:14px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;overflow-x:auto;white-space:pre">ansattnr;navn;periode;lonnsart;type;antall;sats;belop;startdato;sluttdato
 1004;Sara Hansen;2026-08;Fastlønn;fast;;;41200,00;2021-03-01;
 1004;Sara Hansen;2026-08;Overtid 50 %;variabel;19,5;431,79;8419,91;2021-03-01;</div>
             </div>
@@ -703,7 +753,7 @@ input,textarea{font-family:inherit}
         <div style="font-size:26px;font-weight:600;letter-spacing:-0.02em;margin-top:18px">Analyserer…</div>
         <div style="font-size:15px;color:#586174;margin-top:6px;min-height:22px">{{ runCur }}</div>
         <div style="height:5px;background:#E4DFD4;border-radius:3px;margin-top:22px;overflow:hidden"><div style="height:100%;width:{{ runW }};background:#35AE74;transition:width .12s linear"></div></div>
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8A909C;margin-top:10px">{{ runN }}</div>
+        <div style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13px;color:#8A909C;margin-top:10px">{{ runN }}</div>
       </div>
     </sc-if>
 
@@ -715,7 +765,7 @@ input,textarea{font-family:inherit}
             <div style="min-width:0">
               <div style="font-size:14px;color:#586174">Kontrollrapport · {{ rMeta }}</div>
               <h1 style="font-size:clamp(26px,3vw,36px);line-height:1.2;font-weight:600;letter-spacing:-0.025em;margin:10px 0 0;max-width:820px;text-wrap:balance">{{ rHead }}</h1>
-              <p style="font-size:14px;color:#586174;margin:10px 0 0;font-family:'IBM Plex Mono',monospace">{{ rStats }}</p>
+              <p style="font-size:14px;color:#586174;margin:10px 0 0;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums">{{ rStats }}</p>
             </div>
             <div class="rf-noprint" style="display:flex;gap:8px">
               <button onClick="{{ exportCsv }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:8px;padding:9px 14px;font-size:14px">Last ned CSV</button>
@@ -724,7 +774,7 @@ input,textarea{font-family:inherit}
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:#E4DFD4;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden;margin-top:28px">
             <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="4">
-              <div onClick="{{ t.fn }}" style="background:{{ t.bg }};padding:18px 20px;cursor:pointer;transition:background .15s"><div style="font-size:12px;font-weight:600;letter-spacing:.08em;color:#586174">{{ t.l }}</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span style="font-size:30px;font-weight:600;letter-spacing:-0.02em;font-family:'IBM Plex Mono',monospace;color:{{ t.c }}">{{ t.v }}</span><span style="font-size:14px;color:#3D4759">{{ t.u }}</span></div><div style="font-size:13px;color:#8A909C;margin-top:2px">{{ t.d }}</div></div>
+              <div onClick="{{ t.fn }}" style="background:{{ t.bg }};padding:18px 20px;cursor:pointer;transition:background .15s"><div style="font-size:12px;font-weight:600;letter-spacing:.08em;color:#586174">{{ t.l }}</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span style="font-size:30px;font-weight:600;letter-spacing:-0.02em;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:{{ t.c }}">{{ t.v }}</span><span style="font-size:14px;color:#3D4759">{{ t.u }}</span></div><div style="font-size:13px;color:#8A909C;margin-top:2px">{{ t.d }}</div></div>
             </sc-for>
           </div>
           <div class="rf-noprint" style="margin-top:16px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:18px 22px">
@@ -736,7 +786,7 @@ input,textarea{font-family:inherit}
             <sc-if value="{{ prHas }}">
               <div style="margin-top:16px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">JEG VILLE STARTET HER</div>
               <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
-                <sc-for list="{{ prItems }}" as="p" hint-placeholder-count="3"><div onClick="{{ p.fn }}" style="display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:12px 14px;border:1px solid #EFEBE2;border-radius:10px;cursor:pointer" style-hover="border-color:#A9A294"><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8A909C;padding-top:2px">{{ p.n }}</span><div style="min-width:0"><div style="font-size:15px;font-weight:600">{{ p.t }}</div><div style="font-size:14px;color:#586174;margin-top:2px;line-height:1.45">{{ p.g }}</div></div><span style="font-size:12px;font-weight:600;color:{{ p.sevC }};background:{{ p.sevBg }};padding:3px 9px;border-radius:5px">{{ p.sevL }}</span></div></sc-for>
+                <sc-for list="{{ prItems }}" as="p" hint-placeholder-count="3"><div onClick="{{ p.fn }}" style="display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:12px 14px;border:1px solid #EFEBE2;border-radius:10px;cursor:pointer" style-hover="border-color:#A9A294"><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13px;color:#8A909C;padding-top:2px">{{ p.n }}</span><div style="min-width:0"><div style="font-size:15px;font-weight:600">{{ p.t }}</div><div style="font-size:14px;color:#586174;margin-top:2px;line-height:1.45">{{ p.g }}</div></div><span style="font-size:12px;font-weight:600;color:{{ p.sevC }};background:{{ p.sevBg }};padding:3px 9px;border-radius:5px">{{ p.sevL }}</span></div></sc-for>
               </div>
               <div style="margin-top:10px;font-size:12.5px;color:#8A909C">{{ prSrc }}</div>
             </sc-if>
@@ -754,9 +804,9 @@ input,textarea{font-family:inherit}
                   <sc-for list="{{ reconRows }}" as="r" hint-placeholder-count="4">
                     <div onClick="{{ r.fn }}" style="display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(120px,1fr) minmax(120px,1fr) minmax(110px,1fr) 170px;gap:16px;padding:14px 22px;border-bottom:1px solid #F3F0E9;align-items:center;font-size:14.5px;cursor:pointer" style-hover="background:#FBFAF6">
                       <span style="font-weight:600">{{ r.t }}</span>
-                      <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px">{{ r.expS }}</span>
-                      <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px">{{ r.bookS }}</span>
-                      <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:{{ r.dc }}">{{ r.diffS }}</span>
+                      <span style="text-align:right;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13.5px">{{ r.expS }}</span>
+                      <span style="text-align:right;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13.5px">{{ r.bookS }}</span>
+                      <span style="text-align:right;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13.5px;color:{{ r.dc }}">{{ r.diffS }}</span>
                       <span style="justify-self:end;font-size:12.5px;font-weight:600;color:{{ r.sc }};background:{{ r.sb }};padding:3px 9px;border-radius:5px;white-space:nowrap">{{ r.stL }}</span>
                     </div>
                   </sc-for>
@@ -768,7 +818,7 @@ input,textarea{font-family:inherit}
             <div data-rf="span2" style="grid-column:span 2;min-width:0">
               <div class="rf-noprint" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
                 <div style="display:flex;gap:4px;background:#EAE5DA;border-radius:9px;padding:3px">
-                  <sc-for list="{{ areaTabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.fn }}" style="background:{{ t.bg }};border:0;border-radius:7px;padding:7px 13px;font-size:14px;color:#0B2545;font-weight:{{ t.fw }}">{{ t.l }} <span style="color:#8A909C;font-family:'IBM Plex Mono',monospace;font-size:12.5px">{{ t.n }}</span></button></sc-for>
+                  <sc-for list="{{ areaTabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.fn }}" style="background:{{ t.bg }};border:0;border-radius:7px;padding:7px 13px;font-size:14px;color:#0B2545;font-weight:{{ t.fw }}">{{ t.l }} <span style="color:#8A909C;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px">{{ t.n }}</span></button></sc-for>
                 </div>
                 <div style="display:flex;gap:16px">
                   <sc-for list="{{ statusTabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.fn }}" style="background:transparent;border:0;border-bottom:1.5px solid {{ t.bd }};padding:6px 0;font-size:14px;color:{{ t.col }}">{{ t.l }}</button></sc-for>
@@ -779,7 +829,7 @@ input,textarea{font-family:inherit}
                   <div data-rf="frow" onClick="{{ f.fn }}" style="background:#fff;border:1px solid #E4DFD4;border-radius:12px;padding:16px 20px;cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px 16px;align-items:center;opacity:{{ f.op }};transition:border-color .15s" style-hover="border-color:#A9A294">
                     <span style="font-size:12px;font-weight:600;color:{{ f.sevC }};background:{{ f.sevBg }};padding:3px 9px;border-radius:5px;min-width:64px;text-align:center">{{ f.sevL }}</span>
                     <div style="min-width:0"><div style="font-size:15.5px;font-weight:600">{{ f.title }}</div><div style="font-size:14px;color:#586174;margin-top:3px;line-height:1.45">{{ f.summary }}</div></div>
-                    <div style="text-align:right;white-space:nowrap"><div style="font-family:'IBM Plex Mono',monospace;font-size:14px">{{ f.amountS }}</div><div style="font-size:12.5px;color:#8A909C;margin-top:3px">{{ f.meta }}</div></div>
+                    <div style="text-align:right;white-space:nowrap"><div style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px">{{ f.amountS }}</div><div style="font-size:12.5px;color:#8A909C;margin-top:3px">{{ f.meta }}</div></div>
                   </div>
                 </sc-for>
                 <sc-if value="{{ listEmpty }}">
@@ -813,7 +863,7 @@ input,textarea{font-family:inherit}
         <div style="animation:rfIn .3s ease both">
           <div class="rf-noprint" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
             <a onClick="{{ toReport }}" style="font-size:14.5px;color:#586174;cursor:pointer">← Kontrollrapport</a>
-            <div style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:#586174"><button onClick="{{ prevF }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:7px;padding:6px 10px;font-size:14px">←</button><span style="font-family:'IBM Plex Mono',monospace;padding:0 6px">{{ fPos }}</span><button onClick="{{ nextF }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:7px;padding:6px 10px;font-size:14px">→</button></div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:13.5px;color:#586174"><button onClick="{{ prevF }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:7px;padding:6px 10px;font-size:14px">←</button><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;padding:0 6px">{{ fPos }}</span><button onClick="{{ nextF }}" style="background:#fff;border:1px solid #D9D3C6;border-radius:7px;padding:6px 10px;font-size:14px">→</button></div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px;margin-top:22px;align-items:start">
             <div data-rf="span2" style="grid-column:span 2;min-width:0;display:flex;flex-direction:column;gap:16px">
@@ -822,8 +872,8 @@ input,textarea{font-family:inherit}
                 <h1 style="font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-0.02em;margin:14px 0 0;text-wrap:balance">{{ F.title }}</h1>
                 <p style="font-size:16.5px;line-height:1.55;color:#2A3547;margin:12px 0 0">{{ F.summary }}</p>
                 <div style="display:flex;gap:28px;margin-top:18px;flex-wrap:wrap">
-                  <sc-if value="{{ F.hasAmt }}"><div><div style="font-size:12.5px;color:#8A909C">Beløp</div><div style="font-family:'IBM Plex Mono',monospace;font-size:18px;margin-top:3px">{{ F.amountS }}</div></div></sc-if>
-                  <sc-if value="{{ F.hasDate }}"><div><div style="font-size:12.5px;color:#8A909C">Dato</div><div style="font-family:'IBM Plex Mono',monospace;font-size:18px;margin-top:3px">{{ F.dateS }}</div></div></sc-if>
+                  <sc-if value="{{ F.hasAmt }}"><div><div style="font-size:12.5px;color:#8A909C">Beløp</div><div style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:18px;margin-top:3px">{{ F.amountS }}</div></div></sc-if>
+                  <sc-if value="{{ F.hasDate }}"><div><div style="font-size:12.5px;color:#8A909C">Dato</div><div style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:18px;margin-top:3px">{{ F.dateS }}</div></div></sc-if>
                 </div>
                 <div class="rf-noprint" style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
                   <button onClick="{{ aiOpen }}" style="background:#F6DF6E;color:#0B2545;border:0;border-radius:8px;padding:10px 16px;font-size:14.5px;font-weight:600">{{ aiBtnL }}</button>
@@ -840,7 +890,7 @@ input,textarea{font-family:inherit}
                     <div style="margin-top:18px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">MULIG FORKLARING</div>
                     <div style="margin-top:6px;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ aiForkl }}" as="w" hint-placeholder-count="1"><div style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:#2A3547"><span style="width:6px;height:6px;border-radius:50%;background:#0B2545;margin-top:9px;flex-shrink:0"></span><span>{{ w.t }}</span></div></sc-for></div>
                     <div style="margin-top:18px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#8A909C">DETTE VILLE JEG KONTROLLERT</div>
-                    <div style="margin-top:6px;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ aiKontr }}" as="w" hint-placeholder-count="2"><div style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:#2A3547"><span style="font-family:'IBM Plex Mono',monospace;color:#8A909C;font-size:13px;margin-top:2px">{{ w.n }}</span><span>{{ w.t }}</span></div></sc-for></div>
+                    <div style="margin-top:6px;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ aiKontr }}" as="w" hint-placeholder-count="2"><div style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:#2A3547"><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#8A909C;font-size:13px;margin-top:2px">{{ w.n }}</span><span>{{ w.t }}</span></div></sc-for></div>
                     <sc-if value="{{ aiHasNote }}"><div style="margin-top:16px;font-size:13.5px;color:#586174;background:#F4F1EA;border-radius:8px;padding:10px 12px">{{ aiNote }}</div></sc-if>
                     <div style="margin-top:14px;font-size:12.5px;color:#8A909C">Tallene kommer fra kontrollmotoren. Forklaringen endrer dem ikke, og vurderingen er din.</div>
                   </sc-if>
@@ -864,7 +914,7 @@ input,textarea{font-family:inherit}
               <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:24px 28px">
                 <div style="font-size:16px;font-weight:600">Forslag til neste steg</div>
                 <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
-                  <sc-for list="{{ fNext }}" as="w" hint-placeholder-count="2"><div style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:#2A3547"><span style="font-family:'IBM Plex Mono',monospace;color:#8A909C;font-size:13px;margin-top:2px">{{ w.n }}</span><span>{{ w.t }}</span></div></sc-for>
+                  <sc-for list="{{ fNext }}" as="w" hint-placeholder-count="2"><div style="display:flex;gap:12px;font-size:15px;line-height:1.55;color:#2A3547"><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#8A909C;font-size:13px;margin-top:2px">{{ w.n }}</span><span>{{ w.t }}</span></div></sc-for>
                 </div>
               </div>
             </div>
@@ -893,7 +943,7 @@ input,textarea{font-family:inherit}
               <sc-if value="{{ fHasHist }}">
                 <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:22px;font-size:14px">
                   <div style="font-size:15.5px;font-weight:600">Historikk</div>
-                  <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><sc-for list="{{ fHist }}" as="e" hint-placeholder-count="2"><div style="display:grid;grid-template-columns:44px 1fr;gap:10px;line-height:1.45"><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#8A909C;padding-top:1px">{{ e.t }}</span><span style="color:#2A3547">{{ e.x }}</span></div></sc-for></div>
+                  <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><sc-for list="{{ fHist }}" as="e" hint-placeholder-count="2"><div style="display:grid;grid-template-columns:44px 1fr;gap:10px;line-height:1.45"><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;color:#8A909C;padding-top:1px">{{ e.t }}</span><span style="color:#2A3547">{{ e.x }}</span></div></sc-for></div>
                 </div>
               </sc-if>
               <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:22px;font-size:14px">
@@ -918,10 +968,10 @@ input,textarea{font-family:inherit}
             <sc-for list="{{ payRows }}" as="r" hint-placeholder-count="10">
               <div onClick="{{ r.fn }}" style="display:grid;grid-template-columns:minmax(180px,1.4fr) 130px 130px 130px 90px minmax(140px,1fr);gap:16px;padding:13px 22px;font-size:14.5px;border-bottom:1px solid #F3F0E9;align-items:center;cursor:{{ r.cur }}" style-hover="background:#FBFAF6">
                 <span style="font-weight:500">{{ r.name }}</span>
-                <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:#586174">{{ r.prevS }}</span>
-                <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px">{{ r.currS }}</span>
-                <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:{{ r.col }}">{{ r.diffS }}</span>
-                <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:13.5px;color:{{ r.col }}">{{ r.pctS }}</span>
+                <span style="text-align:right;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13.5px;color:#586174">{{ r.prevS }}</span>
+                <span style="text-align:right;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13.5px">{{ r.currS }}</span>
+                <span style="text-align:right;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13.5px;color:{{ r.col }}">{{ r.diffS }}</span>
+                <span style="text-align:right;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13.5px;color:{{ r.col }}">{{ r.pctS }}</span>
                 <span style="font-size:13px;color:{{ r.fC }}">{{ r.fS }}</span>
               </div>
             </sc-for>
@@ -939,7 +989,7 @@ input,textarea{font-family:inherit}
           <p style="font-size:16px;line-height:1.55;color:#3D4759;margin:10px 0 0;max-width:760px">{{ RR.method }}</p>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:#E4DFD4;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden;margin-top:24px">
             <sc-for list="{{ rrKpi }}" as="t" hint-placeholder-count="5">
-              <div style="background:#fff;padding:18px 20px"><div style="font-size:13.5px;color:#586174">{{ t.l }}</div><div style="font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-top:6px;font-family:'IBM Plex Mono',monospace;color:{{ t.c }}">{{ t.v }}</div></div>
+              <div style="background:#fff;padding:18px 20px"><div style="font-size:13.5px;color:#586174">{{ t.l }}</div><div style="font-size:22px;font-weight:600;letter-spacing:-0.02em;margin-top:6px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:{{ t.c }}">{{ t.v }}</div></div>
             </sc-for>
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px;margin-top:24px;align-items:start">
@@ -947,7 +997,7 @@ input,textarea{font-family:inherit}
               <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:24px 28px">
                 <div style="font-size:16px;font-weight:600">Beregning</div>
                 <div style="margin-top:12px;display:flex;flex-direction:column">
-                  <sc-for list="{{ rrCalc }}" as="c" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid #F3F0E9;font-size:15px"><span style="color:#3D4759">{{ c.l }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;white-space:nowrap">{{ c.v }}</span></div></sc-for>
+                  <sc-for list="{{ rrCalc }}" as="c" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid #F3F0E9;font-size:15px"><span style="color:#3D4759">{{ c.l }}</span><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap">{{ c.v }}</span></div></sc-for>
                 </div>
                 <sc-if value="{{ rrHasNotes }}"><div style="margin-top:14px;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ rrNotes }}" as="w" hint-placeholder-count="1"><div style="display:flex;gap:12px;font-size:14.5px;line-height:1.55;color:#3D4759"><span style="width:6px;height:6px;border-radius:50%;background:#0B2545;margin-top:9px;flex-shrink:0"></span><span>{{ w.t }}</span></div></sc-for></div></sc-if>
               </div>
@@ -996,7 +1046,7 @@ input,textarea{font-family:inherit}
         <div style="margin-top:24px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden">
           <sc-for list="{{ hist }}" as="e" hint-placeholder-count="6">
             <div data-rf="hist" onClick="{{ e.fn }}" style="display:grid;grid-template-columns:110px 96px minmax(0,1fr);gap:16px;padding:13px 22px;border-bottom:1px solid #F3F0E9;font-size:14.5px;align-items:start;cursor:{{ e.cur }}" style-hover="background:#FBFAF6">
-              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8A909C;padding-top:2px">{{ e.date }} {{ e.time }}</span>
+              <span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:13px;color:#8A909C;padding-top:2px">{{ e.date }} {{ e.time }}</span>
               <span style="justify-self:start;font-size:12px;font-weight:600;color:{{ e.whoC }};background:{{ e.whoBg }};padding:3px 8px;border-radius:5px;white-space:nowrap">{{ e.who }}</span>
               <span style="line-height:1.5;color:#2A3547">{{ e.text }}</span>
             </div>
@@ -1013,7 +1063,7 @@ input,textarea{font-family:inherit}
           <div style="font-size:17px;font-weight:600">Arbeidsgiveravgift</div>
           <div style="font-size:14px;color:#586174;margin-top:4px">Sonen virksomheten er registrert i. Satser for 2026, generelle næringer.</div>
           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:16px">
-            <sc-for list="{{ zones }}" as="z" hint-placeholder-count="7"><button onClick="{{ z.fn }}" style="background:{{ z.bg }};color:{{ z.fg }};border:1px solid {{ z.bd }};border-radius:9px;padding:9px 14px;font-size:14.5px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:92px"><span style="font-weight:600">{{ z.l }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12.5px;opacity:.8">{{ z.p }}</span></button></sc-for>
+            <sc-for list="{{ zones }}" as="z" hint-placeholder-count="7"><button onClick="{{ z.fn }}" style="background:{{ z.bg }};color:{{ z.fg }};border:1px solid {{ z.bd }};border-radius:9px;padding:9px 14px;font-size:14.5px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:92px"><span style="font-weight:600">{{ z.l }}</span><span style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;opacity:.8">{{ z.p }}</span></button></sc-for>
           </div>
           <sc-if value="{{ isIa }}"><label style="display:flex;align-items:center;gap:10px;margin-top:16px;font-size:14.5px;cursor:pointer"><input type="checkbox" checked="{{ fribBrukt }}" onChange="{{ toggleFrib }}" style="width:17px;height:17px">Fribeløpet på 850 000 kr er brukt opp</label></sc-if>
         </div>
@@ -1021,14 +1071,14 @@ input,textarea{font-family:inherit}
           <div style="font-size:17px;font-weight:600">Toleranse</div>
           <div style="font-size:14px;color:#586174;margin-top:4px">Differanser innenfor toleransen vises som «Innenfor toleranse» og gir ikke funn.</div>
           <div style="margin-top:12px;display:flex;flex-direction:column">
-            <sc-for list="{{ tolRows }}" as="t" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid #F3F0E9;font-size:15px"><span>{{ t.l }}</span><span style="display:flex;align-items:center;gap:8px"><input value="{{ t.v }}" onChange="{{ t.ch }}" onBlur="{{ t.bl }}" inputMode="decimal" style="width:96px;border:1px solid #D9D3C6;border-radius:8px;padding:7px 10px;font-size:14.5px;text-align:right;font-family:'IBM Plex Mono',monospace;color:#0B2545;outline:none"><span style="color:#586174;font-size:14px">kr</span></span></div></sc-for>
+            <sc-for list="{{ tolRows }}" as="t" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid #F3F0E9;font-size:15px"><span>{{ t.l }}</span><span style="display:flex;align-items:center;gap:8px"><input value="{{ t.v }}" onChange="{{ t.ch }}" onBlur="{{ t.bl }}" inputMode="decimal" style="width:96px;border:1px solid #D9D3C6;border-radius:8px;padding:7px 10px;font-size:14.5px;text-align:right;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#0B2545;outline:none"><span style="color:#586174;font-size:14px">kr</span></span></div></sc-for>
           </div>
         </div>
         <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;padding:24px 28px;margin-top:16px">
           <div style="font-size:17px;font-weight:600">Kontomapping</div>
           <div style="font-size:14px;color:#586174;margin-top:4px">Kontonummer eller intervaller, skilt med komma. Standard følger norsk standard kontoplan.</div>
           <div style="margin-top:12px;display:flex;flex-direction:column">
-            <sc-for list="{{ mapRows }}" as="m" hint-placeholder-count="8"><div data-rf="kv2" style="display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,1.4fr);align-items:center;gap:16px;padding:9px 0;border-bottom:1px solid #F3F0E9;font-size:15px"><span>{{ m.l }}</span><input value="{{ m.v }}" onChange="{{ m.ch }}" onBlur="{{ m.bl }}" style="width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:7px 10px;font-size:14px;font-family:'IBM Plex Mono',monospace;color:#0B2545;outline:none"></div></sc-for>
+            <sc-for list="{{ mapRows }}" as="m" hint-placeholder-count="8"><div data-rf="kv2" style="display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,1.4fr);align-items:center;gap:16px;padding:9px 0;border-bottom:1px solid #F3F0E9;font-size:15px"><span>{{ m.l }}</span><input value="{{ m.v }}" onChange="{{ m.ch }}" onBlur="{{ m.bl }}" style="width:100%;border:1px solid #D9D3C6;border-radius:8px;padding:7px 10px;font-size:14px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:#0B2545;outline:none"></div></sc-for>
           </div>
         </div>
         <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
@@ -1066,7 +1116,7 @@ input,textarea{font-family:inherit}
     <div style="background:#fff;border-radius:18px;padding:36px;max-width:580px;width:100%;max-height:calc(100vh - 40px);overflow:auto;box-shadow:0 30px 60px -20px rgba(11,37,69,.5)">
       <span style="font-weight:700;letter-spacing:.08em;font-size:12px;background:#F6DF6E;color:#0B2545;padding:3px 9px;border-radius:4px">DEMO · FIKTIVE DATA</span>
       <h2 style="font-size:30px;font-weight:600;letter-spacing:-0.025em;margin:18px 0 0">{{ introCo }}</h2>
-      <div style="font-size:14px;color:#586174;margin-top:6px;font-family:'IBM Plex Mono',monospace">{{ introSub }}</div>
+      <div style="font-size:14px;color:#586174;margin-top:6px;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums">{{ introSub }}</div>
       <p style="font-size:16px;line-height:1.6;color:#3D4759;margin:18px 0 0">Rettført har allerede analysert regnskapet og lønnen. Følg en guidet gjennomgang på omtrent to minutter, eller utforsk rapporten selv.</p>
       <div style="display:flex;gap:10px;margin-top:26px;flex-wrap:wrap">
         <button onClick="{{ startTour }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 20px;font-size:15px;font-weight:500">Start guidet demo</button>
@@ -1080,12 +1130,12 @@ input,textarea{font-family:inherit}
     <div onClick="{{ stop }}" style="background:#fff;border-radius:18px;padding:36px;max-width:580px;width:100%;max-height:calc(100vh - 40px);overflow:auto;box-shadow:0 30px 60px -20px rgba(11,37,69,.5)">
       <h2 style="font-size:26px;font-weight:600;letter-spacing:-0.02em;margin:0">Slik fungerer Rettført</h2>
       <div style="margin-top:20px;display:flex;flex-direction:column;gap:14px">
-            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">1</span><div><div style="font-size:15.5px;font-weight:600">SAF-T og lønnsdata</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Filene leses lokalt i nettleseren.</div></div></div>
-            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">2</span><div><div style="font-size:15.5px;font-weight:600">Regelbasert kontrollmotor</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Faste regler, terskler og kontomapping.</div></div></div>
-            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">3</span><div><div style="font-size:15.5px;font-weight:600">Avvik og krysskontroller</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Regnskap, lønn og avstemming mellom dem.</div></div></div>
-            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#F6DF6E;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">4</span><div><div style="font-size:15.5px;font-weight:600">Forklaring og prioritering</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Bygger bare på funnene kontrollmotoren allerede har laget.</div></div></div>
-            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#E2F1E8;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">5</span><div><div style="font-size:15.5px;font-weight:600">Menneskelig vurdering</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Rettet, forventet avvik, oppfølging eller ikke relevant.</div></div></div>
-            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#E2F1E8;color:#0B2545;font-family:'IBM Plex Mono',monospace;font-size:12.5px;display:flex;align-items:center;justify-content:center">6</span><div><div style="font-size:15.5px;font-weight:600">Dokumentert konklusjon</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Alt logges i historikken.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;display:flex;align-items:center;justify-content:center">1</span><div><div style="font-size:15.5px;font-weight:600">SAF-T og lønnsdata</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Filene leses lokalt i nettleseren.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;display:flex;align-items:center;justify-content:center">2</span><div><div style="font-size:15.5px;font-weight:600">Regelbasert kontrollmotor</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Faste regler, terskler og kontomapping.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#EAE5DA;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;display:flex;align-items:center;justify-content:center">3</span><div><div style="font-size:15.5px;font-weight:600">Avvik og krysskontroller</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Regnskap, lønn og avstemming mellom dem.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#F6DF6E;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;display:flex;align-items:center;justify-content:center">4</span><div><div style="font-size:15.5px;font-weight:600">Forklaring og prioritering</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Bygger bare på funnene kontrollmotoren allerede har laget.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#E2F1E8;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;display:flex;align-items:center;justify-content:center">5</span><div><div style="font-size:15.5px;font-weight:600">Menneskelig vurdering</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Rettet, forventet avvik, oppfølging eller ikke relevant.</div></div></div>
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start"><span style="width:28px;height:28px;border-radius:50%;background:#E2F1E8;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:12.5px;display:flex;align-items:center;justify-content:center">6</span><div><div style="font-size:15.5px;font-weight:600">Dokumentert konklusjon</div><div style="font-size:13.5px;color:#586174;margin-top:1px">Alt logges i historikken.</div></div></div>
       </div>
       <div style="margin-top:22px;background:#F4F1EA;border-radius:12px;padding:18px 20px;font-size:15px;line-height:1.6;color:#0B2545"><div>Beregninger og kontroller følger faste regler.</div><div>Forklaringer og prioritering bygger på de samme funnene.</div><div style="font-weight:600">Den faglige vurderingen gjøres alltid av brukeren.</div></div>
       <button onClick="{{ closeHow }}" style="background:#0B2545;color:#fff;border:0;border-radius:9px;padding:13px 20px;font-size:15px;font-weight:500;margin-top:22px">Lukk</button>
@@ -1132,23 +1182,35 @@ const SEV = { hoy: { l: 'Høy', c: '#A63A28', bg: '#F6E3DD', o: 0 }, middels: { 
 const ICONS = { x: [['path', { d: 'M6 6l12 12M18 6L6 18' }]], arrow: [['path', { d: 'M5 12h14M13 6l6 6-6 6' }]], tick: [['path', { d: 'M5 12.5l4.5 4.5L19 7.5' }]] };
 const icon = (n, s = 16, sw = 1.8) => h('svg', { width: s, height: s, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: sw, strokeLinecap: 'round', strokeLinejoin: 'round', style: { display: 'block', flexShrink: 0 } }, ICONS[n].map((p, i) => h(p[0], { key: i, ...p[1] })));
 
-const M = ({ s = 130, lx = 0, ly = 0, smile = true, wave = false, hold = false, bob = false, ground = true, scan = false, think = false, tired = false, d = 0, fidget = false }) => {
+const M = ({ s = 130, lx = 0, ly = 0, smile = true, wave = false, hold = false, bob = false, ground = true, scan = false, think = false, tired = false, d = 0, fidget = false, happy = false, sleep = false, headset = false, stamp = false, torch = false, point = false }) => {
   const an = (n, dur) => ({ animation: `${n} ${dur}s ease-in-out ${-d}s infinite` });
   const st = { stroke: INK, strokeWidth: 3, fill: 'none', strokeLinecap: 'round' };
   const face = h('g', { style: { transform: `translate(${lx}px,${ly}px)`, transition: 'transform .55s cubic-bezier(.3,.7,.2,1)' } },
     h('g', { style: scan ? { animation: 'rfScan 2.2s ease-in-out infinite' } : undefined },
       h('path', { d: think ? 'M85 53 Q91 47 97 51' : tired ? 'M86 56 Q92 55 98 58' : 'M86 57 Q92 53 98 56', ...st }),
       h('path', { d: think ? 'M102 57 Q108 57 114 60' : tired ? 'M102 58 Q108 55 114 56' : 'M102 56 Q108 53 114 57', ...st }),
+      (happy || sleep) ? h('g', null, h('path', { d: sleep ? 'M88 65 Q93 70 98 65' : 'M88 68 Q93 61 98 68', ...st }), h('path', { d: sleep ? 'M102 65 Q107 70 112 65' : 'M102 68 Q107 61 112 68', ...st })) :
       h('g', { style: { animation: 'rfBlink 5.2s infinite', transformOrigin: '100px 66px' } },
         h('ellipse', { cx: 93, cy: tired ? 67 : 66, rx: 4.2, ry: tired ? 3.8 : 5.4, fill: INK, style: { transition: 'all .6s' } }), h('ellipse', { cx: 107, cy: tired ? 67 : 66, rx: 4.2, ry: tired ? 3.8 : 5.4, fill: INK, style: { transition: 'all .6s' } }),
         h('circle', { cx: 94.3, cy: 64, r: 1.3, fill: '#fff' }), h('circle', { cx: 108.3, cy: 64, r: 1.3, fill: '#fff' })),
-      smile ? h('path', { d: 'M94 75 Q100 81 106 75', ...st }) : h('path', { d: think ? 'M95 77 q2.5 -2.2 5 0 t5 0' : 'M96 76.5 L104 76.5', ...st })));
+      smile ? h('path', { d: 'M94 75 Q100 81 106 75', ...st }) : h('path', { d: think ? 'M95 77 q2.5 -2.2 5 0 t5 0' : 'M96 76.5 L104 76.5', ...st })),
+    headset ? h('g', null,
+      h('path', { d: 'M79 66 C80 36 114 26 128 44', stroke: INK, strokeWidth: 4.5, fill: 'none', strokeLinecap: 'round' }),
+      h('rect', { x: 72, y: 60, width: 12, height: 17, rx: 5, fill: INK, transform: 'rotate(-20 78 68)' }),
+      h('rect', { x: 123, y: 38, width: 12, height: 17, rx: 5, fill: INK, transform: 'rotate(-45 129 46)' }),
+      h('path', { d: 'M79 76 Q82 88 92 86', stroke: INK, strokeWidth: 2.6, fill: 'none', strokeLinecap: 'round' }),
+      h('circle', { cx: 93, cy: 86, r: 3.2, fill: INK })) : null);
   return h('div', { style: { width: s, height: s, animation: bob ? 'rfBob 3.6s ease-in-out infinite' : undefined } },
     h('svg', { width: s, height: s, viewBox: '0 0 170 170', style: { display: 'block', overflow: 'visible' } },
       ground ? h('ellipse', { cx: 70, cy: 158, rx: 44, ry: 5, fill: 'rgba(11,37,69,.10)' }) : null,
       h('g', { style: { animation: fidget ? 'rfKickL 2.2s ease-in-out 1' : 'none', transformOrigin: '58px 116px' } }, h('rect', { x: 54, y: 114, width: 8, height: 36, rx: 3, fill: INK }), h('ellipse', { cx: 55, cy: 152, rx: 11, ry: 6.5, fill: INK })),
       h('g', { style: { animation: fidget ? 'rfKickR 2.2s ease-in-out 1' : 'none', transformOrigin: '75px 116px' } }, h('rect', { x: 71, y: 114, width: 8, height: 36, rx: 3, fill: INK }), h('ellipse', { cx: 80, cy: 152, rx: 11, ry: 6.5, fill: INK })),
       h('g', { style: { ...an(tired ? 'rfShiftT' : 'rfShift', 13), transformOrigin: '66px 118px' } },
+      stamp ? h('g', { style: { animation: 'rfStampArm 3.2s cubic-bezier(.5,0,.3,1) infinite', transformOrigin: '120px 74px', transformBox: 'view-box' } },
+        h('path', { d: 'M120 74 C140 70 152 70 158 80', stroke: INK, strokeWidth: 6.5, fill: 'none', strokeLinecap: 'round' }),
+        h('rect', { x: 156, y: 70, width: 8, height: 16, rx: 3, fill: '#C99A52' }), h('circle', { cx: 160, cy: 68, r: 7, fill: '#C99A52' }),
+        h('rect', { x: 147, y: 86, width: 26, height: 10, rx: 2.5, fill: INK }), h('rect', { x: 148, y: 96, width: 24, height: 4, rx: 1.5, fill: '#35AE74' }),
+        h('circle', { cx: 159, cy: 80, r: 7.5, fill: INK })) :
       h('g', { style: wave ? { animation: 'rfWave 3s ease-in-out infinite', transformOrigin: '120px 74px' } : undefined },
         h('path', { d: wave ? 'M120 74 C138 66 146 50 142 36' : 'M120 74 C140 80 146 96 136 106', stroke: INK, strokeWidth: 6.5, fill: 'none', strokeLinecap: 'round' }),
         h('circle', { cx: wave ? 142 : 135, cy: wave ? 33 : 108, r: 7.5, fill: INK })),
@@ -1163,12 +1225,41 @@ const M = ({ s = 130, lx = 0, ly = 0, smile = true, wave = false, hold = false, 
       h('path', { d: 'M106 43 L121 26', stroke: 'rgba(255,255,255,.35)', strokeWidth: 5, strokeLinecap: 'round' }),
       h('path', { d: 'M20 62 L32 75', stroke: 'rgba(255,255,255,.3)', strokeWidth: 4.5, strokeLinecap: 'round' }),
       face,
+      torch ? h('g', null,
+        h('defs', null, h('linearGradient', { id: 'rfBeamG', x1: 1, x2: 0 }, h('stop', { offset: 0, stopColor: '#F6DF6E', stopOpacity: 0.75 }), h('stop', { offset: 1, stopColor: '#F6DF6E', stopOpacity: 0 }))),
+        h('path', { d: 'M44 90 C30 100 20 104 10 102', stroke: INK, strokeWidth: 6.5, fill: 'none', strokeLinecap: 'round' }),
+        h('g', { style: { animation: 'rfBeam 3.6s ease-in-out infinite', transformOrigin: '4px 101px', transformBox: 'view-box' } },
+          h('path', { d: 'M-2 97 L-150 60 L-150 150 L-2 106 Z', fill: 'url(#rfBeamG)' }),
+          h('rect', { x: -4, y: 94, width: 18, height: 14, rx: 3, fill: '#586174', transform: 'rotate(8 5 101)' }),
+          h('rect', { x: -7, y: 93, width: 6, height: 16, rx: 2, fill: '#F6DF6E', transform: 'rotate(8 -4 101)' })),
+        h('circle', { cx: 12, cy: 102, r: 7.5, fill: INK })) : null,
+      point ? h('g', { style: { animation: 'rfPoint 3s ease-in-out infinite', transformOrigin: '40px 92px', transformBox: 'view-box' } },
+        h('path', { d: 'M40 92 C30 106 14 104 9 90', stroke: INK, strokeWidth: 6.5, fill: 'none', strokeLinecap: 'round' }),
+        h('circle', { cx: 8, cy: 86, r: 7.5, fill: INK }), h('path', { d: 'M5 81 L-3 71', stroke: INK, strokeWidth: 4.5, strokeLinecap: 'round' })) : null,
+      sleep ? h('g', { fontFamily: 'Schibsted Grotesk, sans-serif', fontWeight: 700, fill: INK }, h('text', { x: 138, y: 30, fontSize: 18, style: { animation: 'rfZ 3.6s ease-in-out infinite' } }, 'z'), h('text', { x: 152, y: 14, fontSize: 13, style: { animation: 'rfZ 3.6s ease-in-out 1.2s infinite' } }, 'z')) : null,
       think ? h('g', { style: { animation: 'rfAsk 4s ease-in-out infinite', transformOrigin: '152px 18px' } }, h('text', { x: 142, y: 24, fontSize: 30, fontWeight: 700, fill: INK, fontFamily: 'Schibsted Grotesk, sans-serif' }, '?')) : null)));
 };
 
 class Component extends DCLogic {
   state = { screen: 'landing', page: 'new', authMode: 'login', heroStep: 0, mobileMenu: false, ctrlExpanded: false, ctrlArea: null, ready: false, files: { saft: null, prev: null, curr: null }, drag: null, err: null, runIdx: 0, runList: [], pending: null, result: null, resolved: {}, fArea: 'alle', fStatus: 'apne', fid: null, note: '', toast: null, fmtOpen: false, planHover: 1, tired: false, fidget: null, ex: 0, su: { name: '', email: '', role: '', org: '', notify: true, plan: '' }, suState: 'form', suErr: '', nfEmail: '', nfDone: false, slikSeen: false, demo: false, showIntro: false, showHow: false, showEnd: false, tour: null, hist: [], ai: {}, prio: null, outcome: null, settings: null, rid: null, mapDraft: {}, tolDraft: {} };
   timers = [];
+  FN = [
+    { t: 'Betaling til endret kontonummer', belop: '64 000,00', risk: 'Mulig fakturasvindel', sev: 'Høy', omr: 'Leverandørreskontro', saa: 'Nordic Steel Supply AS fikk betalingen 12.09 til et annet kontonummer enn i august.', kunne: 'Hvis endringen ikke er ekte, har pengene gått til feil mottaker. Neste betaling går samme vei.', regel: 'Internkontroll · svindelforebygging', spor: [['Leverandør 20114', 'Nordic Steel'], ['Kontonr. aug.', '1506 22 90871'], ['Kontonr. sep.', '9710 12 34567', 1], ['Betaling', '12.09']] },
+    { t: 'Samme faktura bokført to ganger', belop: '18 750,00', risk: 'Kan være betalt to ganger', sev: 'Høy', omr: 'Hovedbok · bilag', saa: 'Faktura 20931 fra Kontorpartner AS er bokført som bilag 1043 og 1087, med samme beløp.', kunne: 'Kostnaden blir 18 750 kr for høy, og fakturaen kan bli betalt en gang til.', regel: 'Bokføringsloven § 4', spor: [['Faktura 20931', 'EHF + PDF'], ['Bilag 1043', '03.09'], ['Bilag 1087', '24.09', 1], ['Konto 6540', '37 500,00']] },
+    { t: 'Innbetaling mangler i regnskapet', belop: '21 500,00', risk: 'Bank og hovedbok stemmer ikke', sev: 'Middels', omr: 'Bank · avstemming', saa: 'Kontoutskriften viser 21 500 kr mer enn konto 1920 per 30.09. En innbetaling fra Havbruk Service AS er ikke ført.', kunne: 'Kunden purres for noe som er betalt, og resultatet blir feil.', regel: 'Bokføringsloven § 4 · avstemming', spor: [['Konto 1920', '412 380,00'], ['Kontoutskrift', '433 880,00'], ['Banklinje 29.09', '21 500,00', 1]] },
+    { t: 'Arbeidsgiveravgift er for lav', belop: '7 136,00', risk: 'Feil i a-meldingen', sev: 'Middels', omr: 'Lønn × regnskap', saa: 'Beregnet arbeidsgiveravgift for september er 58 092 kr. Bokført er 50 956 kr.', kunne: 'For lite innrapportert og betalt, med renter og tilleggsavgift senere.', regel: 'Folketrygdloven § 23-2', spor: [['Lønnsfil sep.', '412 000,00'], ['Sone 1', '14,1 %'], ['Konto 5400', '50 956,00', 1]] },
+    { t: 'MVA trukket fra på kundemiddag', belop: '3 100,00', risk: 'Fradrag uten fradragsrett', sev: 'Middels', omr: 'MVA', saa: 'Bilag 1072 «Kundemiddag Restaurant Fjord» er ført med fradrag for inngående MVA.', kunne: 'MVA-meldingen blir feil, og fradraget kan bli tilbakeført ved kontroll.', regel: 'Merverdiavgiftsloven § 8-3', spor: [['Bilag 1072', '17.09'], ['Konto 7350', 'Representasjon'], ['Konto 2710', '3 100,00', 1]] }
+  ];
+  funnVals() {
+    const i = this.state.fnI || 0; const f = this.FN[i];
+    const sev = s => s === 'Høy' ? ['#C4553F', '#F6E1DC', '#8A2E1F'] : ['#E0B43C', '#FAEDD3', '#8E5A0F'];
+    return {
+      goSignup: () => { window.location.href = '/demo?signup'; },
+      fnList: this.FN.map((x, j) => ({ ...x, dot: sev(x.sev)[0], bg: j === i ? '#fff' : 'transparent', border: j === i ? '#0B2545' : '#E4DFD4', onClick: () => this.setState({ fnI: j }) })),
+      fnC: { ...f, sevBg: sev(f.sev)[1], sevFg: sev(f.sev)[2], spor: f.spor.map((p, j) => ({ t: p[0], d: p[1], arrow: j > 0, bg: p[2] ? '#FBEFA8' : '#fff', border: p[2] ? '#E6CF5C' : '#D9D3C6' })) }
+    };
+  }
+
   componentDidMount() {
     try { const s = JSON.parse(localStorage.getItem('rettfort_nav') || '{}'); if (s.screen) this.setState({ screen: s.screen, page: s.page === 'controls' || s.page === 'settings' ? s.page : 'new' }); } catch (e) {}
     try { const st = JSON.parse(localStorage.getItem('rettfort_settings') || 'null'); if (st) this.setState({ settings: st }); } catch (e) {}
@@ -1258,7 +1349,7 @@ class Component extends DCLogic {
     else this.setState({ ...base, tour: null, showEnd: true, page: 'report' });
   }
   async sendForm(data) { if (!FORM_ENDPOINT) { await new Promise(r => setTimeout(r, 500)); return true; } const r = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) }); return r.ok; }
-  trySample() { window.location.href = '/demo.html'; }
+  trySample() { window.location.href = '/demo'; }
   applySettings(ns) { try { localStorage.setItem('rettfort_settings', JSON.stringify(ns)); } catch (e) {} const up = { settings: ns }; const f = this.state.files; if (this.E && this.state.result) { try { up.result = this.E.analyze({ saft: f.saft && f.saft.text, prev: f.prev && f.prev.text, curr: f.curr && f.curr.text, settings: ns }); } catch (e) { console.error(e); } } this.setState(up); }
   analyze(files) {
     const f = files || this.state.files; if (!this.E) return; this.demoRun = !!(f.saft && f.saft.demo);
@@ -1323,7 +1414,7 @@ class Component extends DCLogic {
     const go = d => () => { if (!fAll.length) return; const n = fAll[(idx + d + fAll.length) % fAll.length]; this.setState({ fid: n.id, note: (R[n.id] || {}).note || '', outcome: null }); };
     const rightCol = v => /kr$|^[−+]?[\d\s ,.]+$/.test(v || '');
     const fCols = F ? F.ev.cols.map((v, i) => ({ v, al: 'left' })) : [];
-    const fRows = F ? F.ev.rows.map(r => ({ cells: r.map(v => ({ v, al: rightCol(v) ? 'right' : 'left', ff: rightCol(v) ? "'IBM Plex Mono',monospace" : 'inherit' })) })) : [];
+    const fRows = F ? F.ev.rows.map(r => ({ cells: r.map(v => ({ v, al: rightCol(v) ? 'right' : 'left', ff: rightCol(v) ? "'Schibsted Grotesk',system-ui,sans-serif" : 'inherit' })) })) : [];
     if (F) F.ev.cols.forEach((c, i) => { if (F.ev.rows.length && F.ev.rows.every(r => !r[i] || rightCol(r[i]))) fCols[i].al = 'right'; });
     const fr = F ? R[F.id] : null;
 
@@ -1333,7 +1424,7 @@ class Component extends DCLogic {
     const sgn = v => (v > 0 ? '+' : v < 0 ? '−' : '') + kr(Math.abs(v));
     const reconRows = rc && !rc.reason ? rc.rows.map(r => { const c = RST[r.status], no = r.status === 'ikke'; return { t: r.t, expS: no ? '—' : kr(r.expected), bookS: no ? '—' : kr(r.booked), diffS: no ? '' : sgn(r.diff), dc: r.status === 'avvik' ? '#8E5A0F' : C.mut, stL: r.statusL, sc: c[0], sb: c[1], fn: set({ page: 'recon', rid: r.key }) }; }).concat(rc.fordel ? [(() => { const n = fAll.filter(f => f.controlId === 'fordel' && !f.done).length; return { t: 'Mulige fordeler', expS: '', bookS: '', diffS: '', dc: C.mut, stL: n ? `${n} bør vurderes` : 'Ingen funn', sc: n ? '#8E5A0F' : C.grn, sb: n ? '#FAEDD3' : C.grnBg, fn: set({ fArea: 'kryss', fStatus: 'apne' }) }; })()] : []) : [];
     const ar = rc && rc.agaRate;
-    const mkT = (cols, rows) => { const al = cols.map((_, i) => rows.length && rows.every(r => !r[i] || rightCol(r[i])) ? 'right' : 'left'); return { cols: cols.map((v, i) => ({ v, al: al[i] })), rows: rows.map((r, j) => ({ cells: r.map((v, i) => ({ v, al: al[i], ff: al[i] === 'right' ? "'IBM Plex Mono',monospace" : 'inherit', fw: r.bold ? 600 : 400 })) })) }; };
+    const mkT = (cols, rows) => { const al = cols.map((_, i) => rows.length && rows.every(r => !r[i] || rightCol(r[i])) ? 'right' : 'left'); return { cols: cols.map((v, i) => ({ v, al: al[i] })), rows: rows.map((r, j) => ({ cells: r.map((v, i) => ({ v, al: al[i], ff: al[i] === 'right' ? "'Schibsted Grotesk',system-ui,sans-serif" : 'inherit', fw: r.bold ? 600 : 400 })) })) }; };
     const rr = rc && rc.rows ? rc.rows.find(r => r.key === s.rid) : null;
     const pRows = rr ? rr.postings.map(p => [p.bilag, nd(p.date), p.accName, p.text, kr(p.amount)]) : [];
     if (rr && pRows.length) { const t = ['Sum', '', '', '', kr(rr.postings.reduce((a, p) => a + p.amount, 0))]; t.bold = true; pRows.push(t); }
@@ -1396,7 +1487,7 @@ class Component extends DCLogic {
     ].map((p, i) => { const dk = s.planHover === i; return { ...p, dark: dk, bg: dk ? INK : '#fff', fg: dk ? '#fff' : INK, sub: dk ? 'rgba(255,255,255,.68)' : C.mut, bd: dk ? INK : C.line, line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2', btnBg: dk ? '#F6DF6E' : INK, btnFg: dk ? INK : '#fff', shadow: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', lift: dk ? '-12px' : '0px', limits: p.lim.map(l => ({ l })), feats: PF.map(f => { const on = !!f[1][i]; return { l: f[0], on, off: !on, txt: on ? (dk ? '#fff' : INK) : (dk ? 'rgba(255,255,255,.4)' : '#A4A8B0'), icBg: on ? (dk ? '#35AE74' : C.grnBg) : (dk ? 'rgba(255,255,255,.08)' : '#EFEBE2'), icFg: on ? (dk ? '#fff' : C.grn) : (dk ? 'rgba(255,255,255,.42)' : '#A4A8B0') }; }), enter: () => { if (s.planHover !== i) this.setState({ planHover: i }); }, fn: i === 0 ? () => this.trySample() : () => this.setState(st => ({ screen: 'auth', authMode: 'signup', su: { ...st.su, plan: p.k } })) }; });
 
     const cat = E ? E.CONTROLS : [];
-    const appNav = [['new', 'Ny analyse'], ['report', 'Rapport'], ['payroll', 'Lønn'], ['controls', 'Kontroller'], ['history', 'Historikk'], ['settings', 'Innstillinger']].map(([k, l]) => { const on = s.page === k || (k === 'report' && (s.page === 'finding' || s.page === 'recon')) || (k === 'new' && s.page === 'run'); return { l, fn: k === 'new' ? () => { window.location.href = '/demo.html'; } : set({ page: k }), bg: on ? '#F1EDE4' : 'transparent', col: on ? INK : C.mut, fw: on ? 600 : 400, hasBadge: k === 'report' && openN > 0, badge: String(openN) }; });
+    const appNav = [['new', 'Ny analyse'], ['report', 'Rapport'], ['payroll', 'Lønn'], ['controls', 'Kontroller'], ['history', 'Historikk'], ['settings', 'Innstillinger']].map(([k, l]) => { const on = s.page === k || (k === 'report' && (s.page === 'finding' || s.page === 'recon')) || (k === 'new' && s.page === 'run'); return { l, fn: k === 'new' ? () => { window.location.href = '/demo'; } : set({ page: k }), bg: on ? '#F1EDE4' : 'transparent', col: on ? INK : C.mut, fw: on ? 600 : 400, hasBadge: k === 'report' && openN > 0, badge: String(openN) }; });
 
     return {
       isLanding: s.screen === 'landing', isAbout: s.screen === 'about', isAuth: s.screen === 'auth', isApp: s.screen === 'app',
@@ -1407,19 +1498,29 @@ class Component extends DCLogic {
       mobCtrl: () => { this.setState({ mobileMenu: false }); this.scrollTo('kontroller'); },
       mobPrice: () => { this.setState({ mobileMenu: false }); this.scrollTo('priser'); },
       mobAbout: goTop({ mobileMenu: false, screen: 'about' }),
-      mobLogin: () => this.setState({ mobileMenu: false, screen: 'auth', authMode: 'login' }),
+      mobLogin: () => { window.location.href = '/demo?login'; },
       mobTry: () => { this.setState({ mobileMenu: false }); this.trySample(); },
-      toLanding: goTop({ screen: 'landing', mobileMenu: false }), toAbout: goTop({ screen: 'about', mobileMenu: false }), toLogin: set({ screen: 'auth', authMode: 'login', mobileMenu: false }), toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
-      enterApp: () => { window.location.href = '/demo.html'; }, toUpload: () => { window.location.href = '/demo.html'; }, toControls: set({ screen: 'app', page: 'controls' }),
-      trySample: () => this.trySample(),
+      toLanding: goTop({ screen: 'landing', mobileMenu: false }), toAbout: goTop({ screen: 'about', mobileMenu: false }), toLogin: () => { window.location.href = '/demo?login'; }, toSignup: set({ screen: 'auth', authMode: 'signup' }), toReset: set({ authMode: 'reset' }),
+      enterApp: () => { window.location.href = '/demo'; }, toUpload: () => { window.location.href = '/demo?login'; }, toControls: set({ screen: 'app', page: 'controls' }),
+      trySample: () => { window.location.href = '/demo'; }, ...this.funnVals(),
       resetSent: () => this.toast('Lenke sendt (demo)'), logout: set({ screen: 'landing' }),
       goHow: () => this.scrollTo('slik'), goCtrl: () => this.scrollTo('kontroller'), goPrice: () => this.scrollTo('priser'),
       iArrow: icon('arrow', 15), iTick: icon('tick', 22, 2.4), iX: icon('x', 15), iXs: icon('x', 11, 2.4), iTickS: icon('tick', 12, 2.6),
       mHero: M({ s: 132, lx: -9, ly: hs < 7 ? 4 : 6, smile: hs >= 7, wave: hs >= 12, ground: false }),
-      mHero: M({ s: 150, wave: true, bob: true, lx: -5, ly: 3 }), mStep1: M({ s: 150, hold: true, lx: 6, ly: 3, tired: s.tired, d: 0, fidget: s.fidget === 's1' }), mStep2: M({ s: 132, lx: -9, ly: 6, smile: false, scan: true, tired: s.tired, d: 2.3, fidget: s.fidget === 's2' }), mStep3: M({ s: 140, lx: -8, ly: 5, wave: true, tired: s.tired, d: 4.6, fidget: s.fidget === 's3' }),
+      mHero: M({ s: 150, wave: true, bob: true, lx: -5, ly: 3 }), mStep1: M({ s: 150, stamp: true, happy: true, lx: 6, ly: 3, tired: s.tired, d: 0, fidget: s.fidget === 's1' }), mStep2: M({ s: 132, lx: -9, ly: 6, happy: true, tired: s.tired, d: 2.3, fidget: s.fidget === 's2' }), mStep3: M({ s: 140, lx: -8, ly: 5, point: true, tired: s.tired, d: 4.6, fidget: s.fidget === 's3' }),
       mCta: M({ s: 140, lx: -5, ly: 4, wave: true, ground: false, tired: s.tired, d: 1.2, fidget: s.fidget === 'cta' }), mPrice: M({ s: 90, lx: -4, ly: 5, ground: false, bob: true }), mAbout: M({ s: 150, hold: true, lx: -4, ly: 2, tired: s.tired, d: 3, fidget: s.fidget === 'about' }),
       mAuth: M({ s: 190, lx: -5, ly: 4, wave: true, tired: s.tired, d: 1.7, fidget: s.fidget === 'auth' }), mRun: M({ s: 150, smile: false, scan: true, bob: true }), mEmpty: M({ s: 110, wave: true, tired: s.tired, fidget: s.fidget === 'empty' }),
       heroLinesS: fmt(Math.min(hLines, Math.round(hLines * hs / 6))), heroOkS: String(hOk), heroOpenS: String(hOpen), heroSumOp: hs >= 7 ? 1 : 0, heroW: Math.min(100, hs / 6 * 100) + '%', heroBusy: hs < 7, heroDone: hs >= 7, heroFinds,
+      faq: [["Må jeg bytte regnskapssystem?","Nei. Bedrifter kan føre hele regnskapet i Rettført. Regnskapsførere kan også koble Rettført på Tripletex, PowerOffice Go, Fiken, Visma og Xledger, og bruke det som et kontrollag oppå systemet de har i dag."],["Hva gjør AI-en, og hva gjør den ikke?","Den tolker bilag, foreslår konto og forklarer funn med kilder. Den bokfører aldri selv og endrer aldri tall. Alt den foreslår, er merket, og ingenting sendes eller godkjennes uten at du har trykket."],["Hvor blir regnskapsfilene av?","Filene leses i nettleseren din og lastes ikke opp, med mindre du velger det. Når du spør assistenten, sendes bare opplysningene fra funnet du ser på."],["Hva skjer etter 30 dager?","Du velger om du vil fortsette. Du blir ikke belastet før du har valgt pakke, det er ingen binding, og du kan bytte pakke når som helst."],["Må kundene mine betale eller logge inn?","Nei. Kunden får en personlig lenke på SMS eller e-post, tar bilde eller svarer rett fra mobilen, og trenger verken konto eller noe å installere."],["Hvilke kontroller kjøres?","36 faste kontroller innen hovedbok, MVA, bank, reskontro, periodisering og lønn. Hver har en fast terskel og henvisning til lov eller forskrift, for eksempel bokføringsloven § 4 og merverdiavgiftsloven § 8-3."]].map(([q, a], i) => { const open = s.faqOpen === i; return { q, a, open, sep: i ? '#EFEBE2' : 'transparent', bg: open ? '#FBFAF6' : '#fff', rows: open ? '1fr' : '0fr', op: open ? 1 : 0, ty: open ? 'none' : 'translateY(-6px)', rot: open ? 'rotate(225deg)' : 'rotate(0deg)', chipBg: open ? '#0B2545' : 'transparent', chipFg: open ? '#fff' : '#0B2545', ring: open ? '#0B2545' : '#D9D3C6', onClick: () => this.setState({ faqOpen: this.state.faqOpen === i ? null : i }) }; }),
+      pcReset: () => { if ((s.pcH ?? 2) !== 2) this.setState({ pcH: 2 }); },
+      pcards: (() => { const FT = [['Faktura, kjøp og MVA-melding', 1, 1, 1, 1], ['Lønnsslipper', 1, 1, 1, 1], ['Kvitteringer på e-post', 1, 1, 1, 1], ['Frister, påminnelser og kalender', 1, 1, 1, 1], ['Sjekk av sum, duplikater og leverandør', 1, 1, 1, 1], ['Regnskapsføreren din får tilgang', 1, 1, 1, 1], ['Kvitteringer leses automatisk', 0, 1, 1, 1], ['36 kontroller hver natt', 0, 1, 1, 1], ['Bankkobling og avstemming', 0, 0, 1, 1], ['Assistent med kilder', 0, 0, 1, 1], ['Kontrollbevis med signering', 0, 0, 1, 1], ['Flere klienter i én arbeidsliste', 0, 0, 0, 1], ['Kundeportal og manglende bilag', 0, 0, 0, 1], ['Ansatte med roller', 0, 0, 0, 1], ['Prioritert support', 0, 0, 0, 1]];
+        const P = [['Gratis', 'For bedriften som vil føre selv uten å betale.', '0', 'kr / mnd', 'Ingen kort. Ingen tidsgrense.', 'Start gratis', ['Opptil 100 bilag per år', 'Lønnsslipp for inntil 3 ansatte', 'Uten AI']], ['Start', 'For bedriften som vil slippe å taste inn kvitteringer.', '149', 'kr / mnd per selskap', '186,25 kr inkl. MVA', 'Velg Start', ['Ubegrenset bilag', '300 kvitteringer leses per måned', 'Kontroll hver natt']], ['Selskap', 'For bedriften som vil ha bank, kontroll og assistent på ett sted.', '249', 'kr / mnd per selskap', '311,25 kr inkl. MVA', 'Velg Selskap', ['Ubegrenset bilag', 'Bankkobling', '200 assistentsvar per måned']], ['Byrå', 'For regnskapsførere som følger opp mange kunder.', '1 490', 'kr / mnd inkl. 15 kunder', '1 862,50 kr inkl. MVA', 'Velg Byrå', ['Kunder på Rettført kobles til av seg selv', 'Ingen grense på posteringer', '2 000 assistentsvar per måned']]];
+        const hv = s.pcH ?? 2;
+        return P.map(([n, d, pris, unit, vat, cta, lim], i) => { const dk = i === hv; const href = i === 3 ? '/demo?signup' : '/demo-bedrift?ny';
+          return { href,  n, d, pris, unit, vat, cta, lim, rec: i === 2, onEnter: () => { if ((this.state.pcH ?? 2) !== i) this.setState({ pcH: i }); },
+            bg: dk ? '#0B2545' : '#fff', fg: dk ? '#fff' : '#0B2545', border: dk ? '#0B2545' : '#E4DFD4', sub: dk ? '#C9D3E2' : '#586174', line: dk ? 'rgba(255,255,255,.14)' : '#EFEBE2',
+            sh: dk ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', tf: dk ? 'translateY(-10px)' : 'none', btnBg: dk ? '#F6DF6E' : '#0B2545', btnFg: dk ? '#0B2545' : '#fff',
+            feat: FT.map(r => { const on = r[i + 1]; return { t: r[0], sym: on ? '✓' : '×', fg: on ? (dk ? '#fff' : '#0B2545') : (dk ? '#6F819C' : '#9AA0AA'), bg: on ? (dk ? '#35AE74' : '#E2F1E8') : (dk ? 'rgba(255,255,255,.08)' : '#F1EEE7'), ic: on ? (dk ? '#fff' : '#1F7D52') : (dk ? '#6F819C' : '#B9B2A4') }; }) }; }); })(),
       planReset: () => { if (s.planHover !== 1) this.setState({ planHover: 1 }); }, ctrlR: cat.filter(c => c.area === 'regnskap'), ctrlL: cat.filter(c => c.area === 'lonn'), ctrlK: cat.filter(c => c.area === 'kryss'), ctrlV: cat.filter(c => c.area === 'revisjon'), nV: E ? String(nBy('revisjon')) : '', stop: e => e.stopPropagation(), plans,
       ...(() => { const su = s.su, upd = k => e => { const v = e.target.value; this.setState(st => ({ su: { ...st.su, [k]: v }, suErr: '' })); }; const okMail = x => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(x.trim());
         return { suForm: s.suState !== 'done', suDone: s.suState === 'done', suName: su.name, suEmail: su.email, suOrg: su.org, suNotify: su.notify, suSetName: upd('name'), suSetEmail: upd('email'), suSetOrg: upd('org'), suToggle: () => this.setState(st => ({ su: { ...st.su, notify: !st.su.notify } })),
@@ -1453,7 +1554,7 @@ class Component extends DCLogic {
       hasResult: !!res, noResult: !res, rCompany: res ? res.company : '', rHead, rMeta, tiles, areaTabs, statusTabs, flist, listEmpty: !!res && flist.length === 0, ctrlSide,
       emptyT: openN === 0 ? 'Alle forhold er avklart.' : 'Ingen funn her.', emptyS: openN === 0 ? 'Rapporten er klar til å lagres eller skrives ut.' : 'Prøv et annet filter.',
       exportCsv: () => { const rows = [['Alvorlighet', 'Område', 'Kontroll', 'Funn', 'Beløp', 'Dato', 'Status', 'Kommentar']].concat(fAll.map(f => [f.sevL, f.areaL, f.ctrlT, f.title, f.amountS, f.dateS, R[f.id] ? OUT_L[R[f.id].outcome] : 'Åpen', (R[f.id] || {}).note || ''])); this.download('rettfort-kontrollrapport.csv', '\uFEFF' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\n'), 'text/csv'); },
-      printIt: () => window.print(), toReport: set({ page: 'report' }), toNew: () => { window.location.href = '/demo.html'; },
+      printIt: () => window.print(), toReport: set({ page: 'report' }), toNew: () => { window.location.href = '/demo'; },
       hasF: !!F, F: F || {}, fWhy: F ? F.why.map(t => ({ t })) : [], fNext: F ? F.next.map((t, i) => ({ t, n: String(i + 1).padStart(2, '0') })) : [], fCols, fRows, fPos: F ? `${idx + 1} / ${fAll.length}` : '', prevF: go(-1), nextF: go(1),
       fOpen: !fr, fDone: !!fr, note: s.note, noteType: e => this.setState({ note: e.target.value }), fNote: fr ? fr.note : '', fHasNote: !!(fr && fr.note), fDoneAt: fr ? `Vurdert av ${fr.who} · ${fr.at}` : '',
       resolveF: () => { if (!F || !s.outcome) return; const t = this.now(), lbl = OUT_L[s.outcome], nt = s.note.trim(); this.setState(st => ({ resolved: { ...st.resolved, [F.id]: { outcome: st.outcome, note: nt, at: `${t.date} kl. ${t.time}`, who: 'Daniel Berg' } }, outcome: null })); this.log('Daniel Berg', `Vurderte «${F.title}» som «${lbl}».${nt ? ` Kommentar: ${nt}` : ''}`, F.id); this.toast('Vurderingen er lagret'); if (s.tour === 3) this.later(() => this.tourGo(4), 1300); },
@@ -1666,7 +1767,7 @@ class Component extends DCLogic {
         var a = el('div', 'rfc-acts');
         acts.forEach(function (x) {
           var b = el('button', x.kind === 'demo' ? 'demo' : '', x.l); b.type = 'button';
-          b.onclick = function () { window.location.href = x.kind === 'mail' ? 'mailto:' + MAIL : '/demo.html'; };
+          b.onclick = function () { window.location.href = x.kind === 'mail' ? 'mailto:' + MAIL : '/demo'; };
           a.appendChild(b);
         });
         w.appendChild(a);
