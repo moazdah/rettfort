@@ -22,14 +22,15 @@ input,textarea,select{font-family:inherit;}
 @keyframes rfTourPulse{0%{box-shadow:0 0 0 0 rgba(246,223,110,.7)}70%{box-shadow:0 0 0 14px rgba(246,223,110,0)}100%{box-shadow:0 0 0 0 rgba(246,223,110,0)}}
 @keyframes rfScanLine{0%{top:0}100%{top:100%}}
 @keyframes rfIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (max-width:1180px){[data-rf=firmanavn]{display:none}[data-rf=valgrad]>button{padding:0 8px!important;font-size:14.5px!important}}
 @media (max-width:820px){
-[data-rf=ramme]{flex-direction:column}
-[data-rf=side]{width:100%!important;height:auto!important;position:sticky!important;top:0;z-index:40;background:#F4F1EA;flex-direction:row!important;align-items:center;overflow-x:auto;gap:4px!important;padding:8px 10px!important;border-right:0!important;border-bottom:1px solid #E4DFD4;scrollbar-width:none}
-[data-rf=side]::-webkit-scrollbar{display:none}
-[data-rf=side]>div{display:none!important}
-[data-rf=side]>div:first-child{display:block!important;padding:0 6px 0 0!important;flex:none}
-[data-rf=side]>button{width:auto!important;flex:none;white-space:nowrap;margin:0!important}
-[data-rf=side]>button span:last-child:empty{display:none}
+[data-rf=topp]{padding:8px 12px 0!important;gap:10px!important;height:auto!important;flex-wrap:wrap}
+[data-rf=topp]>img{margin-right:auto}
+[data-rf=valgrad]{order:3;flex:0 0 100%!important;height:44px!important;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 4px}
+[data-rf=valgrad]::-webkit-scrollbar{display:none}
+[data-rf=valgrad]>button{padding:0 9px!important;font-size:14px!important}
+[data-rf=firmanavn]{display:none}
+[data-rf=topp]>img{height:20px!important}
 [data-rf=hoved]{min-width:0;overflow-x:hidden}
 [data-rf=hoved]>div{padding-left:16px!important;padding-right:16px!important}
 [data-rf=hoved] [style*="minmax(340px"],[data-rf=hoved] [style*="minmax(380px"],[data-rf=hoved] [style*="minmax(300px"],[data-rf=hoved] [style*="minmax(280px"]{grid-template-columns:minmax(0,1fr)!important}
@@ -42,29 +43,46 @@ input,textarea,select{font-family:inherit;}
 @media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important;}}
 </style>
 </helmet>
-<div data-rf="ramme" style="display:flex;min-height:100vh;background:#F4F1EA;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-size:15px">
+<div data-rf="ramme" style="display:flex;flex-direction:column;min-height:100vh;background:#F4F1EA;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-size:15px">
 
-  <aside data-rf="side" style="width:232px;flex:none;border-right:1px solid #E4DFD4;display:flex;flex-direction:column;padding:18px 12px 14px;gap:2px;position:sticky;top:0;height:100vh">
-    <div style="padding:0 8px 16px"><img src="assets/rettfort-logo.png" alt="Rettført" style="height:26px;width:auto;margin-left:-6px"></div>
-    <div style="padding:0 10px 14px;font-size:13px;color:#586174;line-height:1.35">{{ orgNavn }}<br><span style="color:#8A909C">Pakke: {{ pakke }}</span></div>
-    <sc-for list="{{ nav }}" as="n" hint-placeholder-count="6">
-      <button onClick="{{ n.onClick }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;border:1px solid {{ n.border }};background:{{ n.bg }};color:#0B2545;font-size:15px;font-weight:{{ n.fw }};text-align:left;width:100%" style-hover="background:#FBFAF6">
-        <span style="width:24px;height:24px;flex:none;border-radius:7px;background:{{ n.chipBg }};color:{{ n.chipFg }};font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ n.short }}</span>
-        <span style="flex:1;white-space:nowrap">{{ n.label }}</span>
-        <span style="font-size:11px;font-weight:600;color:#0B2545;background:{{ n.pillBg }};padding:1px 7px;border-radius:99px">{{ n.count }}</span>
-      </button>
-    </sc-for>
-    <div style="flex:1"></div>
-    <button onClick="{{ tourStart }}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;margin-bottom:8px;border-radius:10px;border:none;background:#0B2545;color:#fff;font-size:14px;font-weight:600;cursor:pointer">Se demo</button>
-    <button onClick="{{ visVelkomst }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;margin-bottom:8px;border-radius:10px;border:1px dashed #D9D3C6;background:transparent;color:#586174;font-size:13px;text-align:left;width:100%">Vis velkomstflyten</button>
-    <div style="display:flex;align-items:center;gap:10px;padding:12px 10px 0;border-top:1px solid #E4DFD4">
-      <span style="width:28px;height:28px;flex:none;border-radius:99px;background:#0B2545;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ userInit }}</span>
-      <div style="flex:1;min-width:0;line-height:1.25"><div style="font-size:14px;font-weight:600">{{ userNavn }}</div><div style="font-size:12px;color:#8A909C">{{ userRolle }}</div></div>
-      <a href="/" style="border:1px solid #E4DFD4;border-radius:8px;height:28px;padding:0 8px;font-size:12px;color:#586174;text-decoration:none;display:flex;align-items:center">Logg ut</a>
+  <header data-rf="side" style="position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid #E4DFD4">
+    <div data-rf="topp" style="max-width:1180px;margin:0 auto;height:60px;padding:0 24px;display:flex;align-items:center;gap:22px">
+      <img src="assets/rettfort-logo.png" alt="Rettført" style="height:24px;width:auto;flex:none">
+      <nav data-rf="valgrad" style="display:flex;align-items:stretch;height:100%;flex:1;min-width:0;gap:2px">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="7">
+          <button onClick="{{ n.onClick }}" style="display:flex;align-items:center;gap:6px;padding:0 11px;height:100%;border:0;border-bottom:2px solid {{ n.line }};margin-bottom:-1px;background:transparent;color:#0B2545;font-size:15px;font-weight:{{ n.fw }};white-space:nowrap" style-hover="background:#F8F6F1">{{ n.label }}<span style="font-size:11px;font-weight:700;background:{{ n.pillBg }};padding:1px 7px;border-radius:99px">{{ n.count }}</span></button>
+        </sc-for>
+        <div style="position:relative;display:flex;align-items:stretch">
+          <button onClick="{{ merToggle }}" style="display:flex;align-items:center;gap:5px;padding:0 11px;height:100%;border:0;border-bottom:2px solid {{ merLine }};margin-bottom:-1px;background:transparent;color:#0B2545;font-size:15px;font-weight:{{ merFw }};white-space:nowrap" style-hover="background:#F8F6F1">Mer <span style="font-size:11px;color:#586174">▾</span></button>
+          <sc-if value="{{ merOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ menyLukk }}" style="position:fixed;inset:0;z-index:61"></div>
+            <div style="position:absolute;top:calc(100% + 6px);left:0;z-index:62;min-width:220px;background:#fff;border:1px solid #E4DFD4;border-radius:12px;box-shadow:0 12px 32px -12px rgba(11,37,69,.25);padding:6px;display:flex;flex-direction:column">
+              <sc-for list="{{ navMer }}" as="m" hint-placeholder-count="4">
+                <button onClick="{{ m.onClick }}" style="text-align:left;padding:9px 12px;border-radius:8px;border:0;background:{{ m.bg }};color:#0B2545;font-size:15px;font-weight:{{ m.fw }}" style-hover="background:#F4F1EA">{{ m.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </nav>
+      <button onClick="{{ tourStart }}" style="flex:none;height:36px;padding:0 16px;border-radius:99px;border:none;background:#0B2545;color:#fff;font-size:14px;font-weight:600">Se demo</button>
+      <div style="position:relative;flex:none">
+        <button onClick="{{ profilToggle }}" style="display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:4px;border-radius:99px;color:#0B2545" style-hover="background:#F4F1EA">
+          <span data-rf="firmanavn" style="font-size:14px;font-weight:500;white-space:nowrap">{{ orgNavn }}</span>
+          <span style="width:32px;height:32px;flex:none;border-radius:99px;background:#0B2545;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ userInit }}</span>
+        </button>
+        <sc-if value="{{ profilOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ menyLukk }}" style="position:fixed;inset:0;z-index:61"></div>
+          <div style="position:absolute;top:calc(100% + 10px);right:0;z-index:62;min-width:240px;background:#fff;border:1px solid #E4DFD4;border-radius:12px;box-shadow:0 12px 32px -12px rgba(11,37,69,.25);padding:6px;display:flex;flex-direction:column">
+            <div style="padding:10px 12px 12px;border-bottom:1px solid #E4DFD4;margin-bottom:6px;font-size:13px;color:#586174;line-height:1.45"><div style="font-size:15px;font-weight:600;color:#0B2545">{{ userNavn }}</div>{{ userRolle }}<br>{{ orgNavn }} · Pakke: {{ pakke }}</div>
+            <button onClick="{{ visVelkomstLukk }}" style="text-align:left;padding:9px 12px;border-radius:8px;border:0;background:transparent;color:#0B2545;font-size:15px" style-hover="background:#F4F1EA">Vis velkomstflyten</button>
+            <a href="/" style="display:block;padding:9px 12px;border-radius:8px;color:#0B2545;font-size:15px;text-decoration:none" style-hover="background:#F4F1EA">Logg ut</a>
+          </div>
+        </sc-if>
+      </div>
     </div>
-  </aside>
+  </header>
 
-  <main data-rf="hoved" style="flex:1;min-width:0">
+  <main data-rf="hoved" style="flex:1;min-width:0;width:100%;max-width:1180px;margin:0 auto">
 
     <!-- ============ HJEM ============ -->
     <sc-if value="{{ isHjem }}" hint-placeholder-val="{{ true }}">
@@ -1748,13 +1766,14 @@ class Component extends DCLogic {
     const el = this.tFind(this.state.tSpec);
     if (!el) { if (tries < 20) this.tTs.push(setTimeout(() => this.tScroll(tries + 1), 100)); return; }
     const r = el.getBoundingClientRect(), vh = window.innerHeight;
-    if (r.top < 80 || r.bottom > vh - 40) { try { window.scrollTo({ top: window.scrollY + r.top - Math.max(90, (vh - r.height) / 3), behavior: 'smooth' }); } catch (e) {} this.tTs.push(setTimeout(() => this.tMeasure(), 420)); }
+    if (r.top < 90 || r.bottom > vh - 40) { try { window.scrollTo({ top: window.scrollY + r.top - Math.max(100, (vh - r.height) / 3), behavior: 'smooth' }); } catch (e) {} this.tTs.push(setTimeout(() => this.tMeasure(), 420)); }
     this.tMeasure();
   }
   tMeasure() {
     if (this.state.tour == null) return; const el = this.tFind(this.state.tSpec); if (!el) return;
     const vw = window.innerWidth, vh = window.innerHeight, p = 8, r = el.getBoundingClientRect();
-    const x = Math.max(8, r.left - p), y = Math.max(8, r.top - p), x2 = Math.min(vw - 8, r.right + p), y2 = Math.min(vh - 8, r.bottom + p);
+    const topp = (document.querySelector('[data-rf=side]')?.getBoundingClientRect().bottom || 0) + 6;
+    const x = Math.max(8, r.left - p), y = Math.max(topp, r.top - p), x2 = Math.min(vw - 8, r.right + p), y2 = Math.min(vh - 8, r.bottom + p);
     const rect = { x: Math.round(x), y: Math.round(y), w: Math.round(Math.max(40, x2 - x)), h: Math.round(Math.max(40, y2 - y)) };
     const BW = Math.min(360, vw - 32), BH = 230, g = 18; let bx, by;
     if (rect.x + rect.w + g + BW < vw - 12) { bx = rect.x + rect.w + g; by = rect.y; }
@@ -1762,7 +1781,7 @@ class Component extends DCLogic {
     else if (rect.y + rect.h + g + BH < vh - 12) { bx = rect.x + rect.w / 2 - BW / 2; by = rect.y + rect.h + g; }
     else if (rect.y - g - BH > 12) { bx = rect.x + rect.w / 2 - BW / 2; by = rect.y - g - BH; }
     else { bx = vw - BW - 24; by = vh - BH - 24; }
-    bx = Math.max(16, Math.min(vw - BW - 16, bx)); by = Math.max(16, Math.min(vh - BH - 16, by));
+    bx = Math.max(16, Math.min(vw - BW - 16, bx)); by = Math.max(topp + 8, Math.min(vh - BH - 16, by));
     const o = this.state.tRect; if (o && o.x === rect.x && o.y === rect.y && o.w === rect.w && o.h === rect.h) return;
     this.setState({ tRect: rect, tBub: { x: Math.round(bx), y: Math.round(by) }, tAnim: !!o });
   }
@@ -2002,7 +2021,9 @@ class Component extends DCLogic {
     const s = this.state, scr = s.scr, gratis = this.gratis();
     const R = this.mvaRader(); const igjen = R.b.length + R.k.length; const L = this.lonnVals();
     const navDef = [['hjem', 'Hjem', 'Hj', ''], ['kjop', 'Penger ut', 'Ut', ''], ['faktura', 'Penger inn', 'Inn', ''], ['bank', 'Bank', 'Ba', s.bStage === 'klar' && !s.bLukket && this.bankVals().igjen ? String(this.bankVals().igjen) : ''], ['lonn', 'Lønn', 'Lø', ''], ['rapp', 'Rapporter', 'Ra', ''], ['mva', 'MVA', 'Mv', igjen && !s.mvaSendt ? String(igjen) : ''], ['frister', 'Frister', 'Fr', ''], ['aars', 'Årsavslutning', 'År', ''], ['rf', 'Regnskapsfører', 'Rf', ''], ['innst', 'Innstillinger', 'In', '']];
-    const nav = navDef.map(([id, label, short, count]) => { const a = scr === id; return { label, short, count, pillBg: count ? '#F6DF6E' : 'transparent', bg: a ? '#fff' : 'transparent', border: a ? '#E4DFD4' : 'transparent', fw: a ? 600 : 400, chipBg: a ? '#0B2545' : '#EFEBE2', chipFg: a ? '#fff' : '#586174', onClick: () => this.go(id) }; });
+    const navAlle = navDef.map(([id, label, short, count]) => { const a = scr === id; return { id, label, short, count, pillBg: count ? '#F6DF6E' : 'transparent', bg: a ? '#F4F1EA' : 'transparent', line: a ? '#0B2545' : 'transparent', fw: a ? 600 : 400, onClick: () => { this.setState({ merOpen: false, profilOpen: false }); this.go(id); } }; });
+    // Vannrett meny: de sju første står i linjen, resten under «Mer».
+    const nav = navAlle.slice(0, 7), navMer = navAlle.slice(7), merAktiv = navMer.some(m => m.id === scr);
 
     // kjøp
     const kv = s.kv; const lev = s.kStage === 'leser';
@@ -2122,6 +2143,9 @@ class Component extends DCLogic {
       kalendere: ['Google Kalender', 'Apple Kalender', 'Outlook'].map(t => ({ t, on: () => this.toast('Lenke kopiert. Lim den inn i ' + t + '.') })),
       aarsSteg: aars, mnd,
       ...this.obVals(), ...L, visVelkomst: () => this.setState({ ob: 0, obKode: '', obQ: '' }),
+      navMer, merOpen: !!s.merOpen, profilOpen: !!s.profilOpen, merLine: merAktiv ? '#0B2545' : 'transparent', merFw: merAktiv ? 600 : 400,
+      merToggle: () => this.setState({ merOpen: !s.merOpen, profilOpen: false }), profilToggle: () => this.setState({ profilOpen: !s.profilOpen, merOpen: false }), menyLukk: () => this.setState({ merOpen: false, profilOpen: false }),
+      visVelkomstLukk: () => this.setState({ merOpen: false, profilOpen: false, ob: 0, obKode: '', obQ: '' }),
       orgNavn: s.org, userNavn: s.user.navn, userRolle: s.user.rolle, userInit: s.user.navn.split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase(), fornavn: s.user.navn.split(' ')[0],
       bilagEpost: s.org.toLowerCase().replace(/\b(as|asa|ans|da|enk)\b/g, '').replace(/æ/g, 'ae').replace(/ø/g, 'o').replace(/å/g, 'a').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '@bilag.rettfort.no',
       ...this.bankRender(), ...this.rappRender(), ...this.innstRender(), ...this.detRender(), ...this.tourVals(),
