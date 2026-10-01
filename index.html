@@ -185,7 +185,7 @@ input,textarea{font-family:inherit}
 }
 @media (max-width:520px){[data-rf=hdr]{padding:0 18px !important;gap:12px !important}[data-rf=login]{display:none !important}[data-rf=sec]{padding-left:18px !important;padding-right:18px !important}[data-rf=hero]{padding-left:18px !important;padding-right:18px !important}[data-rf=steps]{gap:48px !important}}
 [data-rf=nav]{align-items:center}.rf-fn{flex:none}.rf-fn>button{white-space:nowrap}.rf-fn:hover>button,.rf-fn:focus-within>button{background:#EAE5DA;color:#0B2545}.rf-fn-m{display:none}.rf-fn:hover .rf-fn-m,.rf-fn:focus-within .rf-fn-m{display:block}.rf-fn-i:hover{background:#FBFAF6}@media (max-width:900px){.rf-fn{display:none !important}}
-@media (max-width:900px){.rf-ad-kol{min-height:360px !important;border-right:0 !important}.rf-ad-dok{display:none !important}}@keyframes rfCaret{0%,49%{opacity:1}50%,100%{opacity:0}}@keyframes rfPulse{0%,100%{transform:scale(.7);opacity:.5}50%{transform:scale(1);opacity:1}}@keyframes rfBar{from{width:0}to{width:100%}}@keyframes rfOut{0%,86%{opacity:1}100%{opacity:0;visibility:hidden}}@keyframes rfIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.rf-an-ov{animation:rfOut 3.1s forwards}.rf-an-bar{width:0;animation:rfBar 2.5s cubic-bezier(.3,.7,.2,1) .2s forwards}.rf-an-in{opacity:0;animation:rfIn .45s cubic-bezier(.3,.7,.2,1) forwards}@media (prefers-reduced-motion:reduce){.rf-an-ov{display:none}.rf-an-in{opacity:1;animation:none}}
+@media (max-width:900px){.rf-ad-lang{display:none}.rf-ad-kort{display:inline !important}.rf-ad-faner{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;width:calc(100% + 44px);margin:0 -22px;padding:0 22px}.rf-ad-faner::-webkit-scrollbar{display:none}.rf-ad-faner>button{padding:0 11px !important;font-size:12.5px !important}.rf-ad-kol{min-height:360px !important;border-right:0 !important}.rf-ad-dok{display:none !important}}.rf-ad-kort{display:none}@keyframes rfCaret{0%,49%{opacity:1}50%,100%{opacity:0}}@keyframes rfPulse{0%,100%{transform:scale(.7);opacity:.5}50%{transform:scale(1);opacity:1}}@keyframes rfBar{from{width:0}to{width:100%}}@keyframes rfOut{0%,86%{opacity:1}100%{opacity:0;visibility:hidden}}@keyframes rfIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}.rf-an-ov{animation:rfOut 3.1s forwards}.rf-an-bar{width:0;animation:rfBar 2.5s cubic-bezier(.3,.7,.2,1) .2s forwards}.rf-an-in{opacity:0;animation:rfIn .45s cubic-bezier(.3,.7,.2,1) forwards}@media (prefers-reduced-motion:reduce){.rf-an-ov{display:none}.rf-an-in{opacity:1;animation:none}}
 </style>
 </helmet>
 
@@ -1281,7 +1281,7 @@ const AD_SC = [
     rader: [['Drillsett 18 V', '999,20', 0], ['MVA 25 %, fradrag', '249,80', 1], ['Betalt fra', 'Driftskonto', 2]], sum: ['Totalt', '1 249,00 kr'],
     final: 'Ført og avstemt. Du trenger ikke gjøre noe mer.', postHead: 'Ført i hovedboken',
     poster: [['6540 Inventar', '999,20', 'D'], ['2710 Inngående MVA', '249,80', 'D'], ['1920 Bank', '1 249,00', 'K']] },
-  { fane: 'Følg opp betaling', tid: '16:40', user: 'Hvem skylder meg penger? Send en påminnelse',
+  { fane: 'Følg opp betaling', kort: 'Purring', tid: '16:40', user: 'Hvem skylder meg penger? Send en påminnelse',
     steg: ['Fant 2 forfalte fakturaer', 'Sjekket at ingen er betalt ennå', 'Skrev en vennlig påminnelse med fakturaen vedlagt', 'Sendte til begge kundene'],
     docT: 'Påminnelser', docSub: '2 kunder · forfalt', ventTxt: 'Kladd', stTxt: 'Påminnelse sendt',
     rader: [['Fjellmat AS · 6 dager over', '8 400,00', 0], ['Nordvik Bygg · 2 dager over', '22 500,00', 0], ['Vedlegg', 'Fakturaen som PDF', 2]], sum: ['Utestående', '30 900,00 kr'],
@@ -1309,6 +1309,9 @@ function AssistentDemo() {
     return () => clearInterval(iv);
   }, [rolig]);
   const { si, t } = st, sc = AD_SC[si], P = adPlan(sc);
+  const faner = React.useRef(null);
+  // Hold valgt fane synlig når fanene ruller sidelengs på mobil (uten å rulle selve siden).
+  React.useEffect(() => { const el = faner.current; const b = el && el.children[si]; if (el && b && el.scrollWidth > el.clientWidth) el.scrollTo({ left: b.offsetLeft - (el.clientWidth - b.offsetWidth) / 2, behavior: 'smooth' }); }, [si]);
   const chars = t < P.ty0 ? 0 : Math.min(sc.user.length, Math.floor((t - P.ty0) / 34));
   const sendt = t >= P.send;
   const stegSt = i => { const a = P.s0 + i * P.gap; return t < a ? 0 : t < a + P.gap - 150 ? 1 : 2; };
@@ -1365,9 +1368,9 @@ function AssistentDemo() {
       h('div', null,
         h('div', { style: { fontSize: 13, color: '#586174', display: 'flex', alignItems: 'center', gap: 6 } }, h('span', { style: { width: 7, height: 7, borderRadius: 99, background: '#2E9E6A' } }), 'Assistent · Nordhavn Drift AS'),
         h('div', { style: { fontSize: 19, fontWeight: 600, letterSpacing: '-.01em', marginTop: 3 } }, 'Du sier det. Rettført fører det.')),
-      h('div', { style: { display: 'flex', gap: 6, flexWrap: 'wrap' }, role: 'tablist', 'aria-label': 'Eksempler' }, AD_SC.map((s, i) => h('button', { key: i, type: 'button', role: 'tab', 'aria-selected': i === si, onClick: () => setSt({ si: i, t: 0 }),
-        style: { position: 'relative', overflow: 'hidden', height: 32, padding: '0 13px', borderRadius: 99, border: `1px solid ${i === si ? '#0B2545' : '#E4DFD4'}`, background: i === si ? '#F4F1EA' : '#fff', color: '#0B2545', fontSize: 13, fontWeight: i === si ? 600 : 500, fontFamily: 'inherit', cursor: 'pointer' } },
-        h('span', { style: { position: 'absolute', left: 0, bottom: 0, height: 2, width: i === si ? `${Math.min(100, t / P.end * 100)}%` : '0%', background: '#0B2545' } }), s.fane)))),
+      h('div', { ref: faner, className: 'rf-ad-faner', style: { display: 'flex', gap: 6 }, role: 'tablist', 'aria-label': 'Eksempler' }, AD_SC.map((s, i) => h('button', { key: i, type: 'button', role: 'tab', 'aria-selected': i === si, onClick: () => setSt({ si: i, t: 0 }),
+        style: { position: 'relative', overflow: 'hidden', height: 32, padding: '0 13px', borderRadius: 99, border: `1px solid ${i === si ? '#0B2545' : '#E4DFD4'}`, background: i === si ? '#F4F1EA' : '#fff', color: '#0B2545', fontSize: 13, fontWeight: i === si ? 600 : 500, fontFamily: 'inherit', cursor: 'pointer', whiteSpace: 'nowrap', flex: 'none' } },
+        h('span', { style: { position: 'absolute', left: 0, bottom: 0, height: 2, width: i === si ? `${Math.min(100, t / P.end * 100)}%` : '0%', background: '#0B2545' } }), s.kort ? [h('span', { key: 'l', className: 'rf-ad-lang' }, s.fane), h('span', { key: 'k', className: 'rf-ad-kort' }, s.kort)] : s.fane)))),
     h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,320px),1fr))', opacity: fade, ...tr('opacity .35s') } }, venstre, hoyre));
 }
 
