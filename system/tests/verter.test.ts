@@ -13,9 +13,12 @@ describe('adressene min. og vaktplan.', () => {
     expect(oktDomene('rettfort-system-abc.vercel.app')).toBeUndefined();
     expect(oktDomene('localhost:3100')).toBeUndefined();
   });
-  it('vaktlenker i e-post går til vaktplan-adressen', () => {
+  it('vaktlenker i e-post går til vaktplan-adressen når den er slått på', () => {
+    expect(tilVaktplan('https://min.xn--rettfrt-u1a.no')).toBe('https://min.xn--rettfrt-u1a.no');
+    process.env.RETTFORT_VAKTPLAN_ADRESSE = '1';
     expect(tilVaktplan('https://min.xn--rettfrt-u1a.no')).toBe('https://vaktplan.xn--rettfrt-u1a.no');
     expect(tilVaktplan('http://localhost:3100')).toBe('http://localhost:3100');
+    delete process.env.RETTFORT_VAKTPLAN_ADRESSE;
   });
   it('lokale adresser bruker http', () => {
     expect(adresse('localhost:3100')).toBe('http://localhost:3100');

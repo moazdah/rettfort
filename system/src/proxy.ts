@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { OKT_COOKIE, erMinVert, erVaktplanVert, minAdresse, oktDomene, vaktplanAdresse, vertAv } from '@/lib/verter';
+import { OKT_COOKIE, egenVaktplanAdresse, erMinVert, erVaktplanVert, minAdresse, oktDomene, vaktplanAdresse, vertAv } from '@/lib/verter';
 
 // Vaktplanen har egen adresse: vaktplan.rettført.no. Regnskapet er på min.rettført.no.
 // Det er det samme systemet; her bestemmes bare hva som vises på hvilken adresse.
@@ -22,7 +22,7 @@ export function proxy(req: NextRequest) {
     return NextResponse.redirect(`${minAdresse()}${pathname}${search}`);
   }
 
-  if (erMinVert(vert) && les && TIL_VAKTPLAN.test(pathname)) {
+  if (egenVaktplanAdresse() && erMinVert(vert) && les && TIL_VAKTPLAN.test(pathname)) {
     const sti = pathname === '/vaktplan' || pathname === '/vp' ? '/' : pathname.replace(/^\/vp\//, '/vaktplan/');
     const res = NextResponse.redirect(`${vaktplanAdresse()}${sti}${search}`);
     // Innlogginger fra før vaktplanen fikk egen adresse gjaldt bare min. Flytt dem til den delte kaken.

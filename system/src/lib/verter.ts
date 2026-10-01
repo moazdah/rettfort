@@ -24,5 +24,11 @@ export function oktDomene(vert: string): string | undefined {
   return navn.endsWith(`.${DOMENE}`) ? `.${DOMENE}` : undefined;
 }
 
+/**
+ * Slås på med RETTFORT_VAKTPLAN_ADRESSE=1 når vaktplan.rettført.no svarer (DNS-oppføringen er lagt inn).
+ * Før det blir vaktplanen liggende på min.rettført.no, så ingen lenker peker til en adresse som ikke finnes.
+ */
+export const egenVaktplanAdresse = () => process.env.RETTFORT_VAKTPLAN_ADRESSE === '1';
+
 /** Lenker til vaktplanen i e-post går til vaktplan.rettført.no når systemet kjører på min.rettført.no. */
-export const tilVaktplan = (base: string) => (base === minAdresse() ? vaktplanAdresse() : base);
+export const tilVaktplan = (base: string) => (egenVaktplanAdresse() && base === minAdresse() ? vaktplanAdresse() : base);
