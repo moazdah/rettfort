@@ -6,7 +6,7 @@
 (function () { try {
   var q = new URLSearchParams(location.search), S = 'https://min.xn--rettfrt-u1a.no';
   if (q.has('logg-inn')) location.replace(S + '/logg-inn');
-  else if (q.has('venteliste')) { var v = q.get('venteliste'); location.replace(S + '/registrer' + (v === 'regnskapsforer' || v === 'bedrift' ? '?rolle=' + v : '')); }
+  else if (q.has('venteliste')) { var v = q.get('venteliste'); location.replace(S + '/registrer'); }
   else if (q.has('demo')) location.replace('/demo-bedrift');
 } catch (e) {} })();
 </script>
@@ -52,7 +52,6 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
       <nav data-rf="topnav" style="display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;flex:1;min-width:0;height:40px;font-size:15.5px;overflow:hidden;white-space:nowrap">
         <a href="#funksjoner" style="padding:8px 12px;border-radius:99px;color:#3D4759" style-hover="color:#0B2545;background:#EAE5DA">Funksjoner</a>
         <a href="#priser" style="padding:8px 12px;border-radius:99px;color:#3D4759" style-hover="color:#0B2545;background:#EAE5DA">Priser</a>
-        <a href="#regnskapsforer" style="padding:8px 12px;border-radius:99px;color:#3D4759" style-hover="color:#0B2545;background:#EAE5DA">For regnskapsførere</a>
         <a href="#om" style="padding:8px 12px;border-radius:99px;color:#3D4759" style-hover="color:#0B2545;background:#EAE5DA">Om prosjektet</a>
       </nav>
       <div data-rf="toppknapper" style="display:flex;align-items:center;gap:8px;flex:none">
@@ -186,7 +185,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
   </section>
 
   <section id="priser" style="scroll-margin-top:72px;background:#F4F1EA;border-top:1px solid #E4DFD4;padding:104px 24px 88px">
-    <div style="max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:48px">
+    <div style="max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:48px">
       <div style="text-align:center"><h2 style="margin:0;font-size:clamp(34px,4.2vw,54px);line-height:1.05;letter-spacing:-.035em;font-weight:600">Enkle priser.</h2><p style="margin:14px auto 0;font-size:18px;color:#3D4759;max-width:560px;text-wrap:pretty">Start gratis, eller velg en betalt pakke for 3 kr i måneden mens vi bygger ferdig. Ingen binding.</p></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;align-items:stretch" onMouseLeave="{{ pkLeave }}">
         <sc-for list="{{ pk }}" as="p" hint-placeholder-count="4">
@@ -210,14 +209,14 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
           </div>
         </sc-for>
       </div>
-      <div style="text-align:center;font-size:13.5px;color:#586174">Priser eks. MVA. Byrå: 79 kr per ekstra kunde utover 15.</div>
+      <div style="text-align:center;font-size:13.5px;color:#586174;line-height:1.6">Priser eks. MVA. Ekstra ansatte i vaktplanen: 29 kr per ansatt per måned, gratis i introduksjonsperioden.<br><a href="/vilkar" style="color:#0B2545;font-weight:600;border-bottom:1.5px solid #0B2545">Se pris- og abonnementsvilkår</a></div>
     </div>
   </section>
 
   <section id="regnskapsforer" style="scroll-margin-top:72px;padding:88px 24px 0">
     <div style="max-width:1200px;margin:0 auto;background:#0B2545;color:#fff;border-radius:28px;padding:44px clamp(24px,5vw,56px);display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
-      <div><div style="font-size:clamp(24px,2.6vw,32px);font-weight:600;letter-spacing:-.02em">Har du regnskapsfører?</div><div style="font-size:17px;color:#C9D3E2;margin-top:6px">Inviter regnskapsføreren inn. Dere ser det samme.</div></div>
-      <a href="/demo" style="height:48px;padding:0 22px;border-radius:99px;background:#fff;color:#0B2545;font-weight:600;display:flex;align-items:center">For regnskapsførere</a>
+      <div><div style="font-size:clamp(24px,2.6vw,32px);font-weight:600;letter-spacing:-.02em">Har du regnskapsfører?</div><div style="font-size:17px;color:#C9D3E2;margin-top:6px">Inviter regnskapsføreren inn. Dere ser det samme, uansett pakke, og det koster ingenting ekstra.</div></div>
+      <a href="https://min.xn--rettfrt-u1a.no/registrer" style="height:48px;padding:0 22px;border-radius:99px;background:#fff;color:#0B2545;font-weight:600;display:flex;align-items:center">Start gratis</a>
     </div>
   </section>
 
@@ -257,6 +256,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
       <img src="assets/rettfort-logo.png" alt="Rettført" style="height:28px;width:auto;margin:0 -8px">
       <span style="flex:1">© 2026 Rettført</span>
       <a href="/personvern" style="color:#586174">Personvern</a>
+      <a href="/vilkar" style="color:#586174">Vilkår</a>
       <a href="#om" style="color:#586174">Om prosjektet</a>
       <a href="mailto:mohbok04@hotmail.com" style="color:#586174">Kontakt</a>
     </div>
@@ -295,21 +295,21 @@ class Component extends DCLogic {
       aiValg: this.AI.map((x, i) => ({ t: x.tema, bg: i === s.ai ? '#0B2545' : '#fff', fg: i === s.ai ? '#fff' : '#0B2545', bd: i === s.ai ? '#0B2545' : '#D9D3C6', on: () => this.setState({ ai: i, at: 0 }) }))
     };
     const FAQ = [
-      ['Er Gratis virkelig gratis?', 'Ja. Du kan sende fakturaer, føre kjøp, levere MVA og kjøre lønn uten å betale. Du betaler først når du vil ha automatisk lesing av kvitteringer, bank og vaktplan.'],
+      ['Er Gratis virkelig gratis?', 'Ja. Du kan sende fakturaer, føre kjøp med kvitteringslesing, avstemme banken, lage MVA-meldingen og kjøre lønn uten å betale. Du betaler først når du vil ha vaktplan eller assistenten.'],
+      ['Hva koster vaktplanen?', 'Start har vaktplan for 5 ansatte og Selskap for 15. Har du flere, koster hver ekstra ansatt 29 kr i måneden. I introduksjonsperioden tar vi ikke betalt for ekstra ansatte. Detaljene står i vilkårene.'],
       ['Kan regnskapsføreren min være med?', 'Ja. Inviter regnskapsføreren fra systemet. Regnskapsføreren får tilgang til det samme som deg, uansett pakke.'],
       ['Hvordan lages MVA-meldingen?', 'Den lages av det du har ført. Rettført viser hva som mangler før fristen, så du vet at tallene stemmer.'],
       ['Hvordan fungerer vaktplanen?', 'Du legger inn de ansatte og lager uka. De får en lenke på e-post eller SMS, ser vaktene sine, tar ledige vakter og sier fra når de ikke kan. Timene går rett til lønnskjøringen.']
     ];
-    const FUNK = [['Faktura, kjøp og MVA-melding', 0], ['Lønnsslipper', 0], ['Kvitteringer på e-post og mobil', 0], ['Frister, påminnelser og kalender', 0], ['Sjekk av sum, duplikater og leverandør', 0], ['Regnskapsføreren din får tilgang', 0], ['Kvitteringer leses automatisk', 1], ['Kontroll hver natt', 1], ['Bankkobling og avstemming', 2], ['Assistent som fører for deg', 2], ['Flere klienter i én arbeidsliste', 3]];
+    const FUNK = [['Faktura og tilbud med KID', 0], ['Kjøp, med kvitteringer som leses automatisk', 0], ['Bank: last opp kontoutskriften, så avstemmer vi', 0], ['MVA-melding, frister og påminnelser', 0], ['Lønn og lønnsslipper', 0], ['Rapporter og SAF-T', 0], ['Regnskapsføreren din får tilgang', 0], ['Vaktplan med bytter, fri og ledige vakter', 1], ['Timer fra vaktplanen rett til lønn', 1], ['Assistent som fører for deg', 2]];
     const PK = [
-      { n: 'Gratis', d: 'For bedriften som vil føre selv uten å betale.', pris: '0', per: 'kr / mnd', note: 'Ingen kort. Ingen tidsgrense.', knapp: 'Start gratis', top: ['Opptil 100 bilag per år', 'Lønnsslipp for inntil 3 ansatte', 'Uten assistent'] },
-      { n: 'Start', d: 'For bedriften som vil slippe å taste inn kvitteringer.', pris: '3', per: 'kr / mnd · introduksjonspris', note: 'Ordinær pris 149 kr / mnd. Du får beskjed før den endres.', knapp: 'Velg Start', top: ['Ubegrenset bilag', '300 kvitteringer leses per måned', 'Kontroll hver natt'] },
-      { n: 'Selskap', d: 'For bedriften som vil ha bank, kontroll og assistent på ett sted.', pris: '3', per: 'kr / mnd · introduksjonspris', note: 'Ordinær pris 249 kr / mnd. Du får beskjed før den endres.', knapp: 'Velg Selskap', top: ['Ubegrenset bilag', 'Bankkobling', '200 assistentsvar per måned'], anbefalt: true },
-      { n: 'Byrå', d: 'For regnskapsførere som følger opp mange kunder.', pris: '1 490', per: 'kr / mnd inkl. 15 kunder', note: '1 862,50 kr inkl. MVA', knapp: 'Velg Byrå', top: ['Kunder på Rettført kobles til av seg selv', 'Ingen grense på posteringer', '2 000 assistentsvar per måned'] }
+      { n: 'Gratis', d: 'For deg som vil føre regnskapet selv uten å betale.', pris: '0', per: 'kr / mnd', note: 'Ingen kort. Ingen tidsgrense.', knapp: 'Start gratis', top: ['Hele regnskapet og lønn', 'Kvitteringer leses automatisk', 'Uten vaktplan og assistent'] },
+      { n: 'Start', d: 'For bedriften med ansatte som jobber i vakter.', pris: '3', per: 'kr / mnd · introduksjonspris', note: 'Ordinær pris 149 kr / mnd. Du får beskjed før den endres.', knapp: 'Velg Start', top: ['Alt i Gratis', 'Vaktplan for 5 ansatte', '29 kr / mnd per ekstra ansatt'] },
+      { n: 'Selskap', d: 'For bedriften som vil at assistenten gjør jobben.', pris: '3', per: 'kr / mnd · introduksjonspris', note: 'Ordinær pris 249 kr / mnd. Du får beskjed før den endres.', knapp: 'Velg Selskap', top: ['Alt i Start', 'Vaktplan for 15 ansatte', 'Assistent, 200 svar per måned'], anbefalt: true }
     ];
     const hov = s.hov ?? 2;
     const pk = PK.map((x, i) => { const m = i === hov;
-      return { ...x, href: i === 3 ? 'https://min.xn--rettfrt-u1a.no/registrer?rolle=regnskapsforer' : 'https://min.xn--rettfrt-u1a.no/pakke/' + ['gratis', 'start', 'selskap'][i], anbefalt: !!x.anbefalt, enter: () => this.setState({ hov: i }),
+      return { ...x, href: 'https://min.xn--rettfrt-u1a.no/pakke/' + ['gratis', 'start', 'selskap'][i], anbefalt: !!x.anbefalt, enter: () => this.setState({ hov: i }),
         bg: m ? '#0B2545' : '#fff', fg: m ? '#fff' : '#0B2545', bd: m ? '#0B2545' : '#E4DFD4', mut: m ? '#C9D3E2' : '#586174', sh: m ? '0 30px 60px -30px rgba(11,37,69,.55)' : 'none', y: m ? '-8px' : '0',
         kBg: m ? '#F6DF6E' : '#0B2545', kFg: m ? '#0B2545' : '#fff', linje: m ? 'rgba(255,255,255,.14)' : '#EFEBE2',
         f: FUNK.map(([t, lvl]) => { const ja = i >= lvl; return { t, i: ja ? '✓' : '×', fg: ja ? (m ? '#fff' : '#0B2545') : (m ? 'rgba(255,255,255,.45)' : '#A5A9B2'), dot: ja ? (m ? '#35AE74' : '#E2F1E8') : (m ? 'rgba(255,255,255,.12)' : '#EFEBE2'), ic: ja ? (m ? '#fff' : '#1F7D52') : (m ? 'rgba(255,255,255,.5)' : '#A5A9B2') }; }) }; });
