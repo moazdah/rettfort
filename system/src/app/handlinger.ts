@@ -16,7 +16,7 @@ import { kjorLonn, type LonnInput } from '@/lib/tjenester/lonn';
 import { vurderFunn } from '@/lib/tjenester/kontroll';
 import type { Enhet } from '@/lib/brreg';
 import { randomBytes } from 'node:crypto';
-import { sendEpost, maler, grunnadresse, epostPa } from '@/lib/epost';
+import { sendEpost, maler, grunnadresse, epostPa, qrVedlegg } from '@/lib/epost';
 import { fakturaPdf } from '@/lib/tjenester/fakturaPdf';
 import { hentFakta } from '@/lib/tjenester/assistent';
 import { svar as assistentSvar, type Svar } from '@/lib/assistent';
@@ -34,10 +34,12 @@ import { listSamtaler, hentSamtale as hentSamtaleDb, lagreSamtale as lagreSamtal
 import { valgtLeverandor, leverandorKlar, settLeverandor, type Leverandor } from '@/lib/ai/modell';
 import { lagLenke, hentNye, etterRegistrering, hentInnsending, settTilbake, settFastTilbake, betalUtleggNa, avvis, slettLenke, type Tilbake } from '@/lib/tjenester/innsending';
 import { kr } from '@/lib/penger';
+import { slettKonto } from '@/lib/tjenester/konto';
 
-async function settCookie(token: string) {
+/** varig = false: informasjonskapselen forsvinner når nettleseren lukkes (brukes før e-posten er bekreftet). */
+async function settCookie(token: string, varig = true) {
   const c = await cookies();
-  c.set(SESJON_COOKIE, token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: SESJON_DAGER * 86400 });
+  c.set(SESJON_COOKIE, token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', ...(varig ? { maxAge: SESJON_DAGER * 86400 } : {}) });
 }
 
 async function kreverInnlogget() {
@@ -127,11 +129,20 @@ export async function registrer(_: unknown, fd: FormData): Promise<Resultat<{ ko
     if (!gyldigEpost(epost)) throw new RegnskapsFeil('Skriv en gyldig e-postadresse.');
     const pf = passordFeil(passord); if (pf) throw new RegnskapsFeil(pf);
     const db = await getDb();
-    if (await db.en('select 1 from bruker where epost = $1', [epost])) throw new RegnskapsFeil('Det finnes allerede en bruker med denne e-posten. Logg inn i stedet.');
+    const fra = await db.en<{ id: string; epost_bekreftet: boolean }>('select id, epost_bekreftet from bruker where epost = $1', [epost]);
+    if (fra?.epost_bekreftet) throw new RegnskapsFeil('Det finnes allerede en bruker med denne e-posten. Logg inn i stedet.');
     const kode = lagKode();
     const hash = await hashPassord(passord);
     const { token } = await db.tx(async t => {
-      const b = await t.en<{ id: string }>('insert into bruker (epost, navn, passord_hash, bekreftkode) values ($1,$2,$3,$4) returning id', [epost, navn, hash, kode]);
+      // Registreringen ble ikke fullført sist (e-posten aldri bekreftet): start på nytt med samme adresse.
+      if (fra) {
+        await t.q('delete from sesjon where bruker_id = $1', [fra.id]);
+        await t.q(`delete from organisasjon o where o.type = 'byra' and exists (select 1 from medlemskap m where m.organisasjon_id = o.id and m.bruker_id = $1) and (select count(*) from medlemskap m2 where m2.organisasjon_id = o.id) = 1`, [fra.id]);
+        await t.q('delete from medlemskap where bruker_id = $1', [fra.id]);
+      }
+      const b = fra
+        ? await t.en<{ id: string }>('update bruker set navn = $2, passord_hash = $3, bekreftkode = $4 where id = $1 returning id', [fra.id, navn, hash, kode])
+        : await t.en<{ id: string }>('insert into bruker (epost, navn, passord_hash, bekreftkode) values ($1,$2,$3,$4) returning id', [epost, navn, hash, kode]);
       if (hvem === 'regnskapsforer') {
         const o = await t.en<{ id: string }>(`insert into organisasjon (type, navn, pakke) values ('byra', $1, 'byra') returning id`, [`${navn}s regnskapskontor`]);
         await t.q(`insert into medlemskap (bruker_id, organisasjon_id, rolle) values ($1,$2,'eier')`, [b!.id, o!.id]);
@@ -139,7 +150,7 @@ export async function registrer(_: unknown, fd: FormData): Promise<Resultat<{ ko
       }
       return opprettSesjon(t, b!.id, null);
     });
-    await settCookie(token);
+    await settCookie(token, false);
     // Koden vises bare på skjermen hvis e-posten ikke kunne sendes.
     const sendt = await sendEpost({ til: epost, ...maler.bekreftkode(navn.split(' ')[0], kode) });
     return { kode: sendt ? undefined : kode };
@@ -154,7 +165,21 @@ export async function bekreftEpost(kode: string): Promise<Resultat> {
     const b = await db.en<{ bekreftkode: string | null }>('select bekreftkode from bruker where id = $1', [s.bruker.id]);
     if (!b?.bekreftkode || b.bekreftkode !== kode.trim()) throw new RegnskapsFeil('Koden stemmer ikke. Sjekk e-posten og prøv igjen.');
     await db.q('update bruker set epost_bekreftet = true, bekreftkode = null where id = $1', [s.bruker.id]);
+    // Nå er kontoen ekte: husk innloggingen også etter at nettleseren lukkes.
+    const tok = (await cookies()).get(SESJON_COOKIE)?.value;
+    if (tok) await settCookie(tok);
   });
+}
+
+/** Avbryter en registrering som ikke er bekreftet, så man kommer tilbake til Logg inn / Lag konto. */
+export async function avbrytRegistrering() {
+  const s = await sesjon();
+  if (s && !s.bruker.epostBekreftet) {
+    const db = await getDb();
+    await db.q('delete from sesjon where bruker_id = $1', [s.bruker.id]);
+  }
+  (await cookies()).delete(SESJON_COOKIE);
+  redirect('/registrer');
 }
 
 /** Retter e-postadressen før den er bekreftet, og sender en ny kode til den nye adressen. */
@@ -591,7 +616,7 @@ export async function lagSkannelenke(o: { type: 'klient' | 'ansatt'; ansattId?: 
     const { token } = await db.tx(t => lagLenke(t, s.org.id, { type: o.type, ansattId: o.ansattId, navn, epost, brukerId: s.bruker.id }));
     const url = `${await grunnadresse()}/skann/${token}`;
     let sendt = false;
-    if (o.send && epost) sendt = await sendEpost({ til: epost, ...maler.skannelenke({ navn, foretak: s.org.navn, type: o.type, lenke: url }), svarTil: s.bruker.epost });
+    if (o.send && epost) sendt = await sendEpost({ til: epost, ...maler.skannelenke({ navn, foretak: s.org.navn, type: o.type, lenke: url, qr: true }), svarTil: s.bruker.epost, vedlegg: [await qrVedlegg(url)] });
     revalidatePath('/kjop/innboks');
     return { url, sendt };
   });
@@ -607,7 +632,8 @@ export async function sendSkannelenkePaNytt(id: string): Promise<Resultat<{ til:
     const til = l.epost ?? l.ansatt_epost;
     if (!til) throw new RegnskapsFeil('Lenken har ingen e-postadresse. Kopier lenken og send den selv.');
     if (!epostPa()) throw new RegnskapsFeil('E-post er ikke koblet til ennå. Kopier lenken og send den selv.');
-    const ok = await sendEpost({ til, ...maler.skannelenke({ navn: l.ansatt_navn ?? l.navn, foretak: s.org.navn, type: l.type, lenke: `${await grunnadresse()}/skann/${l.token}` }), svarTil: s.bruker.epost });
+    const url = `${await grunnadresse()}/skann/${l.token}`;
+    const ok = await sendEpost({ til, ...maler.skannelenke({ navn: l.ansatt_navn ?? l.navn, foretak: s.org.navn, type: l.type, lenke: url, qr: true }), svarTil: s.bruker.epost, vedlegg: [await qrVedlegg(url)] });
     if (!ok) throw new RegnskapsFeil('E-posten kunne ikke sendes. Prøv igjen om litt.');
     return { til };
   }, 'Lenken er sendt.');
@@ -959,7 +985,7 @@ export async function velgForslag(id: string, valg: Valg): Promise<Resultat<{ me
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     if (!/^[0-9a-f-]{36}$/.test(id) || !['utfor', 'vent', 'avbryt'].includes(valg)) throw new RegnskapsFeil('Ugyldig valg.');
-    const r = await utforForslag(await getDb(), { orgId: s.org.id, brukerId: s.bruker.id, brukerEpost: s.bruker.epost, foretak: s.org.navn, idag: idag() }, id, valg);
+    const r = await utforForslag(await getDb(), { orgId: s.org.id, brukerId: s.bruker.id, brukerEpost: s.bruker.epost, brukerNavn: s.bruker.navn, foretak: s.org.navn, idag: idag(), grunnadresse: await grunnadresse() }, id, valg);
     revalidatePath('/', 'layout');
     return r;
   });
@@ -1010,6 +1036,28 @@ export async function settAiLeverandor(l: Leverandor): Promise<Resultat> {
     await settLeverandor(await getDb(), l);
     revalidatePath('/', 'layout');
   }, 'Byttet.');
+}
+
+// ---------- Din konto ----------
+
+/** Sletter kontoen etter at passordet er bekreftet. Regnskapet blir hos foretaket (oppbevaringsplikt). */
+export async function slettMinKonto(_: unknown, fd: FormData): Promise<Resultat<{ foretak: string[] }>> {
+  const res = await trygt(async () => {
+    const s = await kreverInnlogget();
+    if (String(fd.get('bekreft') ?? '').trim().toUpperCase() !== 'SLETT') throw new RegnskapsFeil('Skriv SLETT for å bekrefte.');
+    const db = await getDb();
+    const b = await db.en<{ passord_hash: string }>('select passord_hash from bruker where id = $1', [s.bruker.id]);
+    if (!b || !(await sjekkPassord(String(fd.get('passord') ?? ''), b.passord_hash))) throw new RegnskapsFeil('Passordet stemmer ikke.');
+    const alene = await db.q<{ id: string; stripe_abonnement: string | null }>(
+      `select o.id, o.stripe_abonnement from organisasjon o join medlemskap m on m.organisasjon_id = o.id where m.bruker_id = $1 and m.rolle = 'eier' and (select count(*) from medlemskap x where x.organisasjon_id = o.id) = 1`, [s.bruker.id]);
+    const r = await db.tx(t => slettKonto(t, s.bruker.id, idag()));
+    // Stopp abonnement på foretak ingen andre bruker lenger.
+    for (const o of alene) if (o.stripe_abonnement) await sigOpp(db, o.id).catch(e => console.error('Avslutt abonnement:', e));
+    await db.q(`insert into logg (bruker_id, handling, ref) values ($1, 'konto_slettet', null)`, [s.bruker.id]).catch(() => {});
+    return r;
+  });
+  if (res.ok) { (await cookies()).delete(SESJON_COOKIE); redirect('/logg-inn?slettet=1'); }
+  return res;
 }
 
 // ---------- Testtilgang ----------

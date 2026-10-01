@@ -18,9 +18,9 @@ type Forslag = Extract<Kort, { type: 'forslag' }>;
 type Valg = 'utfor' | 'vent' | 'avbryt';
 export type Ferdig = (id: string, status: string, melding: string, lenke?: string) => void;
 
-const KNAPP: Record<string, string> = { faktura: 'Send fakturaen', kostnad: 'Før kostnad', betaling: 'Registrer betalingen', purring: 'Send purringen', kreditnota: 'Lag kreditnota', mva: 'Merk som sendt' };
-const TITTEL: Record<string, string> = { faktura: 'Faktura', kostnad: 'Kostnad', betaling: 'Innbetaling', purring: 'Purring', kreditnota: 'Kreditnota', mva: 'MVA-melding' };
-const APNE: Record<string, string> = { faktura: 'Åpne faktura', kostnad: 'Åpne bilag', betaling: 'Åpne faktura', purring: 'Åpne faktura', kreditnota: 'Åpne kreditnota', mva: 'Åpne MVA' };
+const KNAPP: Record<string, string> = { faktura: 'Send fakturaen', kostnad: 'Før kostnad', betaling: 'Registrer betalingen', purring: 'Send purringen', kreditnota: 'Lag kreditnota', mva: 'Merk som sendt', skannelenke: 'Send lenken', invitasjon: 'Send invitasjonen', lonn: 'Kjør lønn', lonnslipp: 'Send lønnslippen', kunde: 'Legg til kunden' };
+const TITTEL: Record<string, string> = { faktura: 'Faktura', kostnad: 'Kostnad', betaling: 'Innbetaling', purring: 'Purring', kreditnota: 'Kreditnota', mva: 'MVA-melding', skannelenke: 'Skannelenke', invitasjon: 'Invitasjon', lonn: 'Lønnskjøring', lonnslipp: 'Lønnslipp', kunde: 'Ny kunde' };
+const APNE: Record<string, string> = { faktura: 'Åpne faktura', kostnad: 'Åpne bilag', betaling: 'Åpne faktura', purring: 'Åpne faktura', kreditnota: 'Åpne kreditnota', mva: 'Åpne MVA', skannelenke: 'Åpne innboksen', invitasjon: 'Åpne brukere', lonn: 'Åpne lønn', lonnslipp: 'Åpne lønn', kunde: 'Åpne' };
 const STATUS: Record<string, [string, string]> = { venter: ['Venter på deg', 'venter'], utfort: ['Lagret', 'utfort'], pa_vent: ['På vent', 'pa_vent'], avbrutt: ['Avbrutt', 'avbrutt'] };
 const UTKAST_ART = new Set(['faktura', 'kostnad']);
 
@@ -65,7 +65,7 @@ export function ForslagKort({ k, onUtvid, onFerdig, onEndre, utlos }: { k: Forsl
   };
   const aapen = status === 'venter';
   const pdf = `/api/assistent/forslag/${k.id}/pdf?s=${status}&last=1`;
-  const harPdf = k.art !== 'kostnad' && k.art !== 'mva';
+  const harPdf = ['faktura', 'betaling', 'purring', 'kreditnota'].includes(k.art);
   // Brukeren skrev «send»/«vent»/«avbryt» i chatten i stedet for å trykke.
   useEffect(() => { if (utlos && aapen) velg(utlos); }, [utlos]); // eslint-disable-line react-hooks/exhaustive-deps
   const mvaMangler = k.art === 'mva' && Number(d.mangler) > 0;
@@ -104,6 +104,24 @@ export function ForslagKort({ k, onUtvid, onFerdig, onEndre, utlos }: { k: Forsl
   } else if (k.art === 'kreditnota') {
     rader = [['Faktura', `${d.nr} · ${d.kunde}`], ['Grunn', d.grunn]];
     sum = ['Krediteres', d.belop];
+  } else if (k.art === 'skannelenke') {
+    rader = [['Til', d.navn ? `${d.navn} · ${d.epost}` : d.epost], ['Hvem', d.type === 'ansatt' ? 'Ansatt (utlegg og kvitteringer)' : 'Klient (kvitteringer og fakturaer)'], ['Virker', 'Til du sletter lenken']];
+    sum = ['', 0];
+    ekstra = <div className="ak-kort-merknad gul" style={{ margin: 0, background: 'var(--kort-2)', color: 'var(--mut)' }}>E-posten har en QR-kode og en lenke. Bildene de tar, havner i innboksen under Penger ut.</div>;
+  } else if (k.art === 'invitasjon') {
+    rader = [['E-post', d.epost], ['Tilgang', ({ full: 'Full tilgang, kan føre', les: 'Kan se, ikke endre', kvittering: 'Kan bare levere kvitteringer' } as Record<string, string>)[d.rolle] ?? d.rolle]];
+  } else if (k.art === 'lonn') {
+    rader = (d.slipper as { navn: string; brutto: number; netto: number; epost: string | null }[]).map((x): [ReactNode, ReactNode] => [x.navn, `${kr(x.netto)} kr netto`]);
+    rader.push(['Brutto', `${kr(d.sum.brutto)} kr`], ['Skattetrekk', `${kr(d.sum.skatt)} kr`], ['Arbeidsgiveravgift', `${kr(d.sum.aga)} kr`], ['Utbetales', nd(d.utbetalingsdato)],
+      ['Lønnslipper', d.send === 'na' ? 'Sendes med en gang' : d.send === 'ingen' ? 'Sendes ikke' : 'Sendes på utbetalingsdagen']);
+    sum = ['Til utbetaling', d.sum.netto];
+    const adv = (d.slipper as { navn: string; advarsler: string[] }[]).flatMap(x => x.advarsler.map(a => `${x.navn}: ${a}`));
+    if (adv.length) ekstra = <div className="ak-kort-merknad gul">{adv.join(' ')}</div>;
+  } else if (k.art === 'lonnslipp') {
+    rader = [['Ansatt', d.navn], ['Måned', d.periode], ['Sendes til', d.epost]];
+    sum = ['Netto', d.netto];
+  } else if (k.art === 'kunde') {
+    rader = [['Navn', d.navn], ...(d.orgnr ? [['Org.nr', d.orgnr] as [string, string]] : []), ['E-post', d.epost ?? 'Ingen'], ['Adresse', [d.adresse, [d.postnr, d.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', ') || 'Ingen']];
   } else if (k.art === 'mva') {
     rader = [['Termin', d.termin.tittel], ['Frist', nd(d.frist)], ['Status', mvaMangler ? `${d.mangler} ${d.mangler === 1 ? 'bevegelse' : 'bevegelser'} i banken mangler bilag` : 'Alt er klart']];
     sum = [d.aBetale >= 0 ? 'Å betale' : 'Til gode', Math.abs(d.aBetale)];
@@ -116,7 +134,7 @@ export function ForslagKort({ k, onUtvid, onFerdig, onEndre, utlos }: { k: Forsl
         <Linjer rader={rader} />
         {ekstra}
       </div>
-      <div className="ak-kort-sum"><span>{sum[0]}</span><span className="tall">{kr(sum[1])} kr</span></div>
+      {sum[0] && <div className="ak-kort-sum"><span>{sum[0]}</span><span className="tall">{kr(sum[1])} kr</span></div>}
       {aapen && (
         <div className="ak-kort-knapper">
           <button type="button" className="ak-knapp hoved" disabled={!!venter || mvaMangler} onClick={() => velg('utfor')}>{venter === 'utfor' ? 'Et øyeblikk …' : KNAPP[k.art]}</button>
@@ -224,7 +242,9 @@ export function Liste({ k }: { k: Extract<Kort, { type: 'liste' }> }) {
     <Ramme tittel={k.tittel}>
       <div className="ak-tabell">
         {k.rader.map(r => {
-          const innhold = <><span className="fyll"><span className="ak-rad-navn">{r.navn}</span><span className="ak-bar"><span style={{ width: `${(Math.abs(r.belop) / maks) * 100}%` }} className={r.belop < 0 ? 'ut' : 'inn'} /></span></span><span className="tall">{kr(r.belop)}</span></>;
+          const innhold = r.tekst != null
+            ? <><span className="fyll"><span className="ak-rad-navn">{r.navn}</span></span><span className="tall">{r.tekst}</span></>
+            : <><span className="fyll"><span className="ak-rad-navn">{r.navn}</span><span className="ak-bar"><span style={{ width: `${(Math.abs(r.belop) / maks) * 100}%` }} className={r.belop < 0 ? 'ut' : 'inn'} /></span></span><span className="tall">{kr(r.belop)}</span></>;
           return r.lenke ? <Link key={r.navn} href={r.lenke} className="ak-rad">{innhold}</Link> : <div key={r.navn} className="ak-rad statisk">{innhold}</div>;
         })}
       </div>

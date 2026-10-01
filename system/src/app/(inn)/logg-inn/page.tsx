@@ -3,15 +3,17 @@ import { redirect } from 'next/navigation';
 import { Logo } from '@/components/Logo';
 import { sesjon, db } from '@/lib/server';
 import { LoggInnSkjema } from './skjema';
+import { UferdigRegistrering } from '@/components/UferdigRegistrering';
 import { demoInn } from '@/app/handlinger';
 
 export const metadata = { title: 'Logg inn' };
 
-export default async function LoggInn({ searchParams }: { searchParams: Promise<{ neste?: string }> }) {
-  const { neste: n } = await searchParams;
+export default async function LoggInn({ searchParams }: { searchParams: Promise<{ neste?: string; slettet?: string }> }) {
+  const { neste: n, slettet } = await searchParams;
   const neste = n && /^\/invitasjon\/[\w-]+$/.test(n) ? n : undefined;
   const s = await sesjon();
-  if (s) redirect(neste ?? '/');
+  const uferdig = s && !s.bruker.epostBekreftet ? s.bruker.epost : null;
+  if (s && !uferdig) redirect(neste ?? '/');
   const d = await db();
   return (
     <main className="midt">
@@ -19,6 +21,8 @@ export default async function LoggInn({ searchParams }: { searchParams: Promise<
         <div style={{ marginBottom: 28 }}><Logo bredde={130} /></div>
         <h1>Logg inn</h1>
         <p className="mut" style={{ marginTop: 8 }}>Regnskap som sjekker seg selv.</p>
+        {slettet && <div className="varsel gronn liten" style={{ marginTop: 18 }}>Kontoen er slettet. Takk for at du brukte Rettført.</div>}
+        {uferdig && <UferdigRegistrering epost={uferdig} />}
         {d.modus === 'testmodus' ? (
           <>
             <div className="testmodus" style={{ marginTop: 18 }}>Testmodus: alt er eksempeldata og nullstilles med jevne mellomrom. Du trenger ikke passord.</div>

@@ -19,7 +19,12 @@ Slik jobber du:
 - Er beløpet oppgitt «inkl. MVA» for en faktura, regn om til pris eks. MVA før du bruker lag_faktura.
 - Vil brukeren se oversikter, bruk vis_-verktøyene: de viser grafer og tabeller brukeren kan trykke på. Kommenter kort det viktigste.
 - Generelle spørsmål (regnskapsregler, skatt, MVA-satser, frister, dato, klokke, hverdagslige spørsmål) svarer du på selv. Satser og grenser kan endres hvert år: si det når det er relevant, og vis til skatteetaten.no for detaljer.
-- Lønn kan du ikke kjøre ennå. Vis til Lønn-siden.
+- Lønn: bruk vis_lonn for å se ansatte og tidligere kjøringer, kjor_lonn for å lage et forslag (timer/overtid/provisjon per ansatt der det trengs; spør om timer for timelønnede), og send_lonnslipp for å sende en slipp på e-post.
+- Skannelenke/QR-kode: send_skannelenke sender en lenke med QR-kode på e-post til en klient eller ansatt, så de kan ta bilde av kvitteringer med mobilen.
+- Invitere noen til foretaket: inviter_bruker. Ny kunde som ikke finnes: ny_kunde, og lag fakturaen etterpå.
+- Frister: vis_frister. Kvitteringer leses best under Penger ut, der brukeren laster opp bildet.
+- Er noe utenfor det verktøyene kan, si det kort og vis til riktig side i systemet (Penger inn, Penger ut, Bank, Lønn, Rapporter, MVA, Frister, Innstillinger).
+- Tenk ett steg frem: tilby det naturlige neste steget (f.eks. purring når noe er forfalt, faktura etter ny kunde).
 ${o.kanEndre ? '' : '- Brukeren har bare lesetilgang. Du kan vise tall, men ikke lage forslag som endrer noe.\n'}- Du er «Rettførts assistent». Ikke nevn hvilken AI-modell eller leverandør du bygger på.`;
 }
 
@@ -32,7 +37,7 @@ export async function svarSomAgent(k: Ktx, kontekst: Parameters<typeof systemtek
     ...historikk.slice(-14).map(t => ({ role: t.role, content: t.content.slice(0, 4000) })),
   ];
   const kort: Kort[] = [];
-  for (let runde = 0; runde < 6; runde++) {
+  for (let runde = 0; runde < 8; runde++) {
     const m = await spor(leverandor, meldinger, VERKTOY);
     meldinger.push({ role: 'assistant', content: m.content ?? '', tool_calls: m.tool_calls });
     if (!m.tool_calls?.length) return { tekst: (m.content ?? '').trim(), kort };

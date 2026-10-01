@@ -8,15 +8,20 @@ import { registrerKjop, lagreKjopUtkast } from '../tjenester/kjop';
 import { sendMva, type Termin } from '../tjenester/mva';
 import { fakturaPdf } from '../tjenester/fakturaPdf';
 import { lagFakturaPdf, type PdfData } from '../pdf';
-import { sendEpost, maler } from '../epost';
+import { sendEpost, maler, qrVedlegg } from '../epost';
 import { kr } from '../penger';
+import { finnEllerLagKontakt } from '../tjenester/kjop';
+import { lagLenke } from '../tjenester/innsending';
+import { kjorLonn, type LonnInput } from '../tjenester/lonn';
+import { planleggUtsending, sendForfalte, type SendNar } from '../tjenester/lonnslipp';
+import { randomBytes } from 'node:crypto';
 
 export type Valg = 'utfor' | 'vent' | 'avbryt';
 
 /** Hvilke forslag som kan settes på vent som utkast på sin egen side. De andre venter på Hjem. */
 export const UTKAST: Record<string, string> = { faktura: '/salg', kostnad: '/kjop' };
 
-export async function utforForslag(db: Db, o: { orgId: string; brukerId: string; brukerEpost: string; foretak: string; idag: string }, id: string, valg: Valg): Promise<{ melding: string; lenke?: string; status: string }> {
+export async function utforForslag(db: Db, o: { orgId: string; brukerId: string; brukerEpost: string; brukerNavn?: string; foretak: string; idag: string; grunnadresse?: string }, id: string, valg: Valg): Promise<{ melding: string; lenke?: string; status: string }> {
   const f = await db.en<{ id: string; art: string; data: Record<string, unknown> | string; status: string }>('select id, art, data, status from ai_forslag where id = $1 and organisasjon_id = $2', [id, o.orgId]);
   if (!f) throw new RegnskapsFeil('Fant ikke forslaget.');
   if (!['venter', 'pa_vent'].includes(f.status)) throw new RegnskapsFeil(f.status === 'utfort' ? 'Dette er allerede gjort.' : 'Forslaget er avbrutt.');
@@ -86,6 +91,53 @@ export async function utforForslag(db: Db, o: { orgId: string; brukerId: string;
     const r = await db.tx(t => sendMva(t, o.orgId, d.termin as Termin, o.brukerId));
     await ferdig('utfort', { aBetale: r.aBetale });
     return { melding: `MVA-meldingen er markert som sendt og ført. ${r.aBetale >= 0 ? `Betal ${kr(r.aBetale)} kr` : `Du får ${kr(-r.aBetale)} kr tilbake`}. Husk å levere tallene i Altinn.`, lenke: '/mva', status: 'utfort' };
+  }
+  const base = o.grunnadresse ?? 'https://min.xn--rettfrt-u1a.no';
+  if (f.art === 'skannelenke') {
+    const type = d.type === 'ansatt' ? 'ansatt' : 'klient';
+    const { token } = await db.tx(t => lagLenke(t, o.orgId, { type, ansattId: (d.ansattId as string | null) ?? null, navn: (d.navn as string | null) ?? null, epost: String(d.epost), brukerId: o.brukerId }));
+    const url = `${base}/skann/${token}`;
+    const sendt = await sendEpost({ til: String(d.epost), ...maler.skannelenke({ navn: (d.navn as string | null) ?? null, foretak: o.foretak, type, lenke: url, qr: true }), svarTil: o.brukerEpost, vedlegg: [await qrVedlegg(url)] });
+    await ferdig('utfort', { url, sendt });
+    return { melding: sendt ? `Lenken med QR-kode er sendt til ${d.epost}. Bildene havner i innboksen under Penger ut.` : `Lenken er laget, men e-posten kunne ikke sendes. Kopier lenken fra Penger ut → Innboks og send den selv.`, lenke: '/kjop/innboks', status: 'utfort' };
+  }
+  if (f.art === 'invitasjon') {
+    const rolle = String(d.rolle);
+    const token = randomBytes(18).toString('base64url');
+    await db.q('insert into invitasjon (organisasjon_id, epost, rolle, token) values ($1,$2,$3,$4)', [o.orgId, String(d.epost), rolle, token]);
+    const sendt = await sendEpost({ til: String(d.epost), ...maler.invitasjon(o.brukerNavn ?? o.foretak, o.foretak, rolle === 'full' ? 'med full tilgang' : rolle === 'les' ? 'med lesetilgang' : 'for å levere kvitteringer', `${base}/invitasjon/${token}`), svarTil: o.brukerEpost });
+    await ferdig('utfort', { sendt });
+    return { melding: sendt ? `Invitasjonen er sendt til ${d.epost}.` : `Invitasjonen er laget, men e-posten kunne ikke sendes. Lenken finner du under Innstillinger → Brukere.`, lenke: '/innstillinger?vis=brukere', status: 'utfort' };
+  }
+  if (f.art === 'lonn') {
+    const send = (['na', 'utbetaling', 'ingen'].includes(String(d.send)) ? d.send : 'utbetaling') as SendNar;
+    const r = await db.tx(async t => {
+      const k = await kjorLonn(t, o.orgId, String(d.periode), String(d.utbetalingsdato), d.input as LonnInput[], o.brukerId);
+      await planleggUtsending(t, k.id, send, String(d.utbetalingsdato));
+      return k;
+    });
+    const u = send === 'na' ? await sendForfalte(db, base, o.orgId) : { sendt: [], feilet: [] };
+    await ferdig('utfort', { bilagNr: r.bilagNr });
+    const om = send === 'na' ? (u.sendt.length ? ` Lønnslipper sendt til ${u.sendt.length}.` : ' Lønnslippene kunne ikke sendes nå.') : send === 'utbetaling' ? ' Lønnslippene sendes på utbetalingsdagen.' : '';
+    return { melding: `Lønn for ${d.periode} er kjørt og ført som bilag ${r.bilagNr}.${om} Husk a-meldingen innen den 5.`, lenke: '/lonn?vis=historikk', status: 'utfort' };
+  }
+  if (f.art === 'lonnslipp') {
+    const r = await db.en<{ id: string }>(`select ls.id from lonnslipp ls join lonnskjoring l on l.id = ls.lonnskjoring_id where l.organisasjon_id = $1 and l.periode = $2 and ls.ansatt_id = $3`, [o.orgId, String(d.periode), String(d.ansattId)]);
+    if (!r) throw new RegnskapsFeil('Fant ikke lønnslippen.');
+    await db.q('update lonnslipp set send_etter = now(), sendt_tid = null where id = $1', [r.id]);
+    const u = await sendForfalte(db, base, o.orgId);
+    if (!u.sendt.length) throw new RegnskapsFeil('Lønnslippen kunne ikke sendes. Sjekk at e-post er koblet til, og prøv igjen.');
+    await ferdig('utfort', {});
+    return { melding: `Lønnslippen for ${d.periode} er sendt til ${d.epost}.`, lenke: '/lonn?vis=historikk', status: 'utfort' };
+  }
+  if (f.art === 'kunde') {
+    const kid = await db.tx(async t => {
+      const id = await finnEllerLagKontakt(t, o.orgId, 'kunde', String(d.navn), (d.orgnr as string | null) ?? null, { adresse: (d.adresse as string) ?? undefined, postnr: (d.postnr as string) ?? undefined, poststed: (d.poststed as string) ?? undefined, epost: (d.epost as string) ?? undefined });
+      if (d.epost) await t.q('update kontakt set epost = coalesce(epost, $2) where id = $1', [id, d.epost]);
+      return id;
+    });
+    await ferdig('utfort', { kontaktId: kid });
+    return { melding: `${d.navn} er lagt til som kunde. Be meg lage fakturaen nå.`, status: 'utfort' };
   }
   throw new RegnskapsFeil('Ukjent forslag.');
 }

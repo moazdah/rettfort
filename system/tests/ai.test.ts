@@ -152,6 +152,60 @@ describe('assistenten som agent', () => {
   });
 });
 
+describe('nye verktøy: lønn, skannelenke, invitasjon, kunde, frister', () => {
+  it('kjører lønn som forslag og utfører den', async () => {
+    const v = await kjorVerktoy(k, 'vis_lonn', {});
+    const ansatte = (v.svar as { ansatte: { navn: string; lonnstype: string }[] }).ansatte;
+    expect(ansatte.length).toBeGreaterThan(0);
+    const timelonn = ansatte.filter(x => x.lonnstype === 'time').map(x => ({ navn: x.navn, timer: 100 }));
+    const f = forslag(await kjorVerktoy(k, 'kjor_lonn', { periode: '2026-10', ansatte: timelonn, send_slipper: 'ingen' }));
+    const d = f.data as { utbetalingsdato: string; sum: { netto: number; brutto: number } };
+    expect(d.utbetalingsdato.startsWith('2026-10-')).toBe(true);
+    expect(d.sum.netto).toBeGreaterThan(0);
+    expect((await kjorVerktoy(k, 'kjor_lonn', { ansatte: [{ navn: 'Finnes Ikke' }] })).svar).toHaveProperty('feil');
+    const r = await utforForslag(db, o(), f.id, 'utfor');
+    expect(r.melding).toMatch(/Lønn for 2026-10 er kjørt/);
+    expect((await kjorVerktoy(k, 'kjor_lonn', { periode: '2026-10' })).svar).toHaveProperty('feil');
+    expect(balanse(await hentPosteringer(db, org), '2026-12-31').differanse).toBe(0);
+  });
+
+  it('sender lønnslipp, skannelenke og invitasjon på e-post', async () => {
+    const navn = (await db.en<{ navn: string }>(`select a.navn from lonnslipp ls join ansatt a on a.id = ls.ansatt_id join lonnskjoring l on l.id = ls.lonnskjoring_id where l.organisasjon_id = $1 and a.epost is not null order by l.periode desc limit 1`, [org]))?.navn;
+    if (navn) {
+      const ls = forslag(await kjorVerktoy(k, 'send_lonnslipp', { navn }));
+      expect((ls.data as { epost: string }).epost).toMatch(/@/);
+    }
+    const sl = forslag(await kjorVerktoy(k, 'send_skannelenke', { type: 'klient', navn: 'Per Klient', epost: 'per@example.com' }));
+    const r = await utforForslag(db, { ...o(), grunnadresse: 'https://min.test' }, sl.id, 'utfor');
+    expect(r.melding).toMatch(/QR-kode er sendt til per@example.com/);
+    expect(await db.en(`select 1 from skannelenke where organisasjon_id = $1 and epost = 'per@example.com'`, [org])).toBeTruthy();
+    const kall = (sendEpost as unknown as { mock: { calls: [{ vedlegg?: { cid?: string }[]; html?: string }][] } }).mock.calls.at(-1)![0];
+    expect(kall.vedlegg?.[0]?.cid).toBe('qr-kode');
+    expect(kall.html).toContain('cid:qr-kode');
+    expect((await kjorVerktoy(k, 'send_skannelenke', { type: 'klient' })).svar).toHaveProperty('feil');
+
+    const inv = forslag(await kjorVerktoy(k, 'inviter_bruker', { epost: 'ny@example.com', rolle: 'les' }));
+    expect((await utforForslag(db, o(), inv.id, 'utfor')).melding).toMatch(/Invitasjonen er sendt/);
+    expect(await db.en(`select 1 from invitasjon where organisasjon_id = $1 and epost = 'ny@example.com' and rolle = 'les'`, [org])).toBeTruthy();
+  });
+
+  it('legger til ny kunde og viser frister', async () => {
+    const kf = forslag(await kjorVerktoy(k, 'ny_kunde', { navn: 'Nordlys Testkunde AS', epost: 'post@nordlys.no', postnr: '9008', poststed: 'Tromsø' }));
+    await utforForslag(db, o(), kf.id, 'utfor');
+    const sok = (await kjorVerktoy(k, 'sok_kunde', { sok: 'Nordlys Testkunde' })).svar as { epost: string }[];
+    expect(sok[0].epost).toBe('post@nordlys.no');
+    expect((await kjorVerktoy(k, 'ny_kunde', { navn: 'Nordlys Testkunde AS' })).svar).toHaveProperty('info');
+    const fr = await kjorVerktoy(k, 'vis_frister', {});
+    expect(fr.kort?.type).toBe('liste');
+    expect(((fr.kort as { rader: { tekst?: string }[] }).rader[0].tekst ?? '')).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
+  });
+
+  it('lesetilgang kan ikke kjøre lønn eller invitere', async () => {
+    for (const v of ['kjor_lonn', 'inviter_bruker', 'send_skannelenke', 'ny_kunde', 'send_lonnslipp'])
+      expect((await kjorVerktoy({ ...k, kanEndre: false }, v, {})).svar).toHaveProperty('feil');
+  });
+});
+
 describe('tidligere samtaler', () => {
   it('lagres per bruker, kan søkes i og får oppdatert status på forslag', async () => {
     const { lagreSamtale, listSamtaler, hentSamtale } = await import('@/lib/ai/samtale');

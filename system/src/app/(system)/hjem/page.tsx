@@ -33,6 +33,11 @@ export default async function Hjem() {
     if (v.art === 'purring') return { id: v.id, art: v.art, tittel: 'Purring', tekst: `Faktura ${x.nr} til ${x.kunde}, ${kr(x.rest)} kr, sendes til ${x.epost}`, knapp: 'Send' };
     if (v.art === 'betaling') return { id: v.id, art: v.art, tittel: 'Betaling', tekst: `Innbetaling på faktura ${x.nr} fra ${x.kunde}, ${kr(x.belop)} kr`, knapp: 'Registrer' };
     if (v.art === 'kreditnota') return { id: v.id, art: v.art, tittel: 'Kreditnota', tekst: `Faktura ${x.nr} til ${x.kunde}, ${kr(x.belop)} kr. ${x.grunn}`, knapp: 'Lag kreditnota' };
+    if (v.art === 'skannelenke') return { id: v.id, art: v.art, tittel: 'Lenke', tekst: `Skannelenke til ${x.navn ? `${x.navn}, ` : ''}${x.epost}`, knapp: 'Send' };
+    if (v.art === 'invitasjon') return { id: v.id, art: v.art, tittel: 'Invitasjon', tekst: `Inviter ${x.epost}`, knapp: 'Send' };
+    if (v.art === 'lonn') return { id: v.id, art: v.art, tittel: 'Lønn', tekst: `Lønn ${x.periode}: ${kr(x.sum?.netto ?? 0)} kr til utbetaling ${String(x.utbetalingsdato ?? '').split('-').reverse().join('.')}`, knapp: 'Kjør lønn' };
+    if (v.art === 'lonnslipp') return { id: v.id, art: v.art, tittel: 'Lønnslipp', tekst: `Lønnslipp ${x.periode} til ${x.navn} (${x.epost})`, knapp: 'Send' };
+    if (v.art === 'kunde') return { id: v.id, art: v.art, tittel: 'Kunde', tekst: `Ny kunde: ${x.navn}`, knapp: 'Legg til' };
     return { id: v.id, art: v.art, tittel: 'MVA', tekst: `${x.termin?.tittel ?? 'MVA-melding'}: ${x.aBetale >= 0 ? 'betal' : 'til gode'} ${kr(Math.abs(x.aBetale))} kr`, knapp: 'Merk som sendt', sperret: mva && mva.antallMangler > 0 && x.termin?.tittel === mva.termin.tittel ? 'Noe mangler bilag. Se MVA-siden.' : undefined };
   });
   const ubetalt = await d.en<{ n: number }>(`select count(*)::int as n from kjop where organisasjon_id = $1 and status = 'registrert'`, [s.org.id]);

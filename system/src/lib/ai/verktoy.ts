@@ -12,6 +12,8 @@ import { hentOrg, forfallFra } from '../tjenester/faktura';
 import { finnDuplikat } from '../tjenester/kjop';
 import { foreslaKonto, konto as finnKonto, kontoType } from '../kontoplan';
 import { splittBrutto } from '../penger';
+import { forhandsvisLonn, type LonnInput } from '../tjenester/lonn';
+import { nesteFrister } from '../tjenester/oversikt';
 
 export interface Ktx { db: Db; orgId: string; brukerId: string; idag: string; kanEndre: boolean }
 
@@ -19,9 +21,9 @@ export type Kort =
   | { type: 'forslag'; id: string; art: Art; status: string; data: Record<string, unknown>; melding?: string; lenke?: string }
   | { type: 'graf_maned'; ar: number; maneder: { maned: number; inn: number; ut: number; resultat: number; topp: { navn: string; belop: number }[]; bilag: number }[] }
   | { type: 'tabell_fakturaer'; tittel: string; rader: { id: string; nr: number; kunde: string; forfall: string | null; rest: number; forfalt: boolean }[] }
-  | { type: 'liste'; tittel: string; rader: { navn: string; belop: number; lenke?: string }[] };
+  | { type: 'liste'; tittel: string; rader: { navn: string; belop: number; tekst?: string; lenke?: string }[] };
 
-export type Art = 'faktura' | 'kostnad' | 'betaling' | 'purring' | 'kreditnota' | 'mva';
+export type Art = 'faktura' | 'kostnad' | 'betaling' | 'purring' | 'kreditnota' | 'mva' | 'skannelenke' | 'invitasjon' | 'lonn' | 'lonnslipp' | 'kunde';
 
 const tall = (v: unknown, navn: string) => { const n = Number(v); if (!Number.isFinite(n)) throw new RegnskapsFeil(`Mangler ${navn}.`); return n; };
 const ore = (kr: unknown, navn: string) => Math.round(tall(kr, navn) * 100);
@@ -47,9 +49,20 @@ export const VERKTOY: Verktoy[] = [
   { type: 'function', function: { name: 'send_purring', description: 'Forslag om å sende purring (betalingspåminnelse) på en forfalt faktura.', parameters: { type: 'object', properties: { faktura_nr: { type: 'integer' } }, required: ['faktura_nr'] } } },
   { type: 'function', function: { name: 'lag_kreditnota', description: 'Forslag om kreditnota på en faktura, helt eller delvis.', parameters: { type: 'object', properties: { faktura_nr: { type: 'integer' }, grunn: { type: 'string' }, belop: { type: 'number', description: 'Kroner inkl. MVA. Tom = hele fakturaen' } }, required: ['faktura_nr', 'grunn'] } } },
   { type: 'function', function: { name: 'mva_status', description: 'Viser MVA-meldingen for gjeldende termin: tallene, hva som mangler og beløpet, som et kort brukeren kan sende fra.', parameters: { type: 'object', properties: {} } } },
+  { type: 'function', function: { name: 'vis_lonn', description: 'Ansatte (lønnstype, månedslønn/timesats, skatteprosent, e-post) og de siste lønnskjøringene. Bruk før kjor_lonn og send_lonnslipp.', parameters: { type: 'object', properties: {} } } },
+  { type: 'function', function: { name: 'kjor_lonn', description: 'Lager et forslag til lønnskjøring for en måned. Brukeren ser hver lønnslipp og trykker Kjør lønn. Timer/overtid/provisjon oppgis per ansatt der det trengs.', parameters: { type: 'object', properties: {
+    periode: { type: 'string', description: 'ÅÅÅÅ-MM, standard inneværende måned' }, utbetalingsdato: { type: 'string', description: 'ÅÅÅÅ-MM-DD, standard lønningsdagen' },
+    ansatte: { type: 'array', items: { type: 'object', properties: { navn: { type: 'string' }, timer: { type: 'number' }, overtid_timer: { type: 'number' }, provisjon_grunnlag_kr: { type: 'number' } }, required: ['navn'] } },
+    send_slipper: { type: 'string', enum: ['utbetaling', 'na', 'ingen'], description: 'Når lønnslippene sendes på e-post. Standard: på utbetalingsdagen.' },
+  } } } },
+  { type: 'function', function: { name: 'send_lonnslipp', description: 'Forslag om å sende lønnslippen for en måned på e-post til en ansatt.', parameters: { type: 'object', properties: { navn: { type: 'string' }, periode: { type: 'string', description: 'ÅÅÅÅ-MM, standard siste kjørte' } }, required: ['navn'] } } },
+  { type: 'function', function: { name: 'send_skannelenke', description: 'Forslag om å sende en lenke (med QR-kode) på e-post, så en klient eller ansatt kan ta bilde av kvitteringer med mobilen. Ansatt: bruk navnet fra vis_lonn.', parameters: { type: 'object', properties: { type: { type: 'string', enum: ['klient', 'ansatt'] }, navn: { type: 'string' }, epost: { type: 'string' } }, required: ['type'] } } },
+  { type: 'function', function: { name: 'inviter_bruker', description: 'Forslag om å invitere noen til foretaket. rolle: full (kan føre), les (kan se), kvittering (kan bare levere kvitteringer).', parameters: { type: 'object', properties: { epost: { type: 'string' }, rolle: { type: 'string', enum: ['full', 'les', 'kvittering'] } }, required: ['epost', 'rolle'] } } },
+  { type: 'function', function: { name: 'ny_kunde', description: 'Forslag om å legge til en ny kunde. Bruk når sok_kunde ikke finner kunden og brukeren vil fakturere den.', parameters: { type: 'object', properties: { navn: { type: 'string' }, epost: { type: 'string' }, adresse: { type: 'string' }, postnr: { type: 'string' }, poststed: { type: 'string' }, orgnr: { type: 'string' } }, required: ['navn'] } } },
+  { type: 'function', function: { name: 'vis_frister', description: 'De neste fristene (MVA, a-melding, skattetrekk, årsoppgjør) med dato.', parameters: { type: 'object', properties: {} } } },
 ];
 
-const ENDRER = new Set(['lag_faktura', 'registrer_kostnad', 'registrer_innbetaling', 'send_purring', 'lag_kreditnota']);
+const ENDRER = new Set(['lag_faktura', 'registrer_kostnad', 'registrer_innbetaling', 'send_purring', 'lag_kreditnota', 'kjor_lonn', 'send_lonnslipp', 'send_skannelenke', 'inviter_bruker', 'ny_kunde']);
 
 async function lagreForslag(k: Ktx, art: Art, data: Record<string, unknown>): Promise<Kort> {
   const r = await k.db.en<{ id: string }>('insert into ai_forslag (organisasjon_id, bruker_id, art, data) values ($1,$2,$3,$4) returning id', [k.orgId, k.brukerId, art, JSON.stringify(data)]);
@@ -164,6 +177,94 @@ export async function kjorVerktoy(k: Ktx, navn: string, a: Record<string, unknow
       if (belop <= 0 || belop > f.total) return { svar: { feil: 'Beløpet må være mellom 0 og fakturaens total.' } };
       const kort = await lagreForslag(k, 'kreditnota', { fakturaId: f.id, nr: f.nr, kunde: f.kunde, belop, total: f.total, grunn: String(a.grunn ?? '').slice(0, 200) });
       return { svar: { forslag: 'kreditnota', faktura: f.nr, belop_ore: belop }, kort };
+    }
+    case 'vis_lonn': {
+      const ansatte = await k.db.q<{ id: string; navn: string; epost: string | null; lonn_type: string; manedslonn: number; timesats: number; skatteprosent: number; stillingsprosent: number }>(
+        `select id, navn, epost, lonn_type, manedslonn, timesats, skatteprosent, stillingsprosent from ansatt where organisasjon_id = $1 and aktiv order by navn`, [k.orgId]);
+      const kj = await k.db.q<{ periode: string; utbetalingsdato: string; brutto: number; netto: number; skatt: number; aga: number }>(
+        `select periode, utbetalingsdato::text as utbetalingsdato, brutto, netto, skatt, aga from lonnskjoring where organisasjon_id = $1 order by periode desc limit 6`, [k.orgId]);
+      const org = await k.db.en<{ lonningsdag: number | null }>('select lonningsdag from organisasjon where id = $1', [k.orgId]);
+      return {
+        svar: { ansatte: ansatte.map(a => ({ navn: a.navn, epost: a.epost, lonnstype: a.lonn_type, manedslonn_ore: Number(a.manedslonn), timesats_ore: Number(a.timesats), skatteprosent: Number(a.skatteprosent), stillingsprosent: Number(a.stillingsprosent) })), siste_kjoringer: kj.map(x => ({ ...x, brutto: Number(x.brutto), netto: Number(x.netto), skatt: Number(x.skatt), aga: Number(x.aga) })), lonningsdag: org?.lonningsdag ?? null, merk: 'Øre.' },
+        kort: { type: 'liste', tittel: 'Lønn', rader: kj.length ? kj.map(x => ({ navn: `Lønn ${x.periode} (brutto)`, belop: Number(x.brutto), lenke: '/lonn?vis=historikk' })) : ansatte.map(a => ({ navn: `${a.navn} (${a.lonn_type === 'time' ? 'timelønn' : a.lonn_type === 'provisjon' ? 'provisjon' : 'fastlønn'})`, belop: Number(a.lonn_type === 'time' ? a.timesats : a.manedslonn), lenke: '/lonn' })) },
+      };
+    }
+    case 'kjor_lonn': {
+      const periode = typeof a.periode === 'string' && /^\d{4}-\d{2}$/.test(a.periode) ? a.periode : k.idag.slice(0, 7);
+      if (await k.db.en('select 1 from lonnskjoring where organisasjon_id = $1 and periode = $2', [k.orgId, periode])) return { svar: { feil: `Lønn for ${periode} er allerede kjørt.` } };
+      const ansatte = await k.db.q<{ id: string; navn: string; epost: string | null }>('select id, navn, epost from ansatt where organisasjon_id = $1 and aktiv order by navn', [k.orgId]);
+      if (!ansatte.length) return { svar: { feil: 'Foretaket har ingen ansatte. Legg dem til under Lønn.' } };
+      const inn: LonnInput[] = [];
+      for (const x of (Array.isArray(a.ansatte) ? a.ansatte : []) as Record<string, unknown>[]) {
+        const n = String(x.navn ?? '').toLowerCase().trim();
+        const treff = ansatte.filter(y => y.navn.toLowerCase().includes(n));
+        if (treff.length !== 1) return { svar: { feil: treff.length ? `Flere ansatte heter «${x.navn}». Bruk fullt navn.` : `Fant ingen ansatt som heter «${x.navn}».` } };
+        inn.push({ ansattId: treff[0].id, timer: x.timer != null ? Number(x.timer) : undefined, overtidTimer: x.overtid_timer != null ? Number(x.overtid_timer) : undefined, provisjonGrunnlag: x.provisjon_grunnlag_kr != null ? ore(x.provisjon_grunnlag_kr, 'provisjonsgrunnlag') : undefined });
+      }
+      const slipper = (await forhandsvisLonn(k.db, k.orgId, inn)).filter(x => x.brutto > 0);
+      if (!slipper.length) return { svar: { feil: 'Ingen har lønn med disse tallene. Timelønnede trenger timer.' } };
+      const org = await k.db.en<{ lonningsdag: number | null }>('select lonningsdag from organisasjon where id = $1', [k.orgId]);
+      const [y, m] = periode.split('-').map(Number);
+      const siste = new Date(Date.UTC(y, m, 0)).getUTCDate();
+      const std = `${periode}-${String(Math.min(org?.lonningsdag ?? 20, siste)).padStart(2, '0')}`;
+      const utbetalingsdato = dato(a.utbetalingsdato, std);
+      const send = ['na', 'utbetaling', 'ingen'].includes(String(a.send_slipper)) ? String(a.send_slipper) : 'utbetaling';
+      const sum = (f: 'brutto' | 'skatt' | 'netto' | 'aga' | 'feriepenger') => slipper.reduce((s2, x) => s2 + x[f], 0);
+      const data = { periode, utbetalingsdato, send, input: inn, slipper: slipper.map(x => ({ navn: x.navn, brutto: x.brutto, skatt: x.skatt, netto: x.netto, epost: ansatte.find(y => y.id === x.ansattId)?.epost ?? null, advarsler: x.advarsler })), sum: { brutto: sum('brutto'), skatt: sum('skatt'), netto: sum('netto'), aga: sum('aga'), feriepenger: sum('feriepenger') } };
+      const kort = await lagreForslag(k, 'lonn', data);
+      return { svar: { forslag: 'lonn', periode, utbetalingsdato, ansatte: data.slipper.map(x => ({ navn: x.navn, netto_ore: x.netto })), sum_netto_ore: data.sum.netto, merk: 'Kortet vises med Kjør lønn / Sett på vent.' }, kort };
+    }
+    case 'send_lonnslipp': {
+      const n = String(a.navn ?? '').toLowerCase().trim();
+      const r = await k.db.q<{ ansatt_id: string; navn: string; epost: string | null; periode: string; netto: number }>(
+        `select a.id as ansatt_id, a.navn, a.epost, l.periode, ls.netto from lonnslipp ls join lonnskjoring l on l.id = ls.lonnskjoring_id join ansatt a on a.id = ls.ansatt_id
+         where l.organisasjon_id = $1 and lower(a.navn) like $2 ${typeof a.periode === 'string' && /^\d{4}-\d{2}$/.test(a.periode) ? 'and l.periode = $3' : ''} order by l.periode desc limit 5`,
+        typeof a.periode === 'string' && /^\d{4}-\d{2}$/.test(a.periode) ? [k.orgId, `%${n}%`, a.periode] : [k.orgId, `%${n}%`]);
+      if (!r.length) return { svar: { feil: `Fant ingen lønnslipp for «${a.navn}».` } };
+      if (new Set(r.map(x => x.ansatt_id)).size > 1) return { svar: { feil: `Flere ansatte passer: ${[...new Set(r.map(x => x.navn))].join(', ')}. Spør hvem.` } };
+      const x = r[0];
+      if (!x.epost) return { svar: { feil: `${x.navn} har ikke e-post. Legg den inn under Lønn.` } };
+      const kort = await lagreForslag(k, 'lonnslipp', { ansattId: x.ansatt_id, navn: x.navn, epost: x.epost, periode: x.periode, netto: Number(x.netto) });
+      return { svar: { forslag: 'lonnslipp', navn: x.navn, periode: x.periode, til: x.epost }, kort };
+    }
+    case 'send_skannelenke': {
+      const type = a.type === 'ansatt' ? 'ansatt' : 'klient';
+      let navn = a.navn ? String(a.navn).trim() : null;
+      let epost = a.epost ? String(a.epost).trim().toLowerCase() : null;
+      let ansattId: string | null = null;
+      if (type === 'ansatt') {
+        const n = (navn ?? '').toLowerCase();
+        const treff = await k.db.q<{ id: string; navn: string; epost: string | null }>('select id, navn, epost from ansatt where organisasjon_id = $1 and aktiv and lower(navn) like $2', [k.orgId, `%${n}%`]);
+        if (treff.length !== 1) return { svar: { feil: treff.length ? `Flere ansatte passer: ${treff.map(t2 => t2.navn).join(', ')}.` : `Fant ingen ansatt som heter «${navn ?? ''}».` } };
+        ansattId = treff[0].id; navn = treff[0].navn; epost = epost ?? treff[0].epost;
+      }
+      if (!epost || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(epost)) return { svar: { feil: 'Trenger en gyldig e-postadresse å sende lenken til.' } };
+      const kort = await lagreForslag(k, 'skannelenke', { type, navn, epost, ansattId });
+      return { svar: { forslag: 'skannelenke', til: epost, type }, kort };
+    }
+    case 'inviter_bruker': {
+      const epost = String(a.epost ?? '').trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(epost)) return { svar: { feil: 'Trenger en gyldig e-postadresse.' } };
+      const rolle = ['full', 'les', 'kvittering'].includes(String(a.rolle)) ? String(a.rolle) : 'les';
+      if (await k.db.en('select 1 from medlemskap m join bruker b on b.id = m.bruker_id where m.organisasjon_id = $1 and b.epost = $2', [k.orgId, epost])) return { svar: { feil: `${epost} har allerede tilgang.` } };
+      const kort = await lagreForslag(k, 'invitasjon', { epost, rolle });
+      return { svar: { forslag: 'invitasjon', epost, rolle }, kort };
+    }
+    case 'ny_kunde': {
+      const navn = String(a.navn ?? '').trim();
+      if (navn.length < 2) return { svar: { feil: 'Trenger navnet på kunden.' } };
+      const epost = a.epost ? String(a.epost).trim().toLowerCase() : null;
+      if (epost && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(epost)) return { svar: { feil: 'E-postadressen ser ikke riktig ut.' } };
+      const postnr = a.postnr ? String(a.postnr).trim() : null;
+      if (postnr && !/^\d{4}$/.test(postnr)) return { svar: { feil: 'Postnummeret skal ha 4 siffer.' } };
+      const finnes = await k.db.en<{ id: string }>(`select id from kontakt where organisasjon_id = $1 and type in ('kunde','begge') and lower(navn) = lower($2)`, [k.orgId, navn]);
+      if (finnes) return { svar: { info: 'Kunden finnes allerede.', kunde_id: finnes.id } };
+      const kort = await lagreForslag(k, 'kunde', { navn, epost, adresse: a.adresse ? String(a.adresse) : null, postnr, poststed: a.poststed ? String(a.poststed) : null, orgnr: a.orgnr ? String(a.orgnr).replace(/\s/g, '') : null });
+      return { svar: { forslag: 'kunde', navn, merk: 'Når brukeren har lagt den til, kan du lage fakturaen (finn kunde_id med sok_kunde).' }, kort };
+    }
+    case 'vis_frister': {
+      const f = (await nesteFrister(k.db, k.orgId, k.idag, 6)).slice(0, 8);
+      return { svar: { frister: f.map(x => ({ dato: x.dato, tittel: x.tittel, beskrivelse: x.beskrivelse })) }, kort: { type: 'liste', tittel: 'Neste frister', rader: f.map(x => ({ navn: x.tittel, belop: 0, tekst: x.dato.split('-').reverse().join('.'), lenke: '/frister' })) } };
     }
     case 'mva_status': {
       const org = await hentOrg(k.db, k.orgId);

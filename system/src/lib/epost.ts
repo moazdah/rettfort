@@ -14,7 +14,8 @@ export interface Epost {
   tekst: string;
   html?: string;
   svarTil?: string | null;
-  vedlegg?: { filnavn: string; innhold: Uint8Array }[];
+  /** cid: vises inne i e-posten (<img src="cid:...">) i stedet for som vedlegg. */
+  vedlegg?: { filnavn: string; innhold: Uint8Array; cid?: string }[];
 }
 
 /** Sender én e-post. Gir false (og logger) hvis den ikke kunne sendes, men kaster aldri. */
@@ -27,7 +28,7 @@ export async function sendEpost(e: Epost): Promise<boolean> {
       body: JSON.stringify({
         from: avsender(), to: [e.til], subject: e.emne, text: e.tekst, html: e.html ?? somHtml(e.tekst),
         ...(e.svarTil ? { reply_to: e.svarTil } : {}),
-        ...(e.vedlegg?.length ? { attachments: e.vedlegg.map(v => ({ filename: v.filnavn, content: Buffer.from(v.innhold).toString('base64') })) } : {}),
+        ...(e.vedlegg?.length ? { attachments: e.vedlegg.map(v => ({ filename: v.filnavn, content: Buffer.from(v.innhold).toString('base64'), ...(v.cid ? { content_id: v.cid } : {}) })) } : {}),
       }),
     });
     if (!r.ok) { console.error('E-post ble ikke sendt:', r.status, await r.text().catch(() => '')); return false; }
@@ -140,7 +141,7 @@ export const maler = {
       bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
     }),
   }),
-  skannelenke: (o: { navn: string | null; foretak: string; type: 'klient' | 'ansatt'; lenke: string }): Mal => {
+  skannelenke: (o: { navn: string | null; foretak: string; type: 'klient' | 'ansatt'; lenke: string; qr?: boolean }): Mal => {
     const ansatt = o.type === 'ansatt';
     const hva = ansatt ? `utlegg til ${o.foretak}` : `kvitteringer og fakturaer til ${o.foretak}`;
     return {
@@ -150,6 +151,7 @@ export const maler = {
         tittel: ansatt ? 'Send utlegg med mobilen' : 'Send bilag med mobilen', forhandsvisning: `Ta bilde av kvitteringen, så er det sendt til ${o.foretak}`,
         innhold: avsnitt(`Hei${o.navn ? ` ${esc(o.navn.split(' ')[0])}` : ''}! Med denne lenken kan du sende ${esc(hva)} rett fra mobilen. Ta bilde av kvitteringen, så er det gjort.`)
           + knapp(ansatt ? 'Send et utlegg' : 'Send en kvittering', o.lenke)
+          + (o.qr ? `<div style="text-align:center;margin:8px 0 18px"><img src="cid:qr-kode" width="180" height="180" alt="QR-kode til lenken" style="display:inline-block;border:1px solid #E4DFD4;border-radius:12px"><div style="font-size:13px;color:#586174;margin-top:6px">Leser du dette på PC-en? Skann koden med mobilkameraet.</div></div>` : '')
           + liten(`${ansatt ? 'Du ser også om utleggene dine er godkjent og betalt. ' : ''}Lenken er personlig. Tips: legg den til på hjemskjermen, så har du den alltid for hånden.`),
         bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
       }),
@@ -170,3 +172,10 @@ export const maler = {
     };
   },
 };
+
+/** QR-kode som PNG, til bruk inne i en e-post (cid: qr-kode). */
+export async function qrVedlegg(lenke: string): Promise<{ filnavn: string; innhold: Uint8Array; cid: string }> {
+  const QR = await import('qrcode');
+  const png = await QR.toBuffer(lenke, { width: 360, margin: 1, color: { dark: '#0B2545', light: '#FFFFFF' } });
+  return { filnavn: 'qr-kode.png', innhold: new Uint8Array(png), cid: 'qr-kode' };
+}

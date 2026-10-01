@@ -11,16 +11,17 @@ import { VisKort } from './AssistentKort';
 const FORSLAG = [
   'Lag en faktura',
   'Hvem har ikke betalt?',
+  'Kjør lønn for denne måneden',
+  'Send en skannelenke til en ansatt',
   'Hvordan går det i år?',
-  'Hvordan ligger vi an med MVA?',
-];
+]
 
 // Korte svar som gjelder det siste forslaget som venter, så man slipper å trykke.
 const UTFOR = /^(ja[,!. ]*)?(godkjenn|godkjent|send( den| det| fakturaen| purringen)?|registrer( den| det)?|før( den| det)?|utfør|kjør( på)?|gjør det|ok,? send)[.! ]*$/i;
 const VENT = /^(sett (den |det )?på vent|vent|ikke ennå|senere)[.! ]*$/i;
 const AVBRYT = /^(avbryt|nei,? avbryt|glem det|slett (den|det))[.! ]*$/i;
 
-const TITTEL: Record<string, string> = { faktura: 'fakturaforslag', kostnad: 'kostnadsforslag', betaling: 'innbetaling', purring: 'purring', kreditnota: 'kreditnota', mva: 'MVA-melding' };
+const TITTEL: Record<string, string> = { faktura: 'fakturaforslag', kostnad: 'kostnadsforslag', betaling: 'innbetaling', purring: 'purring', kreditnota: 'kreditnota', mva: 'MVA-melding', skannelenke: 'skannelenke på e-post', invitasjon: 'invitasjon', lonn: 'lønnskjøring', lonnslipp: 'lønnslipp på e-post', kunde: 'ny kunde' };
 const STATUSORD: Record<string, string> = { venter: 'venter på brukeren', utfort: 'utført', pa_vent: 'satt på vent', avbrutt: 'avbrutt' };
 const HUSK = 'rf-assistent';
 

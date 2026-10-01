@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { tolkKvittering, kronerIOrd, gyldigOrgnr } from '@/lib/kvittering.js';
+import { tolkKvittering, kronerIOrd, gyldigOrgnr, stoy } from '@/lib/kvittering.js';
 
 const IDAG = { idag: '2026-10-05' };
 const kiwi = (total = 'TOTALT 163,80', kort = 'Bankkort 163,80', mva = 'Herav MVA 15% 21,37') => [
@@ -142,6 +142,37 @@ describe('hjelpere', () => {
   it('org.nr med kontrollsiffer', () => {
     expect(gyldigOrgnr('983 045 804')).toBe(true);
     expect(gyldigOrgnr('912345678')).toBe(false);
+  });
+});
+
+describe('rot fra tekstgjenkjenningen siles bort', () => {
+  const rotete = [
+    "~ '. ;i |' ,", 'Ae7 rl ~ ;', 'BILTEMA NORGE AS', 'Org.nr 935 948 509 MVA', 'Storgata 12, 9008 Tromsø', 'Tlf 22 00 00 00', 'Dato 26.09.2026 14:12',
+    '7350025000123 DRILLSETT 18V 999,20', 'Pant 2,00', 'xKjrtLq vbnm 0,50', 'TOTALT 1 001,70', 'Herav MVA 25% 200,34', 'Bankkort 1 001,70', 'Takk for handelen!',
+  ].join('\n');
+  it('velger riktig leverandør og hopper over rot, adresse og telefon', () => {
+    const r = tolkKvittering(rotete, IDAG);
+    expect(r.lev).toBe('Biltema Norge AS');
+    expect(r.orgnr).toBe('935948509');
+    expect(r.total).toBe(100170);
+  });
+  it('beskrivelsen har bare lesbare varer, uten strekkode, pant og rot', () => {
+    const r = tolkKvittering(rotete, IDAG);
+    expect(r.beskrivelse).toBe('Drillsett 18v');
+    expect(r.varer.map(v => v.tekst)).not.toContain('xKjrtLq vbnm');
+  });
+  it('leverandør uten kjent kjede: linjen med selskapsform ved org.nr', () => {
+    const r = tolkKvittering(['|| ~~ ,', 'Velkommen!', 'FJELLHEIM SNEKKERSERVICE AS', 'Org.nr 923 456 781', 'Arbeid kjøkken 3 500,00', 'Totalt 4 375,00', 'MVA 25% 875,00'].join('\n'), IDAG);
+    expect(r.lev).toBe('Fjellheim Snekkerservice AS');
+  });
+  it('bare rot gir ingen leverandør, ikke søppel', () => {
+    const r = tolkKvittering(['~|; ., ~', 'rl Ii lI |', 'SUM 120,00'].join('\n'), IDAG);
+    expect(r.lev).toBeNull();
+  });
+  it('stoy() skiller tekst fra rot', () => {
+    expect(stoy('Kaffe Evergood 500g')).toBeLessThan(0.3);
+    expect(stoy("~ '. ;i |' ,")).toBeGreaterThan(0.45);
+    expect(stoy('xKjrtLq vbnm')).toBeGreaterThan(0.45);
   });
 });
 

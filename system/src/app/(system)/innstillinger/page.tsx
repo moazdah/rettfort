@@ -10,10 +10,12 @@ import { trekkInvitasjon } from '@/app/handlinger';
 import { FirmaSkjema, FakturaInnstillinger, Inviter, Pakker, Laas, Apningsbalanse } from './Skjemaer';
 import { stripePa, fullforBetaling, synkAbonnement } from '@/lib/stripe';
 import { INTROPRIS } from '@/lib/pakker';
+import { slettPlan } from '@/lib/tjenester/konto';
+import { SlettKonto } from './SlettKonto';
 
 export const metadata = { title: 'Innstillinger' };
 
-const FANER = [['firma', 'Firma'], ['faktura', 'Faktura'], ['brukere', 'Brukere'], ['sikkerhet', 'Sikkerhet'], ['abonnement', 'Abonnement'], ['avansert', 'Avansert']] as const;
+const FANER = [['firma', 'Firma'], ['faktura', 'Faktura'], ['brukere', 'Brukere'], ['sikkerhet', 'Sikkerhet'], ['abonnement', 'Abonnement'], ['avansert', 'Avansert'], ['konto', 'Din konto']] as const;
 const ORGFORM: Record<string, string> = { AS: 'Aksjeselskap', ENK: 'Enkeltpersonforetak', ANS: 'Ansvarlig selskap', DA: 'Selskap med delt ansvar', NUF: 'Norskregistrert utenlandsk foretak' };
 const ROLLE: Record<string, string> = { eier: 'Eier', full: 'Full tilgang', les: 'Kan se', kvittering: 'Kvitteringer', regnskapsforer_full: 'Regnskapsfører', regnskapsforer_les: 'Regnskapsfører (se)' };
 
@@ -76,6 +78,26 @@ export default async function Innstillinger({ searchParams }: { searchParams: Pr
         </>
       )}
 
+      {vis === 'konto' && await (async () => {
+        const plan = await slettPlan(d, s.bruker.id);
+        const ar = Number(idag().slice(0, 4));
+        return (
+          <>
+            <section className="kort stakk">
+              <h2>Last ned dataene dine</h2>
+              <p className="mut liten">Alt vi har lagret om deg som person: profil, tilganger, innlogginger, samtaler med assistenten og hva du har gjort i systemet. Filen er i JSON-format.</p>
+              <div><a href="/api/mine-data" className="knapp hvit" download>Last ned mine data</a></div>
+              <p className="mut liten">Regnskapet til {s.org.navn} lastes ned som SAF-T, som alle regnskapssystemer kan lese.</p>
+              <div className="rad" style={{ gap: 8 }}>{[ar, ar - 1].map(a => <a key={a} href={`/api/saft?ar=${a}`} className="knapp hvit liten" download>SAF-T {a}</a>)}</div>
+            </section>
+            <section className="kort stakk">
+              <h2>Slett kontoen</h2>
+              <p className="mut liten">Kontoen din ({s.bruker.epost}) slettes. Det du har ført i regnskapet blir stående hos foretaket, merket «Slettet bruker».</p>
+              <SlettKonto hindring={plan.hindring} foretakAlene={plan.foretakAlene.map(f => f.navn)} />
+            </section>
+          </>
+        );
+      })()}
       {vis === 'sikkerhet' && <section className="kort stakk"><h2>Totrinns innlogging</h2><Totrinn pa={totrinnPa} /></section>}
       {vis === 'abonnement' && <section className="kort stakk"><h2>Abonnement</h2><Pakker pakke={o?.pakke ?? 'gratis'} erEier={s.rolle === 'eier'} betalingPa={stripePa()} intropris={INTROPRIS} status={(o?.abonnement_status as string | null) ?? null} slutt={o?.abonnement_slutt ? String(o.abonnement_slutt).slice(0, 10) : null} harKunde={!!o?.stripe_kunde} betalt={betalt} avbrutt={!!sp.avbrutt} /></section>}
 

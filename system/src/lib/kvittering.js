@@ -80,6 +80,91 @@ const naer = (a, b, tol = 2) => Math.abs(a - b) <= tol; // øre
 /** MVA som passer med en total for en av satsene. */
 function mvaFor(total, sats) { return Math.round((total * sats) / (100 + sats)); }
 
+// ---------- Rydding: skill ekte tekst fra rot fra tekstgjenkjenningen ----------
+
+/** Hvor mye av linjen som ser ut som rot (0 = ren tekst, 1 = bare rot). */
+export function stoy(l) {
+  const t = String(l || '').trim();
+  if (!t) return 1;
+  const tegn = t.replace(/\s/g, '');
+  const nyttige = (tegn.match(/[A-Za-zÆØÅæøåÉéÜüÖöÄä0-9.,:%\-\/&]/g) || []).length;
+  let s = 1 - nyttige / tegn.length;
+  const ordene = t.split(/\s+/);
+  const enkeltBokstaver = ordene.filter(o => /^[A-Za-zÆØÅæøå]$/.test(o) && !/^[xX&]$/.test(o)).length;
+  if (ordene.length >= 3 && enkeltBokstaver / ordene.length >= 0.4) s += 0.4;
+  // Ord uten vokaler (bortsett fra kjente forkortelser) er nesten alltid feillesing.
+  const bokstavord = ordene.map(o => o.replace(/[^A-Za-zÆØÅæøå]/g, '')).filter(o => o.length >= 4);
+  const uten = bokstavord.filter(o => !/[aeiouyæøåAEIOUYÆØÅ]/.test(o) && !/^(MVA|NOK|KR|STK|PCS|TLF|ORG|NR|KG|LTR|PK|DL|CL|ML|GR|BRT|VVS|MVH)$/i.test(o)).length;
+  if (bokstavord.length && uten / bokstavord.length >= 0.5) s += 0.5;
+  // Rare blandinger av store og små bokstaver midt i ord («iIlIl», «aBcDe»).
+  if (/[a-zæøå][A-ZÆØÅ][a-zæøå][A-ZÆØÅ]/.test(t) || /[Il|]{3,}/.test(t)) s += 0.3;
+  if (/[~^`{}\[\]<>\\_=]{1,}/.test(t)) s += 0.2;
+  return Math.min(1, s);
+}
+
+const KJEDER = [
+  'Rema 1000', 'Kiwi', 'Coop Extra', 'Coop Mega', 'Coop Prix', 'Coop Obs', 'Obs Bygg', 'Extra', 'Meny', 'Spar', 'Joker', 'Bunnpris', 'Oda',
+  'Biltema', 'Clas Ohlson', 'Jernia', 'Europris', 'Normal', 'Elkjøp', 'Power', 'Komplett', 'Netonnet', 'Kjell & Company', 'Lefdal',
+  'Circle K', 'Esso', 'Shell', 'Uno-X', 'YX', 'St1', 'Best', 'Narvesen', '7-Eleven', 'Deli de Luca', 'Mix',
+  'IKEA', 'Jysk', 'Byggmakker', 'Maxbo', 'Montér', 'Optimera', 'Felleskjøpet', 'Plantasjen', 'XXL', 'Sport 1', 'Intersport', 'Anton Sport',
+  'Apotek 1', 'Vitusapotek', 'Boots apotek', 'Vinmonopolet', 'Posten', 'Bring', 'Telenor', 'Telia', 'Ice', 'Ruter', 'Vy', 'SAS', 'Norwegian', 'Widerøe',
+  'Peppes Pizza', 'Egon', 'McDonald\'s', 'Burger King', 'Starbucks', 'Espresso House', 'Kaffebrenneriet', 'Ark', 'Norli', 'Søstrene Grene', 'Princess', 'Kid',
+  'Thon Hotels', 'Scandic', 'Nordic Choice', 'Strawberry', 'Easypark', 'Apcoa', 'Onepark', 'Bilia', 'Mekonomen', 'Dekkmann', 'Vianor', 'Staples', 'Officeday', 'Lyreco',
+];
+const enkel = x => x.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ø/g, 'o').replace(/æ/g, 'ae').replace(/[^a-z0-9]/g, '');
+
+/** Gjør «KIWI MAJORSTUEN» til «Kiwi Majorstuen», men lar selskapsformer og korte forkortelser stå. */
+function penNavn(l) {
+  const t = l.replace(/\s{2,}/g, ' ').replace(/^[^A-Za-zÆØÅæøå0-9]+|[^A-Za-zÆØÅæøå0-9.)]+$/g, '').trim();
+  if (t !== t.toUpperCase()) return t;
+  return t.split(' ').map(w => /^(AS|ASA|ANS|DA|ENK|SA|NUF|BA|KS|NO|AB|ABC|XXL|IKEA|SAS|YX|ST1)$/.test(w) || /\d/.test(w) ? w : w.charAt(0) + w.slice(1).toLowerCase()).join(' ');
+}
+
+/** Velger leverandørnavnet blant de første linjene: kjent kjede, selskapsform og org.nr teller mest; rot og adresser trekker ned. */
+function finnLeverandor(raa, orgnrLinje) {
+  const kandidater = [];
+  raa.slice(0, 12).forEach((l, i) => {
+    const t = l.trim();
+    if (t.length < 2 || t.length > 70) return;
+    const st = stoy(t);
+    if (st >= 0.45) return;
+    let p = 10 - i * 0.8 - st * 40;
+    const e = enkel(t);
+    const kjede = KJEDER.find(k => { const kk = enkel(k); return kk.length >= 3 && (e === kk || e.startsWith(kk) || (kk.length >= 5 && e.includes(kk))); });
+    if (kjede) p += 40;
+    if (/\b(AS|ASA|ANS|DA|ENK|SA|NUF)\b\.?$|\b(AS|ASA)\b/.test(t)) p += 25;
+    if (orgnrLinje != null && (i === orgnrLinje - 1 || i === orgnrLinje)) p += 15;
+    const siffer = (t.match(/\d/g) || []).length;
+    if (siffer / t.length > 0.25) p -= 30;
+    if (/\b\d{4}\s+[A-ZÆØÅ]/.test(t) || /\b(gate|gata|veien|vei|vegen|veg|plass|torg|senter|senteret|postboks|pb\.?)\b\s*\d/i.test(t)) p -= 30;
+    if (/tlf|telefon|tel\.|www\.|https?:|@|\.no\b|\.com\b/i.test(t)) p -= 30;
+    if (/kvittering|velkommen|takk for|kopi|åpningstid|apningstid|kasse|ekspeditør|betjent|dato|kl\.|salgsbilag|faktura(?!\s*fra)|kunde|kjøper|til:|org\.?\s*nr|mva-?nr|foretaksreg/i.test(t)) p -= 40;
+    if (!/[A-Za-zÆØÅæøå]{3}/.test(t)) p -= 50;
+    kandidater.push({ t, p, kjede, i });
+  });
+  kandidater.sort((a, b) => b.p - a.p || a.i - b.i);
+  const b = kandidater[0];
+  if (!b || b.p <= 0) return null;
+  // Bare kjedenavnet + rot rundt? Bruk den rene skrivemåten.
+  if (b.kjede && enkel(b.t).length <= enkel(b.kjede).length + 2) return b.kjede;
+  return penNavn(b.t).slice(0, 80);
+}
+
+/** Rydder teksten på en varelinje: strekkoder, varenummer, antall og enhetspris fjernes. */
+function ryddVare(t) {
+  let x = String(t || '')
+    .replace(/\b\d{6,14}\b/g, ' ')                         // strekkode / varenummer
+    .replace(/^\s*\d{1,4}\s*[x×*]\s*/i, '')                 // «2 x Melk»
+    .replace(/\s+\d+(?:[,.]\d+)?\s*[x×*@]\s*[\d ,.]*$/i, '') // «Melk 2 x 24,90»
+    .replace(/\s+(?:à|a|@)\s*\d+[,.]\d{2}.*$/i, '')          // «à 12,90»
+    .replace(/[*#_~|]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^[^A-Za-zÆØÅæøå0-9]+|[\s.:,;-]+$/g, '')
+    .trim();
+  if (x === x.toUpperCase()) x = x.charAt(0) + x.slice(1).toLowerCase();
+  return x;
+}
+
 /**
  * @param {string} tekst Teksten fra kvitteringen.
  * @param {{ idag?: string }} [opts]
@@ -112,8 +197,9 @@ export function tolkKvittering(tekst, opts = {}) {
 
   // Varelinjer: tekst og et beløp til slutt, ikke summer, MVA, betaling eller annet.
   const forsteSum = Math.min(...[...totalLinjer, ...med('delsum'), ...mvaLinjer, ...betaling].map(x => x.i), Infinity);
+  // Rotete linjer (stoy) kan fortsatt ha et riktig beløp, så de telles med i varesummen, men teksten deres brukes ikke.
   const varer = alle.filter(x => x.siste && x.siste.sikker && x.i < forsteSum && x.typer.length === 0 && /[A-Za-zÆØÅæøå]{2}/.test(x.l.slice(0, x.siste.pos)))
-    .map(x => ({ tekst: x.l.slice(0, x.siste.pos).replace(/\s+\d+\s*[x*]\s*$/i, '').replace(/[\s.:-]+$/, '').trim(), ore: x.siste.ore, alt: x.siste.alt, altTekst: x.siste.alt == null ? null : x.l.slice(0, x.siste.altPos).replace(/[\s.:-]+$/, '').trim() }));
+    .map(x => { const r = stoy(x.l.slice(0, x.siste.pos)) >= 0.45; return { tekst: ryddVare(x.l.slice(0, x.siste.pos).replace(/\s+\d+\s*[x*]\s*$/i, '')), ore: x.siste.ore, alt: x.siste.alt, altTekst: x.siste.alt == null ? null : ryddVare(x.l.slice(0, x.siste.altPos)), rot: r }; });
   // Alle mulige varesummer når noen linjer kan leses på to måter (maks 2^8 kombinasjoner).
   const tvetydige = varer.map((v, i) => (v.alt != null ? i : -1)).filter(i => i >= 0).slice(0, 8);
   const vareSummer = [];
@@ -241,19 +327,28 @@ export function tolkKvittering(tekst, opts = {}) {
   // Leverandør og org.nr.
   let orgnr = null;
   for (const x of alle) { const m = x.raa.replace(/\s/g, '').match(/(?:org\.?(?:nr|no)?\.?|NO)?:?(\d{9})(?:MVA)?/i); if (m && gyldigOrgnr(m[1])) { orgnr = m[1]; break; } }
-  const topp = linjer.slice(0, 8);
-  const lev = topp.find(l => /\b(AS|ASA|ANS|DA|ENK|SA|NUF)\b/.test(l) && !/kunde|kjøper|til:/i.test(l)) || topp.find(l => /[A-Za-zÆØÅæøå]{3}/.test(l) && !/kvittering|velkommen|salgskvittering/i.test(l)) || null;
+  const orgnrLinje = alle.findIndex(x => /org\.?\s*(nr|no|nummer)|foretaksreg/i.test(x.raa));
+  const lev = finnLeverandor(raa, orgnrLinje >= 0 ? orgnrLinje : null);
   status.lev = lev ? (orgnr ? 'bekreftet' : 'lest') : 'mangler';
   if (orgnr) grunn.lev = `Org.nr ${orgnr.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3')} er gyldig.`;
 
   return {
-    lev: lev ? lev.replace(/\s{2,}/g, ' ').slice(0, 80) : null, orgnr, dato, total, mva, sats,
-    varer: varer.map(v => ({ tekst: v.tekst, ore: v.ore })),
-    beskrivelse: varer.slice(0, 3).map(v => v.tekst).join(', ').slice(0, 80) || null,
+    lev, orgnr, dato, total, mva, sats,
+    varer: varer.filter(v => !v.rot && v.tekst.length >= 2).map(v => ({ tekst: v.tekst, ore: v.ore })),
+    beskrivelse: beskriv(varer),
     status, grunn,
     /** true når totalen og MVA er kryss-sjekket. Brukeren skal likevel alltid bekrefte. */
     sikker: status.total === 'bekreftet' && (status.mva === 'bekreftet' || status.mva === 'mangler'),
   };
+}
+
+/** Kort beskrivelse av kjøpet: de dyreste lesbare varene. Pant, rabatt og rot tas ikke med. */
+function beskriv(varer) {
+  const gode = varer.filter(v => !v.rot && v.ore > 0 && /[A-Za-zÆØÅæøå]{3}/.test(v.tekst) && !/^(pant|rabatt|avslag|bonus|gebyr|frakt|levering)\b/i.test(v.tekst));
+  if (!gode.length) return null;
+  const topp = [...gode].sort((a, b) => b.ore - a.ore).slice(0, 3).map(v => v.tekst);
+  const resten = gode.length - topp.length;
+  return (topp.join(', ') + (resten > 0 ? ` og ${resten} til` : '')).slice(0, 80);
 }
 
 function kr(ore) {
