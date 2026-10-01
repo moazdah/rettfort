@@ -12,7 +12,7 @@ export const MENY: MenyValg[] = [
   { href: '/bank', navn: 'Bank', aktivPa: ['/bank'] },
   { navn: 'Ansatte', under: [
     { href: '/lonn', navn: 'Lønn', tekst: 'Lønnskjøring og lønnsslipper', aktivPa: ['/lonn'] },
-    { href: '/vaktplan', navn: 'Vaktplan', tekst: 'Vakter, bytter og tilgjengelighet', aktivPa: ['/vaktplan'], kreverBetalt: true },
+    { href: '/vaktplan', navn: 'Vaktplan', tekst: 'Egen side: vaktplan.rettført.no', aktivPa: ['/vaktplan'], kreverBetalt: true },
   ] },
   { navn: 'Regnskap', under: [
     { href: '/mva', navn: 'MVA', tekst: 'Melding og betaling', aktivPa: ['/mva'] },

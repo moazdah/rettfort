@@ -15,7 +15,7 @@ const FORSLAG_FOR: [RegExp, string[]][] = [
   [/^\/kjop/, ['Registrer en kostnad', 'Hva er de største kostnadene i år?', 'Send en skannelenke til en ansatt', 'Hvilke regninger forfaller snart?']],
   [/^\/bank/, ['Har vi nok penger de neste 30 dagene?', 'Hvem har ikke betalt?', 'Registrer en innbetaling']],
   [/^\/lonn/, ['Kjør lønn for denne måneden', 'Vis lønn og ansatte', 'Send lønnslippen til en ansatt']],
-  [/^\/vaktplan/, ['Lag vaktplan for neste uke', 'Hvem bør ta en ledig vakt?', 'Får noen overtid denne uka?']],
+  [/^\/($|vaktplan|vp)/, ['Lag vaktplan for neste uke', 'Hvem bør ta en ledig vakt?', 'Får noen overtid denne uka?']],
   [/^\/(mva|frister|rapporter|aarsavslutning)/, ['Hvordan ligger vi an med MVA?', 'Hvilke frister kommer?', 'Vis resultatet per måned']],
 ];
 const FORSLAG_STD = ['Lag en faktura', 'Hvem har ikke betalt?', 'Kjør lønn for denne måneden', 'Hvordan går det i år?'];

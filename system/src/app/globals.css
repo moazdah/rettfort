@@ -556,7 +556,7 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
   .vp-rutenett-ramme, .vp-forklaring { display: none; }
   .vp-dag { display: flex; flex-direction: column; gap: 12px; }
   .vp-topp, .vp-topp-hoyre { width: 100%; }
-  .vp-ukevelger { flex: 1; justify-content: space-between; }
+  .vp-ukevelger { flex: 1 1 100%; justify-content: space-between; }
   .vp-trenger-rad { flex-wrap: wrap; }
   .vp-trenger-knapper { width: 100%; justify-content: flex-start; padding-left: 42px; }
 }
@@ -617,3 +617,13 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
 @keyframes mer-inn { from { transform: translateY(100%); } to { transform: none; } }
 @keyframes mer-inn-bak { from { background: rgba(11,37,69,0); } }
 @media (min-width: 901px) { .mer-bak { display: none; } }
+/* vaktplan.rettført.no: egen toppmeny */
+.vp-logo { gap: 10px; text-decoration: none; }
+.vp-produkt { font-size: 15px; font-weight: 600; color: var(--ink); padding-left: 10px; border-left: 1px solid var(--linje-2); line-height: 22px; }
+.vp-firma { flex: 1; min-width: 0; font-size: 14px; color: var(--mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vp-til-regnskap { white-space: nowrap; }
+@media (max-width: 900px) {
+  .vp-ramme .innhold { padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+  .vp-firma { display: none; }
+}
+@media (max-width: 480px) { .vp-til-regnskap { display: none; } }

@@ -9,6 +9,7 @@ import { RegnskapsFeil } from '@/lib/hovedbok';
 import { kanEndre } from '@/lib/auth';
 import { harVaktplan } from '@/lib/pakker';
 import { sendEpost, maler, grunnadresse } from '@/lib/epost';
+import { tilVaktplan } from '@/lib/verter';
 import * as V from '@/lib/tjenester/vaktplan';
 import * as VV from '@/lib/tjenester/vaktvarsel';
 import { kortTid, type VaktMal } from '@/lib/vaktplan';
@@ -115,7 +116,7 @@ export async function lagreVaktAnsattHandling(a: V.NyAnsatt & { inviter?: boolea
 
 async function inviter(db: Db, orgId: string, foretak: string, ansattId: string) {
   const i = await db.tx(t => V.inviterAnsatt(t, orgId, ansattId));
-  const lenke = `${await grunnadresse()}/vakt/inn/${i.token}`;
+  const lenke = `${tilVaktplan(await grunnadresse())}/vakt/inn/${i.token}`;
   const sendt = i.epost ? await sendEpost({ til: i.epost, ...maler.vakt({ navn: i.navn, foretak, tittel: 'Du er lagt til i vaktplanen', linjer: [`${foretak} bruker Rettført til vaktplanen.`, 'Her ser du vaktene dine, tar ledige vakter, ber om fri og sier når du kan jobbe. Du ser ikke regnskapet.'], knappTekst: 'Åpne vaktplanen', lenke }) }) : false;
   return { lenke, sendt };
 }

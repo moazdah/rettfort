@@ -1,7 +1,7 @@
-import { cookies } from 'next/headers';
 import { db } from '@/lib/server';
 import { apneLenke } from '@/lib/tjenester/vaktplan';
-import { opprettSesjon, SESJON_COOKIE, SESJON_DAGER } from '@/lib/auth';
+import { opprettSesjon } from '@/lib/auth';
+import { settOkt } from '@/lib/okt';
 import { grunnadresse } from '@/lib/epost';
 
 /** Lenken fra SMS/e-post: logger den ansatte rett inn i vaktplanen (uten passord i testfasen). */
@@ -12,6 +12,6 @@ export async function GET(_: Request, { params }: { params: Promise<{ token: str
   const r = /^[\w-]{20,80}$/.test(token) ? await apneLenke(d, token) : null;
   if (!r) return Response.redirect(`${base}/vakt?ugyldig=1`, 303);
   const { token: sesjon } = await d.tx(t => opprettSesjon(t, r.brukerId, r.orgId));
-  (await cookies()).set(SESJON_COOKIE, sesjon, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', maxAge: SESJON_DAGER * 86400 });
+  await settOkt(sesjon);
   return Response.redirect(`${base}/vakt`, 303);
 }

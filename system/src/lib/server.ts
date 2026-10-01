@@ -1,8 +1,8 @@
 import 'server-only';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getDb, type Db } from './db';
-import { lesSesjon, SESJON_COOKIE, kanEndre, type Sesjon } from './auth';
+import { lesSesjon, kanEndre, type Sesjon } from './auth';
+import { oktToken } from './okt';
 import { RegnskapsFeil } from './hovedbok';
 
 export async function db(): Promise<Db> {
@@ -14,9 +14,8 @@ export async function db(): Promise<Db> {
  * så regnskapssider, API-er og handlinger avviser dem. /vakt bruker { ansatt: true }.
  */
 export async function sesjon(o: { ansatt?: boolean } = {}): Promise<Sesjon | null> {
-  const c = await cookies();
   const d = await getDb();
-  const s = await lesSesjon(d, c.get(SESJON_COOKIE)?.value);
+  const s = await lesSesjon(d, await oktToken());
   if (s && s.rolle === 'ansatt' && !o.ansatt) return { ...s, org: null };
   return s;
 }

@@ -1,10 +1,10 @@
 'use server';
 
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { getDb } from '@/lib/db';
-import { hashPassord, sjekkPassord, opprettSesjon, gyldigEpost, passordFeil, lagKode, lagSlug, tokenHash, SESJON_COOKIE, SESJON_DAGER, kanEndre } from '@/lib/auth';
+import { hashPassord, sjekkPassord, opprettSesjon, gyldigEpost, passordFeil, lagKode, lagSlug, tokenHash, kanEndre } from '@/lib/auth';
 import { sesjon, trygt, idag, sjekkSkrivetilgang, type Resultat } from '@/lib/server';
 import { RegnskapsFeil } from '@/lib/hovedbok';
 import { lagreSalg, sendSalg, registrerBetaling, krediter, forfallFra, hentOrg, type FakturaInput } from '@/lib/tjenester/faktura';
@@ -36,11 +36,17 @@ import { lagLenke, hentNye, etterRegistrering, hentInnsending, settTilbake, sett
 import { kr } from '@/lib/penger';
 import { slettKonto } from '@/lib/tjenester/konto';
 import { merkTimerBrukt } from '@/lib/tjenester/vaktplan';
+import { oktToken, settOkt, slettOkt } from '@/lib/okt';
+import { erVaktplanVert, vertAv } from '@/lib/verter';
 
 /** varig = false: informasjonskapselen forsvinner når nettleseren lukkes (brukes før e-posten er bekreftet). */
 async function settCookie(token: string, varig = true) {
-  const c = await cookies();
-  c.set(SESJON_COOKIE, token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/', ...(varig ? { maxAge: SESJON_DAGER * 86400 } : {}) });
+  await settOkt(token, varig);
+}
+
+/** Etter innlogging: forsiden på vaktplan-adressen er vaktplanen, ellers Hjem. */
+async function hjemSti() {
+  return erVaktplanVert(vertAv(await headers())) ? '/' : '/hjem';
 }
 
 async function kreverInnlogget() {
@@ -96,7 +102,7 @@ export async function loggInn(_: unknown, fd: FormData): Promise<Resultat<string
   if (!res.ok) return { ...res, totrinn };
   const neste = String(fd.get('neste') ?? '');
   if (/^\/invitasjon\/[\w-]+$/.test(neste)) redirect(neste);
-  redirect(res.data === 'byra' ? '/byra' : res.data ? '/hjem' : '/velkommen');
+  redirect(res.data === 'byra' ? '/byra' : res.data ? await hjemSti() : '/velkommen');
 }
 
 /** Bare i testmodus: gå rett inn i demo-foretaket uten passord. */
@@ -109,14 +115,13 @@ export async function demoInn(fd: FormData) {
   const m = await db.en<{ organisasjon_id: string; type: string }>('select m.organisasjon_id, o.type from medlemskap m join organisasjon o on o.id = m.organisasjon_id where m.bruker_id = $1 order by m.opprettet limit 1', [b.id]);
   const { token } = await db.tx(t => opprettSesjon(t, b.id, m?.organisasjon_id ?? null));
   await settCookie(token);
-  redirect(m?.type === 'byra' ? '/byra' : '/hjem');
+  redirect(m?.type === 'byra' ? '/byra' : await hjemSti());
 }
 
 export async function loggUt() {
-  const c = await cookies();
-  const tok = c.get(SESJON_COOKIE)?.value;
+  const tok = await oktToken();
   if (tok) { const db = await getDb(); await db.q('delete from sesjon where token_hash = $1', [tokenHash(tok)]); }
-  c.delete(SESJON_COOKIE);
+  await slettOkt();
   redirect('/logg-inn');
 }
 
@@ -167,7 +172,7 @@ export async function bekreftEpost(kode: string): Promise<Resultat> {
     if (!b?.bekreftkode || b.bekreftkode !== kode.trim()) throw new RegnskapsFeil('Koden stemmer ikke. Sjekk e-posten og prøv igjen.');
     await db.q('update bruker set epost_bekreftet = true, bekreftkode = null where id = $1', [s.bruker.id]);
     // Nå er kontoen ekte: husk innloggingen også etter at nettleseren lukkes.
-    const tok = (await cookies()).get(SESJON_COOKIE)?.value;
+    const tok = await oktToken();
     if (tok) await settCookie(tok);
   });
 }
@@ -179,7 +184,7 @@ export async function avbrytRegistrering() {
     const db = await getDb();
     await db.q('delete from sesjon where bruker_id = $1', [s.bruker.id]);
   }
-  (await cookies()).delete(SESJON_COOKIE);
+  await slettOkt();
   redirect('/registrer');
 }
 
@@ -1072,7 +1077,7 @@ export async function slettMinKonto(_: unknown, fd: FormData): Promise<Resultat<
     await db.q(`insert into logg (bruker_id, handling, ref) values ($1, 'konto_slettet', null)`, [s.bruker.id]).catch(() => {});
     return r;
   });
-  if (res.ok) { (await cookies()).delete(SESJON_COOKIE); redirect('/logg-inn?slettet=1'); }
+  if (res.ok) { await slettOkt(); redirect('/logg-inn?slettet=1'); }
   return res;
 }
 
