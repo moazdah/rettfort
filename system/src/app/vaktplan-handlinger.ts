@@ -10,6 +10,7 @@ import { kanEndre } from '@/lib/auth';
 import { harVaktplan } from '@/lib/pakker';
 import { sendEpost, maler, grunnadresse } from '@/lib/epost';
 import { tilVaktplan } from '@/lib/verter';
+import { synkEkstraAnsatte } from '@/lib/stripe';
 import * as V from '@/lib/tjenester/vaktplan';
 import * as VV from '@/lib/tjenester/vaktvarsel';
 import { kortTid, type VaktMal } from '@/lib/vaktplan';
@@ -107,6 +108,7 @@ export async function lagreVaktAnsattHandling(a: V.NyAnsatt & { inviter?: boolea
   return trygt(async () => {
     const s = await kreverLeder(); const db = await getDb();
     const id = await db.tx(t => V.lagreVaktAnsatt(t, s.org.id, a));
+    if (!a.id) await synkEkstraAnsatte(db, s.org.id).catch(e => console.error('Ekstra ansatte i Stripe:', e));
     let lenke: string | null = null, sendt = false;
     if (a.inviter) ({ lenke, sendt } = await inviter(db, s.org.id, s.org.navn, id));
     oppdater(); revalidatePath('/lonn');

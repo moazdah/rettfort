@@ -1342,7 +1342,7 @@ input,textarea,select{font-family:inherit;}
                   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
                     <sc-for list="{{ obRoller }}" as="r" hint-placeholder-count="3"><button onClick="{{ r.on }}" style="height:44px;border-radius:10px;border:1.5px solid {{ r.bd }};background:{{ r.bg }};color:#0B2545;font-size:14px;font-weight:{{ r.fw }}">{{ r.t }}</button></sc-for>
                   </div>
-                  <sc-if value="{{ obErRf }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#586174;background:#FBFAF6;border:1px solid #EFEBE2;border-radius:10px;padding:10px 12px;line-height:1.45">Fører du for flere kunder? Da passer <a href="/demo">Byrå-visningen</a> bedre. Du kan også fortsette her og sette opp én kunde.</div></sc-if>
+                  <sc-if value="{{ obErRf }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:#586174;background:#FBFAF6;border:1px solid #EFEBE2;border-radius:10px;padding:10px 12px;line-height:1.45">Fører du for flere kunder? Tilbudet for regnskapsførere kommer senere. Du kan fortsette her og sette opp én kunde.</div></sc-if>
                 </div>
                 <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#586174">Velg passord</span><input type="password" value="{{ obPw }}" onChange="{{ setObPw }}" placeholder="Minst 8 tegn" style="height:46px;padding:0 12px;border-radius:10px;border:1px solid #D9D3C6;font-size:15px;color:#0B2545;outline:none"></label>
               </div>

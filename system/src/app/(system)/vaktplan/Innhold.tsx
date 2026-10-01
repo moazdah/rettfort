@@ -1,7 +1,7 @@
 import { db, idag } from '@/lib/server';
 import type { Sesjon } from '@/lib/auth';
 import { kanEndre } from '@/lib/auth';
-import { harVaktplan, harAssistent } from '@/lib/pakker';
+import { harVaktplan, harAssistent, inkluderteAnsatte, EKSTRA_ANSATT, tarBetaltForEkstra, PAKKER } from '@/lib/pakker';
 import { hentUke, trengerSvar, vaktAnsatte } from '@/lib/tjenester/vaktplan';
 import { isoUke, flyttUke } from '@/lib/vaktplan';
 import { VaktUke } from './Uke';
@@ -45,7 +45,8 @@ export async function VaktplanInnhold({ s, sp, regnskap = '' }: { s: Sesjon & { 
       {vis === 'uke'
         ? <VaktUke faner={faner} data={await hentUke(d, s.org.id, valgt.aar, valgt.uke)} trenger={await trengerSvar(d, s.org.id, dag)} idag={dag}
             forrige={flyttUke(valgt.aar, valgt.uke, -1)} neste={flyttUke(valgt.aar, valgt.uke, 1)} assistent={harAssistent(s.org.pakke)} endre={endre} nyVakt={sp.ny === '1'} />
-        : <VaktAnsatte faner={faner} ansatte={await vaktAnsatte(d, s.org.id)} maler={(await hentUke(d, s.org.id, naa.aar, naa.uke)).maler} endre={endre} />}
+        : <VaktAnsatte faner={faner} ansatte={await vaktAnsatte(d, s.org.id)} maler={(await hentUke(d, s.org.id, naa.aar, naa.uke)).maler} endre={endre}
+            plass={{ pakkenavn: PAKKER.find(p => p.k === s.org.pakke)?.n ?? 'pakken', inkludert: inkluderteAnsatte(s.org.pakke), ekstraKr: EKSTRA_ANSATT / 100, intro: !tarBetaltForEkstra() }} />}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useActionState, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { registrer } from '@/app/handlinger';
 
-export function RegistrerSkjema({ startRolle, neste, epost }: { startRolle: 'bedrift' | 'regnskapsforer'; neste?: string; epost?: string }) {
+export function RegistrerSkjema({ startRolle, neste, epost, velgRolle = true }: { startRolle: 'bedrift' | 'regnskapsforer'; neste?: string; epost?: string; velgRolle?: boolean }) {
   const [hvem, setHvem] = useState(startRolle);
   const [res, handling, venter] = useActionState(registrer, null);
   const router = useRouter();
@@ -17,13 +17,13 @@ export function RegistrerSkjema({ startRolle, neste, epost }: { startRolle: 'bed
   }, [res, hvem, router, neste]);
   return (
     <form action={handling} className="stakk" style={{ marginTop: 24 }}>
-      <div className="rutenett to" role="radiogroup" aria-label="Hvem er du?">
+      {velgRolle && <div className="rutenett to" role="radiogroup" aria-label="Hvem er du?">
         {([['bedrift', 'Egen bedrift', 'Jeg fører regnskapet for mitt eget foretak.'], ['regnskapsforer', 'Regnskapsfører', 'Jeg fører for kunder.']] as const).map(([v, t, d]) => (
           <button type="button" key={v} className={`valgkort ${hvem === v ? 'valgt' : ''}`} onClick={() => setHvem(v)} aria-pressed={hvem === v}>
             <b style={{ display: 'block' }}>{t}</b><span className="mut liten">{d}</span>
           </button>
         ))}
-      </div>
+      </div>}
       <input type="hidden" name="hvem" value={hvem} />
       <label className="felt"><span>Navnet ditt</span><input className="inndata" name="navn" autoComplete="name" required /></label>
       <label className="felt"><span>E-post</span><input className="inndata" name="epost" type="email" autoComplete="email" defaultValue={epost} required /></label>

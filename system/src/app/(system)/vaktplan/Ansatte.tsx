@@ -12,7 +12,18 @@ import { VpFaner, type Faner } from '@/components/VpFaner';
 const TILGANG: Record<string, [string, string]> = { ingen: ['Ikke invitert', ''], invitert: ['Invitert', 'gul'], aktiv: ['Logget inn', 'gronn'] };
 
 /** Ansatte i vaktplanen. Samme personer som i Lønn. */
-export function VaktAnsatte({ faner, ansatte, maler, endre }: { faner: Faner; ansatte: VaktAnsatt[]; maler: VaktMal[]; endre: boolean }) {
+export type Plass = { pakkenavn: string; inkludert: number; ekstraKr: number; intro: boolean };
+
+/** Hvor mange ansatte som er med i pakken, og hva de ekstra koster. */
+function plassTekst(p: Plass, antall: number) {
+  const ekstra = Math.max(0, antall - p.inkludert);
+  const pris = `${p.ekstraKr} kr i måneden per ekstra ansatt${p.intro ? ', gratis i introduksjonsperioden' : ''}`;
+  return ekstra
+    ? `${antall} ansatte. ${p.inkludert} er med i ${p.pakkenavn}, ${ekstra} er ekstra (${pris}).`
+    : `${antall} av ${p.inkludert} ansatte som er med i ${p.pakkenavn}. Flere koster ${pris}.`;
+}
+
+export function VaktAnsatte({ faner, ansatte, maler, endre, plass }: { faner: Faner; ansatte: VaktAnsatt[]; maler: VaktMal[]; endre: boolean; plass: Plass }) {
   const router = useRouter();
   const [skjema, setSkjema] = useState<VaktAnsatt | 'ny' | null>(null);
   const [lenke, setLenke] = useState<{ navn: string; url: string; sendt: boolean } | null>(null);
@@ -35,6 +46,7 @@ export function VaktAnsatte({ faner, ansatte, maler, endre }: { faner: Faner; an
         <VpFaner f={faner} />
         {endre && <button type="button" className="knapp" onClick={() => setSkjema('ny')}>Legg til ansatt</button>}
       </div>
+      <p className="mut liten" style={{ margin: 0 }}>{plassTekst(plass, ansatte.length)} <a className="lenke" href="https://xn--rettfrt-u1a.no/vilkar" target="_blank" rel="noreferrer">Se vilkår</a></p>
       {melding && <div className={`varsel ${melding.feil ? 'rod' : 'gronn'} liten`}>{melding.tekst}</div>}
       {lenke && (
         <div className="varsel info liten" style={{ display: 'block' }}>
@@ -89,7 +101,7 @@ export function VaktAnsatte({ faner, ansatte, maler, endre }: { faner: Faner; an
 
       <Maler start={maler} endre={endre} onLagret={t => { setMelding({ tekst: t }); router.refresh(); }} />
 
-      {skjema && <AnsattSkjema a={skjema === 'ny' ? null : skjema} onLukk={() => setSkjema(null)} onFerdig={(t, l) => { setSkjema(null); setMelding({ tekst: t }); if (l) setLenke(l); router.refresh(); }} />}
+      {skjema && <AnsattSkjema a={skjema === 'ny' ? null : skjema} ekstra={skjema === 'ny' && ansatte.length >= plass.inkludert ? `Dette blir ansatt nummer ${ansatte.length + 1}. ${plass.pakkenavn} har ${plass.inkludert} med i prisen, så denne koster ${plass.ekstraKr} kr i måneden${plass.intro ? ' når introduksjonsprisen går ut. Nå er det gratis' : ''}.` : null} onLukk={() => setSkjema(null)} onFerdig={(t, l) => { setSkjema(null); setMelding({ tekst: t }); if (l) setLenke(l); router.refresh(); }} />}
     </div>
   );
 }
@@ -121,7 +133,7 @@ function Maler({ start, endre, onLagret }: { start: VaktMal[]; endre: boolean; o
   );
 }
 
-function AnsattSkjema({ a, onLukk, onFerdig }: { a: VaktAnsatt | null; onLukk: () => void; onFerdig: (t: string, lenke?: { navn: string; url: string; sendt: boolean }) => void }) {
+function AnsattSkjema({ a, ekstra, onLukk, onFerdig }: { a: VaktAnsatt | null; ekstra: string | null; onLukk: () => void; onFerdig: (t: string, lenke?: { navn: string; url: string; sendt: boolean }) => void }) {
   const [navn, setNavn] = useState(a?.navn ?? '');
   const [kontakt, setKontakt] = useState(a?.kontakt ?? a?.epost ?? '');
   const [stilling, setStilling] = useState(a?.stilling ?? '');
@@ -150,6 +162,7 @@ function AnsattSkjema({ a, onLukk, onFerdig }: { a: VaktAnsatt | null; onLukk: (
         </div>
         <label className="felt"><span>Stillingsprosent: {pst} % {type === 'fast' ? `(${timer(Math.round(37.5 * 60 * pst / 100))} per uke)` : ''}</span><input type="range" min={10} max={100} step={5} value={pst} onChange={e => setPst(Number(e.target.value))} /></label>
         <label className="felt"><span>{type === 'time' ? 'Timelønn (kr)' : 'Månedslønn (kr)'}</span><input className="inndata mono" inputMode="decimal" value={sats} onChange={e => setSats(e.target.value)} /></label>
+        {ekstra && <div className="varsel gul liten">{ekstra}</div>}
         {feil && <div className="varsel rod liten">{feil}</div>}
         <div className="rad" style={{ gap: 8 }}>
           {!a && <button type="button" className="knapp" disabled={venter || !kontakt.trim()} onClick={() => lagre(true)}>Lagre og send invitasjon</button>}

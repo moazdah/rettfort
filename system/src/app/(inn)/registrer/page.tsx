@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { Logo } from '@/components/Logo';
 import { sesjon } from '@/lib/server';
 import { RegistrerSkjema } from './skjema';
+import { BYRA_I_SALG } from '@/lib/pakker';
 import { UferdigRegistrering } from '@/components/UferdigRegistrering';
 
 export const metadata = { title: 'Lag konto' };
@@ -23,7 +24,7 @@ export default async function Registrer({ searchParams }: { searchParams: Promis
         <h1>Lag kontoen</h1>
         <p className="mut" style={{ marginTop: 8 }}>Gratis å starte. Ingen binding.</p>
         {uferdig && <UferdigRegistrering epost={uferdig} />}
-        <RegistrerSkjema startRolle={rolle === 'regnskapsforer' ? 'regnskapsforer' : 'bedrift'} neste={neste} epost={epost} />
+        <RegistrerSkjema startRolle={BYRA_I_SALG && rolle === 'regnskapsforer' ? 'regnskapsforer' : 'bedrift'} neste={neste} epost={epost} velgRolle={BYRA_I_SALG} />
         <p className="mut liten" style={{ marginTop: 22 }}>Har du konto? <Link href="/logg-inn">Logg inn</Link></p>
       </div>
     </main>

@@ -20,7 +20,7 @@ import { sendEpost, maler, grunnadresse, epostPa, qrVedlegg } from '@/lib/epost'
 import { fakturaPdf } from '@/lib/tjenester/fakturaPdf';
 import { hentFakta } from '@/lib/tjenester/assistent';
 import { svar as assistentSvar, type Svar } from '@/lib/assistent';
-import { harAssistent, erTestbruker } from '@/lib/pakker';
+import { harAssistent, erTestbruker, BYRA_I_SALG } from '@/lib/pakker';
 import { nyHemmelighet, sjekkTotp, otpauthUri } from '@/lib/totp';
 import QRCode from 'qrcode';
 import { lagTestfirma, TESTFIRMA_ORGNR } from '@/lib/db/eksempel';
@@ -37,6 +37,7 @@ import { kr } from '@/lib/penger';
 import { slettKonto } from '@/lib/tjenester/konto';
 import { merkTimerBrukt } from '@/lib/tjenester/vaktplan';
 import { oktToken, settOkt, slettOkt } from '@/lib/okt';
+import { synkEkstraAnsatte } from '@/lib/stripe';
 import { erVaktplanVert, vertAv } from '@/lib/verter';
 
 /** varig = false: informasjonskapselen forsvinner når nettleseren lukkes (brukes før e-posten er bekreftet). */
@@ -129,7 +130,8 @@ export async function registrer(_: unknown, fd: FormData): Promise<Resultat<{ ko
   const navn = String(fd.get('navn') ?? '').trim();
   const epost = String(fd.get('epost') ?? '').trim().toLowerCase();
   const passord = String(fd.get('passord') ?? '');
-  const hvem = String(fd.get('hvem') ?? 'bedrift');
+  // Byrå er ikke i salg ennå: alle registrerer seg som bedrift. En invitert regnskapsfører får byrå-tilgangen når invitasjonen godtas.
+  const hvem = BYRA_I_SALG ? String(fd.get('hvem') ?? 'bedrift') : 'bedrift';
   const res = await trygt(async () => {
     if (navn.length < 2) throw new RegnskapsFeil('Skriv navnet ditt.');
     if (!gyldigEpost(epost)) throw new RegnskapsFeil('Skriv en gyldig e-postadresse.');
@@ -537,6 +539,7 @@ export async function lagreAnsatt(a: { id?: string; navn: string; epost?: string
     } else if (a.passordType && p) {
       await db.q('update ansatt set slipp_passord_hash = $3, slipp_passord_type = $4 where id = $1 and organisasjon_id = $2', [ansattId, s.org.id, await hashPassord(p), a.passordType]);
     }
+    if (!a.id) await synkEkstraAnsatte(db, s.org.id).catch(e => console.error('Ekstra ansatte i Stripe:', e));
     revalidatePath('/lonn');
   }, 'Den ansatte er lagret.');
 }
@@ -943,7 +946,7 @@ export async function opprettKlient(e: { navn: string; orgnr?: string | null; or
 export async function sporAssistent(sporsmal: string): Promise<Resultat<Svar>> {
   return trygt(async () => {
     const s = await kreverOrg();
-    if (!harAssistent(s.org.pakke) && !s.medlemskap.some(m => m.type === 'byra')) throw new RegnskapsFeil('Assistenten er med i Selskap og Byrå.');
+    if (!harAssistent(s.org.pakke) && !s.medlemskap.some(m => m.type === 'byra')) throw new RegnskapsFeil('Assistenten er med i Selskap.');
     const q = sporsmal.trim().slice(0, 500);
     if (!q) throw new RegnskapsFeil('Skriv et spørsmål.');
     const db = await getDb();
@@ -962,7 +965,7 @@ export async function chatMedAssistent(historikk: Tur[]): Promise<Resultat<Agent
   return trygt(async () => {
     const s = await kreverOrg();
     const byra = s.medlemskap.some(m => m.type === 'byra');
-    if (!harAssistent(s.org.pakke) && !byra) throw new RegnskapsFeil('Assistenten er med i Selskap og Byrå.');
+    if (!harAssistent(s.org.pakke) && !byra) throw new RegnskapsFeil('Assistenten er med i Selskap.');
     const tur = historikk.filter(t => (t.role === 'user' || t.role === 'assistant') && typeof t.content === 'string').slice(-14);
     const siste = tur[tur.length - 1];
     if (!siste || siste.role !== 'user' || !siste.content.trim()) throw new RegnskapsFeil('Skriv et spørsmål.');

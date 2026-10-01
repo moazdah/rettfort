@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { lagreInnstillinger, inviterBruker, byttPakke, apneKundeportal, laasPeriodeHandling, lagreApningsbalanse } from '@/app/handlinger';
-import { PAKKER } from '@/lib/pakker';
+import { PAKKER, VAKTPLAN_ANSATTE, EKSTRA_ANSATT } from '@/lib/pakker';
 import { KONTOPLAN } from '@/lib/kontoplan';
 import { kr, tilOre } from '@/lib/penger';
 
@@ -116,6 +116,7 @@ export function Pakker({ pakke, erEier, betalingPa = false, intropris = null, st
       {status === 'past_due' && <div className="varsel rod">Siste trekk feilet. Oppdater kortet, så beholder du pakken. {harKunde && erEier && <button type="button" className="lenke" onClick={portal}>Oppdater kortet</button>}</div>}
       {slutt && pakke !== 'gratis' && <div className="varsel info">Abonnementet er sagt opp og gjelder til {dato(slutt)}. Deretter går du over til Gratis. Du kan velge pakken igjen for å fortsette.</div>}
       {betalingPa && intropris != null && <div className="varsel gul"><b>Introduksjonspris:</b> {kr(intropris, { desimaler: false })} kr i måneden for alle pakker mens vi bygger ferdig. Du får beskjed i god tid før prisen endres.</div>}
+      <p className="mut liten" style={{ margin: 0 }}>Priser uten MVA. Vaktplanen har {VAKTPLAN_ANSATTE.start} ansatte med i Start og {VAKTPLAN_ANSATTE.selskap} i Selskap; flere koster {EKSTRA_ANSATT / 100} kr i måneden per ansatt. <a className="lenke" href="https://xn--rettfrt-u1a.no/vilkar" target="_blank" rel="noreferrer">Se vilkår</a></p>
       <div className="rutenett tre">
         {PAKKER.map(p => (
           <div key={p.k} className="kort stakk" style={{ borderColor: pakke === p.k ? 'var(--ink)' : undefined, gap: 8 }}>

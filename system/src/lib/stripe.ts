@@ -5,7 +5,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { Sporring } from './db';
 import { RegnskapsFeil } from './hovedbok';
-import { PAKKER, prisFor, type BetaltPakke } from './pakker';
+import { PAKKER, prisFor, EKSTRA_ANSATT, ekstraAnsatte, tarBetaltForEkstra, type BetaltPakke } from './pakker';
 
 export const stripePa = () => !!process.env.STRIPE_SECRET_KEY;
 
@@ -52,6 +52,40 @@ export async function prisId(pakke: BetaltPakke): Promise<string> {
     product_data: { name: `Rettført ${navn}`, metadata: { pakke } }, metadata: { pakke },
   });
   return p.id;
+}
+
+/** Prisen for én ekstra ansatt i vaktplanen per måned. Lages i Stripe første gang. */
+export async function ekstraPrisId(): Promise<string> {
+  const oppslag = `rettfort_ekstra_ansatt_${EKSTRA_ANSATT}_mnd`;
+  const f = await stripe<{ data: { id: string }[] }>('GET', 'prices', { lookup_keys: [oppslag], active: true, limit: 1 });
+  if (f.data[0]) return f.data[0].id;
+  const p = await stripe<{ id: string }>('POST', 'prices', {
+    currency: 'nok', unit_amount: EKSTRA_ANSATT, recurring: { interval: 'month' }, lookup_key: oppslag,
+    product_data: { name: 'Rettført vaktplan, ekstra ansatt', metadata: { tillegg: 'ekstra_ansatt' } }, metadata: { tillegg: 'ekstra_ansatt' },
+  });
+  return p.id;
+}
+
+async function antallAnsatte(t: Sporring, orgId: string): Promise<number> {
+  return Number((await t.en<{ n: string }>('select count(*) as n from ansatt where organisasjon_id = $1 and aktiv', [orgId]))?.n ?? 0);
+}
+
+/**
+ * Holder antallet ekstra ansatte i abonnementet i takt med de ansatte i systemet.
+ * Gjør ingenting i introduksjonsperioden, uten Stripe eller uten aktivt abonnement.
+ */
+export async function synkEkstraAnsatte(t: Sporring, orgId: string): Promise<void> {
+  if (!tarBetaltForEkstra() || !stripePa()) return;
+  const o = await t.en<{ pakke: string; stripe_abonnement: string | null }>('select pakke, stripe_abonnement from organisasjon where id = $1', [orgId]);
+  if (!o?.stripe_abonnement) return;
+  const antall = ekstraAnsatte(o.pakke, await antallAnsatte(t, orgId));
+  const pris = await ekstraPrisId();
+  const a = await stripe<{ items: { data: { id: string; quantity: number; price: { id: string } }[] } }>('GET', `subscriptions/${o.stripe_abonnement}`);
+  const linje = a.items.data.find(i => i.price.id === pris);
+  if (linje && antall === linje.quantity) return;
+  if (linje && antall === 0) await stripe('DELETE', `subscription_items/${linje.id}`, { proration_behavior: 'create_prorations' });
+  else if (linje) await stripe('POST', `subscription_items/${linje.id}`, { quantity: antall, proration_behavior: 'create_prorations' });
+  else if (antall > 0) await stripe('POST', 'subscription_items', { subscription: o.stripe_abonnement, price: pris, quantity: antall, proration_behavior: 'create_prorations' });
 }
 
 /** Stripe varsler systemet om trekk, feil og oppsigelser. Endepunktet lages én gang per adresse. */
@@ -115,23 +149,32 @@ export async function startBetaling(t: Sporring, orgId: string, pakke: BetaltPak
   await sikreWebhook(t, grunnadresse);
   const pris = await prisId(pakke);
   if (o.stripe_abonnement) {
-    const a = await stripe<{ status: string; items: { data: { id: string }[] } }>('GET', `subscriptions/${o.stripe_abonnement}`);
+    const a = await stripe<{ status: string; items: { data: { id: string; price: { metadata?: { tillegg?: string } } }[] } }>('GET', `subscriptions/${o.stripe_abonnement}`);
+    const pakkelinje = a.items.data.find(i => !i.price.metadata?.tillegg) ?? a.items.data[0];
     if (['active', 'trialing', 'past_due'].includes(a.status)) {
-      await stripe('POST', `subscriptions/${o.stripe_abonnement}`, { items: [{ id: a.items.data[0].id, price: pris }], proration_behavior: 'create_prorations', cancel_at_period_end: false, metadata: { org_id: orgId, pakke } });
+      await stripe('POST', `subscriptions/${o.stripe_abonnement}`, { items: [{ id: pakkelinje.id, price: pris }], proration_behavior: 'create_prorations', cancel_at_period_end: false, metadata: { org_id: orgId, pakke } });
       await t.q(`update organisasjon set pakke = $2, abonnement_status = 'active', abonnement_slutt = null where id = $1`, [orgId, pakke]);
+      await synkEkstraAnsatte(t, orgId);
       return { byttet: true };
     }
   }
   const k = await kunde(t, o, epost);
   const s = await stripe<{ url: string }>('POST', 'checkout/sessions', {
     mode: 'subscription', customer: k, client_reference_id: orgId, locale: 'nb',
-    line_items: [{ price: pris, quantity: 1 }],
+    line_items: [{ price: pris, quantity: 1 }, ...await ekstraLinje(t, orgId, pakke)],
     subscription_data: { metadata: { org_id: orgId, pakke } },
     metadata: { org_id: orgId, pakke },
     success_url: `${grunnadresse}/innstillinger?vis=abonnement&betaling={CHECKOUT_SESSION_ID}`,
     cancel_url: `${grunnadresse}/innstillinger?vis=abonnement&avbrutt=1`,
   });
   return { url: s.url };
+}
+
+/** Linjen for ekstra ansatte på betalingssiden, når den gjelder. */
+async function ekstraLinje(t: Sporring, orgId: string, pakke: BetaltPakke): Promise<{ price: string; quantity: number }[]> {
+  if (!tarBetaltForEkstra()) return [];
+  const antall = ekstraAnsatte(pakke, await antallAnsatte(t, orgId));
+  return antall > 0 ? [{ price: await ekstraPrisId(), quantity: antall }] : [];
 }
 
 type Abonnement = { id: string; status: string; customer: string; cancel_at_period_end: boolean; current_period_end: number; metadata: { org_id?: string; pakke?: string } };
