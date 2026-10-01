@@ -42,6 +42,8 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
 @media (max-width:760px){[data-rf="topnav"]{display:none !important;}[data-rf="topp"]{gap:12px !important;justify-content:space-between;padding:0 16px !important;}}
 @media (max-width:420px){[data-rf="toppknapper"] a{height:38px !important;padding:0 14px !important;font-size:14.5px !important;}}
 [data-rf="aivalg"]::-webkit-scrollbar{display:none;}
+[data-rf="aichat"]>*{flex-shrink:0}
+@media (max-width:520px){[data-rf="aichat"]{height:450px !important}}
 [data-rf="ftgrid"]{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 @media (max-width:980px){[data-rf="ftgrid"]{grid-template-columns:repeat(2,minmax(0,1fr))}[data-rf="ftgrid"]>:last-child{grid-column:1/-1}}
 @media (max-width:640px){[data-rf="ftgrid"]{grid-template-columns:1fr}}
@@ -87,7 +89,27 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
             <span style="font-weight:600;font-size:14px;flex:1">Assistent</span>
             <span style="font-size:12px;color:#8A909C">{{ aiTid }}</span>
           </div>
-          <div style="height:318px;padding:16px 16px 10px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;background:#FBFAF6;opacity:{{ aiFade }};transition:opacity .35s">
+          <div data-rf="aichat" style="height:400px;overflow:hidden;padding:16px 16px 12px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;background:#FBFAF6;opacity:{{ aiFade }};transition:opacity .35s">
+            <sc-if value="{{ aiVisBilde }}" hint-placeholder-val="{{ false }}">
+              <div style="align-self:flex-end;width:250px;max-width:88%;display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:16px 16px 4px 16px;background:#fff;border:1px solid #E4DFD4;box-shadow:0 8px 20px -14px rgba(11,37,69,.35)">
+                <div style="width:38px;height:50px;flex:none;border-radius:4px;background:#fff;border:1px solid #D9D3C6;padding:5px 5px 0;display:flex;flex-direction:column;gap:3px;transform:rotate(-4deg)">
+                  <span style="height:4px;width:70%;background:#0B2545;border-radius:2px"></span>
+                  <span style="height:2px;background:#D9D3C6;border-radius:2px"></span>
+                  <span style="height:2px;width:80%;background:#D9D3C6;border-radius:2px"></span>
+                  <span style="height:2px;background:#D9D3C6;border-radius:2px"></span>
+                  <span style="height:3px;width:60%;margin-left:auto;background:#0B2545;border-radius:2px;margin-top:2px"></span>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ aiBildeNavn }}</div>
+                  <div style="font-size:11.5px;color:#586174;margin-top:1px">{{ aiBildeTxt }}</div>
+                  <div style="height:4px;border-radius:99px;background:#EFEBE2;margin-top:6px;overflow:hidden"><div style="height:100%;width:{{ aiBildePst }}%;background:{{ aiBildeFarge }};border-radius:99px;transition:width .1s linear"></div></div>
+                </div>
+                <span style="width:28px;height:28px;flex:none;border-radius:50%;background:{{ aiBildeFarge }};color:#fff;display:flex;align-items:center;justify-content:center">
+                  <sc-if value="{{ aiBildeLaster }}" hint-placeholder-val="{{ true }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></sc-if>
+                  <sc-if value="{{ aiBildeFerdig }}" hint-placeholder-val="{{ false }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                </span>
+              </div>
+            </sc-if>
             <sc-if value="{{ aiVisU }}" hint-placeholder-val="{{ true }}">
               <div style="align-self:flex-end;max-width:86%;padding:9px 13px;border-radius:16px 16px 4px 16px;background:#0B2545;color:#fff;font-size:14px;line-height:1.4">{{ aiU }}</div>
             </sc-if>
@@ -282,7 +304,7 @@ class Component extends DCLogic {
   state = { faq: 0, scrolled: false, ai: 0, at: 0 };
   AI = [
     { tema: 'Faktura', tid: '14:04', u: 'Fakturer Havbris AS for 12 timer rådgivning i september', b: 'Her er fakturaen. Jeg brukte timeprisen fra sist og la til KID.', kt: 'Faktura 1043', l: [['Til', 'Havbris AS'], ['12 t × 1 150 kr', '13 800,00'], ['MVA 25 %', '3 450,00'], ['Å betale', '17 250,00 kr']], s: ['Fant Havbris AS i kunderegisteret', 'Hentet timeprisen fra forrige faktura', 'La til 25 % MVA og KID'], ok: 'Send faktura', f: 'Sendt til post@havbris.no' },
-    { tema: 'Kvittering', tid: '09:12', u: 'Før kvitteringen jeg tok bilde av', b: 'Biltema, 1 249 kr. Jeg fant betalingen i banken også.', kt: 'Kjøp · Biltema', l: [['Konto', '6540 Inventar'], ['MVA 25 %', '249,80'], ['Betalt', '26.09 fra driftskonto'], ['Totalt', '1 249,00 kr']], s: ['Leste kvitteringen: Biltema, 1 249 kr', 'Valgte konto 6540 Inventar', 'Fant betalingen i banken 26.09'], ok: 'Før kjøpet', f: 'Ført og avstemt mot banken' },
+    { tema: 'Kvittering', tid: '09:12', bilde: 'kvittering-biltema.jpg', u: 'Før kvitteringen jeg tok bilde av', b: 'Biltema, 1 249 kr. Jeg fant betalingen i banken også.', kt: 'Kjøp · Biltema', l: [['Konto', '6540 Inventar'], ['MVA 25 %', '249,80'], ['Betalt', '26.09 fra driftskonto'], ['Totalt', '1 249,00 kr']], s: ['Leste kvitteringen: Biltema, 1 249 kr', 'Valgte konto 6540 Inventar', 'Fant betalingen i banken 26.09'], ok: 'Før kjøpet', f: 'Ført og avstemt mot banken' },
     { tema: 'Purring', tid: '16:40', u: 'Hvem skylder meg penger?', b: 'To fakturaer er over forfall. Skal jeg sende en vennlig påminnelse?', kt: 'Påminnelser', l: [['Fjellmat AS · 6 dager', '8 400,00'], ['Nordvik Bygg · 2 dager', '22 500,00'], ['Ny frist', '13.10.2026'], ['Totalt', '30 900,00 kr']], s: ['Gikk gjennom alle ubetalte fakturaer', 'Sjekket dagens innbetalinger i banken', 'Skrev en vennlig påminnelse'], ok: 'Send begge', f: 'Sendt. Du får beskjed når de betaler' },
     { tema: 'Vaktplan', tid: '11:20', u: 'Lag vaktplan for neste uke. Jonas har eksamen torsdag', b: 'Jeg brukte denne uka som mal og lot Emma ta torsdagen. Ingen får overtid.', kt: 'Vaktplan uke 42', l: [['Vakter', '18'], ['Ledige', '0'], ['Overtid', '0 t'], ['Jonas torsdag', 'Fri']], s: ['Kopierte vaktene fra denne uka', 'Sjekket hvem som kan jobbe torsdag', 'Regnet timer og overtid per ansatt'], ok: 'Publiser', f: '5 ansatte har fått beskjed' },
     { tema: 'Lønn', tid: '08:30', u: 'Kjør lønn for oktober', b: 'Timene fra vaktplanen er med. Ali har 3 t overtid med 40 % tillegg.', kt: 'Lønn oktober', l: [['Ansatte', '5'], ['Brutto', '148 760,00'], ['Skattetrekk', '41 210,00'], ['Utbetales 25.10', '107 550,00 kr']], s: ['Hentet timer fra vaktplanen', 'Regnet overtid og tillegg', 'Beregnet skattetrekk fra skattekortene'], ok: 'Godkjenn lønn', f: 'Lønnsslipper sendt. A-melding klar' }
@@ -294,10 +316,14 @@ class Component extends DCLogic {
   renderVals() {
     const s = this.state;
     const A = this.AI[s.ai], t = s.at;
-    const tyEnd = 300 + A.u.length * 32, sendt = t >= tyEnd + 250, s0 = tyEnd + 550, SG = 650, bot = t >= s0 + A.s.length * SG + 150, botT = s0 + A.s.length * SG + 150, klikk = t >= botT + 2100, ferdig = t >= botT + 2350;
-    const chars = Math.max(0, Math.min(A.u.length, Math.floor((t - 300) / 32)));
+    // Med bilde: bildet lastes opp først (300–1700 ms), så skrives meldingen.
+    const o = A.bilde ? 1900 : 300, opp = A.bilde ? Math.max(0, Math.min(100, Math.round((t - 300) / 14))) : 0;
+    const tyEnd = o + A.u.length * 32, sendt = t >= tyEnd + 250, s0 = tyEnd + 550, SG = 650, bot = t >= s0 + A.s.length * SG + 150, botT = s0 + A.s.length * SG + 150, klikk = t >= botT + 2100, ferdig = t >= botT + 2350;
+    const chars = Math.max(0, Math.min(A.u.length, Math.floor((t - o) / 32)));
     const aiVals = {
       aiTema: A.tema, aiTid: A.tid, aiU: A.u, aiB: A.b, aiKortT: A.kt, aiOk: A.ok, aiFerdigTxt: A.f,
+      aiVisBilde: !!A.bilde && t >= 200, aiBildeNavn: A.bilde || '', aiBildePst: opp, aiBildeLaster: opp < 100, aiBildeFerdig: opp >= 100,
+      aiBildeTxt: opp < 100 ? 'Laster opp … ' + opp + ' %' : 'Lastet opp · 2,1 MB', aiBildeFarge: opp < 100 ? '#0B2545' : '#1F7D52',
       aiFade: t > 9250 ? 0 : 1, aiVisU: sendt, aiVisB: bot, aiVisSteg: t >= s0,
       ...(() => { const n = A.s.length, ferdigS = t >= s0 + n * SG, i = Math.max(0, Math.min(n - 1, Math.floor((t - s0) / SG))); return { aiStegTxt: ferdigS ? 'Sjekket ' + n + ' ting' : A.s[i] + ' …', aiStegNr: ferdigS ? '' : (i + 1) + '/' + n, aiStegDot: ferdigS ? '#1F7D52' : '#C9CDD5', aiStegIkon: ferdigS ? '✓' : '' }; })(),
       aiSteg: A.s.map((x, i) => { const a = s0 + i * SG, st = t < a ? 0 : t < a + SG - 120 ? 1 : 2; return { t: x, o: st ? 1 : 0, y: st ? '0' : '4px', fg: st === 2 ? '#3D4759' : '#586174', dot: st === 2 ? '#1F7D52' : '#C9CDD5', ikon: st === 2 ? '✓' : '' }; }),
@@ -322,7 +348,8 @@ class Component extends DCLogic {
       { n: 'Selskap', d: 'For bedriften som vil at assistenten gjør jobben.', pris: '3', per: 'kr / mnd · introduksjonspris', note: 'Ordinær pris 249 kr / mnd. Du får beskjed før den endres.', knapp: 'Velg Selskap', top: ['Alt i Start', 'Vaktplan for 15 ansatte', 'Assistent, 200 svar per måned'], anbefalt: true }
     ];
     const valgt = s.pakke ?? 0;
-    const pkValg = PK.map((x, i) => ({ n: x.n, pris: x.pris + ' kr', sel: i === valgt, bg: i === valgt ? '#F6DF6E' : 'transparent', bd: i === valgt ? '#E6CF5C' : 'transparent', fw: i === valgt ? 700 : 500, on: () => this.setState({ pakke: i }) }));
+    // Gratis står i midten og er valgt når siden åpnes.
+    const pkValg = [1, 0, 2].map(i => [PK[i], i]).map(([x, i]) => ({ n: x.n, pris: x.pris + ' kr', sel: i === valgt, bg: i === valgt ? '#F6DF6E' : 'transparent', bd: i === valgt ? '#E6CF5C' : 'transparent', fw: i === valgt ? 700 : 500, on: () => this.setState({ pakke: i }) }));
     const pkVis = [PK[valgt]].map(x => ({ ...x, anbefalt: !!x.anbefalt, href: 'https://min.xn--rettfrt-u1a.no/pakke/' + ['gratis', 'start', 'selskap'][valgt],
       f: FUNK.map(([t, lvl]) => { const ja = valgt >= lvl; return { t, i: ja ? '✓' : '–', fg: ja ? '#0B2545' : '#A5A9B2', dot: ja ? '#E2F1E8' : '#EFEBE2', ic: ja ? '#1F7D52' : '#A5A9B2' }; }) }));
     const V = (t, k) => k === 'o' ? { t, bg: '#fff', bd: '#0B2545', st: 'dashed' } : t ? { t, bg: '#E9EEF5', bd: '#C9D5E5', st: 'solid' } : { t: '', bg: '#FBFAF6', bd: '#EFEBE2', st: 'solid' };
