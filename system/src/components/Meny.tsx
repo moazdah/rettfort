@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Logo } from './Logo';
+import { BYRA_I_SALG } from '@/lib/pakker';
 import { AssistentKnapp } from './Assistent';
 import { loggUt, settTestPakke, testByra, testfirma, byttForetak, settAiLeverandor } from '@/app/handlinger';
 import { MENY, MER, erGruppe, aktivPa, type MenyPunkt } from './menyvalg';
@@ -134,7 +135,7 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
                       <small>Testtilgang: se pakken som</small>
                       <div className="rad">
                         {(['gratis', 'start', 'selskap'] as const).map(p => <button key={p} type="button" className={pakke === p ? 'valgt' : ''} onClick={() => settTestPakke(p)}>{PAKKE[p]}</button>)}
-                        <button type="button" onClick={() => testByra()}>Byrå</button>
+                        {BYRA_I_SALG && <button type="button" onClick={() => testByra()}>Byrå</button>}
                       </div>
                       <button type="button" className="testfirma-knapp" disabled={lager} onClick={async () => { setLager(true); const r = await testfirma(); if (r && !r.ok) { setLager(false); alert(r.feil); } }}>
                         {lager ? 'Lager testfirma … (tar litt tid)' : 'Åpne Testfirma AS med eksempeldata'}

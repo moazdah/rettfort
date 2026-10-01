@@ -1,7 +1,8 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
 import { getDb, type Db } from './db';
-import { lesSesjon, kanEndre, type Sesjon } from './auth';
+import { lesSesjon, kanEndre, tokenHash, type Sesjon } from './auth';
+import { BYRA_I_SALG, erTestbruker } from './pakker';
 import { oktToken } from './okt';
 import { RegnskapsFeil } from './hovedbok';
 
@@ -15,7 +16,17 @@ export async function db(): Promise<Db> {
  */
 export async function sesjon(o: { ansatt?: boolean } = {}): Promise<Sesjon | null> {
   const d = await getDb();
-  const s = await lesSesjon(d, await oktToken());
+  let s = await lesSesjon(d, await oktToken());
+  // Byrå er ikke i salg: testbrukere ser ikke testbyrået sitt. Står økten på det, byttes den til et eget foretak.
+  // Regnskapsførere som er invitert av en kunde, er ikke testbrukere og beholder byrå-visningen.
+  if (s && !BYRA_I_SALG && erTestbruker(s.bruker.epost) && s.medlemskap.some(m => m.type === 'byra')) {
+    if (s.org?.type === 'byra') {
+      const selskap = s.medlemskap.find(m => m.type === 'selskap');
+      await d.q('update sesjon set organisasjon_id = $2 where token_hash = $1', [tokenHash(s.token), selskap?.orgId ?? null]);
+      s = await lesSesjon(d, s.token);
+    }
+    if (s) s = { ...s, medlemskap: s.medlemskap.filter(m => m.type !== 'byra') };
+  }
   if (s && s.rolle === 'ansatt' && !o.ansatt) return { ...s, org: null };
   return s;
 }
