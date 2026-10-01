@@ -347,9 +347,9 @@ class Component extends DCLogic {
       { n: 'Start', d: 'For bedriften med ansatte som jobber i vakter.', pris: '3', per: 'kr / mnd · introduksjonspris', note: 'Ordinær pris 149 kr / mnd. Du får beskjed før den endres.', knapp: 'Velg Start', top: ['Alt i Gratis', 'Vaktplan for 5 ansatte', '29 kr / mnd per ekstra ansatt'] },
       { n: 'Selskap', d: 'For bedriften som vil at assistenten gjør jobben.', pris: '3', per: 'kr / mnd · introduksjonspris', note: 'Ordinær pris 249 kr / mnd. Du får beskjed før den endres.', knapp: 'Velg Selskap', top: ['Alt i Start', 'Vaktplan for 15 ansatte', 'Assistent, 200 svar per måned'], anbefalt: true }
     ];
-    const valgt = s.pakke ?? 0;
-    // Gratis står i midten og er valgt når siden åpnes.
-    const pkValg = [1, 0, 2].map(i => [PK[i], i]).map(([x, i]) => ({ n: x.n, pris: x.pris + ' kr', sel: i === valgt, bg: i === valgt ? '#F6DF6E' : 'transparent', bd: i === valgt ? '#E6CF5C' : 'transparent', fw: i === valgt ? 700 : 500, on: () => this.setState({ pakke: i }) }));
+    const valgt = s.pakke ?? 1;
+    // Start (i midten) er valgt når siden åpnes.
+    const pkValg = PK.map((x, i) => ({ n: x.n, pris: x.pris + ' kr', sel: i === valgt, bg: i === valgt ? '#F6DF6E' : 'transparent', bd: i === valgt ? '#E6CF5C' : 'transparent', fw: i === valgt ? 700 : 500, on: () => this.setState({ pakke: i }) }));
     const pkVis = [PK[valgt]].map(x => ({ ...x, anbefalt: !!x.anbefalt, href: 'https://min.xn--rettfrt-u1a.no/pakke/' + ['gratis', 'start', 'selskap'][valgt],
       f: FUNK.map(([t, lvl]) => { const ja = valgt >= lvl; return { t, i: ja ? '✓' : '–', fg: ja ? '#0B2545' : '#A5A9B2', dot: ja ? '#E2F1E8' : '#EFEBE2', ic: ja ? '#1F7D52' : '#A5A9B2' }; }) }));
     const V = (t, k) => k === 'o' ? { t, bg: '#fff', bd: '#0B2545', st: 'dashed' } : t ? { t, bg: '#E9EEF5', bd: '#C9D5E5', st: 'solid' } : { t: '', bg: '#FBFAF6', bd: '#EFEBE2', st: 'solid' };
