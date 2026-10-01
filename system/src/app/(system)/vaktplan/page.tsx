@@ -9,13 +9,13 @@ import { VaktAnsatte } from './Ansatte';
 
 export const metadata = { title: 'Vaktplan' };
 
-export default async function Vaktplan({ searchParams }: { searchParams: Promise<{ uke?: string; vis?: string }> }) {
+export default async function Vaktplan({ searchParams }: { searchParams: Promise<{ uke?: string; vis?: string; ny?: string }> }) {
   const s = await kreverSelskap();
   const sp = await searchParams;
   if (!harVaktplan(s.org.pakke)) {
     return (
       <div className="stakk" style={{ gap: 20, maxWidth: 720 }}>
-        <div><div className="mut liten">Ansatte</div><h1 style={{ marginTop: 4 }}>Vaktplan</h1></div>
+        <h1>Vaktplan</h1>
         <section className="kort stakk">
           <h2>Vaktplan er med i Start og Selskap</h2>
           <p className="mut">Lag ukeplanen på et par minutter, la de ansatte ta ledige vakter og be om fri fra mobilen, og send timene rett til lønn. Overtid og merarbeid regnes ut for deg.</p>
@@ -37,20 +37,16 @@ export default async function Vaktplan({ searchParams }: { searchParams: Promise
   const vis = sp.vis === 'ansatte' ? 'ansatte' : 'uke';
   const endre = kanEndre(s.rolle);
 
+  const faner = { uke: `/vaktplan?uke=${valgt.aar}-${valgt.uke}`, ansatte: '/vaktplan?vis=ansatte', vis } as const;
+
   return (
-    <div className="stakk" style={{ gap: 20 }}>
-      <div className="rad" style={{ justifyContent: 'space-between', alignItems: 'flex-end' }}>
-        <div><div className="mut liten">Ansatte</div><h1 style={{ marginTop: 4 }}>Vaktplan</h1></div>
-        <nav className="faner">
-          <Link href={`/vaktplan?uke=${valgt.aar}-${valgt.uke}`} className={vis === 'uke' ? 'aktiv' : ''}>Uke</Link>
-          <Link href="/vaktplan?vis=ansatte" className={vis === 'ansatte' ? 'aktiv' : ''}>Ansatte</Link>
-        </nav>
-      </div>
+    <div className="stakk vp-side" style={{ gap: 18 }}>
+      <h1>Vaktplan</h1>
       {!endre && <div className="varsel info liten">Du har lesetilgang. Bare eier og brukere med full tilgang kan endre vaktplanen.</div>}
       {vis === 'uke'
-        ? <VaktUke data={await hentUke(d, s.org.id, valgt.aar, valgt.uke)} trenger={await trengerSvar(d, s.org.id, dag)} idag={dag}
-            forrige={flyttUke(valgt.aar, valgt.uke, -1)} neste={flyttUke(valgt.aar, valgt.uke, 1)} assistent={harAssistent(s.org.pakke)} endre={endre} />
-        : <VaktAnsatte ansatte={await vaktAnsatte(d, s.org.id)} maler={(await hentUke(d, s.org.id, naa.aar, naa.uke)).maler} endre={endre} />}
+        ? <VaktUke faner={faner} data={await hentUke(d, s.org.id, valgt.aar, valgt.uke)} trenger={await trengerSvar(d, s.org.id, dag)} idag={dag}
+            forrige={flyttUke(valgt.aar, valgt.uke, -1)} neste={flyttUke(valgt.aar, valgt.uke, 1)} assistent={harAssistent(s.org.pakke)} endre={endre} nyVakt={sp.ny === '1'} />
+        : <VaktAnsatte faner={faner} ansatte={await vaktAnsatte(d, s.org.id)} maler={(await hentUke(d, s.org.id, naa.aar, naa.uke)).maler} endre={endre} />}
     </div>
   );
 }

@@ -2,19 +2,23 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { chatMedAssistent, samtaler, hentSamtale, lagreSamtale } from '@/app/handlinger';
 import type { Kort } from '@/lib/ai/verktoy';
 import type { Tur } from '@/lib/ai/agent';
 import type { SamtaleMelding as Melding, SamtaleListe } from '@/lib/ai/samtale';
 import { VisKort } from './AssistentKort';
 
-const FORSLAG = [
-  'Lag en faktura',
-  'Hvem har ikke betalt?',
-  'Kjør lønn for denne måneden',
-  'Send en skannelenke til en ansatt',
-  'Hvordan går det i år?',
-]
+// Forslag i tom samtale, tilpasset siden brukeren står på.
+const FORSLAG_FOR: [RegExp, string[]][] = [
+  [/^\/salg/, ['Lag en faktura', 'Hvem har ikke betalt?', 'Send purring på det som er forfalt', 'Hvor mye har vi fakturert i år?']],
+  [/^\/kjop/, ['Registrer en kostnad', 'Hva er de største kostnadene i år?', 'Send en skannelenke til en ansatt', 'Hvilke regninger forfaller snart?']],
+  [/^\/bank/, ['Har vi nok penger de neste 30 dagene?', 'Hvem har ikke betalt?', 'Registrer en innbetaling']],
+  [/^\/lonn/, ['Kjør lønn for denne måneden', 'Vis lønn og ansatte', 'Send lønnslippen til en ansatt']],
+  [/^\/vaktplan/, ['Lag vaktplan for neste uke', 'Hvem bør ta en ledig vakt?', 'Får noen overtid denne uka?']],
+  [/^\/(mva|frister|rapporter|aarsavslutning)/, ['Hvordan ligger vi an med MVA?', 'Hvilke frister kommer?', 'Vis resultatet per måned']],
+];
+const FORSLAG_STD = ['Lag en faktura', 'Hvem har ikke betalt?', 'Kjør lønn for denne måneden', 'Hvordan går det i år?'];
 
 // Korte svar som gjelder det siste forslaget som venter, så man slipper å trykke.
 const UTFOR = /^(ja[,!. ]*)?(godkjenn|godkjent|send( den| det| fakturaen| purringen)?|registrer( den| det)?|før( den| det)?|utfør|kjør( på)?|gjør det|ok,? send)[.! ]*$/i;
@@ -49,15 +53,17 @@ export function AssistentKnapp() {
     return () => window.removeEventListener('rf:assistent-status', status);
   }, []);
   return (
-    <button type="button" className={`assistent-topp ikke-utskrift ${apen ? 'apen' : ''}`} aria-label={apen ? 'Lukk assistenten' : 'Åpne assistenten'} aria-expanded={apen}
+    <button type="button" className={`assistent-topp ikke-utskrift ${apen ? 'apen' : ''}`} aria-label={apen ? 'Lukk assistenten' : 'Åpne assistenten'} aria-expanded={apen} title={`Assistent (${mac ? '⌘K' : 'Ctrl+K'})`}
       onClick={() => window.dispatchEvent(new CustomEvent('rf:assistent', { detail: 'bytt' }))}>
-      <Stjerne /><span className="assistent-topp-tekst">Spør assistenten</span><kbd>{mac ? '⌘K' : 'Ctrl K'}</kbd>
+      <Stjerne s={15} /><span className="assistent-topp-tekst">Assistent</span>
     </button>
   );
 }
 
 /** Assistenten: svarer, viser tall som grafer og tabeller, og lager forslag du sender eller setter på vent. */
-export function Assistent() {
+export function Assistent({ tilgang = true }: { tilgang?: boolean }) {
+  const sti = usePathname();
+  const forslag = FORSLAG_FOR.find(([re]) => re.test(sti))?.[1] ?? FORSLAG_STD;
   const [apen, setApen] = useState(false);
   const [visning, setVisning] = useState<'chat' | 'historikk'>('chat');
   const [bred, setBred] = useState(false);
@@ -213,7 +219,7 @@ export function Assistent() {
           <b>{visning === 'historikk' ? 'Tidligere samtaler' : 'Assistent'}</b>
           {visning === 'chat' && <small>{tittel || 'Ny samtale'}</small>}
         </div>
-        {visning === 'chat' && (
+        {visning === 'chat' && tilgang && (
           <button type="button" className="ap-historikk" onClick={() => { setListe(null); setVisning('historikk'); }} title="Tidligere samtaler">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><path d="M3 12a9 9 0 103-6.7L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l3 2" /></svg>Historikk
           </button>
@@ -222,7 +228,15 @@ export function Assistent() {
         <button type="button" className="ap-ikon" onClick={() => setApen(false)} aria-label="Lukk"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
       </div>
 
-      {visning === 'historikk' ? (
+      {!tilgang ? (
+        <div className="ap-rulle ap-meldinger">
+          <div className="ap-velkommen">
+            <div className="ap-velkommen-tittel">Assistenten er med i Selskap</div>
+            <p>Den lager fakturaer, fører kostnader, sender purringer, kjører lønn og lager vaktplanen for deg. Du ser alltid forslaget og bekrefter selv før noe lagres.</p>
+            <div><Link href="/innstillinger?vis=abonnement" className="knapp">Oppgrader til Selskap</Link></div>
+          </div>
+        </div>
+      ) : visning === 'historikk' ? (
         <div className="ap-historikk-liste">
           <div className="ap-sok">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
@@ -251,7 +265,7 @@ export function Assistent() {
               <div className="ap-velkommen">
                 <div className="ap-velkommen-tittel">Hva skal vi gjøre?</div>
                 <p>Jeg kan lage fakturaer, føre kostnader, sende purringer, sjekke MVA og svare på spørsmål om tallene dine.</p>
-                <div className="ap-forslag">{FORSLAG.map(f => <button key={f} type="button" onClick={() => spor(f)}>{f}</button>)}</div>
+                <div className="ap-forslag">{forslag.map(f => <button key={f} type="button" onClick={() => spor(f)}>{f}</button>)}</div>
               </div>
             )}
             {synlige.map((m, i) => {

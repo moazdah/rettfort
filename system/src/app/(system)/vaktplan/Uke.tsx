@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { hentUke, Trenger } from '@/lib/tjenester/vaktplan';
 import { arbeidMin, kortTid, timer } from '@/lib/vaktplan';
+import { VpFaner, type Faner } from '@/components/VpFaner';
 import { lagreVaktHandling, sjekkVakt, slettVaktHandling, gjorLedigHandling, beholdHandling, tildelHandling, publiserHandling, kopierUkeHandling, svarFriHandling } from '@/app/vaktplan-handlinger';
 
 type Data = Awaited<ReturnType<typeof hentUke>>;
@@ -12,18 +13,20 @@ type Vakt = Data['vakter'][number];
 type Uke = { aar: number; uke: number };
 
 const KORT = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
+const LANG = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag'];
 const MND = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
 const dm = (d: string) => `${Number(d.slice(8))}. ${MND[Number(d.slice(5, 7)) - 1]}`;
 const dagNavn = (d: string) => KORT[(new Date(`${d}T12:00:00Z`).getUTCDay() + 6) % 7];
 const initialer = (n: string) => n.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
 
 /** Lederens ukevisning: rutenett med ansatte og dager, forespørsler og publisering. */
-export function VaktUke({ data, trenger, idag, forrige, neste, assistent, endre }: { data: Data; trenger: Trenger; idag: string; forrige: Uke; neste: Uke; assistent: boolean; endre: boolean }) {
+export function VaktUke({ faner, data, trenger, idag, forrige, neste, assistent, endre, nyVakt = false }: { faner: Faner; data: Data; trenger: Trenger; idag: string; forrige: Uke; neste: Uke; assistent: boolean; endre: boolean; nyVakt?: boolean }) {
   const router = useRouter();
-  const [modal, setModal] = useState<{ vakt?: Vakt; ansattId: string | null; dato: string } | null>(null);
+  const { aar, uke, dager, status, ansatte, vakter, tilgj, perAnsatt, maler } = data;
+  const [modal, setModal] = useState<{ vakt?: Vakt; ansattId: string | null; dato: string } | null>(nyVakt && endre ? { ansattId: null, dato: dager.includes(idag) ? idag : dager[0] } : null);
   const [melding, setMelding] = useState<{ tekst: string; feil?: boolean } | null>(null);
   const [opptatt, setOpptatt] = useState('');
-  const { aar, uke, dager, status, ansatte, vakter, tilgj, perAnsatt, maler } = data;
+  const [dagValgt, setDagValgt] = useState(dager.includes(idag) ? idag : dager[0]);
 
   const kjor = async (navn: string, fn: () => Promise<{ ok: boolean; feil?: string; melding?: string }>, ok?: string) => {
     setOpptatt(navn); setMelding(null);
@@ -33,68 +36,75 @@ export function VaktUke({ data, trenger, idag, forrige, neste, assistent, endre 
     router.refresh();
   };
 
+  const navn = (id: string | null) => ansatte.find(a => a.id === id)?.navn ?? '';
+  const fornavn = (id: string | null) => navn(id).split(' ')[0];
   const celle = (ansattId: string | null, dato: string) => vakter.filter(v => v.ansattId === ansattId && v.dato === dato);
   const pa = (dato: string) => vakter.filter(v => v.dato === dato && v.ansattId).length;
   const ledige = (dato: string) => vakter.filter(v => v.dato === dato && !v.ansattId).length;
-  const harTrenger = trenger.fri.length + trenger.bytte.length + trenger.ledigeMedInteresse.length > 0;
-  const statusMerke = status === 'publisert' ? <span className="merke gronn">Publisert</span> : status === 'endret' ? <span className="merke gul">Endringer ikke publisert</span> : <span className="merke">Utkast</span>;
+  const antallTrenger = trenger.fri.length + trenger.bytte.length + trenger.ledigeMedInteresse.length;
+  const [stTekst, stKlasse] = status === 'publisert' ? ['Publisert', 'gronn'] : status === 'endret' ? ['Endringer ikke publisert', 'gul'] : ['Utkast, ikke publisert', ''];
   const sporAssistent = (q: string) => window.dispatchEvent(new CustomEvent('rf:assistent', { detail: { sporsmal: q } }));
+  const dagLang = (d: string) => `${LANG[(new Date(`${d}T12:00:00Z`).getUTCDay() + 6) % 7]} ${dm(d)}`;
+  const paJobbTekst = (d: string) => `${pa(d)} på jobb${ledige(d) ? `, ${ledige(d)} ledig` : ''}`;
 
   return (
     <div className="stakk" style={{ gap: 18 }}>
       <div className="vp-topp">
-        <div className="rad" style={{ gap: 6, flexWrap: 'nowrap' }}>
-          <Link href={`/vaktplan?uke=${forrige.aar}-${forrige.uke}`} className="vp-pil" aria-label="Forrige uke">‹</Link>
-          <div><b className="vp-uke">Uke {uke}</b> <span className="mut">· {dm(dager[0])} – {dm(dager[6])}</span></div>
-          <Link href={`/vaktplan?uke=${neste.aar}-${neste.uke}`} className="vp-pil" aria-label="Neste uke">›</Link>
-        </div>
-        <div className="rad" style={{ gap: 10 }}>
-          {statusMerke}
+        <VpFaner f={faner} />
+        <div className="vp-topp-hoyre">
+          <div className="vp-ukevelger">
+            <Link href={`/vaktplan?uke=${forrige.aar}-${forrige.uke}`} aria-label="Forrige uke">‹</Link>
+            <b>Uke {uke} · {dm(dager[0])} – {dm(dager[6])}</b>
+            <Link href={`/vaktplan?uke=${neste.aar}-${neste.uke}`} aria-label="Neste uke">›</Link>
+          </div>
+          <span className={`merke ${stKlasse}`}>{stTekst}</span>
           {endre && status !== 'publisert' && vakter.some(v => v.ansattId) && (
             <button type="button" className="knapp" disabled={!!opptatt} onClick={() => kjor('pub', async () => {
               const r = await publiserHandling(aar, uke);
-              return r.ok ? { ok: true, melding: `Publisert. ${r.data!.varslet} fikk e-post${r.data!.uten ? `, ${r.data!.uten} har ikke e-post (send lenken selv under Ansatte)` : ''}.` } : r;
+              return r.ok ? { ok: true, melding: `Publisert. ${r.data!.varslet} fikk e-post${r.data!.uten ? `, ${r.data!.uten} har ikke e-post (send lenken under Ansatte)` : ''}.` } : r;
             })}>{opptatt === 'pub' ? 'Publiserer …' : status === 'endret' ? 'Publiser endringene' : 'Publiser og varsle'}</button>
           )}
         </div>
       </div>
       {melding && <div className={`varsel ${melding.feil ? 'rod' : 'gronn'} liten`}>{melding.tekst}</div>}
 
-      {harTrenger && endre && (
-        <section className="kort stakk vp-trenger">
-          <h2>Trenger svar</h2>
-          <div className="liste">
-            {trenger.fri.map(f => (
-              <div key={f.id} className="linje">
-                <span className="merke gul">Fri</span>
-                <span className="fyll"><b>{f.navn}</b> ber om fri {dagNavn(f.dato).toLowerCase()} {dm(f.dato)}{f.grunn ? `: ${f.grunn}` : ''}{f.harVakt && <small className="mut" style={{ display: 'block' }}>Vakten blir ledig hvis du godkjenner.</small>}</span>
+      {antallTrenger > 0 && endre && (
+        <section className="vp-trenger">
+          <div className="vp-trenger-topp"><b>Trenger svar</b><span className="teller">{antallTrenger}</span></div>
+          {trenger.fri.map(f => (
+            <div key={f.id} className="vp-trenger-rad">
+              <span className="vp-avatar">{initialer(f.navn)}</span>
+              <span className="fyll"><span>{f.navn} ber om fri {dagLang(f.dato).toLowerCase()}</span>
+                <small>{[f.grunn ? `${f.grunn}.` : '', ...celle(f.ansattId, f.dato).map(v => `Har vakt ${kortTid(v.start, v.slutt)}.`), f.harVakt ? 'Vakten blir ledig hvis du godkjenner.' : ''].filter(Boolean).join(' ')}</small></span>
+              <span className="vp-trenger-knapper">
                 <button type="button" className="knapp liten" disabled={!!opptatt} onClick={() => kjor('f' + f.id, () => svarFriHandling(f.id, true))}>Godkjenn</button>
                 <button type="button" className="knapp hvit liten" disabled={!!opptatt} onClick={() => kjor('f' + f.id, () => svarFriHandling(f.id, false))}>Avslå</button>
-              </div>
-            ))}
-            {trenger.bytte.map(v => (
-              <div key={v.id} className="linje">
-                <span className="merke">Bytte</span>
-                <span className="fyll"><b>{v.navn}</b> vil bytte bort {dagNavn(v.dato).toLowerCase()} {dm(v.dato)} <span className="mono">{kortTid(v.start, v.slutt)}</span></span>
+              </span>
+            </div>
+          ))}
+          {trenger.bytte.map(v => (
+            <div key={v.id} className="vp-trenger-rad">
+              <span className="vp-avatar">{initialer(v.navn)}</span>
+              <span className="fyll"><span>{v.navn} vil bytte bort {dagLang(v.dato).toLowerCase()}, {kortTid(v.start, v.slutt)}</span>
+                <small>Gjør vakten ledig så andre kan ta den, eller behold den hos {v.navn.split(' ')[0]}.</small></span>
+              <span className="vp-trenger-knapper">
                 <button type="button" className="knapp liten" disabled={!!opptatt} onClick={() => kjor('b' + v.id, () => gjorLedigHandling(v.id))}>Gjør ledig</button>
                 <button type="button" className="knapp hvit liten" disabled={!!opptatt} onClick={() => kjor('b' + v.id, () => beholdHandling(v.id))}>Behold</button>
-              </div>
-            ))}
-            {trenger.ledigeMedInteresse.map(v => (
-              <div key={v.id} className="linje" style={{ flexWrap: 'wrap' }}>
-                <span className="merke gronn">Ledig</span>
-                <span className="fyll">{dagNavn(v.dato)} {dm(v.dato)} <span className="mono">{kortTid(v.start, v.slutt)}</span> · {v.interessenter.length} vil ta den</span>
-                <span className="rad" style={{ gap: 6 }}>
-                  {v.interessenter.map(i => (
-                    <button key={i.id} type="button" className="knapp hvit liten" title={i.merknad ?? undefined} disabled={!!opptatt} onClick={() => kjor('l' + v.id, () => tildelHandling(v.id, i.id))}>
-                      Gi til {i.navn.split(' ')[0]}{i.merknad ? ' ⚠' : ''}
-                    </button>
-                  ))}
-                </span>
-                {v.interessenter.some(i => i.merknad) && <small className="mut" style={{ flexBasis: '100%' }}>{v.interessenter.filter(i => i.merknad).map(i => i.merknad).join(' ')}</small>}
-              </div>
-            ))}
-          </div>
+              </span>
+            </div>
+          ))}
+          {trenger.ledigeMedInteresse.map(v => (
+            <div key={v.id} className="vp-trenger-rad">
+              <span className="vp-avatar tom">+</span>
+              <span className="fyll"><span>{dagLang(v.dato)}, {kortTid(v.start, v.slutt)} er ledig</span>
+                <small>{v.interessenter.map(i => i.navn.split(' ')[0]).join(' og ')} vil ta den.{v.interessenter.filter(i => i.merknad).map(i => ` ${i.navn.split(' ')[0]} får ${/overtid/.test(i.merknad!) ? 'overtid' : /merarbeid/.test(i.merknad!) ? 'merarbeid' : 'en vakt til samme dag'}.`).join('')}</small></span>
+              <span className="vp-trenger-knapper">
+                {v.interessenter.map((i, n) => (
+                  <button key={i.id} type="button" className={`knapp liten ${n ? 'hvit' : ''}`} title={i.merknad ?? undefined} disabled={!!opptatt} onClick={() => kjor('l' + v.id, () => tildelHandling(v.id, i.id))}>Gi til {i.navn.split(' ')[0]}</button>
+                ))}
+              </span>
+            </div>
+          ))}
         </section>
       )}
 
@@ -105,53 +115,90 @@ export function VaktUke({ data, trenger, idag, forrige, neste, assistent, endre 
           <div><Link href="/vaktplan?vis=ansatte" className="knapp">Legg til ansatt</Link></div>
         </section>
       ) : (
-        <div className="vp-rutenett-ramme">
-          <div className="vp-rutenett" role="grid" aria-label={`Vaktplan uke ${uke}`}>
-            <div className="vp-hode vp-hjorne" />
-            {dager.map(d => (
-              <div key={d} className={`vp-hode ${d === idag ? 'idag' : ''}`}>
-                <b>{dagNavn(d)} {dm(d)}</b>
-                <small>{pa(d)} på jobb{ledige(d) ? `, ${ledige(d)} ledig` : ''}</small>
-              </div>
-            ))}
+        <>
+          <div className="vp-rutenett-ramme">
+            <div className="vp-rutenett" role="grid" aria-label={`Vaktplan uke ${uke}`}>
+              <div className="vp-hode vp-hjorne"><small>{ansatte.length} ansatte</small></div>
+              {dager.map(d => (
+                <div key={d} className={`vp-hode ${d === idag ? 'idag' : ''}`}>
+                  <b>{dagNavn(d)} {dm(d)}</b>
+                  <small>{paJobbTekst(d)}</small>
+                </div>
+              ))}
 
-            <div className="vp-radhode ledig-rad"><span className="vp-avatar tom">+</span><b>Ledige vakter</b></div>
-            {dager.map(d => (
-              <div key={d} className="vp-celle ledig-rad" onClick={() => endre && setModal({ ansattId: null, dato: d })}>
-                {celle(null, d).map(v => <Brikke key={v.id} v={v} onClick={() => endre && setModal({ vakt: v, ansattId: null, dato: d })} />)}
-              </div>
-            ))}
+              <div className="vp-radhode ledig-rad"><span className="fyll"><b>Ledige vakter</b><small>Alle ansatte ser disse</small></span></div>
+              {dager.map(d => (
+                <div key={d} className="vp-celle ledig-rad" onClick={() => endre && setModal({ ansattId: null, dato: d })}>
+                  {celle(null, d).map(v => <Brikke key={v.id} v={v} onClick={() => endre && setModal({ vakt: v, ansattId: null, dato: d })} />)}
+                </div>
+              ))}
 
-            {ansatte.map(a => {
-              const u = perAnsatt[a.id];
-              const avtalt = u?.avtalt ?? null;
-              const andel = avtalt ? Math.min(100, ((u?.arbeid ?? 0) / avtalt) * 100) : Math.min(100, ((u?.arbeid ?? 0) / 2400) * 100);
-              const varm = (u?.overtid ?? 0) > 0 || (u?.merarbeid ?? 0) > 0;
-              return [
-                <div key={a.id} className="vp-radhode">
-                  <span className="vp-avatar">{initialer(a.navn)}</span>
-                  <span className="fyll">
-                    <b>{a.navn}</b>
-                    <small>{avtalt ? `${timer(u?.arbeid ?? 0).replace(' t', '')} av ${timer(avtalt)}` : `${timer(u?.arbeid ?? 0)} · timelønn`}</small>
-                    <span className="vp-strek"><span className={varm ? 'varm' : ''} style={{ width: `${andel}%` }} /></span>
-                    {(u?.overtid ?? 0) > 0 && <small className="tekst-gul">{timer(u.overtid)} overtid</small>}
-                    {!u?.overtid && (u?.merarbeid ?? 0) > 0 && <small className="tekst-gul">{timer(u.merarbeid)} merarbeid</small>}
-                  </span>
-                </div>,
-                ...dager.map(d => {
-                  const t = tilgj.find(x => x.ansattId === a.id && x.dato === d);
-                  return (
-                    <div key={a.id + d} className={`vp-celle ${t?.status === 'kan' ? 'kan' : t?.status === 'kan_ikke' ? 'kan-ikke' : ''}`} title={t?.status === 'kan_ikke' ? `Kan ikke${t.grunn ? `: ${t.grunn}` : ''}` : t?.status === 'kan' ? 'Kan jobbe' : undefined}
-                      onClick={() => endre && setModal({ ansattId: a.id, dato: d })}>
-                      {celle(a.id, d).map(v => <Brikke key={v.id} v={v} kanIkke={t?.status === 'kan_ikke'} onClick={() => endre && setModal({ vakt: v, ansattId: a.id, dato: d })} />)}
-                      {!celle(a.id, d).length && t?.status === 'kan_ikke' && <small className="vp-grunn">{t.grunn || 'Kan ikke'}</small>}
-                    </div>
-                  );
-                }),
-              ];
-            })}
+              {ansatte.map(a => {
+                const u = perAnsatt[a.id];
+                const avtalt = u?.avtalt ?? null;
+                const andel = Math.min(100, ((u?.arbeid ?? 0) / (avtalt ?? 2400)) * 100);
+                const varm = (u?.overtid ?? 0) > 0 || (u?.merarbeid ?? 0) > 0;
+                return [
+                  <div key={a.id} className="vp-radhode">
+                    <span className="vp-avatar">{initialer(a.navn)}</span>
+                    <span className="fyll">
+                      <b>{a.navn}</b>
+                      <small>{avtalt ? `${timer(u?.arbeid ?? 0).replace(' t', '')} av ${timer(avtalt)}` : `${timer(u?.arbeid ?? 0)} · timelønn`}{(u?.overtid ?? 0) > 0 ? ` · ${timer(u.overtid)} overtid` : ''}</small>
+                      <span className="vp-strek"><span className={varm ? 'varm' : ''} style={{ width: `${andel}%` }} /></span>
+                    </span>
+                  </div>,
+                  ...dager.map(d => {
+                    const t = tilgj.find(x => x.ansattId === a.id && x.dato === d);
+                    const her = celle(a.id, d);
+                    return (
+                      <div key={a.id + d} className={`vp-celle ${t?.status === 'kan' ? 'kan' : t?.status === 'kan_ikke' ? 'kan-ikke' : ''} ${her.length ? '' : 'tom'}`} title={t?.status === 'kan_ikke' ? `Kan ikke${t.grunn ? `: ${t.grunn}` : ''}` : undefined}
+                        onClick={() => endre && setModal({ ansattId: a.id, dato: d })}>
+                        {her.map(v => <Brikke key={v.id} v={v} kanIkke={t?.status === 'kan_ikke'} onClick={() => endre && setModal({ vakt: v, ansattId: a.id, dato: d })} />)}
+                        {!her.length && t?.status === 'kan_ikke' && <span className="vp-celletekst rod">{t.grunn || 'Kan ikke'}</span>}
+                        {!her.length && t?.status === 'kan' && <span className="vp-celletekst gronn">Kan jobbe</span>}
+                        {!her.length && !t && endre && <span className="vp-pluss" aria-hidden>+</span>}
+                      </div>
+                    );
+                  }),
+                ];
+              })}
+            </div>
           </div>
-        </div>
+
+          {/* Mobil: én dag om gangen */}
+          <div className="vp-dag">
+            <div className="vp-dagvelger" role="tablist" aria-label="Velg dag">
+              {dager.map(d => (
+                <button key={d} type="button" role="tab" aria-selected={d === dagValgt} className={d === dagValgt ? 'valgt' : ''} onClick={() => setDagValgt(d)}>
+                  <small>{dagNavn(d)}</small><b>{Number(d.slice(8))}</b>{ledige(d) > 0 && <i aria-label="ledig vakt" />}
+                </button>
+              ))}
+            </div>
+            <div className="rad" style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}>
+              <div><b className="vp-dag-tittel">{dagLang(dagValgt)}</b><div className="mut liten">{paJobbTekst(dagValgt)}</div></div>
+              {endre && <button type="button" className="knapp" onClick={() => setModal({ ansattId: null, dato: dagValgt })}>+ Vakt</button>}
+            </div>
+            <div className="vp-dagliste">
+              {[...celle(null, dagValgt), ...vakter.filter(v => v.dato === dagValgt && v.ansattId).sort((x, y) => x.start.localeCompare(y.start))].map(v => {
+                const t = tilgj.find(x => x.ansattId === v.ansattId && x.dato === dagValgt);
+                return (
+                  <button key={v.id} type="button" className="vp-dagrad" onClick={() => endre && setModal({ vakt: v, ansattId: v.ansattId, dato: dagValgt })}>
+                    <span className={`vp-avatar ${v.ansattId ? '' : 'tom'}`}>{v.ansattId ? initialer(navn(v.ansattId)) : '+'}</span>
+                    <span className="fyll"><b>{v.ansattId ? navn(v.ansattId) : 'Ledig vakt'}</b>{!v.ansattId && <small>{v.interesse.length ? `${v.interesse.length} vil ta den` : 'Ingen ennå'}</small>}</span>
+                    {v.overtid > 0 && <span className="merke gul">Overtid</span>}
+                    {t?.status === 'kan_ikke' && <span className="merke rod">Kan ikke</span>}
+                    {v.utlagt && <span className="merke">Vil bytte</span>}
+                    <span className="mono">{kortTid(v.start, v.slutt)}</span>
+                  </button>
+                );
+              })}
+              {!vakter.some(v => v.dato === dagValgt) && <p className="mut" style={{ padding: '14px 16px', margin: 0 }}>Ingen vakter denne dagen.</p>}
+            </div>
+            {tilgj.some(x => x.dato === dagValgt && x.status === 'kan_ikke') && (
+              <p className="mut liten" style={{ margin: 0 }}>Kan ikke jobbe: {tilgj.filter(x => x.dato === dagValgt && x.status === 'kan_ikke').map(x => `${fornavn(x.ansattId)}${x.grunn ? ` (${x.grunn.toLowerCase()})` : ''}`).join(', ')}</p>
+            )}
+          </div>
+        </>
       )}
 
       {ansatte.length > 0 && !vakter.length && endre && (
@@ -174,10 +221,11 @@ export function VaktUke({ data, trenger, idag, forrige, neste, assistent, endre 
 
       <div className="vp-forklaring">
         <span><i className="vanlig" /> Vakt</span>
-        <span><i className="overtid" /> Overtid</span>
-        <span><i className="kan-ikke-brikke" /> Har sagt «kan ikke»</span>
-        <span><i className="kan" /> Kan jobbe</span>
-        <span><i className="kan-ikke" /> Kan ikke</span>
+        <span><i className="overtid" /> Gir overtid</span>
+        <span><i className="ledig" /> Ledig</span>
+        <span><i className="kan" /> Tilgjengelig</span>
+        <span><i className="kan-ikke" /> Kan ikke jobbe</span>
+        {endre && <span className="vp-forklaring-hoyre">Klikk i en rute for å legge til en vakt.</span>}
       </div>
 
       {modal && <VaktModal key={modal.vakt?.id ?? modal.ansattId + modal.dato} start={modal} ansatte={ansatte} dager={dager} maler={maler} onLukk={() => setModal(null)} onFerdig={(t) => { setModal(null); setMelding(t ? { tekst: t } : null); router.refresh(); }} />}
@@ -190,8 +238,9 @@ function Brikke({ v, kanIkke, onClick }: { v: Vakt; kanIkke?: boolean; onClick: 
     <button type="button" className={`vp-brikke ${v.overtid > 0 ? 'overtid' : ''} ${kanIkke ? 'kan-ikke' : ''} ${v.ansattId ? '' : 'ledig'}`} onClick={e => { e.stopPropagation(); onClick(); }}
       title={`${kortTid(v.start, v.slutt)} · ${timer(v.arbeid)}${v.overtid ? ` · ${timer(v.overtid)} overtid` : ''}${v.merarbeid ? ` · ${timer(v.merarbeid)} merarbeid` : ''}`}>
       <span className="mono">{kortTid(v.start, v.slutt)}</span>
+      {v.overtid > 0 && <small>Overtid</small>}
       {v.utlagt && <small>Vil bytte</small>}
-      {!v.ansattId && v.interesse.length > 0 && <small>{v.interesse.length} vil ta</small>}
+      {!v.ansattId && <small>{v.interesse.length ? `${v.interesse.length} vil ta den` : 'Ingen ennå'}</small>}
     </button>
   );
 }

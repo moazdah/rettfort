@@ -1,16 +1,35 @@
 // Menyvalgene. Egen fil så de kan brukes både i server- og klientkomponenter.
+// Toppmeny: Hjem · Penger inn · Penger ut · Bank · Ansatte ▾ · Regnskap ▾ (design: runde 2, Rettfort Toppmeny).
 
-export const MENY: { href: string; navn: string; ikon: string; aktivPa: string[] }[] = [
-  { href: '/hjem', navn: 'Hjem', ikon: 'Hj', aktivPa: ['/hjem'] },
-  { href: '/kjop/ny', navn: 'Penger ut', ikon: 'Ut', aktivPa: ['/kjop'] },
-  { href: '/salg/ny', navn: 'Penger inn', ikon: 'Inn', aktivPa: ['/salg'] },
-  { href: '/bank', navn: 'Bank', ikon: 'Ba', aktivPa: ['/bank'] },
-  { href: '/lonn', navn: 'Lønn', ikon: 'Lø', aktivPa: ['/lonn'] },
-  { href: '/vaktplan', navn: 'Vaktplan', ikon: 'Va', aktivPa: ['/vaktplan'] },
-  { href: '/rapporter', navn: 'Rapporter', ikon: 'Ra', aktivPa: ['/rapporter'] },
-  { href: '/mva', navn: 'MVA', ikon: 'Mv', aktivPa: ['/mva'] },
-  { href: '/frister', navn: 'Frister', ikon: 'Fr', aktivPa: ['/frister'] },
-  { href: '/aarsavslutning', navn: 'Årsavslutning', ikon: 'År', aktivPa: ['/aarsavslutning'] },
-  { href: '/regnskapsforer', navn: 'Regnskapsfører', ikon: 'Rf', aktivPa: ['/regnskapsforer'] },
-  { href: '/innstillinger', navn: 'Innstillinger', ikon: 'In', aktivPa: ['/innstillinger'] },
+export interface MenyPunkt { href: string; navn: string; tekst?: string; aktivPa: string[]; kreverBetalt?: boolean }
+export interface MenyGruppe { navn: string; under: MenyPunkt[] }
+export type MenyValg = MenyPunkt | MenyGruppe;
+
+export const MENY: MenyValg[] = [
+  { href: '/hjem', navn: 'Hjem', aktivPa: ['/hjem'] },
+  { href: '/salg/ny', navn: 'Penger inn', aktivPa: ['/salg'] },
+  { href: '/kjop/ny', navn: 'Penger ut', aktivPa: ['/kjop'] },
+  { href: '/bank', navn: 'Bank', aktivPa: ['/bank'] },
+  { navn: 'Ansatte', under: [
+    { href: '/lonn', navn: 'Lønn', tekst: 'Lønnskjøring og lønnsslipper', aktivPa: ['/lonn'] },
+    { href: '/vaktplan', navn: 'Vaktplan', tekst: 'Vakter, bytter og tilgjengelighet', aktivPa: ['/vaktplan'], kreverBetalt: true },
+  ] },
+  { navn: 'Regnskap', under: [
+    { href: '/mva', navn: 'MVA', tekst: 'Melding og betaling', aktivPa: ['/mva'] },
+    { href: '/rapporter', navn: 'Rapporter', tekst: 'Resultat, balanse og hovedbok', aktivPa: ['/rapporter'] },
+    { href: '/frister', navn: 'Frister', tekst: 'Alt som skal leveres', aktivPa: ['/frister'] },
+    { href: '/aarsavslutning', navn: 'Årsavslutning', tekst: 'Årsregnskap og skattemelding', aktivPa: ['/aarsavslutning'] },
+    { href: '/regnskapsforer', navn: 'Regnskapsfører', tekst: 'Gi tilgang til regnskapsføreren', aktivPa: ['/regnskapsforer'] },
+  ] },
 ];
+
+/** «Mer»-arket på mobil: det som ikke står i bunnmenyen. */
+export const MER: { navn: string; under: MenyPunkt[] }[] = [
+  { navn: 'Penger', under: [{ href: '/bank', navn: 'Bank', aktivPa: ['/bank'] }] },
+  { navn: 'Ansatte', under: (MENY[4] as MenyGruppe).under },
+  { navn: 'Regnskap', under: (MENY[5] as MenyGruppe).under },
+  { navn: 'Konto', under: [{ href: '/innstillinger', navn: 'Innstillinger', aktivPa: ['/innstillinger'] }] },
+];
+
+export const erGruppe = (m: MenyValg): m is MenyGruppe => 'under' in m;
+export const aktivPa = (m: MenyPunkt, sti: string) => m.aktivPa.some(p => sti === p || sti.startsWith(p + '/'));

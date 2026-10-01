@@ -164,7 +164,7 @@ export function ForslagKort({ k, onUtvid, onFerdig, onEndre, utlos }: { k: Forsl
           <span className={status === 'avbrutt' ? 'mut' : status === 'pa_vent' ? 'vent' : 'ok'}>{status === 'utfort' ? '✓ ' : ''}{melding?.tekst ?? (status === 'utfort' ? 'Utført' : status === 'pa_vent' ? 'Satt på vent' : 'Avbrutt. Ingenting er endret.')}</span>
           {status !== 'avbrutt' && (
             <span className="ak-kort-ferdig-knapper">
-              {melding?.lenke && <Link href={melding.lenke} className="ak-liten-knapp" title="Åpne"><ApneIkon />{status === 'pa_vent' && UTKAST_ART.has(k.art) ? 'Åpne utkast' : APNE[k.art]}</Link>}
+              {melding?.lenke && <Link href={melding.lenke} className="ak-liten-knapp" title="Åpne" target={k.art === "faktura" || k.art === "kreditnota" ? "_blank" : undefined}><ApneIkon />{status === 'pa_vent' && UTKAST_ART.has(k.art) ? 'Åpne utkast' : APNE[k.art]}</Link>}
               {harPdf && <a href={pdf} download className="ak-liten-knapp" title="Last ned PDF" aria-label="Last ned PDF"><PdfIkon />PDF</a>}
             </span>
           )}

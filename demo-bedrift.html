@@ -6,9 +6,10 @@
 <script src="./support.js"></script>
 </head>
 <body>
-<div style="background:#0B2545;color:#F4F1EA;font:500 13px/1.4 'Schibsted Grotesk',system-ui,sans-serif;text-align:center;padding:7px 12px">Demo med eksempeldata. Ingenting du skriver blir lagret. <a href="/" style="color:#F6DF6E;text-decoration:underline">Til forsiden</a></div>
+<div style="background:#0B2545;color:#F4F1EA;font:500 13px/1.4 'Schibsted Grotesk',system-ui,sans-serif;text-align:center;padding:7px 12px">Demo med eksempeldata. Ingenting du skriver blir lagret. <a href="?demo=1" style="color:#F6DF6E;text-decoration:underline">Ta omvisningen</a> · <a href="/" style="color:#F6DF6E;text-decoration:underline">Til forsiden</a></div>
 <x-dc>
 <helmet>
+<template id="__bundler_thumbnail" data-bg-color="#F4F1EA"><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#F4F1EA"></rect><rect x="60" y="170" width="280" height="60" rx="14" fill="#0B2545"></rect></svg></template>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -22,11 +23,13 @@ input,textarea,select{font-family:inherit;}
 @keyframes rfTourPulse{0%{box-shadow:0 0 0 0 rgba(246,223,110,.7)}70%{box-shadow:0 0 0 14px rgba(246,223,110,0)}100%{box-shadow:0 0 0 0 rgba(246,223,110,0)}}
 @keyframes rfScanLine{0%{top:0}100%{top:100%}}
 @keyframes rfIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-@media (max-width:1180px){[data-rf=firmanavn]{display:none}[data-rf=valgrad]>button{padding:0 8px!important;font-size:14.5px!important}}
+@media (max-width:1180px){[data-rf=firmanavn],[data-rf=nylbl],[data-rf=ailbl]{display:none!important}[data-rf=ikonknapp]{padding:0 11px!important}}
+@media (max-width:1080px){[data-rf=valgrad] button{padding:0 9px!important;font-size:14px!important}}
+@media (max-width:1000px){[data-rf=topp]{flex-wrap:wrap!important;height:auto!important;padding-top:10px!important;padding-bottom:8px!important;row-gap:8px!important}[data-rf=topp]>button:first-child{margin-right:auto}[data-rf=valgrad]{order:3;flex:0 0 100%!important;flex-wrap:wrap}}
 @media (max-width:820px){
 [data-rf=topp]{padding:8px 12px 0!important;gap:10px!important;height:auto!important;flex-wrap:wrap}
 [data-rf=topp]>img{margin-right:auto}
-[data-rf=valgrad]{order:3;flex:0 0 100%!important;height:44px!important;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 4px}
+[data-rf=valgrad]{order:3;flex:0 0 100%!important;flex-wrap:wrap}
 [data-rf=valgrad]::-webkit-scrollbar{display:none}
 [data-rf=valgrad]>button{padding:0 9px!important;font-size:14px!important}
 [data-rf=firmanavn]{display:none}
@@ -42,47 +45,82 @@ input,textarea,select{font-family:inherit;}
 [data-rf=hoved] [style*="64px 96px 78px 28px"][style*="font-size: 12px"],[data-rf=hoved] [style*="64px 96px 78px 28px"][style*="font-size:12px"]{display:none!important}
 [data-rf=hoved] h1{font-size:28px!important}
 }
+@media (max-width:700px){[data-rf=mobilnav]{display:flex!important}[data-rf=valgrad]{display:none!important}[data-rf=topp]{height:56px!important;padding:0 14px!important;flex-wrap:nowrap!important}body{padding-bottom:76px}}
 @media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important;}}
 </style>
 </helmet>
 <div data-rf="ramme" style="display:flex;flex-direction:column;min-height:100vh;background:#F4F1EA;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-size:15px">
 
   <header data-rf="side" style="position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid #E4DFD4">
-    <div data-rf="topp" style="max-width:1180px;margin:0 auto;height:60px;padding:0 24px;display:flex;align-items:center;gap:22px">
-      <img src="assets/rettfort-logo.png" alt="Rettført" style="height:24px;width:auto;flex:none">
-      <nav data-rf="valgrad" style="display:flex;align-items:stretch;height:100%;flex:1;min-width:0;gap:2px">
-        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="7">
-          <button onClick="{{ n.onClick }}" style="display:flex;align-items:center;gap:6px;padding:0 11px;height:100%;border:0;border-bottom:2px solid {{ n.line }};margin-bottom:-1px;background:transparent;color:#0B2545;font-size:15px;font-weight:{{ n.fw }};white-space:nowrap" style-hover="background:#F8F6F1">{{ n.label }}<span style="font-size:11px;font-weight:700;background:{{ n.pillBg }};padding:1px 7px;border-radius:99px">{{ n.count }}</span></button>
+    <sc-if value="{{ tAnyOpen }}" hint-placeholder-val="{{ false }}"><div onClick="{{ tLukk }}" style="position:fixed;inset:0;z-index:61"></div></sc-if>
+    <div data-rf="topp" style="max-width:1280px;margin:0 auto;height:64px;padding:0 24px;display:flex;align-items:center;gap:20px">
+      <button onClick="{{ tHjem }}" aria-label="Rettført, til Hjem" style="width:100px;height:25px;overflow:hidden;position:relative;flex:none;border:0;padding:0;background:none"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;left:-13px;top:-8px;width:125px;height:auto;max-width:none"></button>
+      <nav data-rf="valgrad" aria-label="Hovedmeny" style="display:flex;align-items:center;gap:2px;flex:1;min-width:0">
+        <sc-for list="{{ tNav }}" as="n" hint-placeholder-count="6">
+          <div style="position:relative;z-index:62">
+            <button onClick="{{ n.on }}" style="height:38px;display:flex;align-items:center;gap:6px;padding:0 13px;border:0;border-radius:10px;background:{{ n.bg }};color:#0B2545;font-size:15px;font-weight:{{ n.fw }};white-space:nowrap" style-hover="background:#F4F1EA">{{ n.t }}<sc-if value="{{ n.teller }}" hint-placeholder-val="{{ false }}"><span style="min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:#F6DF6E;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ n.teller }}</span></sc-if><sc-if value="{{ n.harUnder }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#586174" stroke-width="2.6" style="transform:rotate({{ n.rot }});transition:transform .15s"><path d="M6 9l6 6 6-6"></path></svg></sc-if></button>
+            <sc-if value="{{ n.open }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;top:46px;left:0;min-width:280px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;box-shadow:0 18px 40px -16px rgba(11,37,69,.28);padding:6px;z-index:62">
+                <sc-for list="{{ n.under }}" as="u" hint-placeholder-count="3">
+                  <button onClick="{{ u.on }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border:0;border-radius:10px;background:{{ u.bg }};color:#0B2545;text-align:left" style-hover="background:#F4F1EA"><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:{{ u.fw }}">{{ u.t }}</span><span style="display:block;font-size:13px;color:#586174">{{ u.d }}</span></span><sc-if value="{{ u.teller }}" hint-placeholder-val="{{ false }}"><span style="min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:#F6DF6E;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ u.teller }}</span></sc-if></button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
         </sc-for>
-        <div style="position:relative;display:flex;align-items:stretch">
-          <button onClick="{{ merToggle }}" style="display:flex;align-items:center;gap:5px;padding:0 11px;height:100%;border:0;border-bottom:2px solid {{ merLine }};margin-bottom:-1px;background:transparent;color:#0B2545;font-size:15px;font-weight:{{ merFw }};white-space:nowrap" style-hover="background:#F8F6F1">Mer <span style="font-size:11px;color:#586174">▾</span></button>
-          <sc-if value="{{ merOpen }}" hint-placeholder-val="{{ false }}">
-            <div onClick="{{ menyLukk }}" style="position:fixed;inset:0;z-index:61"></div>
-            <div style="position:absolute;top:calc(100% + 6px);left:0;z-index:62;min-width:220px;background:#fff;border:1px solid #E4DFD4;border-radius:12px;box-shadow:0 12px 32px -12px rgba(11,37,69,.25);padding:6px;display:flex;flex-direction:column">
-              <sc-for list="{{ navMer }}" as="m" hint-placeholder-count="4">
-                <button onClick="{{ m.onClick }}" style="text-align:left;padding:9px 12px;border-radius:8px;border:0;background:{{ m.bg }};color:#0B2545;font-size:15px;font-weight:{{ m.fw }}" style-hover="background:#F4F1EA">{{ m.label }}</button>
-              </sc-for>
+      </nav>
+      <div style="display:flex;align-items:center;gap:8px;flex:none;position:relative;z-index:62">
+        <div style="position:relative">
+          <button onClick="{{ tNyToggle }}" data-rf="ikonknapp" aria-label="Ny" style="height:38px;display:flex;align-items:center;gap:6px;padding:0 14px 0 11px;border-radius:10px;border:1px solid #D9D3C6;background:#fff;color:#0B2545;font-size:14.5px;font-weight:600" style-hover="border-color:#0B2545"><span style="font-size:18px;line-height:1;margin-top:-2px">+</span><span data-rf="nylbl">Ny</span></button>
+          <sc-if value="{{ tNyOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:46px;right:0;min-width:230px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;box-shadow:0 18px 40px -16px rgba(11,37,69,.28);padding:6px;z-index:62">
+              <sc-for list="{{ tNyValg }}" as="u" hint-placeholder-count="4"><button onClick="{{ u.on }}" style="width:100%;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:#0B2545;text-align:left;font-size:15px" style-hover="background:#F4F1EA">{{ u.t }}</button></sc-for>
             </div>
           </sc-if>
         </div>
-      </nav>
-      <button onClick="{{ tourStart }}" style="flex:none;height:36px;padding:0 16px;border-radius:99px;border:none;background:#0B2545;color:#fff;font-size:14px;font-weight:600">Se demo</button>
-      <div style="position:relative;flex:none">
-        <button onClick="{{ profilToggle }}" style="display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:4px;border-radius:99px;color:#0B2545" style-hover="background:#F4F1EA">
-          <span data-rf="firmanavn" style="font-size:14px;font-weight:500;white-space:nowrap">{{ orgNavn }}</span>
-          <span style="width:32px;height:32px;flex:none;border-radius:99px;background:#0B2545;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ userInit }}</span>
-        </button>
-        <sc-if value="{{ profilOpen }}" hint-placeholder-val="{{ false }}">
-          <div onClick="{{ menyLukk }}" style="position:fixed;inset:0;z-index:61"></div>
-          <div style="position:absolute;top:calc(100% + 10px);right:0;z-index:62;min-width:240px;background:#fff;border:1px solid #E4DFD4;border-radius:12px;box-shadow:0 12px 32px -12px rgba(11,37,69,.25);padding:6px;display:flex;flex-direction:column">
-            <div style="padding:10px 12px 12px;border-bottom:1px solid #E4DFD4;margin-bottom:6px;font-size:13px;color:#586174;line-height:1.45"><div style="font-size:15px;font-weight:600;color:#0B2545">{{ userNavn }}</div>{{ userRolle }}<br>{{ orgNavn }} · Pakke: {{ pakke }}</div>
-            <button onClick="{{ visVelkomstLukk }}" style="text-align:left;padding:9px 12px;border-radius:8px;border:0;background:transparent;color:#0B2545;font-size:15px" style-hover="background:#F4F1EA">Vis velkomstflyten</button>
-            <a href="/" style="display:block;padding:9px 12px;border-radius:8px;color:#0B2545;font-size:15px;text-decoration:none" style-hover="background:#F4F1EA">Logg ut</a>
-          </div>
+        <sc-if value="{{ tHarAi }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ aiApne }}" data-rf="ikonknapp" aria-label="Assistent" style="height:38px;display:flex;align-items:center;gap:7px;padding:0 14px 0 12px;border-radius:10px;border:0;background:#0B2545;color:#fff;font-size:14.5px;font-weight:600;white-space:nowrap" style-hover="background:#16345E"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.6L19.5 9.5l-5.7 1.9L12 17l-1.8-5.6L4.5 9.5l5.7-1.9z"></path></svg><span data-rf="ailbl">Assistent</span></button>
         </sc-if>
+        <span style="width:1px;height:24px;background:#E4DFD4;margin:0 4px"></span>
+        <div style="position:relative">
+          <button onClick="{{ tProfilToggle }}" style="height:42px;display:flex;align-items:center;gap:10px;padding:0 6px 0 12px;border:0;border-radius:99px;background:transparent;color:#0B2545" style-hover="background:#F4F1EA">
+            <span data-rf="firmanavn" style="text-align:right;line-height:1.2"><span style="display:block;font-size:14px;font-weight:600;white-space:nowrap">{{ orgNavn }}</span><span style="display:block;font-size:12px;color:#586174">{{ pakke }}</span></span>
+            <span style="width:32px;height:32px;border-radius:50%;background:#0B2545;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ userInit }}</span>
+          </button>
+          <sc-if value="{{ tProfilOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:50px;right:0;width:270px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;box-shadow:0 18px 40px -16px rgba(11,37,69,.28);padding:6px;z-index:62">
+              <div style="padding:10px 12px 12px;border-bottom:1px solid #EFEBE2;margin-bottom:6px;font-size:13px;color:#586174;line-height:1.45"><div style="font-size:15px;font-weight:600;color:#0B2545">{{ userNavn }}</div>{{ userRolle }} · {{ orgNavn }}</div>
+              <button onClick="{{ tInnst }}" style="width:100%;padding:9px 12px;border:0;border-radius:10px;background:transparent;color:#0B2545;font-size:14.5px;text-align:left" style-hover="background:#F4F1EA">Innstillinger</button>
+              <button onClick="{{ visVelkomstLukk }}" style="width:100%;padding:9px 12px;border:0;border-radius:10px;background:transparent;color:#0B2545;font-size:14.5px;text-align:left" style-hover="background:#F4F1EA">Vis velkomstflyten</button>
+              <a href="/" style="display:block;padding:9px 12px;border-radius:10px;color:#8A2E1F;font-size:14.5px;text-decoration:none" style-hover="background:#F4F1EA">Logg ut</a>
+            </div>
+          </sc-if>
+        </div>
       </div>
     </div>
   </header>
+  <nav data-rf="mobilnav" aria-label="Meny" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:65;background:#fff;border-top:1px solid #E4DFD4;padding:4px 4px calc(4px + env(safe-area-inset-bottom))">
+    <sc-for list="{{ mNav }}" as="m" hint-placeholder-count="5">
+      <button onClick="{{ m.on }}" style="flex:1;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:{{ m.fg }};font-size:11.5px;font-weight:{{ m.fw }};position:relative">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ m.d }}"></path></svg>{{ m.t }}
+        <sc-if value="{{ m.teller }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:5px;left:calc(50% + 5px);min-width:17px;height:17px;padding:0 5px;border-radius:99px;background:#F6DF6E;color:#0B2545;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ m.teller }}</span></sc-if>
+      </button>
+    </sc-for>
+  </nav>
+  <sc-if value="{{ mMerOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ mLukk }}" style="position:fixed;inset:0;z-index:66;background:rgba(11,37,69,.32);display:flex;align-items:flex-end">
+      <div onClick="{{ mStopp }}" style="width:100%;background:#fff;border-radius:20px 20px 0 0;padding:8px 12px calc(16px + env(safe-area-inset-bottom));max-height:82vh;overflow:auto">
+        <div style="width:40px;height:4px;border-radius:2px;background:#D9D3C6;margin:4px auto 10px"></div>
+        <sc-for list="{{ mMer }}" as="g" hint-placeholder-count="3">
+          <div style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#8A909C;padding:12px 8px 4px">{{ g.t }}</div>
+          <sc-for list="{{ g.items }}" as="u" hint-placeholder-count="2">
+            <button onClick="{{ u.on }}" style="width:100%;min-height:50px;display:flex;align-items:center;gap:12px;padding:0 10px;border:0;border-radius:12px;background:{{ u.bg }};color:#0B2545;text-align:left;font-size:16px;font-weight:{{ u.fw }}"><span style="flex:1">{{ u.t }}</span><sc-if value="{{ u.teller }}" hint-placeholder-val="{{ false }}"><span style="min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:#F6DF6E;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ u.teller }}</span></sc-if><span style="color:#8A909C">›</span></button>
+          </sc-for>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
 
   <main data-rf="hoved" style="flex:1;min-width:0;width:100%;max-width:1180px;margin:0 auto">
 
@@ -93,16 +131,16 @@ input,textarea,select{font-family:inherit;}
           <div style="font-size:14px;color:#586174">Mandag 5. oktober 2026</div>
           <h1 style="margin:6px 0 0;font-size:34px;font-weight:600;letter-spacing:-0.03em">Hei, {{ fornavn }}. Hva har skjedd i dag?</h1>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
-          <button onClick="{{ goFaktura }}" style="text-align:left;padding:24px;border-radius:18px;border:none;background:#0B2545;color:#fff;display:flex;flex-direction:column;gap:10px;min-height:150px" style-hover="background:#16345E">
-            <span style="font-size:13px;font-weight:600;letter-spacing:.06em;color:#F6DF6E">PENGER INN</span>
+        <div onMouseLeave="{{ hkLeave }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">
+          <button onClick="{{ goFaktura }}" onMouseEnter="{{ hk0.on }}" onFocus="{{ hk0.on }}" style="text-align:left;padding:24px;border-radius:18px;border:1px solid {{ hk0.bd }};background:{{ hk0.bg }};color:{{ hk0.fg }};display:flex;flex-direction:column;gap:10px;min-height:150px;transition:background .25s,color .25s,border-color .25s">
+            <span style="font-size:13px;font-weight:600;letter-spacing:.06em;color:{{ hk0.stikk }};transition:color .25s">PENGER INN</span>
             <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">Jeg skal sende en faktura</span>
-            <span style="font-size:14px;opacity:.8;line-height:1.45">Søk opp kunden, skriv hva du har gjort. Du ser fakturaen mens du skriver.</span>
+            <span style="font-size:14px;color:{{ hk0.mut }};line-height:1.45;transition:color .25s">Søk opp kunden, skriv hva du har gjort. Du ser fakturaen mens du skriver.</span>
           </button>
-          <button onClick="{{ goKjop }}" style="text-align:left;padding:24px;border-radius:18px;border:1px solid #D9D3C6;background:#fff;color:#0B2545;display:flex;flex-direction:column;gap:10px;min-height:150px" style-hover="border-color:#0B2545">
-            <span style="font-size:13px;font-weight:600;letter-spacing:.06em;color:#1F7D52">PENGER UT</span>
+          <button onClick="{{ goKjop }}" onMouseEnter="{{ hk1.on }}" onFocus="{{ hk1.on }}" style="text-align:left;padding:24px;border-radius:18px;border:1px solid {{ hk1.bd }};background:{{ hk1.bg }};color:{{ hk1.fg }};display:flex;flex-direction:column;gap:10px;min-height:150px;transition:background .25s,color .25s,border-color .25s">
+            <span style="font-size:13px;font-weight:600;letter-spacing:.06em;color:{{ hk1.stikk }};transition:color .25s">PENGER UT</span>
             <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">Jeg har kjøpt noe</span>
-            <span style="font-size:14px;color:#586174;line-height:1.45">{{ kjopKortTxt }}</span>
+            <span style="font-size:14px;color:{{ hk1.mut }};line-height:1.45;transition:color .25s">{{ kjopKortTxt }}</span>
           </button>
         </div>
 
@@ -1421,7 +1459,7 @@ input,textarea,select{font-family:inherit;}
       </div>
     </sc-if>
 
-    <sc-if value="{{ aiKnapp }}" hint-placeholder-val="{{ true }}">
+    <sc-if value="{{ aiFlyt }}" hint-placeholder-val="{{ true }}">
       <button onClick="{{ aiApne }}" data-rf="aiknapp" style="position:fixed;right:20px;bottom:20px;z-index:70;display:flex;align-items:center;gap:10px;padding:8px 18px 8px 10px;border-radius:99px;border:0;background:#0B2545;color:#fff;box-shadow:0 16px 36px -14px rgba(11,37,69,.55);text-align:left">
         <img src="assets/mascot-hip.png" alt="" style="width:30px;height:auto"><span style="display:flex;flex-direction:column;line-height:1.2"><b style="font-size:15px">Spør assistenten</b><small style="font-size:12px;color:#C9D3E2">Svar med kilde</small></span>
       </button>
@@ -1650,7 +1688,7 @@ class Component extends DCLogic {
       obHidden: st === 2
     };
   }
-  componentDidMount() { try { if (new URLSearchParams(location.search).has('demo')) setTimeout(() => this.tourGo(0), 300); } catch (e) {} try { const p = new URLSearchParams(location.search); if (p.has('ny')) { this.setState({ pk: 'Gratis', ob: 0, obNavn: p.get('navn') || '', obEpost: p.get('epost') || '' }); return; } } catch (e) {} if ((this.props.start ?? 'Hjem') === 'Velkomst') this.setState({ ob: 0 }); }
+  componentDidMount() { try { const h = location.hash.slice(1); if (h) setTimeout(() => this.go(h), 0); } catch (e) {} try { if (new URLSearchParams(location.search).has('demo')) setTimeout(() => this.tourGo(0), 300); } catch (e) {} try { const p = new URLSearchParams(location.search); if (p.has('ny')) { this.setState({ pk: 'Gratis', ob: 0, obNavn: p.get('navn') || '', obEpost: p.get('epost') || '' }); return; } } catch (e) {} if ((this.props.start ?? 'Hjem') === 'Velkomst') this.setState({ ob: 0 }); }
 
   KONTOER = [['6800','Kontorrekvisita','Papir, toner, penner og småting til kontoret','kontor papir toner penn blekk rekvisita'],['6540','Inventar og utstyr','Møbler, skjermer og utstyr under 30 000 kr','møbler stol pult skjerm pc datamaskin mus tastatur utstyr inventar'],['6860','Møter og kurs','Kursavgifter, konferanser og møterom','kurs konferanse møte seminar opplæring'],['7140','Reise','Fly, tog, hotell og taxi','reise fly tog hotell taxi buss overnatting'],['7350','Servering','Mat og drikke med kunder eller ansatte','mat drikke kaffe lunsj middag restaurant servering kantine'],['6300','Leie av lokaler','Husleie for kontor, lager eller butikk','husleie leie lokale kontor lager'],['6341','Strøm og oppvarming','Strøm, fjernvarme og fyring i lokalene','strøm elektrisitet varme fjernvarme fyring'],['6360','Renhold','Vask og renhold av lokalene','vask renhold rengjøring vaskehjelp'],['6420','Programvare','Abonnement på programmer og nettjenester','programvare software abonnement lisens app microsoft adobe google'],['6500','Verktøy','Verktøy og småutstyr til jobben','verktøy drill hammer maskin utstyr'],['6600','Reparasjon og vedlikehold','Reparasjon av lokaler, maskiner og utstyr','reparasjon vedlikehold service fiks'],['6700','Regnskap og rådgivning','Regnskapsfører, revisor, advokat og konsulenter','regnskap revisor advokat konsulent rådgivning'],['6900','Telefon og internett','Mobilabonnement, bredbånd og porto','telefon mobil internett bredbånd porto telenor telia ice'],['7000','Drivstoff','Bensin, diesel og lading av firmabil','drivstoff bensin diesel lading circle k esso shell uno-x'],['7040','Bil: forsikring og vedlikehold','Service, dekk, forsikring og bompenger for firmabil','bil dekk service bom bompenger parkering forsikring bil'],['7320','Reklame og markedsføring','Annonser, trykksaker og sosiale medier','reklame annonse markedsføring facebook google ads trykk flyer'],['7500','Forsikring','Forsikring for bedriften, ikke bil','forsikring ansvarsforsikring innbo'],['7770','Bank og gebyrer','Bankgebyrer og kortgebyrer','bank gebyr kortgebyr vipps gebyr'],['4300','Varer for videresalg','Når du kjøper noe du skal selge videre','videresalg varer innkjøp lager selge'],['4500','Innleid hjelp','Underleverandører og innleid arbeidskraft','underleverandør innleid frilans hjelp'],['5900','Gaver og velferd til ansatte','Julebord, gaver og sosiale tiltak','gave julebord velferd ansatte sosial'],['6100','Frakt og transport','Frakt av varer til og fra deg','frakt transport posten bring sending']];
   BRREG = [{ n: 'Havbruk Nord AS', o: '915 220 431', a: 'Sjøgata 3, 8006 Bodø', e: 'faktura@havbruknord.no' }, { n: 'Havnelageret Tromsø AS', o: '921 004 118', a: 'Kaia 7, 9008 Tromsø', e: 'post@havnelageret.no' }, { n: 'Kvam Transport AS', o: '912 887 300', a: 'Industriveien 22, 5600 Norheimsund', e: 'regnskap@kvamtransport.no' }, { n: 'Nordhavn Drift AS', o: '998 112 450', a: 'Havnegata 1, 9900 Kirkenes', e: 'faktura@nordhavn.no' }];
@@ -1765,6 +1803,37 @@ class Component extends DCLogic {
     { scr: 'mva', ch: 5, a: '[data-screen-label="04 MVA"] section', t: 'MVA klar til sending', x: 'Rettført viser hva som må ordnes før meldingen kan sendes, og hvor mye som skal betales.' },
     { scr: 'rf', ch: 6, a: '[data-screen-label="07 Regnskapsfører"] section', t: 'Regnskapsføreren er med', x: 'Kari inviterer regnskapsføreren sin. Byrået ser Havøy Fisk i sin arbeidsliste, med de samme tallene.' }
   ];
+  toppVals(scr, navAlle) {
+    const s = this.state, cnt = id => (navAlle.find(n => n.id === id) || {}).count || '';
+    const G = [['hjem', 'Hjem'], ['faktura', 'Penger inn'], ['kjop', 'Penger ut'], ['bank', 'Bank'],
+      ['ansatte', 'Ansatte', [['lonn', 'Lønn', 'Lønnskjøring og lønnsslipper'], ['vakt', 'Vaktplan', 'Vakter, bytter og tilgjengelighet']]],
+      ['regnskap', 'Regnskap', [['mva', 'MVA', 'Melding og betaling'], ['rapp', 'Rapporter', 'Resultat, balanse og hovedbok'], ['frister', 'Frister', 'Alt som skal leveres'], ['aars', 'Årsavslutning', 'Årsregnskap og skattemelding'], ['rf', 'Regnskapsfører', 'Gi tilgang til regnskapsføreren']]]];
+    const lukk = { tOpen: null, tNy: false, tProfil: false };
+    const gå = id => { this.setState(lukk); if (id === 'vakt') { window.location.href = 'demo-vaktplan.html'; return; } this.go(id); };
+    return {
+      tNav: G.map(([k, t, under]) => { under = under || []; const aktiv = scr === k || under.some(u => u[0] === scr), open = s.tOpen === k;
+        const sum = under.length ? under.reduce((a, u) => a + (Number(cnt(u[0])) || 0), 0) : Number(cnt(k)) || 0;
+        return { t, teller: sum ? String(sum) : '', harUnder: !!under.length, open, rot: open ? '180deg' : '0deg', bg: aktiv || open ? '#EFEBE2' : 'transparent', fw: aktiv ? 600 : 500,
+          on: () => under.length ? this.setState({ ...lukk, tOpen: open ? null : k }) : gå(k),
+          under: under.map(([id, ut, d]) => ({ t: ut, d, teller: cnt(id), bg: scr === id ? '#F4F1EA' : 'transparent', fw: scr === id ? 600 : 500, on: () => gå(id) })) }; }),
+      tAnyOpen: !!(s.tOpen || s.tNy || s.tProfil), tLukk: () => this.setState(lukk), tHjem: () => gå('hjem'), tInnst: () => gå('innst'),
+      tNyOpen: !!s.tNy, tNyToggle: () => this.setState({ ...lukk, tNy: !s.tNy }),
+      tNyValg: [['Faktura', 'faktura'], ['Kjøp eller kvittering', 'kjop'], ['Vakt', 'vakt'], ['Kontoutskrift', 'bank']].map(([t, id]) => ({ t, on: () => gå(id) })),
+      tProfilOpen: !!s.tProfil, tProfilToggle: () => this.setState({ ...lukk, tProfil: !s.tProfil }),
+      tHarAi: (s.pk ?? this.props.pakke ?? 'Selskap') === 'Selskap', aiFlyt: false,
+      ...(() => { const P = { hjem: 'M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z', faktura: 'M12 4v11M7 10l5 5 5-5M5 20h14', kjop: 'M12 20V9M7 14l5-5 5 5M5 4h14', vakt: 'M4 6h16v14H4zM4 10h16M9 3v4M15 3v4', mer: 'M5 12h.5M12 12h.5M19 12h.5' };
+        const erAktiv = id => scr === id, cnt = cnt, gå = gå;
+        const MER = [['Penger', [['bank', 'Bank']]], ['Ansatte', [['lonn', 'Lønn'], ['vakt', 'Vaktplan']]], ['Regnskap', [['mva', 'MVA'], ['rapp', 'Rapporter'], ['frister', 'Frister'], ['aars', 'Årsavslutning'], ['rf', 'Regnskapsfører']]], ['Konto', [['innst', 'Innstillinger']]]];
+        const merIds = ['bank', 'lonn', 'mva', 'rapp', 'frister', 'aars', 'rf', 'innst'];
+        return {
+          mNav: [['hjem', 'Hjem'], ['faktura', 'Inn'], ['kjop', 'Ut'], ['vakt', 'Vakter'], ['mer', 'Mer']].map(([id, t]) => { const a = id === 'mer' ? merIds.some(erAktiv) || !!this.state.tMer : erAktiv(id);
+            const n = id === 'mer' ? merIds.reduce((x, k) => x + (Number(cnt(k)) || 0), 0) : Number(cnt(id)) || 0;
+            return { t, d: P[id], fg: a ? '#0B2545' : '#8A909C', fw: a ? 700 : 500, teller: n ? String(n) : '', on: () => id === 'mer' ? this.setState({ tMer: true }) : gå(id) }; }),
+          mMerOpen: !!this.state.tMer, mLukk: () => this.setState({ tMer: false }), mStopp: e => e.stopPropagation(),
+          mMer: MER.map(([t, items]) => ({ t, items: items.map(([id, ut]) => ({ t: ut, teller: cnt(id) ? String(cnt(id)) : '', bg: erAktiv(id) ? '#F4F1EA' : 'transparent', fw: erAktiv(id) ? 600 : 500, on: () => { this.setState({ tMer: false }); gå(id); } })) }))
+        }; })(),
+    };
+  }
   CHAPS = ['Hjem', 'Kjøp', 'Faktura', 'Bank', 'Lønn', 'Tall', 'Byrå'];
   tFind(spec) {
     if (!spec) return null;
@@ -2087,10 +2156,10 @@ class Component extends DCLogic {
   renderVals() {
     const s = this.state, scr = s.scr, gratis = this.gratis();
     const R = this.mvaRader(); const igjen = R.b.length + R.k.length; const L = this.lonnVals();
-    const navDef = [['hjem', 'Hjem', 'Hj', ''], ['kjop', 'Penger ut', 'Ut', ''], ['faktura', 'Penger inn', 'Inn', ''], ['bank', 'Bank', 'Ba', s.bStage === 'klar' && !s.bLukket && this.bankVals().igjen ? String(this.bankVals().igjen) : ''], ['lonn', 'Lønn', 'Lø', ''], ['rapp', 'Rapporter', 'Ra', ''], ['mva', 'MVA', 'Mv', igjen && !s.mvaSendt ? String(igjen) : ''], ['frister', 'Frister', 'Fr', ''], ['aars', 'Årsavslutning', 'År', ''], ['rf', 'Regnskapsfører', 'Rf', ''], ['innst', 'Innstillinger', 'In', '']];
-    const navAlle = navDef.map(([id, label, short, count]) => { const a = scr === id; return { id, label, short, count, pillBg: count ? '#F6DF6E' : 'transparent', bg: a ? '#F4F1EA' : 'transparent', line: a ? '#0B2545' : 'transparent', fw: a ? 600 : 400, onClick: () => { this.setState({ merOpen: false, profilOpen: false }); this.go(id); } }; });
+    const navDef = [['hjem', 'Hjem', 'Hj', ''], ['kjop', 'Penger ut', 'Ut', ''], ['faktura', 'Penger inn', 'Inn', ''], ['bank', 'Bank', 'Ba', s.bStage === 'klar' && !s.bLukket && this.bankVals().igjen ? String(this.bankVals().igjen) : ''], ['lonn', 'Lønn', 'Lø', ''], ['vakt', 'Vaktplan', 'Va', ''], ['rapp', 'Rapporter', 'Ra', ''], ['mva', 'MVA', 'Mv', igjen && !s.mvaSendt ? String(igjen) : ''], ['frister', 'Frister', 'Fr', ''], ['aars', 'Årsavslutning', 'År', ''], ['rf', 'Regnskapsfører', 'Rf', ''], ['innst', 'Innstillinger', 'In', '']];
+    const navAlle = navDef.map(([id, label, short, count]) => { const a = scr === id; return { id, label, short, count, pillBg: count ? '#F6DF6E' : 'transparent', bg: a ? '#F4F1EA' : 'transparent', line: a ? '#0B2545' : 'transparent', fw: a ? 600 : 400, onClick: () => { if (id === 'vakt') { window.location.href = 'demo-vaktplan.html'; return; } this.setState({ merOpen: false, profilOpen: false }); this.go(id); } }; });
     // Vannrett meny: de sju første står i linjen, resten under «Mer».
-    const nav = navAlle.slice(0, 7), navMer = navAlle.slice(7), merAktiv = navMer.some(m => m.id === scr);
+    const nav = navAlle.slice(0, 8), navMer = navAlle.slice(8), merAktiv = navMer.some(m => m.id === scr);
 
     // kjøp
     const kv = s.kv; const lev = s.kStage === 'leser';
@@ -2158,8 +2227,10 @@ class Component extends DCLogic {
     const mnd = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'].map((l, i) => ({ l, c: i < 9 ? '#35AE74' : i === 9 ? '#F6DF6E' : '#EFEBE2' }));
 
     return {
+      ...this.toppVals(scr, navAlle),
       pakke: s.pk ?? this.props.pakke ?? 'Selskap', nav,
       isHjem: scr === 'hjem', isKjop: scr === 'kjop', isFaktura: scr === 'faktura', isMva: scr === 'mva', isFrister: scr === 'frister', isAars: scr === 'aars',
+      ...Object.fromEntries([['#F6DF6E', '#1F7D52'], ['#35AE74', '#1F7D52']].map(([lysS, morkS], i) => { const m = i === (s.hkHov ?? 0); return ['hk' + i, { on: () => this.setState({ hkHov: i }), bg: m ? '#0B2545' : '#fff', fg: m ? '#fff' : '#0B2545', bd: m ? '#0B2545' : '#D9D3C6', mut: m ? 'rgba(255,255,255,.8)' : '#586174', stikk: m ? (i ? '#7FD3A8' : '#F6DF6E') : (i ? '#1F7D52' : '#9A7B00') }]; })), hkLeave: () => this.setState({ hkHov: 0 }),
       goFaktura: () => this.go('faktura'), goKjop: () => this.go('kjop'), goMva: () => this.go('mva'), goFrister: () => this.go('frister'), goHjem: () => this.go('hjem'),
       kjopKortTxt: gratis ? 'Last opp kvitteringen og fyll inn beløpet. Vi sjekker at summen stemmer.' : 'Ta bilde av kvitteringen. Vi leser den og fyller ut resten.',
       mvaKlar, mvaIkkeKlar: !mvaKlar, mvaIgjenTxt: igjen + (igjen === 1 ? ' ting' : ' ting') + ' må ordnes før du kan sende. 5 dager igjen.',

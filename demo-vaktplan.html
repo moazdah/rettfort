@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<template id="__bundler_thumbnail" data-bg-color="#F4F1EA"><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#F4F1EA"></rect><rect x="60" y="170" width="280" height="60" rx="14" fill="#0B2545"></rect></svg></template>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F4F1EA;}
+@media (max-width:700px){[data-rf=mobilnav]{display:flex!important}[data-rf=valgrad]{display:none!important}[data-rf=topp]{height:56px!important;padding:0 14px!important;flex-wrap:nowrap!important}body{padding-bottom:76px}}
+@media (max-width:700px){[data-rf=ukegrid]{display:none!important}[data-rf=dagliste]{display:flex!important}}
+@media (max-width:1180px){[data-rf=firmanavn],[data-rf=nylbl],[data-rf=ailbl]{display:none!important}[data-rf=ikonknapp]{padding:0 11px!important}}
+@media (max-width:1080px){[data-rf=valgrad] button{padding:0 9px!important;font-size:14px!important}}
+@media (max-width:1000px){[data-rf=topp]{flex-wrap:wrap!important;height:auto!important;padding-top:10px!important;padding-bottom:8px!important;row-gap:8px!important}[data-rf=topp]>button:first-child{margin-right:auto}[data-rf=valgrad]{order:3;flex:0 0 100%!important;flex-wrap:wrap}}
+*{box-sizing:border-box;}
+a{color:#0B2545;text-decoration:underline;text-underline-offset:2px;}
+a:hover{color:#16345E;}
+button,input,select,textarea{font-family:inherit;color:inherit;}
+button{cursor:pointer;}
+:focus-visible{outline:2px solid #0B2545;outline-offset:2px;}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#F4F1EA;color:#0B2545;font-family:'Schibsted Grotesk',system-ui,sans-serif;font-size:15px;line-height:1.5">
+
+  <div style="background:#FBEFA8;border-bottom:1px solid #EAD88A;color:#6B5200;font-size:13px;padding:7px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-weight:600">Testmodus, ingen passord.</span><span>Se systemet som:</span>
+    <div style="display:flex;gap:4px;flex-wrap:wrap">
+      <sc-for list="{{ seSom }}" as="r" hint-placeholder-count="3">
+        <button onClick="{{ r.on }}" style="height:28px;padding:0 11px;border-radius:99px;border:1px solid {{ r.bd }};background:{{ r.bg }};font-size:12.5px;font-weight:600;color:#0B2545">{{ r.t }}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <sc-if value="{{ erLeder }}" hint-placeholder-val="{{ true }}">
+  <header data-rf="side" style="position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid #E4DFD4">
+    <sc-if value="{{ tAnyOpen }}" hint-placeholder-val="{{ false }}"><div onClick="{{ tLukk }}" style="position:fixed;inset:0;z-index:61"></div></sc-if>
+    <div data-rf="topp" style="max-width:1280px;margin:0 auto;height:64px;padding:0 24px;display:flex;align-items:center;gap:20px">
+      <button onClick="{{ tHjem }}" aria-label="Rettført, til Hjem" style="width:100px;height:25px;overflow:hidden;position:relative;flex:none;border:0;padding:0;background:none"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;left:-13px;top:-8px;width:125px;height:auto;max-width:none"></button>
+      <nav data-rf="valgrad" aria-label="Hovedmeny" style="display:flex;align-items:center;gap:2px;flex:1;min-width:0">
+        <sc-for list="{{ tNav }}" as="n" hint-placeholder-count="6">
+          <div style="position:relative;z-index:62">
+            <button onClick="{{ n.on }}" style="height:38px;display:flex;align-items:center;gap:6px;padding:0 13px;border:0;border-radius:10px;background:{{ n.bg }};color:#0B2545;font-size:15px;font-weight:{{ n.fw }};white-space:nowrap" style-hover="background:#F4F1EA">{{ n.t }}<sc-if value="{{ n.teller }}" hint-placeholder-val="{{ false }}"><span style="min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:#F6DF6E;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ n.teller }}</span></sc-if><sc-if value="{{ n.harUnder }}" hint-placeholder-val="{{ false }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#586174" stroke-width="2.6" style="transform:rotate({{ n.rot }});transition:transform .15s"><path d="M6 9l6 6 6-6"></path></svg></sc-if></button>
+            <sc-if value="{{ n.open }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;top:46px;left:0;min-width:280px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;box-shadow:0 18px 40px -16px rgba(11,37,69,.28);padding:6px;z-index:62">
+                <sc-for list="{{ n.under }}" as="u" hint-placeholder-count="3">
+                  <button onClick="{{ u.on }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border:0;border-radius:10px;background:{{ u.bg }};color:#0B2545;text-align:left" style-hover="background:#F4F1EA"><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:{{ u.fw }}">{{ u.t }}</span><span style="display:block;font-size:13px;color:#586174">{{ u.d }}</span></span><sc-if value="{{ u.teller }}" hint-placeholder-val="{{ false }}"><span style="min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:#F6DF6E;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ u.teller }}</span></sc-if></button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </nav>
+      <div style="display:flex;align-items:center;gap:8px;flex:none;position:relative;z-index:62">
+        <div style="position:relative">
+          <button onClick="{{ tNyToggle }}" data-rf="ikonknapp" aria-label="Ny" style="height:38px;display:flex;align-items:center;gap:6px;padding:0 14px 0 11px;border-radius:10px;border:1px solid #D9D3C6;background:#fff;color:#0B2545;font-size:14.5px;font-weight:600" style-hover="border-color:#0B2545"><span style="font-size:18px;line-height:1;margin-top:-2px">+</span><span data-rf="nylbl">Ny</span></button>
+          <sc-if value="{{ tNyOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:46px;right:0;min-width:230px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;box-shadow:0 18px 40px -16px rgba(11,37,69,.28);padding:6px;z-index:62">
+              <sc-for list="{{ tNyValg }}" as="u" hint-placeholder-count="4"><button onClick="{{ u.on }}" style="width:100%;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:#0B2545;text-align:left;font-size:15px" style-hover="background:#F4F1EA">{{ u.t }}</button></sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <sc-if value="{{ tHarAi }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ toggleAi }}" data-rf="ikonknapp" aria-label="Assistent" style="height:38px;display:flex;align-items:center;gap:7px;padding:0 14px 0 12px;border-radius:10px;border:0;background:#0B2545;color:#fff;font-size:14.5px;font-weight:600;white-space:nowrap" style-hover="background:#16345E"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.6L19.5 9.5l-5.7 1.9L12 17l-1.8-5.6L4.5 9.5l5.7-1.9z"></path></svg><span data-rf="ailbl">Assistent</span></button>
+        </sc-if>
+        <span style="width:1px;height:24px;background:#E4DFD4;margin:0 4px"></span>
+        <div style="position:relative">
+          <button onClick="{{ tProfilToggle }}" style="height:42px;display:flex;align-items:center;gap:10px;padding:0 6px 0 12px;border:0;border-radius:99px;background:transparent;color:#0B2545" style-hover="background:#F4F1EA">
+            <span data-rf="firmanavn" style="text-align:right;line-height:1.2"><span style="display:block;font-size:14px;font-weight:600;white-space:nowrap">Havøy Fisk AS</span><span style="display:block;font-size:12px;color:#586174">{{ pakkeNavn }}</span></span>
+            <span style="width:32px;height:32px;border-radius:50%;background:#0B2545;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">KH</span>
+          </button>
+          <sc-if value="{{ tProfilOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:50px;right:0;width:270px;background:#fff;border:1px solid #E4DFD4;border-radius:14px;box-shadow:0 18px 40px -16px rgba(11,37,69,.28);padding:6px;z-index:62">
+              <div style="padding:10px 12px 12px;border-bottom:1px solid #EFEBE2;margin-bottom:6px;font-size:13px;color:#586174;line-height:1.45"><div style="font-size:15px;font-weight:600;color:#0B2545">Kari Havøy</div>Eier · Havøy Fisk AS</div>
+              <button onClick="{{ tInnst }}" style="width:100%;padding:9px 12px;border:0;border-radius:10px;background:transparent;color:#0B2545;font-size:14.5px;text-align:left" style-hover="background:#F4F1EA">Innstillinger</button>
+              
+              <a href="/" style="display:block;padding:9px 12px;border-radius:10px;color:#8A2E1F;font-size:14.5px;text-decoration:none" style-hover="background:#F4F1EA">Logg ut</a>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </header>
+  <nav data-rf="mobilnav" aria-label="Meny" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:65;background:#fff;border-top:1px solid #E4DFD4;padding:4px 4px calc(4px + env(safe-area-inset-bottom))">
+    <sc-for list="{{ mNav }}" as="m" hint-placeholder-count="5">
+      <button onClick="{{ m.on }}" style="flex:1;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;color:{{ m.fg }};font-size:11.5px;font-weight:{{ m.fw }};position:relative">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ m.d }}"></path></svg>{{ m.t }}
+        <sc-if value="{{ m.teller }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:5px;left:calc(50% + 5px);min-width:17px;height:17px;padding:0 5px;border-radius:99px;background:#F6DF6E;color:#0B2545;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ m.teller }}</span></sc-if>
+      </button>
+    </sc-for>
+  </nav>
+  <sc-if value="{{ mMerOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ mLukk }}" style="position:fixed;inset:0;z-index:66;background:rgba(11,37,69,.32);display:flex;align-items:flex-end">
+      <div onClick="{{ mStopp }}" style="width:100%;background:#fff;border-radius:20px 20px 0 0;padding:8px 12px calc(16px + env(safe-area-inset-bottom));max-height:82vh;overflow:auto">
+        <div style="width:40px;height:4px;border-radius:2px;background:#D9D3C6;margin:4px auto 10px"></div>
+        <sc-for list="{{ mMer }}" as="g" hint-placeholder-count="3">
+          <div style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#8A909C;padding:12px 8px 4px">{{ g.t }}</div>
+          <sc-for list="{{ g.items }}" as="u" hint-placeholder-count="2">
+            <button onClick="{{ u.on }}" style="width:100%;min-height:50px;display:flex;align-items:center;gap:12px;padding:0 10px;border:0;border-radius:12px;background:{{ u.bg }};color:#0B2545;text-align:left;font-size:16px;font-weight:{{ u.fw }}"><span style="flex:1">{{ u.t }}</span><sc-if value="{{ u.teller }}" hint-placeholder-val="{{ false }}"><span style="min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:#F6DF6E;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ u.teller }}</span></sc-if><span style="color:#8A909C">›</span></button>
+          </sc-for>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+
+    <div style="display:flex;align-items:flex-start">
+      <main style="flex:1;min-width:0;padding:32px 28px 80px">
+        <div style="max-width:1240px;margin:0 auto">
+
+          <sc-if value="{{ visHjem }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:26px;max-width:1100px;margin:0 auto">
+              <div>
+                <div style="font-size:13.5px;color:#586174">Torsdag 1. oktober</div>
+                <h1 style="margin:6px 0 0;font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.15">Hei, Kari.</h1>
+              </div>
+
+              <section style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;overflow:hidden">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #EFEBE2">
+                  <h2 style="margin:0;font-size:18px;font-weight:600">Venter på deg</h2><span style="font-size:13px;color:#586174">{{ venterAntall }} ting</span>
+                </div>
+                <sc-for list="{{ venter }}" as="v" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:14px;padding:13px 20px;border-top:1px solid {{ v.sep }};flex-wrap:wrap">
+                    <span style="min-width:86px;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:{{ v.mbg }};color:{{ v.mfg }};text-align:center">{{ v.merke }}</span>
+                    <span style="flex:1;min-width:200px;font-size:15px">{{ v.t }}</span>
+                    <button onClick="{{ v.on }}" style="height:34px;padding:0 14px;border-radius:9px;border:1px solid #0B2545;background:#0B2545;color:#fff;font-size:13.5px;font-weight:600">{{ v.knapp }}</button>
+                  </div>
+                </sc-for>
+              </section>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+                <button style="text-align:left;background:#0B2545;color:#fff;border:1px solid #0B2545;border-radius:16px;padding:20px 22px">
+                  <div style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#F6DF6E">Penger inn</div>
+                  <div style="font-size:20px;font-weight:600;margin:8px 0 4px">Send en faktura</div>
+                  <div style="font-size:14px;color:rgba(255,255,255,.75)">Søk opp kunden og skriv hva du har gjort.</div>
+                </button>
+                <button style="text-align:left;background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:20px 22px" style-hover="border-color:#0B2545">
+                  <div style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#1F7D52">Penger ut</div>
+                  <div style="font-size:20px;font-weight:600;margin:8px 0 4px">Registrer et kjøp</div>
+                  <div style="font-size:14px;color:#586174">Last opp kvitteringen. 2 regninger venter på betaling.</div>
+                </button>
+                <button onClick="{{ tilVakt }}" style="text-align:left;background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:20px 22px" style-hover="border-color:#0B2545">
+                  <div style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#586174">Vaktplan</div>
+                  <div style="font-size:20px;font-weight:600;margin:8px 0 4px">Planlegg neste uke</div>
+                  <div style="font-size:14px;color:#586174">{{ hjemVaktTekst }}</div>
+                </button>
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px">
+                <section style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:20px 22px;display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-size:18px;font-weight:600">Neste frist</h2><a href="#" style="font-size:14px;color:#586174">Alle frister</a></div>
+                  <div style="display:flex;align-items:center;gap:14px">
+                    <div style="text-align:center;min-width:52px"><div style="font-size:12px;font-weight:600;letter-spacing:.1em;color:#586174">OKT</div><div style="font-size:26px;font-weight:700;line-height:1.1">10</div></div>
+                    <div style="flex:1"><div style="font-weight:600">MVA juli–august er klar</div><div style="font-size:13.5px;color:#586174">Ingenting mangler. Å betale 18 420 kr.</div></div>
+                  </div>
+                </section>
+                <section style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:20px 22px;display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 style="margin:0;font-size:18px;font-weight:600">På jobb mandag 5. okt</h2><span style="font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:{{ stBg }};color:{{ stFg }}">{{ stTxt }}</span></div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ hjemMandag }}" as="m" hint-placeholder-count="2">
+                      <div style="display:flex;align-items:center;gap:10px;font-size:14.5px"><span style="width:28px;height:28px;border-radius:50%;background:#E4DFD4;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ m.init }}</span><span style="flex:1">{{ m.navn }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#586174">{{ m.tid }}</span></div>
+                    </sc-for>
+                  </div>
+                </section>
+              </div>
+
+              <section>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0;font-size:18px;font-weight:600">Sist registrert</h2><a href="#" style="font-size:14px">Se alt</a></div>
+                <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;overflow:hidden">
+                  <sc-for list="{{ sist }}" as="s" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:center;gap:14px;padding:13px 20px;border-top:1px solid {{ s.sep }}">
+                      <span style="min-width:70px;text-align:center;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:{{ s.mbg }};color:{{ s.mfg }}">{{ s.type }}</span>
+                      <span style="flex:1;min-width:0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.t }}</span>
+                      <span style="font-size:13px;color:#586174">{{ s.dato }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;min-width:90px;text-align:right">{{ s.b }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </section>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ visVakt }}" hint-placeholder-val="{{ true }}">
+            <sc-if value="{{ last }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width:620px;margin:40px auto;background:#fff;border:1px solid #E4DFD4;border-radius:18px;padding:32px;display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+                <span style="font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:#EFEBE2;color:#586174">Med i Start og Selskap</span>
+                <h1 style="margin:0;font-size:28px;font-weight:600;letter-spacing:-.02em">Vaktplan for de ansatte</h1>
+                <p style="margin:0;color:#586174">Lag vaktplanen, la de ansatte ta ledige vakter og si fra når de ikke kan jobbe. Timene går rett til lønnskjøringen.</p>
+                <button style="height:44px;padding:0 20px;border-radius:10px;border:0;background:#0B2545;color:#fff;font-weight:600">Oppgrader til Start, 149 kr/mnd</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ aapen }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:20px">
+                <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+                  <div>
+                    <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.15">Vaktplan</h1>
+                    <div style="display:inline-flex;gap:4px;background:#EAE5DA;padding:4px;border-radius:12px;margin-top:14px">
+                      <sc-for list="{{ faner }}" as="f" hint-placeholder-count="2">
+                        <button onClick="{{ f.on }}" style="border:0;padding:7px 14px;border-radius:9px;font-weight:600;font-size:14px;background:{{ f.bg }};color:{{ f.fg }};box-shadow:{{ f.sh }}">{{ f.t }}</button>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <sc-if value="{{ fanUke }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                      <div style="display:flex;align-items:center;background:#fff;border:1px solid #D9D3C6;border-radius:10px;height:40px">
+                        <button onClick="{{ forrigeUke }}" aria-label="Forrige uke" style="width:38px;height:100%;border:0;background:none;font-size:16px">‹</button>
+                        <span style="padding:0 8px;font-weight:600;font-size:14px;white-space:nowrap">Uke {{ uke }} · {{ ukeSpenn }}</span>
+                        <button onClick="{{ nesteUke }}" aria-label="Neste uke" style="width:38px;height:100%;border:0;background:none;font-size:16px">›</button>
+                      </div>
+                      <span style="font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px;background:{{ stBg }};color:{{ stFg }}">{{ stTxt }}</span>
+                      <button onClick="{{ publiser }}" disabled="{{ kanIkkePublisere }}" style="height:40px;padding:0 16px;border-radius:10px;border:1px solid {{ pubBg }};background:{{ pubBg }};color:#fff;font-weight:600;font-size:14px">{{ pubTxt }}</button>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ fanAnsatte }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ nyAnsatt }}" style="height:40px;padding:0 16px;border-radius:10px;border:0;background:#0B2545;color:#fff;font-weight:600;font-size:14px">Legg til ansatt</button>
+                  </sc-if>
+                </div>
+
+                <sc-if value="{{ fanUke }}" hint-placeholder-val="{{ true }}">
+                  <sc-if value="{{ harSvar }}" hint-placeholder-val="{{ true }}">
+                    <section style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;overflow:hidden">
+                      <div style="padding:13px 20px;border-bottom:1px solid #EFEBE2;display:flex;align-items:center;gap:8px"><span style="font-weight:600">Trenger svar</span><span style="background:#F6DF6E;font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px">{{ svarAntall }}</span></div>
+                      <sc-for list="{{ svar }}" as="q" hint-placeholder-count="2">
+                        <div style="display:flex;align-items:center;gap:14px;padding:12px 20px;border-top:1px solid {{ q.sep }};flex-wrap:wrap">
+                          <span style="width:30px;height:30px;flex:none;border-radius:50%;background:#E4DFD4;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ q.init }}</span>
+                          <div style="flex:1;min-width:220px"><div style="font-size:14.5px;font-weight:500">{{ q.t }}</div><div style="font-size:13px;color:#586174">{{ q.sub }}</div></div>
+                          <div style="display:flex;gap:6px;flex-wrap:wrap">
+                            <sc-for list="{{ q.knapper }}" as="k" hint-placeholder-count="2">
+                              <button onClick="{{ k.on }}" style="height:34px;padding:0 13px;border-radius:9px;border:1px solid {{ k.bd }};background:{{ k.bg }};color:{{ k.fg }};font-size:13.5px;font-weight:600">{{ k.t }}</button>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </section>
+                  </sc-if>
+
+                  <sc-if value="{{ tomUke }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:#fff;border:1px dashed #D9D3C6;border-radius:16px;padding:20px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                      <div style="flex:1;min-width:240px"><div style="font-weight:600">Uke {{ uke }} er tom</div><div style="font-size:14px;color:#586174">Start fra forrige uke og juster, eller la assistenten lage et forslag ut fra hvem som er tilgjengelig.</div></div>
+                      <button onClick="{{ kopierUke }}" style="height:38px;padding:0 14px;border-radius:9px;border:1px solid #D9D3C6;background:#fff;font-weight:600;font-size:14px">Kopier uke 41</button>
+                      <sc-if value="{{ harAssistent }}" hint-placeholder-val="{{ true }}"><button onClick="{{ aiForslagUke }}" style="height:38px;padding:0 14px;border-radius:9px;border:0;background:#0B2545;color:#fff;font-weight:600;font-size:14px">Lag forslag med assistenten</button></sc-if>
+                    </div>
+                  </sc-if>
+
+                  <div data-rf="dagliste" style="display:none;flex-direction:column;gap:12px">
+                    <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+                      <sc-for list="{{ mobDager }}" as="d" hint-placeholder-count="7">
+                        <button onClick="{{ d.on }}" style="height:58px;border-radius:12px;border:1px solid {{ d.bd }};background:{{ d.bg }};color:{{ d.fg }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;position:relative"><span style="font-size:11.5px;font-weight:600;opacity:.8">{{ d.k }}</span><span style="font-size:18px;font-weight:700;line-height:1">{{ d.n }}</span><sc-if value="{{ d.ledig }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:5px;right:6px;width:6px;height:6px;border-radius:50%;background:#D9A400"></span></sc-if></button>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div style="font-weight:600;font-size:16px">{{ mobTittel }}</div><div style="font-size:13px;color:#586174">{{ mobSub }}</div></div><button onClick="{{ mobNy }}" style="height:44px;padding:0 16px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-weight:600;font-size:14.5px">+ Vakt</button></div>
+                    <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;overflow:hidden">
+                      <sc-for list="{{ mobVakter }}" as="v" hint-placeholder-count="4">
+                        <button onClick="{{ v.on }}" style="width:100%;min-height:62px;display:flex;align-items:center;gap:12px;padding:10px 14px;border:0;border-top:1px solid {{ v.sep }};background:{{ v.bg }};color:#0B2545;text-align:left">
+                          <span style="width:36px;height:36px;flex:none;border-radius:50%;background:{{ v.avBg }};border:1px {{ v.avSt }} #0B2545;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ v.init }}</span>
+                          <span style="flex:1;min-width:0"><span style="display:block;font-weight:600;font-size:15px">{{ v.navn }}</span><sc-if value="{{ v.merke }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12.5px;font-weight:600;color:{{ v.merkeFg }}">{{ v.merke }}</span></sc-if></span>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">{{ v.tid }}</span>
+                        </button>
+                      </sc-for>
+                      <sc-if value="{{ mobTom }}" hint-placeholder-val="{{ false }}"><div style="padding:22px;text-align:center;color:#586174;font-size:14px">Ingen vakter denne dagen.</div></sc-if>
+                    </div>
+                    <sc-if value="{{ mobUtilg }}" hint-placeholder-val="{{ false }}"><div style="font-size:13.5px;color:#8A2E1F;background:#F8E4DF;border-radius:12px;padding:10px 14px">{{ mobUtilg }}</div></sc-if>
+                  </div>
+
+                  <div data-rf="ukegrid" style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;overflow-x:auto">
+                    <div style="display:grid;grid-template-columns:230px repeat(7,minmax(108px,1fr));min-width:990px">
+                      <div style="padding:12px 16px;font-size:12.5px;color:#586174;display:flex;align-items:flex-end">{{ antallAnsatte }} ansatte</div>
+                      <sc-for list="{{ dager }}" as="d" hint-placeholder-count="7">
+                        <div style="padding:10px 10px;border-left:1px solid #EFEBE2;background:{{ d.bg }}">
+                          <div style="font-size:13px;font-weight:600">{{ d.t }}</div>
+                          <div style="font-size:12px;color:{{ d.fg }}">{{ d.sub }}</div>
+                        </div>
+                      </sc-for>
+
+                      <div style="padding:10px 16px;border-top:1px solid #E4DFD4;background:#FBFAF6;display:flex;flex-direction:column;justify-content:center">
+                        <div style="font-weight:600;font-size:14px">Ledige vakter</div>
+                        <div style="font-size:12px;color:#586174">Alle ansatte ser disse</div>
+                      </div>
+                      <sc-for list="{{ ledigRad }}" as="c" hint-placeholder-count="7">
+                        <div onClick="{{ c.onAdd }}" style="min-height:58px;padding:6px;border-top:1px solid #E4DFD4;border-left:1px solid #EFEBE2;background:#FBFAF6;display:flex;flex-direction:column;gap:4px;cursor:pointer">
+                          <sc-for list="{{ c.vakter }}" as="v" hint-placeholder-count="0">
+                            <button onClick="{{ v.on }}" style="text-align:left;border:1px dashed #0B2545;background:#fff;border-radius:8px;padding:5px 7px;font-size:12.5px;line-height:1.3">
+                              <span style="display:block;font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:12px">{{ v.tid }}</span>
+                              <span style="display:block;color:{{ v.subFg }}">{{ v.sub }}</span>
+                            </button>
+                          </sc-for>
+                        </div>
+                      </sc-for>
+
+                      <sc-for list="{{ rader }}" as="r" hint-placeholder-count="5">
+                        <div style="display:contents">
+                          <div style="padding:10px 16px;border-top:1px solid #EFEBE2;display:flex;gap:10px;align-items:center">
+                            <span style="width:32px;height:32px;flex:none;border-radius:50%;background:#E4DFD4;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ r.init }}</span>
+                            <div style="flex:1;min-width:0">
+                              <div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.navn }}</div>
+                              <div style="font-size:12px;color:#586174">{{ r.timer }}</div>
+                              <div style="height:4px;border-radius:2px;background:#EFEBE2;margin-top:4px;overflow:hidden"><div style="height:100%;width:{{ r.pct }};background:{{ r.barFg }};border-radius:2px"></div></div>
+                            </div>
+                          </div>
+                          <sc-for list="{{ r.celler }}" as="c" hint-placeholder-count="7">
+                            <div onClick="{{ c.onAdd }}" title="{{ c.title }}" style="min-height:62px;padding:6px;border-top:1px solid #EFEBE2;border-left:1px solid #EFEBE2;background:{{ c.bg }};display:flex;flex-direction:column;gap:4px;cursor:pointer">
+                              <sc-for list="{{ c.vakter }}" as="v" hint-placeholder-count="0">
+                                <button onClick="{{ v.on }}" style="text-align:left;border:1px solid {{ v.bd }};background:{{ v.bg }};border-radius:8px;padding:5px 7px;font-size:12px;line-height:1.3;color:#0B2545">
+                                  <span style="display:block;font-weight:600;font-family:'IBM Plex Mono',monospace">{{ v.tid }}</span>
+                                  <sc-if value="{{ v.sub }}" hint-placeholder-val="{{ false }}"><span style="display:block;color:{{ v.subFg }};font-weight:600">{{ v.sub }}</span></sc-if>
+                                </button>
+                              </sc-for>
+                              <sc-if value="{{ c.merk }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px;font-weight:600;color:{{ c.merkFg }}">{{ c.merk }}</span></sc-if>
+                              <sc-if value="{{ c.pluss }}" hint-placeholder-val="{{ false }}"><span style="margin:auto;font-size:18px;color:#D3CCBE;line-height:1">+</span></sc-if>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+
+                  <div data-rf="ukegrid" style="display:flex;gap:18px;flex-wrap:wrap;font-size:12.5px;color:#586174;align-items:center">
+                    <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:4px;background:#E9EEF5;border:1px solid #C9D5E5"></span>Vakt</span>
+                    <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:4px;background:#FBEFA8;border:1px solid #EAD88A"></span>Gir overtid</span>
+                    <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:4px;border:1px dashed #0B2545;background:#fff"></span>Ledig</span>
+                    <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:4px;background:#E7F3EC"></span>Tilgjengelig</span>
+                    <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:4px;background:repeating-linear-gradient(135deg,#FBF1EE 0 4px,#F3DDD6 4px 8px)"></span>Kan ikke jobbe</span>
+                    <span style="margin-left:auto">Klikk i en rute for å legge til en vakt.</span>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ fanAnsatte }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;overflow-x:auto">
+                    <div style="min-width:820px">
+                      <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) 110px 110px 120px 140px;gap:12px;padding:11px 20px;font-size:12.5px;color:#586174;border-bottom:1px solid #EFEBE2">
+                        <span>Navn</span><span>Lønn</span><span>Stilling</span><span>Avtalt per uke</span><span>Tilgang</span><span></span>
+                      </div>
+                      <sc-for list="{{ ansatte }}" as="a" hint-placeholder-count="5">
+                        <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) 110px 110px 120px 140px;gap:12px;padding:12px 20px;align-items:center;border-top:1px solid {{ a.sep }}">
+                          <div style="display:flex;align-items:center;gap:10px;min-width:0">
+                            <span style="width:32px;height:32px;flex:none;border-radius:50%;background:#E4DFD4;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ a.init }}</span>
+                            <div style="min-width:0"><div style="font-weight:600;font-size:14.5px">{{ a.navn }}</div><div style="font-size:12.5px;color:#586174;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.rolle }} · {{ a.kontakt }}</div></div>
+                          </div>
+                          <span style="font-size:14px">{{ a.lonn }}</span>
+                          <span style="font-size:14px">{{ a.pst }}</span>
+                          <span style="font-size:14px;font-family:'IBM Plex Mono',monospace">{{ a.avtalt }}</span>
+                          <span><span style="font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:{{ a.sbg }};color:{{ a.sfg }}">{{ a.status }}</span></span>
+                          <div style="display:flex;gap:6px;justify-content:flex-end">
+                            <button onClick="{{ a.onEndre }}" style="height:32px;padding:0 11px;border-radius:8px;border:1px solid #D9D3C6;background:#fff;font-size:13px;font-weight:500">Endre</button>
+                            <sc-if value="{{ a.kanInvitere }}" hint-placeholder-val="{{ false }}"><button onClick="{{ a.onInviter }}" style="height:32px;padding:0 11px;border-radius:8px;border:1px solid #0B2545;background:#0B2545;color:#fff;font-size:13px;font-weight:600">{{ a.invTxt }}</button></sc-if>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px">
+                    <section style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+                      <h2 style="margin:0;font-size:17px;font-weight:600">Overtid</h2>
+                      <p style="margin:0;font-size:14px;color:#3D4759">Timer over 9 per dag eller 40 per uke er overtid, med {{ otPst }} % tillegg. Gjelder både faste og timelønnede.</p>
+                      <p style="margin:0;font-size:14px;color:#3D4759">For deltid er timer over avtalt stilling merarbeid, med vanlig timelønn, helt til 40 timer.</p>
+                      <div style="display:flex;align-items:center;gap:10px;margin-top:4px"><span style="font-size:13.5px;color:#586174">Tillegg</span>
+                        <div style="display:inline-flex;gap:4px;background:#EAE5DA;padding:3px;border-radius:10px">
+                          <sc-for list="{{ otValg }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="border:0;padding:5px 11px;border-radius:8px;font-weight:600;font-size:13px;background:{{ o.bg }};color:#0B2545">{{ o.t }}</button></sc-for>
+                        </div>
+                      </div>
+                    </section>
+                    <section style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+                      <h2 style="margin:0;font-size:17px;font-weight:600">Timer går rett til lønn</h2>
+                      <p style="margin:0;font-size:14px;color:#3D4759">Når en uke er over, blir vaktene til timelister under Lønn. Overtid og merarbeid regnes ut for deg. Du godkjenner før lønnen kjøres.</p>
+                      <p style="margin:0;font-size:14px;color:#3D4759">De ansatte logger inn med en lenke på SMS eller e-post. De ser bare vaktplanen, ikke regnskapet.</p>
+                    </section>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+          </sc-if>
+        </div>
+      </main>
+
+      <sc-if value="{{ aiOpen }}" hint-placeholder-val="{{ false }}">
+        <aside style="position:sticky;top:64px;width:400px;flex:none;height:calc(100vh - 64px);background:#FBFAF6;border-left:1px solid #E4DFD4;display:flex;flex-direction:column">
+          <div style="height:54px;flex:none;display:flex;align-items:center;padding:0 10px 0 18px;border-bottom:1px solid #E4DFD4"><span style="flex:1;font-weight:600">Assistent</span><button onClick="{{ toggleAi }}" aria-label="Lukk" style="width:34px;height:34px;border:0;border-radius:9px;background:none;font-size:18px">×</button></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:16px">
+            <sc-if value="{{ aiTom }}" hint-placeholder-val="{{ true }}">
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+                <div style="font-size:20px;font-weight:600">Hva skal vi gjøre med vaktplanen?</div>
+                <sc-for list="{{ aiForslag }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.on }}" style="text-align:left;padding:11px 14px;border:1px solid #E4DFD4;border-radius:12px;background:#fff;font-size:14px" style-hover="border-color:#0B2545">{{ f.t }}</button></sc-for>
+              </div>
+            </sc-if>
+            <sc-for list="{{ aiMeldinger }}" as="m" hint-placeholder-count="0">
+              <sc-if value="{{ m.bruker }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div style="max-width:85%;padding:10px 14px;border-radius:16px 16px 4px 16px;background:#0B2545;color:#fff;font-size:14px">{{ m.text }}</div><span style="font-size:11px;color:#8A909C">{{ m.tid }}</span></div>
+              </sc-if>
+              <sc-if value="{{ m.bot }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <div style="font-size:12px;color:#8A909C"><b style="color:#586174">Assistent</b> · {{ m.tid }}</div>
+                  <div style="font-size:14px;line-height:1.55">{{ m.text }}</div>
+                  <sc-if value="{{ m.kort }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:#fff;border:1px solid #E4DFD4;border-radius:14px;overflow:hidden">
+                      <div style="display:flex;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #EFEBE2;font-size:13px;font-weight:600"><span>{{ m.kortT }}</span><span style="font-size:11px;padding:2px 8px;border-radius:99px;background:{{ m.stBg }};color:{{ m.stFg }}">{{ m.stTxt }}</span></div>
+                      <div style="padding:6px 14px">
+                        <sc-for list="{{ m.linjer }}" as="l" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:13px"><span style="color:#586174">{{ l.k }}</span><span>{{ l.v }}</span></div></sc-for>
+                      </div>
+                      <sc-if value="{{ m.venter }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;padding:10px 14px;border-top:1px solid #EFEBE2"><button onClick="{{ m.ok }}" style="height:34px;padding:0 14px;border-radius:9px;border:0;background:#0B2545;color:#fff;font-size:13px;font-weight:600">{{ m.okTxt }}</button><button onClick="{{ m.nei }}" style="height:34px;padding:0 10px;border:0;background:none;color:#586174;font-size:13px">Avbryt</button></div></sc-if>
+                      <sc-if value="{{ m.ferdig }}" hint-placeholder-val="{{ false }}"><div style="padding:9px 14px;border-top:1px solid #EFEBE2;font-size:13px;font-weight:600;color:#1F7D52">✓ {{ m.ferdigTxt }}</div></sc-if>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </sc-for>
+          </div>
+          <div style="padding:10px 14px 12px;border-top:1px solid #E4DFD4">
+            <div style="display:flex;gap:6px;align-items:center;padding:5px 5px 5px 12px;border:1px solid #D9D3C6;border-radius:14px;background:#fff">
+              <input value="{{ aiInput }}" onChange="{{ setAiInput }}" onKeyDown="{{ aiKey }}" placeholder="Skriv til assistenten …" style="flex:1;min-width:0;border:0;outline:none;background:none;font-size:14px;height:34px">
+              <button onClick="{{ aiSend }}" aria-label="Send" style="width:34px;height:34px;border:0;border-radius:10px;background:#0B2545;color:#fff;font-size:16px">↑</button>
+            </div>
+            <div style="font-size:11px;color:#8A909C;margin-top:6px;text-align:center">Assistenten foreslår. Ingenting lagres før du bekrefter.</div>
+          </div>
+        </aside>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ erAnsatt }}" hint-placeholder-val="{{ false }}">
+    <header style="background:#fff;border-bottom:1px solid #E4DFD4">
+      <div style="max-width:640px;margin:0 auto;height:60px;padding:0 20px;display:flex;align-items:center;gap:12px">
+        <img src="assets/rettfort-logo.png" alt="Rettført" style="height:30px;width:auto;margin-left:-6px">
+        <span style="width:1px;height:22px;background:#E4DFD4"></span>
+        <span style="flex:1;font-size:14px;color:#586174">Vaktplan · Nordhavn Kafé</span>
+        <span style="width:32px;height:32px;border-radius:50%;background:#0B2545;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ meg.init }}</span>
+      </div>
+    </header>
+    <main style="max-width:640px;margin:0 auto;padding:24px 20px 80px;display:flex;flex-direction:column;gap:18px">
+      <div><div style="font-size:13.5px;color:#586174">Uke 41 · {{ ukeSpenn41 }}</div><h1 style="margin:4px 0 0;font-size:28px;font-weight:600;letter-spacing:-.02em">Hei, {{ meg.fornavn }}.</h1></div>
+
+      <sc-if value="{{ harNeste }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#0B2545;color:#fff;border-radius:18px;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+          <div><div style="font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#F6DF6E">Neste vakt</div><div style="font-size:22px;font-weight:600;margin-top:6px">{{ neste.dag }}</div><div style="font-size:15px;color:rgba(255,255,255,.8);font-family:'IBM Plex Mono',monospace">{{ neste.tid }}</div></div>
+          <div style="text-align:right"><div style="font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace">{{ megTimer }}</div><div style="font-size:13px;color:rgba(255,255,255,.75)">{{ megAvtalt }}</div></div>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;gap:4px;background:#EAE5DA;padding:4px;border-radius:12px">
+        <sc-for list="{{ aFaner }}" as="f" hint-placeholder-count="3">
+          <button onClick="{{ f.on }}" style="flex:1;border:0;padding:9px 8px;border-radius:9px;font-weight:600;font-size:14px;background:{{ f.bg }};color:{{ f.fg }};box-shadow:{{ f.sh }};display:flex;justify-content:center;gap:6px;align-items:center">{{ f.t }}<sc-if value="{{ f.n }}" hint-placeholder-val="{{ false }}"><span style="background:#F6DF6E;color:#0B2545;font-size:11px;font-weight:700;padding:0 7px;border-radius:99px">{{ f.n }}</span></sc-if></button>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ aMine }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;overflow:hidden">
+          <sc-for list="{{ mine }}" as="v" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid {{ v.sep }}">
+              <div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:#586174">{{ v.kort }}</div><div style="font-size:22px;font-weight:700;line-height:1.1">{{ v.nr }}</div></div>
+              <div style="flex:1;min-width:0"><div style="font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:15px">{{ v.tid }}</div><div style="font-size:13px;color:{{ v.subFg }}">{{ v.sub }}</div></div>
+              <button onClick="{{ v.on }}" style="height:36px;padding:0 13px;border-radius:9px;border:1px solid #D9D3C6;background:#fff;font-size:13.5px;font-weight:600">{{ v.knapp }}</button>
+            </div>
+          </sc-for>
+          <sc-if value="{{ ingenMine }}" hint-placeholder-val="{{ false }}"><div style="padding:24px;text-align:center;color:#586174">Ingen vakter denne uka. Se Ledige vakter.</div></sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ aLedige }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;overflow:hidden">
+          <sc-for list="{{ ledige }}" as="v" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-top:1px solid {{ v.sep }};flex-wrap:wrap">
+              <div style="text-align:center;min-width:44px"><div style="font-size:12px;font-weight:600;color:#586174">{{ v.kort }}</div><div style="font-size:22px;font-weight:700;line-height:1.1">{{ v.nr }}</div></div>
+              <div style="flex:1;min-width:160px"><div style="font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:15px">{{ v.tid }}</div><div style="font-size:13px;color:{{ v.subFg }}">{{ v.sub }}</div></div>
+              <button onClick="{{ v.on }}" style="height:36px;padding:0 14px;border-radius:9px;border:1px solid #0B2545;background:{{ v.bg }};color:{{ v.fg }};font-size:13.5px;font-weight:600">{{ v.knapp }}</button>
+            </div>
+          </sc-for>
+          <sc-if value="{{ ingenLedige }}" hint-placeholder-val="{{ false }}"><div style="padding:24px;text-align:center;color:#586174">Ingen ledige vakter akkurat nå.</div></sc-if>
+        </div>
+        <p style="margin:0;font-size:13px;color:#586174">Når du melder interesse, bestemmer lederen hvem som får vakten. Du får beskjed på SMS.</p>
+      </sc-if>
+
+      <sc-if value="{{ aTilg }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:0;font-size:14px;color:#3D4759">Si fra hvilke dager du kan og ikke kan jobbe. Lederen ser det når vaktplanen lages.</p>
+        <div style="background:#fff;border:1px solid #E4DFD4;border-radius:16px;overflow:hidden">
+          <sc-for list="{{ tilgRader }}" as="t" hint-placeholder-count="7">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:12px 18px;border-top:1px solid {{ t.sep }}">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                <span style="flex:1;min-width:110px;font-weight:600;font-size:14.5px">{{ t.dag }}</span>
+                <div style="display:inline-flex;gap:3px;background:#EFEBE2;padding:3px;border-radius:10px">
+                  <sc-for list="{{ t.valg }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.on }}" style="border:0;padding:6px 11px;border-radius:8px;font-weight:600;font-size:13px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.t }}</button></sc-for>
+                </div>
+              </div>
+              <sc-if value="{{ t.visGrunn }}" hint-placeholder-val="{{ false }}">
+                <input value="{{ t.grunn }}" onChange="{{ t.setGrunn }}" placeholder="Grunn (valgfritt), f.eks. eksamen" style="height:38px;border:1px solid #D9D3C6;border-radius:9px;padding:0 12px;font-size:14px;background:#fff">
+              </sc-if>
+              <sc-if value="{{ t.harVakt }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px;color:#8A2E1F">Du har vakt denne dagen. Legg den ut eller be om fri under Mine vakter.</span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ visVaktModal }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ lukkModal }}" style="position:fixed;inset:0;background:rgba(11,37,69,.32);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stopp }}" style="width:100%;max-width:460px;background:#fff;border-radius:18px;box-shadow:0 30px 70px -20px rgba(11,37,69,.45);display:flex;flex-direction:column">
+        <div style="padding:18px 22px 4px;display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-size:19px;font-weight:600">{{ modalTittel }}</h2><button onClick="{{ lukkModal }}" aria-label="Lukk" style="width:32px;height:32px;border:0;background:none;font-size:20px">×</button></div>
+        <div style="padding:12px 22px 6px;display:flex;flex-direction:column;gap:14px">
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:#586174">Hvem</span>
+            <select value="{{ fP }}" onChange="{{ setFP }}" style="height:44px;border:1px solid #D9D3C6;border-radius:10px;padding:0 10px;font-size:15px;background:#fff">
+              <sc-for list="{{ personValg }}" as="o" hint-placeholder-count="5"><option value="{{ o.v }}">{{ o.t }}</option></sc-for>
+            </select>
+          </label>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:#586174">Dag</span>
+            <select value="{{ fD }}" onChange="{{ setFD }}" style="height:44px;border:1px solid #D9D3C6;border-radius:10px;padding:0 10px;font-size:15px;background:#fff">
+              <sc-for list="{{ dagValg }}" as="o" hint-placeholder-count="7"><option value="{{ o.v }}">{{ o.t }}</option></sc-for>
+            </select>
+          </label>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:#586174">Tid</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <sc-for list="{{ maler }}" as="m" hint-placeholder-count="3"><button onClick="{{ m.on }}" style="height:34px;padding:0 12px;border-radius:99px;border:1px solid {{ m.bd }};background:{{ m.bg }};font-size:13px;font-weight:600">{{ m.t }}</button></sc-for>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;margin-top:4px">
+              <input type="time" value="{{ fS }}" onChange="{{ setFS }}" style="flex:1;height:44px;border:1px solid #D9D3C6;border-radius:10px;padding:0 10px;font-size:15px">
+              <span style="color:#586174">til</span>
+              <input type="time" value="{{ fE }}" onChange="{{ setFE }}" style="flex:1;height:44px;border:1px solid #D9D3C6;border-radius:10px;padding:0 10px;font-size:15px">
+            </div>
+            <span style="font-size:13px;color:#586174">{{ fVarighet }}</span>
+          </div>
+          <sc-for list="{{ advarsler }}" as="w" hint-placeholder-count="0">
+            <div style="background:{{ w.bg }};color:{{ w.fg }};border-radius:10px;padding:10px 12px;font-size:13.5px">{{ w.t }}</div>
+          </sc-for>
+        </div>
+        <div style="padding:14px 22px 18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button onClick="{{ lagreVakt }}" style="height:42px;padding:0 18px;border-radius:10px;border:0;background:#0B2545;color:#fff;font-weight:600;font-size:14.5px">Lagre</button>
+          <sc-if value="{{ erEndre }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ gjorLedig }}" style="height:42px;padding:0 14px;border-radius:10px;border:1px solid #D9D3C6;background:#fff;font-weight:500;font-size:14px">Gjør ledig</button>
+            <button onClick="{{ slettVakt }}" style="height:42px;padding:0 12px;border:0;background:none;color:#8A2E1F;font-weight:500;font-size:14px;margin-left:auto">Slett</button>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ visAnsattModal }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ lukkModal }}" style="position:fixed;inset:0;background:rgba(11,37,69,.32);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div onClick="{{ stopp }}" style="width:100%;max-width:480px;background:#fff;border-radius:18px;box-shadow:0 30px 70px -20px rgba(11,37,69,.45)">
+        <div style="padding:18px 22px 4px;display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font-size:19px;font-weight:600">{{ aModalTittel }}</h2><button onClick="{{ lukkModal }}" aria-label="Lukk" style="width:32px;height:32px;border:0;background:none;font-size:20px">×</button></div>
+        <div style="padding:12px 22px 6px;display:flex;flex-direction:column;gap:14px">
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:#586174">Navn</span><input value="{{ aNavn }}" onChange="{{ setANavn }}" style="height:44px;border:1px solid #D9D3C6;border-radius:10px;padding:0 12px;font-size:15px"></label>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:#586174">Mobil eller e-post</span><input value="{{ aKontakt }}" onChange="{{ setAKontakt }}" placeholder="Invitasjonen sendes hit" style="height:44px;border:1px solid #D9D3C6;border-radius:10px;padding:0 12px;font-size:15px"></label>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:#586174">Stilling</span><input value="{{ aRolle }}" onChange="{{ setARolle }}" placeholder="F.eks. barista" style="height:44px;border:1px solid #D9D3C6;border-radius:10px;padding:0 12px;font-size:15px"></label>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:#586174">Lønn</span>
+            <div style="display:flex;gap:4px;background:#EFEBE2;padding:3px;border-radius:10px">
+              <sc-for list="{{ lonnValg }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.on }}" style="flex:1;border:0;padding:8px;border-radius:8px;font-weight:600;font-size:14px;background:{{ o.bg }}">{{ o.t }}</button></sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ aErFast }}" hint-placeholder-val="{{ true }}">
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:#586174">Stillingsprosent</span>
+              <div style="display:flex;align-items:center;gap:12px"><input type="range" min="10" max="100" step="5" value="{{ aPst }}" onChange="{{ setAPst }}" style="flex:1;accent-color:#0B2545"><span style="min-width:120px;font-weight:600;font-size:14px">{{ aPstTxt }}</span></div>
+            </label>
+          </sc-if>
+          <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13.5px;color:#586174">{{ satsLabel }}</span><input value="{{ aSats }}" onChange="{{ setASats }}" style="height:44px;border:1px solid #D9D3C6;border-radius:10px;padding:0 12px;font-size:15px;font-family:'IBM Plex Mono',monospace"></label>
+          <sc-if value="{{ aNy }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:13px;color:#586174">Den ansatte får en lenke og logger inn uten passord. De ser bare vaktplanen sin. Personen legges også til under Lønn.</p></sc-if>
+        </div>
+        <div style="padding:14px 22px 18px;display:flex;gap:8px">
+          <button onClick="{{ lagreAnsatt }}" disabled="{{ aUgyldig }}" style="height:42px;padding:0 18px;border-radius:10px;border:0;background:{{ aKnappBg }};color:#fff;font-weight:600;font-size:14.5px">{{ aKnappTxt }}</button>
+          <button onClick="{{ lukkModal }}" style="height:42px;padding:0 14px;border:0;background:none;color:#586174;font-size:14px">Avbryt</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:80;background:#0B2545;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:0 14px 34px -10px rgba(11,37,69,.5);max-width:90vw">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;pakke&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;gratis&quot;,&quot;start&quot;,&quot;selskap&quot;],&quot;default&quot;:&quot;selskap&quot;,&quot;tsType&quot;:&quot;'gratis'|'start'|'selskap'&quot;,&quot;section&quot;:&quot;Pakke&quot;}}">
+const KORT = ['Man', 'Tir', 'Ons', 'Tor', 'Fre', 'Lør', 'Søn'];
+const DAG = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag'];
+const MND = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
+const MALER = [['Åpning', '07:00', '15:00'], ['Midt', '10:00', '18:00'], ['Kveld', '13:00', '21:00']];
+const dt = (w, d) => new Date(2026, 9, 5 + (w - 41) * 7 + d);
+const datoTxt = (w, d) => { const x = dt(w, d); return x.getDate() + '. ' + MND[x.getMonth()]; };
+const timer = (s, e) => { const [a, b] = s.split(':').map(Number), [c, d] = e.split(':').map(Number); let x = (c * 60 + d - a * 60 - b) / 60; if (x <= 0) x += 24; return x > 5.5 ? x - 0.5 : x; };
+const fT = x => (Math.round(x * 10) / 10).toString().replace('.', ',') + ' t';
+const kortTid = (s, e) => (s.endsWith(':00') ? s.slice(0, 2) : s) + '–' + (e.endsWith(':00') ? e.slice(0, 2) : e);
+const init = n => n.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
+const nu = () => { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+let SEQ = 100;
+const V = (p, d, s, e, w = 41) => ({ id: 'v' + (SEQ++), w, p, d, s, e });
+
+class Component extends DCLogic {
+  state = {
+    rolle: 'leder', skjerm: 'vakt', fane: 'uke', uke: 41, aFane: 'mine', otPst: 40,
+    status: { 41: 'utkast' },
+    folk: [
+      { id: 'mari', navn: 'Mari Holm', rolle: 'Kokk', type: 'fast', pst: 100, sats: '42 500', kontakt: '912 34 567', status: 'aktiv' },
+      { id: 'ali', navn: 'Ali Hassan', rolle: 'Barista', type: 'fast', pst: 80, sats: '33 600', kontakt: 'ali@epost.no', status: 'aktiv' },
+      { id: 'jonas', navn: 'Jonas Berg', rolle: 'Barista', type: 'fast', pst: 60, sats: '24 900', kontakt: '934 11 208', status: 'aktiv' },
+      { id: 'sara', navn: 'Sara Nilsen', rolle: 'Ekstrahjelp', type: 'time', pst: 0, sats: '215', kontakt: '976 55 012', status: 'aktiv' },
+      { id: 'emma', navn: 'Emma Lie', rolle: 'Ekstrahjelp', type: 'time', pst: 0, sats: '205', kontakt: 'emma.lie@epost.no', status: 'invitert' }
+    ],
+    vakter: [
+      ...[0, 1, 2, 3, 4].map(d => V('mari', d, '07:00', '15:00')), V('mari', 5, '10:00', '18:00'),
+      V('ali', 0, '13:00', '21:00'), V('ali', 1, '13:00', '21:00'), V('ali', 2, '10:00', '18:00'), V('ali', 3, '13:00', '21:00'),
+      V('jonas', 1, '07:00', '15:00'), V('jonas', 4, '13:00', '21:00'), V('jonas', 5, '07:00', '15:00'),
+      V('sara', 5, '13:00', '21:00'), V('sara', 6, '10:00', '18:00'),
+      { id: 'o1', w: 41, p: null, d: 4, s: '10:00', e: '18:00' }, { id: 'o2', w: 41, p: null, d: 6, s: '13:00', e: '21:00' }
+    ],
+    interesse: { o1: ['sara', 'jonas'] },
+    tilg: { jonas: { 3: { t: 'u', g: 'Eksamen' } }, sara: { 2: { t: 'u', g: '' }, 4: { t: 'a' } }, emma: { 5: { t: 'a' }, 6: { t: 'a' } } },
+    fri: [{ id: 'f1', p: 'ali', d: 3, g: 'Legetime' }],
+    utlagt: {},
+    modal: null, f: {}, toast: '', aiOpen: false, aiMsgs: [], aiInput: ''
+  };
+  vis(t) { this.setState({ toast: t }); clearTimeout(this.tt); this.tt = setTimeout(() => this.setState({ toast: '' }), 3400); }
+  componentWillUnmount() { clearTimeout(this.tt); clearTimeout(this.at); }
+  endret(w, s) { const st = s.status[w]; return st === 'publisert' ? { ...s.status, [w]: 'endret' } : s.status; }
+  setVakter(fn, w) { this.setState(s => ({ vakter: fn(s.vakter), status: this.endret(w ?? s.uke, s) })); }
+  sum(p, w, vakter) { return (vakter || this.state.vakter).filter(v => v.p === p && v.w === w).reduce((a, v) => a + timer(v.s, v.e), 0); }
+  avtalt(f) { return f.type === 'fast' ? 37.5 * f.pst / 100 : null; }
+  navn(id) { const f = this.state.folk.find(x => x.id === id); return f ? f.navn.split(' ')[0] : ''; }
+  tildel(vid, p) {
+    this.setState(s => ({ vakter: s.vakter.map(v => v.id === vid ? { ...v, p } : v), interesse: { ...s.interesse, [vid]: [] }, status: this.endret(s.vakter.find(v => v.id === vid).w, s) }));
+    this.vis(`Vakten er gitt til ${this.navn(p)}. Hun eller han får beskjed når du publiserer.`.replace('Hun eller han', this.navn(p)));
+  }
+  lagUke(w) {
+    const mal = this.state.vakter.filter(v => v.w === 41).map(v => ({ ...v, id: 'v' + (SEQ++), w, p: v.p ?? 'sara' }))
+      .filter(v => !(v.p === 'mari' && v.d === 5)).map(v => v.p === 'jonas' && v.d === 3 ? { ...v, p: 'emma' } : v);
+    this.setState(s => ({ vakter: [...s.vakter.filter(v => v.w !== w), ...mal], status: { ...s.status, [w]: 'utkast' }, uke: w, fane: 'uke', skjerm: 'vakt' }));
+    return mal.length;
+  }
+  aiSvar(t) {
+    const l = t.toLowerCase(), tid = nu();
+    if (l.includes('42') || l.includes('lag vaktplan') || l.includes('neste uke')) return { r: 'b', tid, text: 'Jeg har laget et forslag for uke 42 ut fra uke 41. Mari slipper lørdagen, så hun ikke får overtid. Jonas har sagt at han ikke kan torsdag, så Emma tar den vakten.', kort: { t: 'Vaktplan uke 42', linjer: [['Vakter', '18'], ['Ledige', '0'], ['Overtid', '0 t'], ['Tar hensyn til', 'Jonas, Sara']], ok: 'Lag utkast', st: 'venter', ferdig: 'Utkast laget. Se over og publiser.', handling: 'uke42' } };
+    if (l.includes('fredag')) return { r: 'b', tid, text: 'Sara og Jonas vil ta fredag 10–18. Sara har timelønn og 15 t denne uka, så det blir ingen overtid. Jonas har allerede 22,5 t, som er det han har i stillingen, så for ham blir det merarbeid.', kort: { t: 'Gi vakten til Sara', linjer: [['Vakt', 'Fredag 9. okt, 10–18'], ['Timer for Sara', '15 t → 22,5 t'], ['Overtid', '0 t']], ok: 'Gi til Sara', st: 'venter', ferdig: 'Sara har fått vakten.', handling: 'o1sara' } };
+    if (l.includes('overtid')) { const ot = this.state.folk.map(f => [f, this.sum(f.id, 41) - 40]).filter(x => x[1] > 0); return { r: 'b', tid, text: ot.length ? ot.map(([f, x]) => `${f.navn} får ${fT(x)} overtid i uke 41.`).join(' ') + ' Vil du at jeg flytter lørdagsvakten hennes til Emma, som har sagt at hun kan jobbe?' : 'Ingen får overtid i uke 41.' }; }
+    return { r: 'b', tid, text: 'Jeg kan lage vaktplaner, foreslå hvem som kan ta ledige vakter, og si fra om noen får overtid. Hva vil du gjøre?' };
+  }
+  aiSendTekst(t) {
+    t = (t || '').trim(); if (!t) return;
+    this.setState(s => ({ aiMsgs: [...s.aiMsgs, { r: 'u', text: t, tid: nu() }], aiInput: '' }));
+    this.at = setTimeout(() => this.setState(s => ({ aiMsgs: [...s.aiMsgs, this.aiSvar(t)] })), 700);
+  }
+  renderVals() {
+    const s = this.state, p = this.props;
+    const pakke = p.pakke ?? 'selskap';
+    const harAssistent = pakke === 'selskap';
+    const w = s.uke, vU = s.vakter.filter(v => v.w === w);
+    const folkAktive = s.folk;
+    const tilgFor = (pid, d) => (s.tilg[pid] || {})[d];
+    const stMap = { utkast: ['Utkast, ikke publisert', '#EFEBE2', '#586174'], publisert: ['Publisert', '#E2F1E8', '#1F7D52'], endret: ['Endringer ikke publisert', '#FBEFA8', '#8A6A00'] };
+    const st = stMap[s.status[w] || 'utkast'];
+    const st41 = stMap[s.status[41] || 'utkast'];
+    const erLeder = s.rolle === 'leder';
+
+    const fane = (k, t, cur, set) => ({ t, bg: cur === k ? '#fff' : 'transparent', fg: cur === k ? '#0B2545' : '#586174', sh: cur === k ? '0 1px 2px rgba(0,0,0,.06)' : 'none', on: () => set(k) });
+
+    // svar
+    const svar = [];
+    s.fri.forEach(r => { const f = s.folk.find(x => x.id === r.p), v = s.vakter.find(x => x.w === 41 && x.p === r.p && x.d === r.d);
+      svar.push({ init: init(f.navn), t: `${f.navn} ber om fri ${DAG[r.d].toLowerCase()} ${datoTxt(41, r.d)}`, sub: (r.g ? r.g + '. ' : '') + (v ? `Har vakt ${kortTid(v.s, v.e)}. Vakten blir ledig hvis du godkjenner.` : 'Har ingen vakt den dagen.'),
+        knapper: [{ t: 'Godkjenn', bg: '#0B2545', fg: '#fff', bd: '#0B2545', on: () => { this.setState(x => ({ fri: x.fri.filter(y => y.id !== r.id), vakter: x.vakter.map(y => v && y.id === v.id ? { ...y, p: null } : y), tilg: { ...x.tilg, [r.p]: { ...(x.tilg[r.p] || {}), [r.d]: { t: 'u', g: r.g } } }, status: this.endret(41, x) })); this.vis(`Godkjent. Vakten ${DAG[r.d].toLowerCase()} er nå ledig.`); } },
+          { t: 'Avslå', bg: '#fff', fg: '#0B2545', bd: '#D9D3C6', on: () => { this.setState(x => ({ fri: x.fri.filter(y => y.id !== r.id) })); this.vis(`${f.navn.split(' ')[0]} får beskjed om at forespørselen er avslått.`); } }] }); });
+    Object.keys(s.utlagt).forEach(vid => { const v = s.vakter.find(x => x.id === vid); if (!v || !v.p) return; const f = s.folk.find(x => x.id === v.p);
+      svar.push({ init: init(f.navn), t: `${f.navn} vil bytte bort ${DAG[v.d].toLowerCase()} ${datoTxt(v.w, v.d)}, ${kortTid(v.s, v.e)}`, sub: 'Gjør den ledig, så kan andre melde interesse.',
+        knapper: [{ t: 'Gjør ledig', bg: '#0B2545', fg: '#fff', bd: '#0B2545', on: () => { this.setState(x => { const u = { ...x.utlagt }; delete u[vid]; return { utlagt: u, vakter: x.vakter.map(y => y.id === vid ? { ...y, p: null } : y), status: this.endret(v.w, x) }; }); this.vis('Vakten ligger nå under Ledige vakter.'); } },
+          { t: 'Behold', bg: '#fff', fg: '#0B2545', bd: '#D9D3C6', on: () => this.setState(x => { const u = { ...x.utlagt }; delete u[vid]; return { utlagt: u }; }) }] }); });
+    s.vakter.filter(v => !v.p && (s.interesse[v.id] || []).length).forEach(v => { const ii = s.interesse[v.id];
+      svar.push({ init: '+', t: `${DAG[v.d]} ${datoTxt(v.w, v.d)}, ${kortTid(v.s, v.e)} er ledig`, sub: ii.map(x => this.navn(x)).join(' og ') + ' vil ta den. ' + ii.map(x => { const f = s.folk.find(y => y.id === x), ny = this.sum(x, v.w) + timer(v.s, v.e); return ny > 40 ? `${f.navn.split(' ')[0]} får overtid.` : (f.type === 'fast' && ny > this.avtalt(f)) ? `${f.navn.split(' ')[0]} får merarbeid.` : ''; }).join(' '),
+        knapper: ii.map((x, i) => ({ t: 'Gi til ' + this.navn(x), bg: i ? '#fff' : '#0B2545', fg: i ? '#0B2545' : '#fff', bd: i ? '#D9D3C6' : '#0B2545', on: () => this.tildel(v.id, x) })) }); });
+    svar.forEach((x, i) => x.sep = i ? '#EFEBE2' : 'transparent');
+
+    // grid
+    const dager = KORT.map((k, d) => { const n = vU.filter(v => v.d === d && v.p).length, l = vU.filter(v => v.d === d && !v.p).length;
+      return { t: `${k} ${datoTxt(w, d)}`, sub: n ? `${n} på jobb${l ? `, ${l} ledig` : ''}` : (l ? `${l} ledig` : 'Ingen'), fg: l ? '#8A6A00' : '#586174', bg: d >= 5 ? '#FBFAF6' : '#fff' }; });
+    const apneNy = (pid, d) => e => { if (!erLeder) return; const m = MALER[0]; this.setState({ modal: 'vakt', f: { mode: 'ny', p: pid ?? '', d, s: m[1], e: m[2] } }); };
+    const apneEndre = v => e => { e.stopPropagation(); this.setState({ modal: 'vakt', f: { mode: 'endre', id: v.id, p: v.p ?? '', d: v.d, s: v.s, e: v.e } }); };
+    const ledigRad = KORT.map((_, d) => ({ onAdd: apneNy(null, d), vakter: vU.filter(v => !v.p && v.d === d).map(v => { const n = (s.interesse[v.id] || []).length; return { tid: kortTid(v.s, v.e), sub: n ? `${n} vil ta den` : 'Ingen ennå', subFg: n ? '#1F7D52' : '#8A909C', on: apneEndre(v) }; }) }));
+    const rader = folkAktive.map(f => {
+      const sum = this.sum(f.id, w), av = this.avtalt(f), ot = Math.max(0, sum - 40);
+      let løp = 0;
+      const sortert = vU.filter(v => v.p === f.id).sort((a, b) => a.d - b.d || a.s.localeCompare(b.s));
+      const otIds = new Set(); sortert.forEach(v => { løp += timer(v.s, v.e); if (løp > 40 || timer(v.s, v.e) > 9) otIds.add(v.id); });
+      return { init: init(f.navn), navn: f.navn,
+        timer: av != null ? `${fT(sum).replace(' t', '')} av ${fT(av)}${ot ? ` · ${fT(ot)} overtid` : ''}` : `${fT(sum)} · timelønn${ot ? ` · ${fT(ot)} overtid` : ''}`,
+        pct: Math.min(100, sum / (av || 40) * 100) + '%', barFg: ot ? '#D9A400' : (av != null && sum > av ? '#D9A400' : '#1F7D52'),
+        celler: KORT.map((_, d) => { const t = tilgFor(f.id, d), vv = sortert.filter(v => v.d === d);
+          return { onAdd: apneNy(f.id, d), title: t ? (t.t === 'u' ? `${f.navn.split(' ')[0]} kan ikke jobbe${t.g ? ': ' + t.g : ''}` : `${f.navn.split(' ')[0]} kan jobbe`) : '',
+            bg: t && t.t === 'u' ? 'repeating-linear-gradient(135deg,#FBF1EE 0 6px,#F6E6E1 6px 12px)' : t && t.t === 'a' ? '#F1F8F3' : '#fff',
+            merk: t ? (t.t === 'u' ? (t.g || 'Kan ikke') : (vv.length ? '' : 'Kan jobbe')) : '', merkFg: t && t.t === 'u' ? '#8A2E1F' : '#1F7D52',
+            pluss: !vv.length && !t,
+            vakter: vv.map(v => { const o = otIds.has(v.id), u = !!s.utlagt[v.id], konflikt = t && t.t === 'u';
+              return { tid: kortTid(v.s, v.e), on: apneEndre(v), bg: o ? '#FBEFA8' : '#E9EEF5', bd: konflikt ? '#C9533B' : o ? '#EAD88A' : '#C9D5E5', sub: konflikt ? 'Kan ikke' : u ? 'Vil bytte' : o ? 'Overtid' : '', subFg: konflikt ? '#8A2E1F' : u ? '#16345E' : '#8A6A00' }; }) }; }) };
+    });
+
+    // modal
+    const f = s.f, fPers = s.folk.find(x => x.id === f.p);
+    const advarsler = [];
+    if (s.modal === 'vakt' && f.s && f.e) {
+      const varig = timer(f.s, f.e);
+      if (fPers) {
+        const t = tilgFor(fPers.id, Number(f.d));
+        if (t && t.t === 'u') advarsler.push({ t: `${fPers.navn.split(' ')[0]} har sagt at hun eller han ikke kan jobbe ${DAG[f.d].toLowerCase()}${t.g ? ' (' + t.g.toLowerCase() + ')' : ''}.`.replace('hun eller han', fPers.navn.split(' ')[0] === 'Mari' || fPers.navn.split(' ')[0] === 'Sara' || fPers.navn.split(' ')[0] === 'Emma' ? 'hun' : 'han'), bg: '#F8E4DF', fg: '#8A2E1F' });
+        const andre = s.vakter.filter(v => v.w === w && v.p === fPers.id && v.id !== f.id);
+        if (andre.some(v => v.d === Number(f.d))) advarsler.push({ t: `${fPers.navn.split(' ')[0]} har allerede en vakt denne dagen.`, bg: '#FBEFA8', fg: '#6B5200' });
+        const ny = andre.reduce((a, v) => a + timer(v.s, v.e), 0) + varig, av = this.avtalt(fPers);
+        if (ny > 40) advarsler.push({ t: `Gir ${fPers.navn.split(' ')[0]} ${fT(ny - 40)} overtid denne uka (${fT(ny)} totalt). Tillegg ${s.otPst} %.`, bg: '#FBEFA8', fg: '#6B5200' });
+        else if (av != null && ny > av) advarsler.push({ t: `${fT(ny - av)} merarbeid for ${fPers.navn.split(' ')[0]}. Det er mer enn ${fPers.pst} % stilling, men ikke overtid.`, bg: '#EFEBE2', fg: '#3D4759' });
+        if (varig > 9) advarsler.push({ t: 'Vakten er lenger enn 9 timer. Timene over 9 er overtid.', bg: '#FBEFA8', fg: '#6B5200' });
+      } else advarsler.push({ t: 'Vakten legges ut som ledig. Alle ansatte kan melde interesse, og du velger hvem som får den.', bg: '#EFEBE2', fg: '#3D4759' });
+    }
+    const setF = k => e => { const val = e.target.value; this.setState(x => ({ f: { ...x.f, [k]: val } })); };
+
+    // ansatt-modal
+    const af = s.f;
+    const ansatte = s.folk.map((x, i) => ({ init: init(x.navn), navn: x.navn, rolle: x.rolle, kontakt: x.kontakt, sep: i ? '#EFEBE2' : 'transparent',
+      lonn: x.type === 'fast' ? `Fast, ${x.sats} kr/mnd` : `Timelønn, ${x.sats} kr`, pst: x.type === 'fast' ? x.pst + ' %' : 'Etter behov', avtalt: x.type === 'fast' ? fT(37.5 * x.pst / 100) : '–',
+      status: x.status === 'aktiv' ? 'Logget inn' : x.status === 'invitert' ? 'Invitert' : 'Ikke invitert', sbg: x.status === 'aktiv' ? '#E2F1E8' : x.status === 'invitert' ? '#FBEFA8' : '#EFEBE2', sfg: x.status === 'aktiv' ? '#1F7D52' : x.status === 'invitert' ? '#8A6A00' : '#586174',
+      kanInvitere: x.status !== 'aktiv', invTxt: x.status === 'invitert' ? 'Send på nytt' : 'Inviter',
+      onInviter: () => { this.setState(y => ({ folk: y.folk.map(z => z.id === x.id ? { ...z, status: 'invitert' } : z) })); this.vis(`Ny lenke sendt til ${x.kontakt}.`); },
+      onEndre: () => this.setState({ modal: 'ansatt', f: { mode: 'endre', id: x.id, navn: x.navn, kontakt: x.kontakt, rolle: x.rolle, type: x.type, pst: x.pst || 100, sats: x.sats } }) }));
+
+    // ansattvisning
+    const megId = s.rolle, meg = s.folk.find(x => x.id === megId) || s.folk[2];
+    const mineV = s.vakter.filter(v => v.w === 41 && v.p === meg.id).sort((a, b) => a.d - b.d);
+    const megSum = this.sum(meg.id, 41), megAv = this.avtalt(meg);
+    const ledigeV = s.vakter.filter(v => v.w === 41 && !v.p).sort((a, b) => a.d - b.d);
+    const tilgMeg = s.tilg[meg.id] || {};
+    const setTilg = (d, t) => this.setState(x => { const m = { ...(x.tilg[meg.id] || {}) }; if (t) m[d] = { t, g: (m[d] || {}).g || '' }; else delete m[d]; return { tilg: { ...x.tilg, [meg.id]: m } }; });
+
+    const aiMeldinger = s.aiMsgs.map((m, i) => { const k = m.kort, base = { bruker: m.r === 'u', bot: m.r === 'b', text: m.text, tid: m.tid, kort: !!k };
+      if (!k) return base;
+      return { ...base, kortT: k.t, linjer: k.linjer.map(([a, b]) => ({ k: a, v: b })), okTxt: k.ok, venter: k.st === 'venter', ferdig: k.st === 'ferdig', ferdigTxt: k.ferdig,
+        stTxt: k.st === 'venter' ? 'Venter på deg' : k.st === 'ferdig' ? 'Lagret' : 'Avbrutt', stBg: k.st === 'venter' ? '#FFF4CC' : k.st === 'ferdig' ? '#E2F1E8' : '#EFEBE2', stFg: k.st === 'venter' ? '#7A5A00' : k.st === 'ferdig' ? '#1F7D52' : '#586174',
+        ok: () => { if (k.handling === 'uke42') this.lagUke(42); if (k.handling === 'o1sara') this.tildel('o1', 'sara'); this.setState(x => ({ aiMsgs: x.aiMsgs.map((y, j) => j === i ? { ...y, kort: { ...y.kort, st: 'ferdig' } } : y) })); },
+        nei: () => this.setState(x => ({ aiMsgs: x.aiMsgs.map((y, j) => j === i ? { ...y, kort: { ...y.kort, st: 'avbrutt' } } : y) })) }; });
+
+    const md = s.mobDag ?? 0, mobV = [];
+    vU.filter(x => !x.p && x.d === md).forEach(x => { const n = (s.interesse[x.id] || []).length; mobV.push({ init: '+', navn: 'Ledig vakt', tid: kortTid(x.s, x.e), merke: n ? n + ' vil ta den' : 'Ingen har meldt seg', merkeFg: n ? '#1F7D52' : '#8A6A00', avBg: '#fff', avSt: 'dashed', bg: '#FBFAF6', on: apneEndre(x) }); });
+    rader.forEach((r, i) => r.celler[md].vakter.forEach(x => mobV.push({ init: r.init, navn: r.navn, tid: x.tid, merke: x.sub, merkeFg: x.subFg, avBg: '#E4DFD4', avSt: 'solid', bg: '#fff', on: x.on })));
+    const utilg = s.folk.filter(f => { const t = tilgFor(f.id, md); return t && t.t === 'u'; }).map(f => f.navn.split(' ')[0] + (tilgFor(f.id, md).g ? ' (' + tilgFor(f.id, md).g.toLowerCase() + ')' : ''));
+    const mobVals = { mobDager: KORT.map((k, d) => ({ k, n: String(dt(w, d).getDate()), ledig: vU.some(x => !x.p && x.d === d), bg: d === md ? '#0B2545' : '#fff', fg: d === md ? '#fff' : '#0B2545', bd: d === md ? '#0B2545' : '#E4DFD4', on: () => this.setState({ mobDag: d }) })),
+      mobTittel: DAG[md] + ' ' + datoTxt(w, md), mobSub: dager[md].sub, mobVakter: mobV.map((x, i) => ({ ...x, sep: i ? '#EFEBE2' : 'transparent' })), mobTom: !mobV.length,
+      mobUtilg: utilg.length ? 'Kan ikke jobbe: ' + utilg.join(', ') : '', mobNy: apneNy(null, md) };
+    const navT = [['hjem', 'Hjem'], ['', 'Penger ut', 2], ['', 'Penger inn'], ['', 'Bank'], ['', 'Lønn'], ['vakt', 'Vaktplan'], ['', 'Rapporter'], ['', 'MVA'], ['', 'Mer ▾']];
+    const ferdigPub = s.status[w] === 'publisert';
+    const tilVakt = () => this.setState({ skjerm: 'vakt', fane: 'uke' });
+    const åpne = svar.length;
+
+    return {
+      seSom: [['leder', 'Kari Lund, leder'], ['jonas', 'Jonas, ansatt'], ['sara', 'Sara, ansatt']].map(([k, t]) => ({ t, bg: s.rolle === k ? '#fff' : 'transparent', bd: s.rolle === k ? '#0B2545' : '#EAD88A', on: () => this.setState({ rolle: k, aFane: 'mine', aiOpen: false }) })),
+      ...mobVals,
+      erLeder, erAnsatt: !erLeder,
+      nav: navT.map(([k, t, n]) => ({ t, teller: k === 'vakt' && åpne ? String(åpne) : (n ? String(n) : ''), ny: k === 'vakt' && !åpne, bd: k && s.skjerm === k ? '#0B2545' : 'transparent', fw: k && s.skjerm === k ? 600 : 400, on: () => k ? this.setState({ skjerm: k }) : (window.location.href = 'demo-bedrift.html') })),
+      ...(() => { const G = [['hjem', 'Hjem'], ['faktura', 'Penger inn'], ['kjop', 'Penger ut', 0, 2], ['bank', 'Bank'],
+          ['ansatte', 'Ansatte', [['lonn', 'Lønn', 'Lønnskjøring og lønnsslipper'], ['vakt', 'Vaktplan', 'Vakter, bytter og tilgjengelighet', åpne]]],
+          ['regnskap', 'Regnskap', [['mva', 'MVA', 'Melding og betaling', 3], ['rapp', 'Rapporter', 'Resultat, balanse og hovedbok'], ['frister', 'Frister', 'Alt som skal leveres'], ['aars', 'Årsavslutning', 'Årsregnskap og skattemelding'], ['rf', 'Regnskapsfører', 'Gi tilgang til regnskapsføreren']]]];
+        const lukk = { tOpen: null, tNy: false, tProfil: false };
+        const gå = id => { this.setState(lukk); if (id === 'vakt') { this.setState({ skjerm: 'vakt' }); return; } window.location.href = 'demo-bedrift.html#' + id; };
+        return {
+          tNav: G.map(([k, t, under, c]) => { under = under || []; const aktiv = k === 'ansatte', open = s.tOpen === k, sum = under.length ? under.reduce((a, u) => a + (u[3] || 0), 0) : (c || 0);
+            return { t, teller: sum ? String(sum) : '', harUnder: !!under.length, open, rot: open ? '180deg' : '0deg', bg: aktiv || open ? '#EFEBE2' : 'transparent', fw: aktiv ? 600 : 500,
+              on: () => under.length ? this.setState({ ...lukk, tOpen: open ? null : k }) : gå(k),
+              under: under.map(([id, ut, d, uc]) => ({ t: ut, d, teller: uc ? String(uc) : '', bg: id === 'vakt' ? '#F4F1EA' : 'transparent', fw: id === 'vakt' ? 600 : 500, on: () => gå(id) })) }; }),
+          tAnyOpen: !!(s.tOpen || s.tNy || s.tProfil), tLukk: () => this.setState(lukk), tHjem: () => gå('hjem'), tInnst: () => gå('innst'),
+          tNyOpen: !!s.tNy, tNyToggle: () => this.setState({ ...lukk, tNy: !s.tNy }),
+          tNyValg: [['Faktura', 'faktura'], ['Kjøp eller kvittering', 'kjop'], ['Vakt', 'nyvakt'], ['Kontoutskrift', 'bank']].map(([t, id]) => ({ t, on: () => id === 'nyvakt' ? this.setState({ ...lukk, skjerm: 'vakt', fane: 'uke', modal: 'vakt', f: { mode: 'ny', p: '', d: 0, s: '07:00', e: '15:00' } }) : gå(id) })),
+          tProfilOpen: !!s.tProfil, tProfilToggle: () => this.setState({ ...lukk, tProfil: !s.tProfil }),
+          tHarAi: harAssistent, pakkeNavn: pakke.charAt(0).toUpperCase() + pakke.slice(1) }; })(),
+      ...(() => { const P = { hjem: 'M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z', faktura: 'M12 4v11M7 10l5 5 5-5M5 20h14', kjop: 'M12 20V9M7 14l5-5 5 5M5 4h14', vakt: 'M4 6h16v14H4zM4 10h16M9 3v4M15 3v4', mer: 'M5 12h.5M12 12h.5M19 12h.5' };
+        const erAktiv = id => id === 'vakt', cnt = id => id === 'vakt' && åpne ? åpne : id === 'kjop' ? 2 : id === 'mva' ? 3 : '', gå = id => { this.setState({ tMer: false }); if (id === 'vakt') { this.setState({ skjerm: 'vakt' }); return; } window.location.href = 'demo-bedrift.html#' + id; };
+        const MER = [['Penger', [['bank', 'Bank']]], ['Ansatte', [['lonn', 'Lønn'], ['vakt', 'Vaktplan']]], ['Regnskap', [['mva', 'MVA'], ['rapp', 'Rapporter'], ['frister', 'Frister'], ['aars', 'Årsavslutning'], ['rf', 'Regnskapsfører']]], ['Konto', [['innst', 'Innstillinger']]]];
+        const merIds = ['bank', 'lonn', 'mva', 'rapp', 'frister', 'aars', 'rf', 'innst'];
+        return {
+          mNav: [['hjem', 'Hjem'], ['faktura', 'Inn'], ['kjop', 'Ut'], ['vakt', 'Vakter'], ['mer', 'Mer']].map(([id, t]) => { const a = id === 'mer' ? merIds.some(erAktiv) || !!this.state.tMer : erAktiv(id);
+            const n = id === 'mer' ? merIds.reduce((x, k) => x + (Number(cnt(k)) || 0), 0) : Number(cnt(id)) || 0;
+            return { t, d: P[id], fg: a ? '#0B2545' : '#8A909C', fw: a ? 700 : 500, teller: n ? String(n) : '', on: () => id === 'mer' ? this.setState({ tMer: true }) : gå(id) }; }),
+          mMerOpen: !!this.state.tMer, mLukk: () => this.setState({ tMer: false }), mStopp: e => e.stopPropagation(),
+          mMer: MER.map(([t, items]) => ({ t, items: items.map(([id, ut]) => ({ t: ut, teller: cnt(id) ? String(cnt(id)) : '', bg: erAktiv(id) ? '#F4F1EA' : 'transparent', fw: erAktiv(id) ? 600 : 500, on: () => { this.setState({ tMer: false }); gå(id); } })) }))
+        }; })(),
+      harAssistent, toggleAi: () => this.setState(x => ({ aiOpen: !x.aiOpen })), aiOpen: s.aiOpen && erLeder && harAssistent,
+      aiBtnBg: s.aiOpen ? '#fff' : '#0B2545', aiBtnFg: s.aiOpen ? '#0B2545' : '#fff',
+      visHjem: s.skjerm === 'hjem', visVakt: s.skjerm === 'vakt', last: pakke === 'gratis', aapen: pakke !== 'gratis',
+      venter: [
+        ...(åpne && pakke !== 'gratis' ? [{ merke: 'Vaktplan', mbg: '#E9EEF5', mfg: '#16345E', t: `${åpne} ${åpne === 1 ? 'forespørsel' : 'forespørsler'} fra ansatte venter på svar`, knapp: 'Se', on: tilVakt }] : []),
+        { merke: 'Purring', mbg: '#F8E4DF', mfg: '#8A2E1F', t: 'Faktura 1038 til Fjellmat AS er 6 dager over forfall, 8 400 kr', knapp: 'Send purring', on: () => this.vis('Purring sendt til Fjellmat AS.') },
+        { merke: 'MVA', mbg: '#E2F1E8', mfg: '#1F7D52', t: 'MVA juli–august er klar. Å betale 18 420 kr innen 10. okt', knapp: 'Se og send', on: () => {} }
+      ].map((x, i) => ({ ...x, sep: i ? '#EFEBE2' : 'transparent' })),
+      venterAntall: String((åpne && pakke !== 'gratis' ? 1 : 0) + 2),
+      tilVakt, hjemVaktTekst: s.vakter.some(v => v.w === 42) ? 'Uke 42 har et utkast. Se over og publiser.' : 'Uke 42 er tom. Kopier uke 41 eller få et forslag.',
+      hjemMandag: s.vakter.filter(v => v.w === 41 && v.d === 0 && v.p).map(v => ({ init: init(s.folk.find(x => x.id === v.p).navn), navn: s.folk.find(x => x.id === v.p).navn, tid: kortTid(v.s, v.e) })),
+      sist: [['Faktura', 'Faktura 1042 · Solheim Arkitekter', '30.09', '9 375,00', '#E2F1E8', '#1F7D52'], ['Kjøp', 'Kaffebrenneriet AS · kaffebønner', '29.09', '−4 812,50', '#EFEBE2', '#586174'], ['Lønn', 'Lønn september · 5 ansatte', '25.09', '−142 380,00', '#EFEBE2', '#586174'], ['Kjøp', 'Biltema · inventar', '26.09', '−1 249,00', '#EFEBE2', '#586174']].map((r, i) => ({ type: r[0], t: r[1], dato: r[2], b: r[3], mbg: r[4], mfg: r[5], sep: i ? '#EFEBE2' : 'transparent' })),
+      faner: [fane('uke', 'Uke', s.fane, k => this.setState({ fane: k })), fane('ansatte', 'Ansatte', s.fane, k => this.setState({ fane: k }))],
+      fanUke: s.fane === 'uke', fanAnsatte: s.fane === 'ansatte',
+      uke: String(w), ukeSpenn: `${datoTxt(w, 0)} – ${datoTxt(w, 6)}`, ukeSpenn41: `${datoTxt(41, 0)} – ${datoTxt(41, 6)}`,
+      forrigeUke: () => this.setState(x => ({ uke: Math.max(40, x.uke - 1) })), nesteUke: () => this.setState(x => ({ uke: Math.min(44, x.uke + 1) })),
+      stTxt: erLeder && s.skjerm === 'vakt' ? st[0] : st41[0], stBg: erLeder && s.skjerm === 'vakt' ? st[1] : st41[1], stFg: erLeder && s.skjerm === 'vakt' ? st[2] : st41[2],
+      kanIkkePublisere: ferdigPub || !vU.length, pubBg: ferdigPub || !vU.length ? '#B8B2A6' : '#0B2545',
+      pubTxt: ferdigPub ? 'Publisert' : s.status[w] === 'endret' ? 'Publiser endringene' : 'Publiser og varsle',
+      publiser: () => { const n = new Set(vU.filter(v => v.p).map(v => v.p)).size; this.setState(x => ({ status: { ...x.status, [w]: 'publisert' } })); this.vis(`Uke ${w} er publisert. ${n} ansatte fikk beskjed på SMS.`); },
+      harSvar: !!svar.length && w === 41, svar, svarAntall: String(svar.length),
+      tomUke: !vU.length, kopierUke: () => { const n = this.lagUke(w); this.vis(`Kopierte ${n} vakter fra uke 41. Se over før du publiserer.`); },
+      aiForslagUke: () => { this.setState({ aiOpen: true }); this.aiSendTekst(`Lag vaktplan for uke ${w}`); },
+      antallAnsatte: String(s.folk.length), dager, ledigRad, rader,
+      nyAnsatt: () => this.setState({ modal: 'ansatt', f: { mode: 'ny', navn: '', kontakt: '', rolle: '', type: 'fast', pst: 100, sats: '' } }),
+      ansatte, otPst: String(s.otPst), otValg: [40, 50, 100].map(n => ({ t: n + ' %', bg: s.otPst === n ? '#fff' : 'transparent', on: () => this.setState({ otPst: n }) })),
+      aiTom: !s.aiMsgs.length, aiMeldinger,
+      aiForslag: ['Lag vaktplan for uke 42', 'Hvem bør ta fredag 10–18?', 'Får noen overtid i uke 41?'].map(t => ({ t, on: () => this.aiSendTekst(t) })),
+      aiInput: s.aiInput, setAiInput: e => this.setState({ aiInput: e.target.value }), aiKey: e => { if (e.key === 'Enter') this.aiSendTekst(s.aiInput); }, aiSend: () => this.aiSendTekst(s.aiInput),
+
+      visVaktModal: s.modal === 'vakt', visAnsattModal: s.modal === 'ansatt', lukkModal: () => this.setState({ modal: null }), stopp: e => e.stopPropagation(),
+      modalTittel: f.mode === 'endre' ? 'Endre vakt' : 'Ny vakt', erEndre: f.mode === 'endre',
+      fP: f.p ?? '', fD: String(f.d ?? 0), fS: f.s || '', fE: f.e || '', setFP: setF('p'), setFD: setF('d'), setFS: setF('s'), setFE: setF('e'),
+      fVarighet: f.s && f.e ? `${fT(timer(f.s, f.e))} arbeid${timer(f.s, f.e) > 5 ? ', 30 min pause trukket fra' : ''}` : '',
+      personValg: [{ v: '', t: 'Ledig vakt, de ansatte kan melde interesse' }, ...s.folk.map(x => ({ v: x.id, t: `${x.navn} · ${x.rolle}` }))],
+      dagValg: KORT.map((_, d) => ({ v: String(d), t: `${DAG[d]} ${datoTxt(w, d)}` })),
+      maler: MALER.map(([t, a, b]) => ({ t: `${t} ${kortTid(a, b)}`, bg: f.s === a && f.e === b ? '#0B2545' : '#fff', bd: f.s === a && f.e === b ? '#0B2545' : '#D9D3C6', on: () => this.setState(x => ({ f: { ...x.f, s: a, e: b } })) })).map(m => ({ ...m, bg: m.bg })),
+      advarsler,
+      lagreVakt: () => { const d = Number(f.d), pp = f.p || null;
+        if (f.mode === 'endre') this.setVakter(vs => vs.map(v => v.id === f.id ? { ...v, p: pp, d, s: f.s, e: f.e } : v));
+        else this.setVakter(vs => [...vs, { id: 'v' + (SEQ++), w, p: pp, d, s: f.s, e: f.e }]);
+        this.setState({ modal: null }); },
+      gjorLedig: () => { this.setVakter(vs => vs.map(v => v.id === f.id ? { ...v, p: null } : v)); this.setState({ modal: null }); this.vis('Vakten er lagt ut som ledig.'); },
+      slettVakt: () => { this.setVakter(vs => vs.filter(v => v.id !== f.id)); this.setState({ modal: null }); },
+
+      aModalTittel: af.mode === 'endre' ? 'Endre ansatt' : 'Legg til ansatt', aNy: af.mode !== 'endre',
+      aNavn: af.navn || '', aKontakt: af.kontakt || '', aRolle: af.rolle || '', aPst: String(af.pst || 100), aSats: af.sats || '',
+      setANavn: setF('navn'), setAKontakt: setF('kontakt'), setARolle: setF('rolle'), setAPst: e => { const v = Number(e.target.value); this.setState(x => ({ f: { ...x.f, pst: v } })); }, setASats: setF('sats'),
+      aErFast: af.type !== 'time', aPstTxt: `${af.pst || 100} % · ${fT(37.5 * (af.pst || 100) / 100)}/uke`, satsLabel: af.type === 'time' ? 'Timelønn (kr)' : 'Månedslønn ved 100 % (kr)',
+      lonnValg: [['fast', 'Fast lønn'], ['time', 'Timelønn']].map(([k, t]) => ({ t, bg: (af.type || 'fast') === k ? '#fff' : 'transparent', on: () => this.setState(x => ({ f: { ...x.f, type: k } })) })),
+      aUgyldig: !(af.navn || '').trim() || !(af.kontakt || '').trim(), aKnappBg: !(af.navn || '').trim() || !(af.kontakt || '').trim() ? '#B8B2A6' : '#0B2545',
+      aKnappTxt: af.mode === 'endre' ? 'Lagre' : 'Send invitasjon',
+      lagreAnsatt: () => { const x = { navn: af.navn.trim(), kontakt: af.kontakt.trim(), rolle: af.rolle.trim() || 'Ansatt', type: af.type || 'fast', pst: af.type === 'time' ? 0 : af.pst, sats: af.sats || '0' };
+        if (af.mode === 'endre') this.setState(y => ({ folk: y.folk.map(z => z.id === af.id ? { ...z, ...x } : z), modal: null }));
+        else { this.setState(y => ({ folk: [...y.folk, { ...x, id: 'n' + (SEQ++), status: 'invitert' }], modal: null })); this.vis(`Invitasjon sendt til ${x.kontakt}.`); } },
+
+      meg: { init: init(meg.navn), fornavn: meg.navn.split(' ')[0] },
+      harNeste: !!mineV.length, neste: mineV[0] ? { dag: `${DAG[mineV[0].d]} ${datoTxt(41, mineV[0].d)}`, tid: `${mineV[0].s}–${mineV[0].e}` } : { dag: '', tid: '' },
+      megTimer: fT(megSum), megAvtalt: megAv != null ? `av ${fT(megAv)} denne uka` : 'denne uka, timelønn',
+      aFaner: [['mine', 'Mine vakter', ''], ['ledige', 'Ledige', String(ledigeV.length || '')], ['tilg', 'Kan jobbe', '']].map(([k, t, n]) => ({ ...fane(k, t, s.aFane, kk => this.setState({ aFane: kk })), n })),
+      aMine: s.aFane === 'mine', aLedige: s.aFane === 'ledige', aTilg: s.aFane === 'tilg',
+      mine: mineV.map((v, i) => { const u = !!s.utlagt[v.id]; return { kort: KORT[v.d], nr: String(dt(41, v.d).getDate()), tid: `${v.s}–${v.e}`, sub: u ? 'Lagt ut. Venter på leder.' : fT(timer(v.s, v.e)), subFg: u ? '#8A6A00' : '#586174', sep: i ? '#EFEBE2' : 'transparent', knapp: u ? 'Angre' : 'Bytt bort',
+        on: () => { this.setState(x => { const m = { ...x.utlagt }; if (u) delete m[v.id]; else m[v.id] = true; return { utlagt: m }; }); if (!u) this.vis('Lederen har fått beskjed om at du vil bytte bort vakten.'); } }; }),
+      ingenMine: !mineV.length,
+      ledige: ledigeV.map((v, i) => { const meldt = (s.interesse[v.id] || []).includes(meg.id), ny = megSum + timer(v.s, v.e), t = tilgMeg[v.d];
+        const sub = meldt ? 'Du har meldt interesse' : ny > 40 ? 'Gir deg overtid' : (megAv != null && ny > megAv) ? `Mer enn stillingen din (${fT(ny)} totalt)` : `${fT(timer(v.s, v.e))}${t && t.t === 'u' ? ' · du har sagt at du ikke kan' : ''}`;
+        return { kort: KORT[v.d], nr: String(dt(41, v.d).getDate()), tid: `${v.s}–${v.e}`, sub, subFg: meldt ? '#1F7D52' : '#586174', sep: i ? '#EFEBE2' : 'transparent',
+          knapp: meldt ? 'Trekk meg' : 'Jeg tar den', bg: meldt ? '#fff' : '#0B2545', fg: meldt ? '#0B2545' : '#fff',
+          on: () => this.setState(x => { const l = x.interesse[v.id] || []; return { interesse: { ...x.interesse, [v.id]: meldt ? l.filter(y => y !== meg.id) : [...l, meg.id] } }; }) }; }),
+      ingenLedige: !ledigeV.length,
+      tilgRader: KORT.map((_, d) => { const t = tilgMeg[d], harVakt = mineV.some(v => v.d === d) && t && t.t === 'u';
+        return { dag: `${DAG[d]} ${datoTxt(41, d)}`, sep: d ? '#EFEBE2' : 'transparent', visGrunn: !!(t && t.t === 'u'), grunn: (t && t.g) || '', harVakt,
+          setGrunn: e => { const g = e.target.value; this.setState(x => ({ tilg: { ...x.tilg, [meg.id]: { ...(x.tilg[meg.id] || {}), [d]: { t: 'u', g } } } })); },
+          valg: [['a', 'Kan'], ['', 'Ikke satt'], ['u', 'Kan ikke']].map(([k, tt]) => { const på = (t ? t.t : '') === k; return { t: tt, bg: på ? (k === 'a' ? '#1F7D52' : k === 'u' ? '#8A2E1F' : '#fff') : 'transparent', fg: på && k ? '#fff' : '#0B2545', on: () => setTilg(d, k) }; }) }; }),
+      toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

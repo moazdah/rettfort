@@ -6,7 +6,12 @@ import { analyserUke, isoUke, ukeDager, plussDager, avtaltMin } from '@/lib/vakt
 import { loggUt } from '@/app/handlinger';
 import { VaktAnsattFlate } from './flate';
 
-export const metadata = { title: 'Vaktplan' };
+export const metadata = {
+  title: 'Vaktplan',
+  manifest: '/vakt.webmanifest',
+  appleWebApp: { capable: true, title: 'Rettført Vaktplan', statusBarStyle: 'default' as const },
+  icons: { apple: '/vakt-ikon-180.png' },
+};
 
 /** Den ansattes egen, enkle flate. Ser bare egne vakter, ledige vakter og når hen kan jobbe. */
 export default async function Vakt({ searchParams }: { searchParams: Promise<{ ugyldig?: string }> }) {
@@ -45,17 +50,18 @@ export default async function Vakt({ searchParams }: { searchParams: Promise<{ u
     const mine = alle.filter(x => x.ansattId === a.id && x.dato >= w[0] && x.dato <= w[6]);
     const for_ = analyserUke(mine, [meg]).perAnsatt.get(a.id)!;
     const etter = analyserUke([...mine, { ...v, ansattId: a.id }], [meg]).perAnsatt.get(a.id)!;
-    return { ...v, interessert: v.interesse.includes(a.id), overtid: etter.overtid > for_.overtid, merarbeid: etter.merarbeid > for_.merarbeid };
+    return { ...v, interessert: v.interesse.includes(a.id), overtid: etter.overtid > for_.overtid, merarbeid: etter.merarbeid > for_.merarbeid, totalEtter: etter.arbeid };
   });
   const fri = await d.q<{ dato: string; status: string }>(`select dato::text as dato, status from fri_foresporsel where ansatt_id = $1 and dato >= $2 order by opprettet desc`, [a.id, dag]);
   return (
     <div className="vakt-flate">
       <header className="vakt-topp">
         <Logo bredde={92} />
-        <div className="fyll"><b>Vaktplan</b><small>{s.org.navn}</small></div>
+        <span className="vakt-skille" aria-hidden />
+        <div className="fyll">Vaktplan · {s.org.navn}</div>
         <form action={loggUt}><button className="vakt-avatar" title="Logg ut" aria-label={`${a.navn}, logg ut`}>{a.navn.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase()}</button></form>
       </header>
-      <VaktAnsattFlate navn={a.navn} idag={dag} mine={alle.filter(v => v.ansattId === a.id && v.dato >= dag)} ledige={ledige}
+      <VaktAnsattFlate navn={a.navn} idag={dag} uke={u.uke} ukeFra={uka[0]} ukeTil={uka[6]} mine={alle.filter(v => v.ansattId === a.id && v.dato >= dag)} ledige={ledige}
         tilgj={tilgj.filter(x => x.ansattId === a.id)} fri={fri} ukeArbeid={ukeAnalyse.arbeid} avtalt={avtaltMin(meg)} />
     </div>
   );

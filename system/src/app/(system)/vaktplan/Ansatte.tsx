@@ -7,11 +7,12 @@ import { avtaltMin, timer, type VaktMal } from '@/lib/vaktplan';
 import { kr } from '@/lib/penger';
 import { lagreVaktAnsattHandling, inviterAnsattHandling, settOvertidHandling, lagreMalerHandling } from '@/app/vaktplan-handlinger';
 import { Kopier } from '@/components/Kopier';
+import { VpFaner, type Faner } from '@/components/VpFaner';
 
 const TILGANG: Record<string, [string, string]> = { ingen: ['Ikke invitert', ''], invitert: ['Invitert', 'gul'], aktiv: ['Logget inn', 'gronn'] };
 
 /** Ansatte i vaktplanen. Samme personer som i Lønn. */
-export function VaktAnsatte({ ansatte, maler, endre }: { ansatte: VaktAnsatt[]; maler: VaktMal[]; endre: boolean }) {
+export function VaktAnsatte({ faner, ansatte, maler, endre }: { faner: Faner; ansatte: VaktAnsatt[]; maler: VaktMal[]; endre: boolean }) {
   const router = useRouter();
   const [skjema, setSkjema] = useState<VaktAnsatt | 'ny' | null>(null);
   const [lenke, setLenke] = useState<{ navn: string; url: string; sendt: boolean } | null>(null);
@@ -30,8 +31,8 @@ export function VaktAnsatte({ ansatte, maler, endre }: { ansatte: VaktAnsatt[]; 
 
   return (
     <div className="stakk" style={{ gap: 18 }}>
-      <div className="rad" style={{ justifyContent: 'space-between' }}>
-        <p className="mut" style={{ margin: 0 }}>De samme ansatte som under Lønn. Timene fra vaktplanen går rett til lønnen.</p>
+      <div className="vp-topp">
+        <VpFaner f={faner} />
         {endre && <button type="button" className="knapp" onClick={() => setSkjema('ny')}>Legg til ansatt</button>}
       </div>
       {melding && <div className={`varsel ${melding.feil ? 'rod' : 'gronn'} liten`}>{melding.tekst}</div>}
@@ -52,14 +53,14 @@ export function VaktAnsatte({ ansatte, maler, endre }: { ansatte: VaktAnsatt[]; 
                 const [t, farge] = TILGANG[a.tilgang] ?? TILGANG.ingen;
                 return (
                   <tr key={a.id}>
-                    <td><b>{a.navn}</b><div className="mut liten">{[a.stilling, a.kontakt ?? a.epost].filter(Boolean).join(' · ') || 'Ingen kontaktinfo'}</div></td>
-                    <td className="mono liten">{a.lonnType === 'time' ? `${kr(a.timesats)} /t` : a.lonnType === 'provisjon' ? 'Provisjon' : `${kr(a.manedslonn, { desimaler: false })} /mnd`}</td>
-                    <td>{a.stillingsprosent} %</td>
-                    <td>{av ? timer(av) : <span className="mut">Timelønn</span>}</td>
+                    <td><span className="rad" style={{ gap: 12, flexWrap: 'nowrap' }}><span className="vp-avatar">{a.navn.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase()}</span><span><b>{a.navn}</b><span className="mut liten" style={{ display: 'block' }}>{[a.stilling, a.kontakt ?? a.epost].filter(Boolean).join(' · ') || 'Ingen kontaktinfo'}</span></span></span></td>
+                    <td data-l="Lønn">{a.lonnType === 'time' ? `Timelønn, ${kr(a.timesats, { desimaler: false })} kr` : a.lonnType === 'provisjon' ? 'Provisjon' : `Fast, ${kr(a.manedslonn, { desimaler: false })} kr/mnd`}</td>
+                    <td data-l="Stilling">{a.lonnType === 'time' ? 'Etter behov' : `${a.stillingsprosent} %`}</td>
+                    <td className="mono" data-l="Avtalt">{av ? timer(av) : '–'}</td>
                     <td><span className={`merke ${farge}`}>{t}</span></td>
                     <td style={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
-                      {endre && <button type="button" className="lenke liten" onClick={() => setSkjema(a)}>Endre</button>}
-                      {endre && (a.kontakt || a.epost) && <button type="button" className="knapp hvit liten" style={{ marginLeft: 8 }} disabled={!!opptatt} onClick={() => inviter(a)}>{opptatt === a.id ? '…' : a.tilgang === 'ingen' ? 'Inviter' : 'Send på nytt'}</button>}
+                      {endre && <button type="button" className="knapp hvit liten" onClick={() => setSkjema(a)}>Endre</button>}
+                      {endre && a.tilgang !== 'aktiv' && (a.kontakt || a.epost) && <button type="button" className="knapp liten" style={{ marginLeft: 6 }} disabled={!!opptatt} onClick={() => inviter(a)}>{opptatt === a.id ? '…' : a.tilgang === 'ingen' ? 'Inviter' : 'Send på nytt'}</button>}
                     </td>
                   </tr>
                 );
@@ -72,14 +73,17 @@ export function VaktAnsatte({ ansatte, maler, endre }: { ansatte: VaktAnsatt[]; 
       <div className="rutenett to">
         <section className="kort stakk">
           <h2>Overtid</h2>
-          <p className="mut liten" style={{ margin: 0 }}>Over 9 timer på en dag eller 40 timer i uka er overtid (arbeidsmiljøloven). Loven krever minst 40 % tillegg. Deltidsansatte som jobber mer enn stillingen, men under 40 timer, får merarbeid med vanlig sats.</p>
-          <div className="rad" style={{ gap: 6 }}>
-            {[40, 50, 100].map(p => <button key={p} type="button" disabled={!endre} className={`knapp liten ${overtid === p ? '' : 'hvit'}`} onClick={async () => { const r = await settOvertidHandling(p); setMelding(r.ok ? { tekst: `Overtidstillegget er ${p} %.` } : { tekst: r.feil, feil: true }); router.refresh(); }}>{p} %</button>)}
+          <p className="mut liten" style={{ margin: 0 }}>Timer over 9 per dag eller 40 per uke er overtid, med {overtid} % tillegg. Gjelder både faste og timelønnede.</p>
+          <p className="mut liten" style={{ margin: 0 }}>For deltid er timer over avtalt stilling merarbeid, med vanlig timelønn, helt til 40 timer.</p>
+          <div className="rad" style={{ gap: 10 }}>
+            <span className="mut liten">Tillegg</span>
+            <span className="faner liten">{[40, 50, 100].map(p => <button key={p} type="button" disabled={!endre} className={overtid === p ? 'aktiv' : ''} onClick={async () => { const r = await settOvertidHandling(p); setMelding(r.ok ? { tekst: `Overtidstillegget er ${p} %.` } : { tekst: r.feil, feil: true }); router.refresh(); }}>{p} %</button>)}</span>
           </div>
         </section>
         <section className="kort stakk">
           <h2>Timer går rett til lønn</h2>
-          <p className="mut liten" style={{ margin: 0 }}>Når uka er over, ligger timene fra vaktplanen klare under Lønn. Du godkjenner dem, og de blir med i neste lønnskjøring: timelønn ganges med timene, og overtid får tillegget over.</p>
+          <p className="mut liten" style={{ margin: 0 }}>Når en uke er over, blir vaktene til timelister under Lønn. Overtid og merarbeid regnes ut for deg. Du godkjenner før lønnen kjøres.</p>
+          <p className="mut liten" style={{ margin: 0 }}>De ansatte logger inn med en lenke på SMS eller e-post. De ser bare vaktplanen, ikke regnskapet.</p>
         </section>
       </div>
 
@@ -99,7 +103,7 @@ function Maler({ start, endre, onLagret }: { start: VaktMal[]; endre: boolean; o
       <h2>Vaktmaler</h2>
       <p className="mut liten" style={{ margin: 0 }}>Snarveiene du får når du lager en vakt.</p>
       {m.map((x, i) => (
-        <div key={i} className="rad" style={{ gap: 8, flexWrap: 'nowrap' }}>
+        <div key={i} className="vp-mal">
           <input className="inndata" value={x.navn} onChange={e => sett(i, 'navn', e.target.value)} aria-label="Navn på mal" disabled={!endre} />
           <input className="inndata mono" type="time" value={x.start} onChange={e => sett(i, 'start', e.target.value)} aria-label="Fra" disabled={!endre} />
           <input className="inndata mono" type="time" value={x.slutt} onChange={e => sett(i, 'slutt', e.target.value)} aria-label="Til" disabled={!endre} />

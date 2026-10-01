@@ -1,0 +1,13 @@
+{
+  "name": "Rettført Vaktplan",
+  "short_name": "Vaktplan",
+  "start_url": "/vakt",
+  "scope": "/vakt",
+  "display": "standalone",
+  "background_color": "#F4F1EA",
+  "theme_color": "#0B2545",
+  "icons": [
+    { "src": "/vakt-ikon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/vakt-ikon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
