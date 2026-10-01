@@ -1,36 +1,51 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { velgForslag } from '@/app/handlinger';
+import { velgForslag, sendPurringDirekte } from '@/app/handlinger';
+import { svarFriHandling, gjorLedigHandling, tildelHandling } from '@/app/vaktplan-handlinger';
 
-export interface Ventende { id: string; art: string; tittel: string; tekst: string; knapp: string; sperret?: string }
+/** En handling på Hjem: lenke til riktig side, eller en knapp som gjør det med en gang. */
+export type VenterHandling =
+  | { type: 'lenke'; href: string }
+  | { type: 'forslag'; id: string }
+  | { type: 'fri'; id: string }
+  | { type: 'bytte'; id: string }
+  | { type: 'tildel'; id: string; ansattId: string }
+  | { type: 'purring'; nr: number };
 
-/** Forslag fra assistenten som er satt på vent. Brukeren sender dem herfra når hen er klar. */
+export interface Ventende { id: string; merke: string; farge?: 'gul' | 'gronn' | 'rod' | ''; tekst: string; under?: string; knapp: string; handling: VenterHandling; sperret?: string; fjern?: string }
+
+/** Én samlet liste over det som venter: vaktplan, purringer, MVA, regninger og forslag fra assistenten. */
 export function VenterPaDeg({ rader }: { rader: Ventende[] }) {
   const router = useRouter();
   const [opptatt, setOpptatt] = useState('');
   const [melding, setMelding] = useState<{ tekst: string; feil?: boolean } | null>(null);
-  const velg = async (id: string, valg: 'utfor' | 'avbryt') => {
-    setOpptatt(id + valg); setMelding(null);
-    const r = await velgForslag(id, valg);
+  const kjor = async (r: Ventende, fjern = false) => {
+    const h = r.handling;
+    setOpptatt(r.id); setMelding(null);
+    const res = h.type === 'forslag' ? await velgForslag(h.id, fjern ? 'avbryt' : 'utfor')
+      : h.type === 'fri' ? await svarFriHandling(h.id, !fjern)
+      : h.type === 'bytte' ? await gjorLedigHandling(h.id)
+      : h.type === 'tildel' ? await tildelHandling(h.id, h.ansattId)
+      : h.type === 'purring' ? await sendPurringDirekte(h.nr) : null;
     setOpptatt('');
-    setMelding(r.ok ? { tekst: r.data!.melding } : { tekst: r.feil, feil: true });
+    if (res) setMelding(res.ok ? { tekst: (res.data as { melding?: string } | undefined)?.melding ?? res.melding ?? 'Gjort.' } : { tekst: res.feil, feil: true });
     router.refresh();
   };
   return (
     <section className="venter-pa-deg">
-      <div className="rad" style={{ justifyContent: 'space-between', marginBottom: 10 }}>
-        <h2>Venter på deg</h2>
-        <span className="mut liten">Satt på vent fra assistenten</span>
-      </div>
+      <h2 style={{ marginBottom: 10 }}>Venter på deg</h2>
       <div className="liste">
         {rader.map(r => (
           <div key={r.id} className="linje">
-            <span className="merke" style={{ minWidth: 72, justifyContent: 'center' }}>{r.tittel}</span>
-            <span className="fyll tittel">{r.tekst}{r.sperret && <small className="mut" style={{ display: 'block' }}>{r.sperret}</small>}</span>
-            <button type="button" className="knapp liten" disabled={!!opptatt || !!r.sperret} onClick={() => velg(r.id, 'utfor')}>{opptatt === r.id + 'utfor' ? '…' : r.knapp}</button>
-            <button type="button" className="lenke liten" disabled={!!opptatt} onClick={() => velg(r.id, 'avbryt')}>Fjern</button>
+            <span className={`merke ${r.farge ?? ''}`} style={{ minWidth: 76, justifyContent: 'center' }}>{r.merke}</span>
+            <span className="fyll tittel">{r.tekst}{(r.under || r.sperret) && <small className="mut" style={{ display: 'block' }}>{r.sperret ?? r.under}</small>}</span>
+            {r.handling.type === 'lenke'
+              ? <Link href={r.handling.href} className="knapp liten">{r.knapp}</Link>
+              : <button type="button" className="knapp liten" disabled={!!opptatt || !!r.sperret} onClick={() => kjor(r)}>{opptatt === r.id ? '…' : r.knapp}</button>}
+            {r.fjern && <button type="button" className="lenke liten" disabled={!!opptatt} onClick={() => kjor(r, true)}>{r.fjern}</button>}
           </div>
         ))}
       </div>

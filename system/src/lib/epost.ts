@@ -157,6 +157,16 @@ export const maler = {
       }),
     };
   },
+  /** Varsler fra vaktplanen: publisert uke, endret vakt, ledig vakt, svar på fri/bytte, og forespørsler til leder. */
+  vakt: (o: { navn: string | null; foretak: string; tittel: string; linjer: string[]; knappTekst: string; lenke: string }): Mal => ({
+    emne: `${o.tittel} · ${o.foretak}`,
+    tekst: `Hei${o.navn ? ` ${o.navn.split(' ')[0]}` : ''}!\n\n${o.linjer.join('\n')}\n\n${o.knappTekst}: ${o.lenke}`,
+    html: ramme({
+      tittel: o.tittel, forhandsvisning: o.linjer[0] ?? o.tittel,
+      innhold: avsnitt(`Hei${o.navn ? ` ${esc(o.navn.split(' ')[0])}` : ''}!`) + o.linjer.map(l => avsnitt(esc(l), 'margin:0 0 8px')).join('') + '<div style="height:10px"></div>' + knapp(o.knappTekst, o.lenke),
+      bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
+    }),
+  }),
   purring: (o: { nr: number; foretak: string; kunde: string; belop: string; forfall: string; kid: string | null; kontonr: string | null }): Mal => {
     const rad = (k: string, v: string, stor = false) => `<tr><td style="padding:10px 0;border-bottom:1px solid ${LINJE};font-size:14px;color:${MUT}">${k}</td><td align="right" style="padding:10px 0;border-bottom:1px solid ${LINJE};font-size:${stor ? 20 : 15}px;font-weight:${stor ? 700 : 600};color:${BLA};font-family:${stor ? FONT : "'SFMono-Regular',Menlo,Consolas,monospace"}">${esc(v)}</td></tr>`;
     return {

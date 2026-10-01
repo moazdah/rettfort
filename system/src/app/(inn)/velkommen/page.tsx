@@ -9,6 +9,7 @@ export const metadata = { title: 'Velkommen' };
 export default async function Velkommen({ searchParams }: { searchParams: Promise<{ kode?: string }> }) {
   const s = await sesjon();
   if (!s) redirect('/registrer?rolle=bedrift');
+  if (s.rolle === 'ansatt') redirect('/vakt');
   if (s.org && s.org.type === 'selskap') redirect('/hjem');
   const { kode } = await searchParams;
   const d = await db();

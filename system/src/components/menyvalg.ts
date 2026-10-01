@@ -6,6 +6,7 @@ export const MENY: { href: string; navn: string; ikon: string; aktivPa: string[]
   { href: '/salg/ny', navn: 'Penger inn', ikon: 'Inn', aktivPa: ['/salg'] },
   { href: '/bank', navn: 'Bank', ikon: 'Ba', aktivPa: ['/bank'] },
   { href: '/lonn', navn: 'Lønn', ikon: 'Lø', aktivPa: ['/lonn'] },
+  { href: '/vaktplan', navn: 'Vaktplan', ikon: 'Va', aktivPa: ['/vaktplan'] },
   { href: '/rapporter', navn: 'Rapporter', ikon: 'Ra', aktivPa: ['/rapporter'] },
   { href: '/mva', navn: 'MVA', ikon: 'Mv', aktivPa: ['/mva'] },
   { href: '/frister', navn: 'Frister', ikon: 'Fr', aktivPa: ['/frister'] },

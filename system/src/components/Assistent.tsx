@@ -21,7 +21,7 @@ const UTFOR = /^(ja[,!. ]*)?(godkjenn|godkjent|send( den| det| fakturaen| purrin
 const VENT = /^(sett (den |det )?på vent|vent|ikke ennå|senere)[.! ]*$/i;
 const AVBRYT = /^(avbryt|nei,? avbryt|glem det|slett (den|det))[.! ]*$/i;
 
-const TITTEL: Record<string, string> = { faktura: 'fakturaforslag', kostnad: 'kostnadsforslag', betaling: 'innbetaling', purring: 'purring', kreditnota: 'kreditnota', mva: 'MVA-melding', skannelenke: 'skannelenke på e-post', invitasjon: 'invitasjon', lonn: 'lønnskjøring', lonnslipp: 'lønnslipp på e-post', kunde: 'ny kunde' };
+const TITTEL: Record<string, string> = { faktura: 'fakturaforslag', kostnad: 'kostnadsforslag', betaling: 'innbetaling', purring: 'purring', kreditnota: 'kreditnota', mva: 'MVA-melding', skannelenke: 'skannelenke på e-post', invitasjon: 'invitasjon', lonn: 'lønnskjøring', lonnslipp: 'lønnslipp på e-post', kunde: 'ny kunde', vaktplan: 'utkast til vaktplan', tildel_vakt: 'tildeling av ledig vakt', publiser_uke: 'publisering av vaktplan' };
 const STATUSORD: Record<string, string> = { venter: 'venter på brukeren', utfort: 'utført', pa_vent: 'satt på vent', avbrutt: 'avbrutt' };
 const HUSK = 'rf-assistent';
 
@@ -76,12 +76,16 @@ export function Assistent() {
   const ko = useRef<Promise<unknown>>(Promise.resolve());
   const skalLagre = useRef(false);
   const startet = useRef(false);
+  const [venteSporsmal, setVenteSporsmal] = useState<string | null>(null);
 
   // Åpne/lukke fra knappen i toppmenyen og med ⌘K / Ctrl+K. Esc lukker.
   useEffect(() => {
-    const bytt = () => setApen(a => !a);
+    const bytt = (e: Event) => {
+      const q = (e as CustomEvent<{ sporsmal?: string } | string>).detail;
+      if (q && typeof q === 'object' && q.sporsmal) { setApen(true); setVisning('chat'); setVenteSporsmal(q.sporsmal); } else setApen(a => !a);
+    };
     const tast = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); bytt(); }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setApen(a => !a); }
       else if (e.key === 'Escape') setApen(false);
     };
     window.addEventListener('rf:assistent', bytt);
@@ -184,6 +188,9 @@ export function Assistent() {
     if (d.igjen !== undefined) setIgjen(d.igjen);
     endre(m => [...m, { fra: 'assistent', tekst: d.tekst, kort: d.kort, kilder: d.kilder, tid: naa() }]);
   };
+
+  // Spørsmål fra en knapp et annet sted i systemet (f.eks. «Lag forslag med assistenten» i vaktplanen).
+  useEffect(() => { if (venteSporsmal && !venter) { const q = venteSporsmal; setVenteSporsmal(null); spor(q); } }, [venteSporsmal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const nyttKort = (k: Kort) => endre(m => [...m, { fra: 'assistent', tekst: '', kort: [k], tid: naa() }]);
   const tilEndring = () => { setTekst('Endre: '); setTimeout(() => { const el = skrivefelt.current; if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }, 0); };

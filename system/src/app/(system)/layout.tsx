@@ -1,6 +1,7 @@
 import { Meny } from '@/components/Meny';
 import { Assistent } from '@/components/Assistent';
-import { harAssistent, erTestbruker } from '@/lib/pakker';
+import { harAssistent, erTestbruker, harVaktplan } from '@/lib/pakker';
+import { antallForesporsler } from '@/lib/tjenester/vaktplan';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { aktuellTermin, mvaStatus } from '@/lib/tjenester/mva';
 import { sendKlareIBakgrunnen } from '@/lib/tjenester/utsending';
@@ -17,6 +18,7 @@ export default async function SystemRamme({ children }: { children: React.ReactN
   } catch { /* telleren er ikke kritisk */ }
   await sendKlareIBakgrunnen().catch(() => {});
   const innboksTeller = await antallIInnboks(d, s.org.id).catch(() => 0);
+  const vaktTeller = harVaktplan(s.org.pakke) ? await antallForesporsler(d, s.org.id, idag()).catch(() => 0) : 0;
   const test = erTestbruker(s.bruker.epost);
   // Bare for administrator: hvilken språkmodell assistenten bruker. Kunder ser aldri dette.
   const ai = test ? { valgt: await valgtLeverandor(d).catch(() => 'kina' as const), eu: leverandorKlar('eu'), kina: leverandorKlar('kina') } : undefined;

@@ -15,6 +15,9 @@ import { lagLenke } from '../tjenester/innsending';
 import { kjorLonn, type LonnInput } from '../tjenester/lonn';
 import { planleggUtsending, sendForfalte, type SendNar } from '../tjenester/lonnslipp';
 import { randomBytes } from 'node:crypto';
+import { lagreForslagUke, tildel, merkTimerBrukt } from '../tjenester/vaktplan';
+import { varsleAnsatt, publiserOgVarsle, dagTekst } from '../tjenester/vaktvarsel';
+import { kortTid, type VaktInn } from '../vaktplan';
 
 export type Valg = 'utfor' | 'vent' | 'avbryt';
 
@@ -114,6 +117,7 @@ export async function utforForslag(db: Db, o: { orgId: string; brukerId: string;
     const r = await db.tx(async t => {
       const k = await kjorLonn(t, o.orgId, String(d.periode), String(d.utbetalingsdato), d.input as LonnInput[], o.brukerId);
       await planleggUtsending(t, k.id, send, String(d.utbetalingsdato));
+      await merkTimerBrukt(t, o.orgId, k.id, k.slipper.map(x => x.ansattId));
       return k;
     });
     const u = send === 'na' ? await sendForfalte(db, base, o.orgId) : { sendt: [], feilet: [] };
@@ -138,6 +142,22 @@ export async function utforForslag(db: Db, o: { orgId: string; brukerId: string;
     });
     await ferdig('utfort', { kontaktId: kid });
     return { melding: `${d.navn} er lagt til som kunde. Be meg lage fakturaen nå.`, status: 'utfort' };
+  }
+  if (f.art === 'vaktplan') {
+    const n = await db.tx(t => lagreForslagUke(t, o.orgId, Number(d.aar), Number(d.uke), d.vakter as VaktInn[]));
+    await ferdig('utfort', { antall: n });
+    return { melding: `Utkast for uke ${d.uke} er laget med ${n} vakter. Se over og trykk «Publiser og varsle» når du er fornøyd.`, lenke: `/vaktplan?uke=${d.aar}-${d.uke}`, status: 'utfort' };
+  }
+  if (f.art === 'tildel_vakt') {
+    const r = await db.tx(t => tildel(t, o.orgId, String(d.vaktId), String(d.ansattId)));
+    await varsleAnsatt(db, base, o.orgId, o.foretak, String(d.ansattId), 'Du fikk vakten', [`Du har fått vakten ${dagTekst(r.dato)} ${kortTid(r.start, r.slutt)}.`]);
+    await ferdig('utfort', {});
+    return { melding: `${d.navn} har fått vakten ${dagTekst(String(d.dato))} ${kortTid(String(d.start), String(d.slutt))}.`, lenke: `/vaktplan`, status: 'utfort' };
+  }
+  if (f.art === 'publiser_uke') {
+    const r = await publiserOgVarsle(db, base, o.orgId, o.foretak, Number(d.aar), Number(d.uke));
+    await ferdig('utfort', r);
+    return { melding: `Uke ${d.uke} er publisert. ${r.varslet} fikk e-post${r.uten ? `, ${r.uten} har ikke e-post` : ''}.`, lenke: `/vaktplan?uke=${d.aar}-${d.uke}`, status: 'utfort' };
   }
   throw new RegnskapsFeil('Ukjent forslag.');
 }

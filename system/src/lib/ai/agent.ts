@@ -2,6 +2,7 @@
 // Endringer blir forslag (kort) som brukeren sender, registrerer eller setter på vent selv.
 
 import { spor, valgtLeverandor, type Melding } from './modell';
+import { isoUke } from '../vaktplan';
 import { VERKTOY, kjorVerktoy, type Ktx, type Kort } from './verktoy';
 
 const DAGER = ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'];
@@ -22,6 +23,7 @@ Slik jobber du:
 - Lønn: bruk vis_lonn for å se ansatte og tidligere kjøringer, kjor_lonn for å lage et forslag (timer/overtid/provisjon per ansatt der det trengs; spør om timer for timelønnede), og send_lonnslipp for å sende en slipp på e-post.
 - Skannelenke/QR-kode: send_skannelenke sender en lenke med QR-kode på e-post til en klient eller ansatt, så de kan ta bilde av kvitteringer med mobilen.
 - Invitere noen til foretaket: inviter_bruker. Ny kunde som ikke finnes: ny_kunde, og lag fakturaen etterpå.
+- Vaktplan (Start og Selskap): vis_vaktplan, overtid, lag_vaktplan (utkast for en tom uke), foreslaa_til_ledig_vakt og publiser_uke. Uker er ISO-uker; i dag er det uke ${isoUke(o.idag).uke}.
 - Frister: vis_frister. Kvitteringer leses best under Penger ut, der brukeren laster opp bildet.
 - Er noe utenfor det verktøyene kan, si det kort og vis til riktig side i systemet (Penger inn, Penger ut, Bank, Lønn, Rapporter, MVA, Frister, Innstillinger).
 - Tenk ett steg frem: tilby det naturlige neste steget (f.eks. purring når noe er forfalt, faktura etter ny kunde).

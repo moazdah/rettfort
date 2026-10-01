@@ -11,11 +11,13 @@ import { formaterKontonr, manedNavn, nd } from '@/lib/vis';
 
 type A = AnsattData & { id: string };
 
-export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, orgnr, kanEndre, utlegg = [] }: { ansatte: A[]; periode: string; dato: string; ferie: number; agaSats: number; firma: string; orgnr: string | null; kanEndre: boolean; utlegg?: { ansattId: string; belop: number; tekst: string }[] }) {
+export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, orgnr, kanEndre, utlegg = [], fraVakt = {} }: { ansatte: A[]; periode: string; dato: string; ferie: number; agaSats: number; firma: string; orgnr: string | null; kanEndre: boolean; utlegg?: { ansattId: string; belop: number; tekst: string }[]; fraVakt?: Record<string, { timer: number; overtid: number; uker: number[] }> }) {
   const router = useRouter();
   const [valgt, setValgt] = useState(ansatte[0]?.id ?? '');
-  const [timer, setTimer] = useState<Record<string, string>>({});
-  const [overtid, setOvertid] = useState<Record<string, string>>({});
+  // Godkjente timer fra vaktplanen fylles inn: timelønn får timene, alle får overtiden.
+  const tekst = (n: number) => String(n).replace('.', ',');
+  const [timer, setTimer] = useState<Record<string, string>>(() => Object.fromEntries(ansatte.filter(a => a.lonn_type === 'time' && fraVakt[a.id]?.timer).map(a => [a.id, tekst(fraVakt[a.id].timer - fraVakt[a.id].overtid)])));
+  const [overtid, setOvertid] = useState<Record<string, string>>(() => Object.fromEntries(ansatte.filter(a => fraVakt[a.id]?.overtid).map(a => [a.id, tekst(fraVakt[a.id].overtid)])));
   const [salg, setSalg] = useState<Record<string, string>>({});
   const [tillegg, setTillegg] = useState<Record<string, { tekst: string; belop: string }[]>>({});
   const [utbetaling, setUtbetaling] = useState(dato);
@@ -93,6 +95,7 @@ export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, org
             <div className="rad" style={{ justifyContent: 'space-between' }}><h2>{a.navn}</h2>{kanEndre && <button type="button" className="knapp hvit liten" onClick={() => setEndre(true)}>Endre</button>}</div>
             <div className="rutenett to">
               {a.lonn_type === 'time' && <label className="felt"><span>Timer i {manedNavn(periode, false)}</span><input className="inndata mono" inputMode="decimal" value={timer[a.id] ?? ''} onChange={e => setTimer({ ...timer, [a.id]: e.target.value })} placeholder="0" /></label>}
+              {fraVakt[a.id] && <span className="hint">Fra vaktplanen, uke {fraVakt[a.id].uker.join(', ')}{fraVakt[a.id].overtid ? ` (${String(fraVakt[a.id].overtid).replace('.', ',')} t overtid)` : ''}.</span>}
               {a.lonn_type === 'provisjon' && <label className="felt"><span>Salg som gir provisjon (kr)</span><input className="inndata mono" inputMode="decimal" value={salg[a.id] ?? ''} onChange={e => setSalg({ ...salg, [a.id]: e.target.value })} placeholder="0,00" /><span className="hint">{String(a.provisjon_prosent ?? 0).replace('.', ',')} % gir {kr(Math.round(((tilOre(salg[a.id] ?? '') ?? 0) * (a.provisjon_prosent ?? 0)) / 100))} kr i provisjon.</span></label>}
               <label className="felt"><span>Overtidstimer</span><input className="inndata mono" inputMode="decimal" value={overtid[a.id] ?? ''} onChange={e => setOvertid({ ...overtid, [a.id]: e.target.value })} placeholder="0" /><span className="hint">{kr(Math.round(grunntimesats(a) * (1 + (a.overtid_prosent ?? 40) / 100)))} kr per time ({String(a.overtid_prosent ?? 40).replace('.', ',')} % tillegg).</span></label>
             </div>

@@ -9,6 +9,9 @@ import type { AnsattData } from './Ansatt';
 import { Utfylling } from '@/components/Utfylling';
 import { SendSlipp } from './SendSlipp';
 import { utleggTilLonn } from '@/lib/tjenester/innsending';
+import { ventendeTimelister, godkjenteTimer } from '@/lib/tjenester/vaktplan';
+import { harVaktplan } from '@/lib/pakker';
+import { Timelister } from './Timelister';
 
 export const metadata = { title: 'Lønn' };
 
@@ -19,6 +22,9 @@ export default async function Lonn({ searchParams }: { searchParams: Promise<{ v
   const sp = await searchParams;
   const o = await d.en<{ ferie_prosent: number; lonningsdag: number | null; otp: string | null; aga_sone: string; navn: string; orgnr: string | null; utlegg_tilbake: string | null }>('select ferie_prosent, lonningsdag, otp, aga_sone, navn, orgnr, utlegg_tilbake from organisasjon where id = $1', [s.org.id]);
   const utlegg = await utleggTilLonn(d, s.org.id);
+  const vakt = harVaktplan(s.org.pakke);
+  const timelister = vakt ? await ventendeTimelister(d, s.org.id, dag) : [];
+  const fraVakt = vakt ? await godkjenteTimer(d, s.org.id) : {};
   const ansatte = await d.q<AnsattData & { id: string }>(`select id, navn, epost, stilling, lonn_type, manedslonn, timesats, skatteprosent, kontonr, startdato::text as startdato, provisjon_prosent, overtid_prosent, stillingsprosent, faste_tillegg, slipp_passord_type from ansatt where organisasjon_id = $1 and aktiv order by navn`, [s.org.id]);
   const kjoringer = await d.q<{ periode: string; utbetalingsdato: string; brutto: number; skatt: number; netto: number; aga: number; feriepenger: number; nr: number | null }>(`select l.periode, l.utbetalingsdato::text as utbetalingsdato, l.brutto, l.skatt, l.netto, l.aga, l.feriepenger, b.nr from lonnskjoring l left join bilag b on b.id = l.bilag_id where l.organisasjon_id = $1 order by l.periode desc`, [s.org.id]);
   const kjort = new Set(kjoringer.map(k => k.periode));
@@ -48,7 +54,8 @@ export default async function Lonn({ searchParams }: { searchParams: Promise<{ v
         {!forste && <nav className="faner">{[['kjor', 'Kjør lønn'], ['historikk', 'Tidligere'], ['oppsett', 'Oppsett']].map(([k, t]) => <Link key={k} href={`/lonn?vis=${k}`} className={vis === k ? 'aktiv' : ''}>{t}</Link>)}</nav>}
       </div>
       {vis === 'oppsett' && <LonnOppsett forste={forste} start={{ ferie: o?.ferie_prosent ?? 10.2, lonningsdag: o?.lonningsdag ?? null, otp: o?.otp ?? null, agaSone: o?.aga_sone ?? '1', utleggTilbake: o?.utlegg_tilbake ?? null }} />}
-      {vis === 'kjor' && <LonnKjoring ansatte={ansatte} periode={periode} dato={dato} ferie={o?.ferie_prosent ?? 10.2} agaSats={agaSats} firma={o?.navn ?? ''} orgnr={o?.orgnr ?? null} kanEndre={kanEndre(s.rolle)} utlegg={utlegg.map(u => ({ ansattId: u.ansatt_id, belop: Number(u.belop), tekst: u.tekst }))} />}
+      {vis === 'kjor' && timelister.length > 0 && <Timelister lister={timelister} kanEndre={kanEndre(s.rolle)} />}
+      {vis === 'kjor' && <LonnKjoring fraVakt={fraVakt} ansatte={ansatte} periode={periode} dato={dato} ferie={o?.ferie_prosent ?? 10.2} agaSats={agaSats} firma={o?.navn ?? ''} orgnr={o?.orgnr ?? null} kanEndre={kanEndre(s.rolle)} utlegg={utlegg.map(u => ({ ansattId: u.ansatt_id, belop: Number(u.belop), tekst: u.tekst }))} />}
       {vis === 'historikk' && amKjoring && (
         <section className="kort stakk">
           <div className="rad" style={{ justifyContent: 'space-between' }}>

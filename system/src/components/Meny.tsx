@@ -13,7 +13,9 @@ export { MENY };
 const PAKKE: Record<string, string> = { gratis: 'Gratis', start: 'Start', selskap: 'Selskap', byra: 'Byrå' };
 const ROLLE: Record<string, string> = { eier: 'Eier', full: 'Full tilgang', les: 'Kan se', kvittering: 'Kvitteringer', regnskapsforer_full: 'Regnskapsfører', regnskapsforer_les: 'Regnskapsfører (se)' };
 // Valgene som står direkte i linjen. Resten ligger under «Mer».
-const HOVED = ['/hjem', '/kjop/ny', '/salg/ny', '/bank', '/lonn', '/rapporter', '/mva'];
+const HOVED = ['/hjem', '/kjop/ny', '/salg/ny', '/bank', '/lonn', '/vaktplan', '/rapporter', '/mva'];
+// «NY» ved Vaktplan de første 30 dagene etter lansering, når det ikke er noe å svare på.
+const VAKTPLAN_NY_TIL = '2026-11-01';
 
 /** Lukker en nedtrekksmeny ved klikk utenfor, Escape eller når siden byttes. */
 function useNedtrekk() {
@@ -31,7 +33,7 @@ function useNedtrekk() {
   return { apen, setApen, ref };
 }
 
-export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '', innboksTeller = 0, ai, assistent = false }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string; innboksTeller?: number; ai?: { valgt: 'kina' | 'eu'; kina: boolean; eu: boolean }; assistent?: boolean }) {
+export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '', innboksTeller = 0, ai, assistent = false, vaktTeller = 0, idag = '' }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string; innboksTeller?: number; ai?: { valgt: 'kina' | 'eu'; kina: boolean; eu: boolean }; assistent?: boolean; vaktTeller?: number; idag?: string }) {
   const sti = usePathname();
   const aktiv = (m: (typeof MENY)[number]) => m.aktivPa.some(p => sti === p || sti.startsWith(p + '/'));
   const initialer = bruker.split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
@@ -45,7 +47,9 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
   const { setApen: lukkProfil } = profil;
   useEffect(() => { lukkProfil(false); setLager(false); }, [orgId, lukkProfil]);
   const teller = (m: (typeof MENY)[number]) => m.href === '/mva' && mvaTeller > 0 ? <span className="teller" aria-label={`${mvaTeller} ting mangler`}>{mvaTeller}</span>
-    : m.href === '/kjop/ny' && innboksTeller > 0 ? <span className="teller" aria-label={`${innboksTeller} i innboksen`}>{innboksTeller}</span> : null;
+    : m.href === '/kjop/ny' && innboksTeller > 0 ? <span className="teller" aria-label={`${innboksTeller} i innboksen`}>{innboksTeller}</span>
+    : m.href === '/vaktplan' && vaktTeller > 0 ? <span className="teller" aria-label={`${vaktTeller} venter på svar`}>{vaktTeller}</span>
+    : m.href === '/vaktplan' && idag && idag < VAKTPLAN_NY_TIL ? <span className="teller ny">NY</span> : null;
 
   return (
     <>
@@ -109,7 +113,7 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
         </div>
       </header>
       <nav className="mobilmeny" aria-label="Meny">
-        {[MENY[0], MENY[1], MENY[2], MENY[6]].map(m => (
+        {['/hjem', '/kjop/ny', '/salg/ny', '/mva'].map(h => MENY.find(m => m.href === h)!).map(m => (
           <Link key={m.href} href={m.href} className={aktiv(m) ? 'aktiv' : ''}><span className="ikon">{m.ikon}</span>{m.navn}{m.href === '/mva' && mvaTeller > 0 ? ` (${mvaTeller})` : m.href === '/kjop/ny' && innboksTeller > 0 ? ` (${innboksTeller})` : ''}</Link>
         ))}
         <Link href="/meny" className={sti === '/meny' ? 'aktiv' : ''}><span className="ikon">···</span>Mer</Link>

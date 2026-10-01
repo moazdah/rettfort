@@ -206,6 +206,42 @@ describe('nye verktøy: lønn, skannelenke, invitasjon, kunde, frister', () => {
   });
 });
 
+describe('vaktplan i assistenten', () => {
+  it('bare i betalte pakker, og lager utkast, foreslår til ledig vakt og publiserer', async () => {
+    await db.q(`update organisasjon set pakke = 'gratis' where id = $1`, [org]);
+    expect(String(((await kjorVerktoy(k, 'vis_vaktplan', {})).svar as { feil: string }).feil)).toMatch(/Start og Selskap/);
+    await db.q(`update organisasjon set pakke = 'start' where id = $1`, [org]);
+    const V = await import('@/lib/tjenester/vaktplan');
+    const a1 = await V.lagreVaktAnsatt(db, org, { navn: 'Vera Vakt', kontakt: 'vera@example.com', lonnType: 'fast', stillingsprosent: 100, sats: 4000000 });
+    const a2 = await V.lagreVaktAnsatt(db, org, { navn: 'Tor Time', kontakt: 'tor@example.com', lonnType: 'time', stillingsprosent: 50, sats: 22000 });
+    await V.inviterAnsatt(db, org, a1); await V.inviterAnsatt(db, org, a2);
+    // Uke 40 (forrige) har vakter; assistenten bygger uke 41 på dem.
+    await V.lagreVakt(db, org, { ansattId: a1, dato: '2026-09-28', start: '07:00', slutt: '15:00' });
+    await V.lagreVakt(db, org, { ansattId: a2, dato: '2026-09-29', start: '10:00', slutt: '18:00' });
+    const f = forslag(await kjorVerktoy(k, 'lag_vaktplan', { uke: 41, aar: 2026 }));
+    expect((f.data as { vakter: unknown[] }).vakter).toHaveLength(2);
+    expect((await utforForslag(db, o(), f.id, 'utfor')).melding).toMatch(/Utkast for uke 41 er laget med 2 vakter/);
+    expect((await kjorVerktoy(k, 'lag_vaktplan', { uke: 41, aar: 2026 })).svar).toHaveProperty('feil');
+
+    const v = await kjorVerktoy(k, 'vis_vaktplan', { uke: 41, aar: 2026 });
+    expect((v.svar as { status: string }).status).toBe('utkast');
+    // Gjør tirsdagens vakt ledig, la Vera melde interesse, og be om forslag.
+    const tirsdag = (await V.vakterMellom(db, org, '2026-10-06', '2026-10-06'))[0];
+    await V.gjorLedig(db, org, tirsdag.id);
+    await V.settInteresse(db, org, a1, tirsdag.id, true);
+    const t = forslag(await kjorVerktoy(k, 'foreslaa_til_ledig_vakt', { dato: '2026-10-06' }));
+    expect((t.data as { navn: string; interessert: boolean })).toMatchObject({ navn: 'Vera Vakt', interessert: true });
+    await utforForslag(db, { ...o(), grunnadresse: 'https://min.test' }, t.id, 'utfor');
+    expect((await V.vakterMellom(db, org, '2026-10-06', '2026-10-06'))[0].ansattId).toBe(a1);
+
+    const p = forslag(await kjorVerktoy(k, 'publiser_uke', { uke: 41, aar: 2026 }));
+    const r = await utforForslag(db, { ...o(), grunnadresse: 'https://min.test' }, p.id, 'utfor');
+    expect(r.melding).toMatch(/Uke 41 er publisert\. 1 fikk e-post/);
+    expect((await kjorVerktoy(k, 'publiser_uke', { uke: 41, aar: 2026 })).svar).toHaveProperty('info');
+    expect((await kjorVerktoy(k, 'overtid', { uke: 41, aar: 2026 })).svar).toHaveProperty('ansatte');
+  });
+});
+
 describe('tidligere samtaler', () => {
   it('lagres per bruker, kan søkes i og får oppdatert status på forslag', async () => {
     const { lagreSamtale, listSamtaler, hentSamtale } = await import('@/lib/ai/samtale');

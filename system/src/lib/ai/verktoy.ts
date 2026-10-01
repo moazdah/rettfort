@@ -14,6 +14,9 @@ import { foreslaKonto, konto as finnKonto, kontoType } from '../kontoplan';
 import { splittBrutto } from '../penger';
 import { forhandsvisLonn, type LonnInput } from '../tjenester/lonn';
 import { nesteFrister } from '../tjenester/oversikt';
+import { hentUke, forslagUke, vakterMellom, vaktAnsatte, tilgjengelighet, godkjenteTimer } from '../tjenester/vaktplan';
+import { isoUke, ukeDager, advarsler as vaktAdvarsler, kortTid, timer as tTimer } from '../vaktplan';
+import { harVaktplan } from '../pakker';
 
 export interface Ktx { db: Db; orgId: string; brukerId: string; idag: string; kanEndre: boolean }
 
@@ -23,10 +26,11 @@ export type Kort =
   | { type: 'tabell_fakturaer'; tittel: string; rader: { id: string; nr: number; kunde: string; forfall: string | null; rest: number; forfalt: boolean }[] }
   | { type: 'liste'; tittel: string; rader: { navn: string; belop: number; tekst?: string; lenke?: string }[] };
 
-export type Art = 'faktura' | 'kostnad' | 'betaling' | 'purring' | 'kreditnota' | 'mva' | 'skannelenke' | 'invitasjon' | 'lonn' | 'lonnslipp' | 'kunde';
+export type Art = 'faktura' | 'kostnad' | 'betaling' | 'purring' | 'kreditnota' | 'mva' | 'skannelenke' | 'invitasjon' | 'lonn' | 'lonnslipp' | 'kunde' | 'vaktplan' | 'tildel_vakt' | 'publiser_uke';
 
 const tall = (v: unknown, navn: string) => { const n = Number(v); if (!Number.isFinite(n)) throw new RegnskapsFeil(`Mangler ${navn}.`); return n; };
 const ore = (kr: unknown, navn: string) => Math.round(tall(kr, navn) * 100);
+const dato_ = (v: unknown) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
 const dato = (v: unknown, std: string) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : std);
 
 export const VERKTOY: Verktoy[] = [
@@ -60,9 +64,14 @@ export const VERKTOY: Verktoy[] = [
   { type: 'function', function: { name: 'inviter_bruker', description: 'Forslag om å invitere noen til foretaket. rolle: full (kan føre), les (kan se), kvittering (kan bare levere kvitteringer).', parameters: { type: 'object', properties: { epost: { type: 'string' }, rolle: { type: 'string', enum: ['full', 'les', 'kvittering'] } }, required: ['epost', 'rolle'] } } },
   { type: 'function', function: { name: 'ny_kunde', description: 'Forslag om å legge til en ny kunde. Bruk når sok_kunde ikke finner kunden og brukeren vil fakturere den.', parameters: { type: 'object', properties: { navn: { type: 'string' }, epost: { type: 'string' }, adresse: { type: 'string' }, postnr: { type: 'string' }, poststed: { type: 'string' }, orgnr: { type: 'string' } }, required: ['navn'] } } },
   { type: 'function', function: { name: 'vis_frister', description: 'De neste fristene (MVA, a-melding, skattetrekk, årsoppgjør) med dato.', parameters: { type: 'object', properties: {} } } },
+  { type: 'function', function: { name: 'vis_vaktplan', description: 'Vaktplanen for en uke: hvem som jobber når, ledige vakter, timer, overtid og merarbeid per ansatt, og om uka er publisert.', parameters: { type: 'object', properties: { uke: { type: 'integer', description: 'Ukenummer, standard denne uka' }, aar: { type: 'integer' } } } } },
+  { type: 'function', function: { name: 'lag_vaktplan', description: 'Lager et utkast til vaktplan for en tom uke ut fra forrige uke og når de ansatte kan jobbe, og unngår overtid. Brukeren ser utkastet og trykker Lag utkast.', parameters: { type: 'object', properties: { uke: { type: 'integer' }, aar: { type: 'integer' } }, required: ['uke'] } } },
+  { type: 'function', function: { name: 'foreslaa_til_ledig_vakt', description: 'Finner hvem som bør ta en ledig vakt en dag (de som har meldt interesse først, så de som ikke får overtid eller merarbeid). Lager et forslag med «Gi til X».', parameters: { type: 'object', properties: { dato: { type: 'string', description: 'ÅÅÅÅ-MM-DD' }, start: { type: 'string', description: 'HH:MM, valgfritt hvis det er flere ledige den dagen' } }, required: ['dato'] } } },
+  { type: 'function', function: { name: 'overtid', description: 'Overtid og merarbeid per ansatt i en uke.', parameters: { type: 'object', properties: { uke: { type: 'integer' }, aar: { type: 'integer' } } } } },
+  { type: 'function', function: { name: 'publiser_uke', description: 'Forslag om å publisere vaktplanen for en uke og varsle de ansatte på e-post. Krever at brukeren bekrefter.', parameters: { type: 'object', properties: { uke: { type: 'integer' }, aar: { type: 'integer' } }, required: ['uke'] } } },
 ];
 
-const ENDRER = new Set(['lag_faktura', 'registrer_kostnad', 'registrer_innbetaling', 'send_purring', 'lag_kreditnota', 'kjor_lonn', 'send_lonnslipp', 'send_skannelenke', 'inviter_bruker', 'ny_kunde']);
+const ENDRER = new Set(['lag_faktura', 'registrer_kostnad', 'registrer_innbetaling', 'send_purring', 'lag_kreditnota', 'kjor_lonn', 'send_lonnslipp', 'send_skannelenke', 'inviter_bruker', 'ny_kunde', 'lag_vaktplan', 'foreslaa_til_ledig_vakt', 'publiser_uke']);
 
 async function lagreForslag(k: Ktx, art: Art, data: Record<string, unknown>): Promise<Kort> {
   const r = await k.db.en<{ id: string }>('insert into ai_forslag (organisasjon_id, bruker_id, art, data) values ($1,$2,$3,$4) returning id', [k.orgId, k.brukerId, art, JSON.stringify(data)]);
@@ -201,6 +210,13 @@ export async function kjorVerktoy(k: Ktx, navn: string, a: Record<string, unknow
         if (treff.length !== 1) return { svar: { feil: treff.length ? `Flere ansatte heter «${x.navn}». Bruk fullt navn.` : `Fant ingen ansatt som heter «${x.navn}».` } };
         inn.push({ ansattId: treff[0].id, timer: x.timer != null ? Number(x.timer) : undefined, overtidTimer: x.overtid_timer != null ? Number(x.overtid_timer) : undefined, provisjonGrunnlag: x.provisjon_grunnlag_kr != null ? ore(x.provisjon_grunnlag_kr, 'provisjonsgrunnlag') : undefined });
       }
+      // Godkjente timer fra vaktplanen brukes når brukeren ikke har oppgitt noe selv.
+      const fraVakt = await godkjenteTimer(k.db, k.orgId);
+      for (const [id, v] of Object.entries(fraVakt)) {
+        if (inn.some(x => x.ansattId === id)) continue;
+        const an = await k.db.en<{ lonn_type: string }>('select lonn_type from ansatt where id = $1', [id]);
+        inn.push({ ansattId: id, timer: an?.lonn_type === 'time' ? Math.max(0, v.timer - v.overtid) : undefined, overtidTimer: v.overtid || undefined });
+      }
       const slipper = (await forhandsvisLonn(k.db, k.orgId, inn)).filter(x => x.brutto > 0);
       if (!slipper.length) return { svar: { feil: 'Ingen har lønn med disse tallene. Timelønnede trenger timer.' } };
       const org = await k.db.en<{ lonningsdag: number | null }>('select lonningsdag from organisasjon where id = $1', [k.orgId]);
@@ -265,6 +281,52 @@ export async function kjorVerktoy(k: Ktx, navn: string, a: Record<string, unknow
     case 'vis_frister': {
       const f = (await nesteFrister(k.db, k.orgId, k.idag, 6)).slice(0, 8);
       return { svar: { frister: f.map(x => ({ dato: x.dato, tittel: x.tittel, beskrivelse: x.beskrivelse })) }, kort: { type: 'liste', tittel: 'Neste frister', rader: f.map(x => ({ navn: x.tittel, belop: 0, tekst: x.dato.split('-').reverse().join('.'), lenke: '/frister' })) } };
+    }
+    case 'vis_vaktplan': case 'lag_vaktplan': case 'foreslaa_til_ledig_vakt': case 'overtid': case 'publiser_uke': {
+      const pakke = (await k.db.en<{ pakke: string }>('select pakke from organisasjon where id = $1', [k.orgId]))?.pakke ?? 'gratis';
+      if (!harVaktplan(pakke)) return { svar: { feil: 'Vaktplan er med i Start og Selskap. Brukeren kan oppgradere under Innstillinger → Abonnement.' } };
+      const naa = isoUke(k.idag);
+      const uke = Number(a.uke) >= 1 && Number(a.uke) <= 53 ? Number(a.uke) : naa.uke;
+      const aar = Number(a.aar) > 2000 ? Number(a.aar) : uke < naa.uke - 26 ? naa.aar + 1 : naa.aar;
+      if (navn === 'vis_vaktplan' || navn === 'overtid') {
+        const u = await hentUke(k.db, k.orgId, aar, uke);
+        const per = u.ansatte.map(x => ({ navn: x.navn, timer: tTimer(u.perAnsatt[x.id]?.arbeid ?? 0), avtalt: u.perAnsatt[x.id]?.avtalt ? tTimer(u.perAnsatt[x.id].avtalt!) : 'timelønn', overtid: tTimer(u.perAnsatt[x.id]?.overtid ?? 0), merarbeid: tTimer(u.perAnsatt[x.id]?.merarbeid ?? 0) }));
+        if (navn === 'overtid') return { svar: { uke, aar, ansatte: per.filter(x => x.overtid !== '0 t' || x.merarbeid !== '0 t'), merk: 'Overtid: over 9 t/dag eller 40 t/uke. Merarbeid: deltid over avtalt, under 40 t.' } };
+        const vakter = u.vakter.map(v => ({ dag: v.dato, tid: kortTid(v.start, v.slutt), hvem: u.ansatte.find(x => x.id === v.ansattId)?.navn ?? 'LEDIG', vil_bytte: v.utlagt, interesserte: v.interesse.length }));
+        return { svar: { uke, aar, status: u.status, vakter, per_ansatt: per }, kort: { type: 'liste', tittel: `Vaktplan uke ${uke}`, rader: u.ansatte.map(x => ({ navn: x.navn, belop: 0, tekst: `${tTimer(u.perAnsatt[x.id]?.arbeid ?? 0)}${u.perAnsatt[x.id]?.overtid ? ` · ${tTimer(u.perAnsatt[x.id].overtid)} overtid` : ''}`, lenke: `/vaktplan?uke=${aar}-${uke}` })) } };
+      }
+      if (navn === 'lag_vaktplan') {
+        const f = await forslagUke(k.db, k.orgId, aar, uke);
+        if (f.finnes) return { svar: { feil: `Uke ${uke} har allerede ${f.finnes} vakter. Endre dem under Vaktplan, eller velg en tom uke.` } };
+        if (!f.vakter.length) return { svar: { feil: `Forrige uke (uke ${uke - 1 || 52}) har ingen vakter å bygge på. Legg inn noen vakter først, eller kopier en annen uke under Vaktplan.` } };
+        const kort = await lagreForslag(k, 'vaktplan', f as unknown as Record<string, unknown>);
+        return { svar: { forslag: 'vaktplan', uke, vakter: f.vakter.length, ledige: f.ledige, overtid_timer: f.overtidMin / 60, hensyn: f.hensyn, merk: 'Kortet vises med Lag utkast / Sett på vent. Utkastet publiseres ikke før brukeren gjør det.' }, kort };
+      }
+      if (navn === 'foreslaa_til_ledig_vakt') {
+        const dato = dato_(a.dato);
+        if (!dato) return { svar: { feil: 'Trenger datoen (ÅÅÅÅ-MM-DD).' } };
+        const d = ukeDager(isoUke(dato).aar, isoUke(dato).uke);
+        const [alle, ansatte, tilgj] = await Promise.all([vakterMellom(k.db, k.orgId, d[0], d[6]), vaktAnsatte(k.db, k.orgId), tilgjengelighet(k.db, k.orgId, dato, dato)]);
+        const ledige = alle.filter(v => v.dato === dato && (!v.ansattId || v.utlagt) && (!a.start || v.start === String(a.start).slice(0, 5)));
+        if (!ledige.length) return { svar: { feil: `Ingen ledige vakter ${dato}${a.start ? ` kl. ${a.start}` : ''}.` } };
+        if (ledige.length > 1 && !a.start) return { svar: { flere: ledige.map(v => kortTid(v.start, v.slutt)), merk: 'Spør hvilken vakt.' } };
+        const v = ledige[0];
+        const kandidater = ansatte.filter(x => x.id !== v.ansattId).map(x => {
+          const w = vaktAdvarsler({ ansattId: x.id, dato, start: v.start, slutt: v.slutt }, alle.filter(y => y.id !== v.id), x, tilgj);
+          const t = tilgj.find(y => y.ansattId === x.id);
+          const timerUka = alle.filter(y => y.ansattId === x.id).length;
+          const poeng = (v.interesse.includes(x.id) ? 100 : 0) + (t?.status === 'kan' ? 20 : 0) - (t?.status === 'kan_ikke' ? 200 : 0) - (w.some(z => /allerede/.test(z)) ? 150 : 0) - (w.some(z => /overtid/.test(z)) ? 60 : 0) - (w.some(z => /merarbeid/.test(z)) ? 15 : 0) - timerUka;
+          return { id: x.id, navn: x.navn, interessert: v.interesse.includes(x.id), merknad: w.join(' ') || null, poeng };
+        }).filter(x => x.poeng > -150).sort((p, q) => q.poeng - p.poeng);
+        if (!kandidater.length) return { svar: { feil: 'Ingen kan ta vakten uten å ha sagt nei eller allerede ha vakt den dagen.' } };
+        const kort = await lagreForslag(k, 'tildel_vakt', { vaktId: v.id, dato, start: v.start, slutt: v.slutt, ansattId: kandidater[0].id, navn: kandidater[0].navn, merknad: kandidater[0].merknad, interessert: kandidater[0].interessert, alternativer: kandidater.slice(1, 4).map(x => ({ navn: x.navn, merknad: x.merknad, interessert: x.interessert })) });
+        return { svar: { forslag: 'tildel_vakt', beste: kandidater[0], andre: kandidater.slice(1, 4) }, kort };
+      }
+      const u = await hentUke(k.db, k.orgId, aar, uke);
+      if (!u.vakter.some(v => v.ansattId)) return { svar: { feil: `Uke ${uke} har ingen vakter å publisere.` } };
+      if (u.status === 'publisert') return { svar: { info: `Uke ${uke} er allerede publisert, og ingenting er endret siden.` } };
+      const kort = await lagreForslag(k, 'publiser_uke', { aar, uke, status: u.status, vakter: u.vakter.length, ledige: u.vakter.filter(v => !v.ansattId).length, ansatte: u.ansatte.filter(x => u.vakter.some(v => v.ansattId === x.id)).map(x => x.navn) });
+      return { svar: { forslag: 'publiser_uke', uke, merk: 'Kortet vises med Publiser og varsle.' }, kort };
     }
     case 'mva_status': {
       const org = await hentOrg(k.db, k.orgId);

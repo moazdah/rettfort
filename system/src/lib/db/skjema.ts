@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 11;
+export const SKJEMA_VERSJON = 12;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -446,6 +446,30 @@ create table if not exists ai_samtale (id uuid primary key default gen_random_uu
 create index if not exists ai_samtale_bruker on ai_samtale (organisasjon_id, bruker_id, oppdatert desc);
 alter table organisasjon add column if not exists slettes_etter date;
 alter table bruker add column if not exists slettet timestamptz;
+-- Vaktplan (v12). Ansatte er de samme som i Lønn. Vaktplanen har ingen posteringer.
+alter table medlemskap drop constraint if exists medlemskap_rolle_check;
+alter table medlemskap add constraint medlemskap_rolle_check check (rolle in ('eier','full','les','kvittering','regnskapsforer_full','regnskapsforer_les','ansatt'));
+alter table ansatt add column if not exists bruker_id uuid references bruker(id) on delete set null;
+alter table ansatt add column if not exists tilgang text not null default 'ingen' check (tilgang in ('ingen','invitert','aktiv'));
+alter table ansatt add column if not exists kontakt text;
+create table if not exists vakt_lenke (token_hash text primary key, ansatt_id uuid not null references ansatt(id) on delete cascade, opprettet timestamptz not null default now());
+alter table organisasjon add column if not exists vakt_maler jsonb;
+alter table organisasjon add column if not exists vakt_varslet timestamptz;
+create table if not exists vakt (
+  id uuid primary key default gen_random_uuid(),
+  organisasjon_id uuid not null references organisasjon(id) on delete cascade,
+  ansatt_id uuid references ansatt(id) on delete set null,
+  dato date not null, start time not null, slutt time not null,
+  pause_min int not null default 30,
+  utlagt boolean not null default false,
+  opprettet timestamptz not null default now()
+);
+create index if not exists vakt_org_dato on vakt (organisasjon_id, dato);
+create table if not exists vakt_interesse (vakt_id uuid not null references vakt(id) on delete cascade, ansatt_id uuid not null references ansatt(id) on delete cascade, tid timestamptz not null default now(), primary key (vakt_id, ansatt_id));
+create table if not exists tilgjengelighet (organisasjon_id uuid not null references organisasjon(id) on delete cascade, ansatt_id uuid not null references ansatt(id) on delete cascade, dato date not null, status text not null check (status in ('kan','kan_ikke')), grunn text, primary key (ansatt_id, dato));
+create table if not exists fri_foresporsel (id uuid primary key default gen_random_uuid(), organisasjon_id uuid not null references organisasjon(id) on delete cascade, ansatt_id uuid not null references ansatt(id) on delete cascade, dato date not null, grunn text, status text not null default 'venter' check (status in ('venter','godkjent','avslatt')), opprettet timestamptz not null default now());
+create table if not exists vaktuke (organisasjon_id uuid not null references organisasjon(id) on delete cascade, aar int not null, uke int not null, status text not null default 'utkast' check (status in ('utkast','publisert','endret')), publisert timestamptz, berorte jsonb not null default '[]', primary key (organisasjon_id, aar, uke));
+create table if not exists timeliste (organisasjon_id uuid not null references organisasjon(id) on delete cascade, ansatt_id uuid not null references ansatt(id) on delete cascade, aar int not null, uke int not null, arbeid_min int not null, overtid_min int not null default 0, status text not null default 'godkjent' check (status in ('godkjent','brukt')), lonnskjoring_id uuid references lonnskjoring(id) on delete set null, godkjent timestamptz not null default now(), primary key (ansatt_id, aar, uke));
 
 -- Supabase gir tilgang til tabellene i «public» gjennom sitt eget API med en offentlig nøkkel.
 -- Systemet bruker ikke det API-et, så all slik tilgang stenges: radsikkerhet uten regler, og ingen rettigheter

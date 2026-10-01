@@ -1,6 +1,8 @@
 // Eksempeldata for testmodus (når databasen ikke er koblet til). Kjøres bare i PGlite.
 // Innlogging: demo@rettfort.no / rettfort-demo (bedrift) og regnskap@rettfort.no / rettfort-demo (byrå).
 
+import { lagreVaktAnsatt, lagreVakt, publiser, vakterMellom, settInteresse, settTilgjengelig } from '../tjenester/vaktplan';
+import { ukeDager } from '../vaktplan';
 import type { Db } from './index';
 import { hashPassord } from '../auth';
 import { bokfor } from '../tjenester/bokforing';
@@ -61,6 +63,23 @@ export async function seedDemo(db: Db): Promise<void> {
   await db.q(`insert into ansatt (organisasjon_id, navn, epost, stilling, lonn_type, manedslonn, skatteprosent, kontonr, startdato) values ($1, 'Sara Havøy', 'sara@havoyfisk.no', 'Daglig leder', 'fast', 4500000, 32, '15063344556', '2024-01-01'), ($1, 'Ola Nilsen', 'ola@havoyfisk.no', 'Fisker', 'time', 0, 28, '15064455667', '2025-05-01')`, [org]);
   const ola = (await db.en<{ id: string }>(`select id from ansatt where navn = 'Ola Nilsen' and organisasjon_id = $1`, [org]))!.id;
   for (const m of mnd) await db.tx(t => kjorLonn(t, org, `2026-${m}`, `2026-${m}-25`, [{ ansattId: ola, timer: 120 + Number(m) * 3 }]));
+
+  // Vaktplan: uke 40 og 41 med en ledig vakt noen vil ta og en forespørsel om fri.
+  const jonas = await lagreVaktAnsatt(db, org, { navn: 'Jonas Berg', kontakt: 'jonas@havoyfisk.no', stilling: 'Butikkmedarbeider', lonnType: 'fast', stillingsprosent: 60, sats: 2700000 });
+  const sara = (await db.en<{ id: string }>(`select id from ansatt where navn = 'Sara Havøy' and organisasjon_id = $1`, [org]))!.id;
+  await db.q(`update ansatt set kontakt = epost where organisasjon_id = $1 and kontakt is null`, [org]);
+  for (const uke of [40, 41]) {
+    const d = ukeDager(2026, uke);
+    for (const i of [0, 1, 2, 3, 4]) await lagreVakt(db, org, { ansattId: sara, dato: d[i], start: '07:00', slutt: '15:00' });
+    for (const i of [0, 2, 4]) await lagreVakt(db, org, { ansattId: jonas, dato: d[i], start: '13:00', slutt: '21:00' });
+    for (const i of [1, 3]) await lagreVakt(db, org, { ansattId: ola, dato: d[i], start: '10:00', slutt: '18:00' });
+    await lagreVakt(db, org, { ansattId: uke === 41 ? null : ola, dato: d[5], start: '10:00', slutt: '16:00' });
+    await publiser(db, org, 2026, uke);
+  }
+  const lordag = (await vakterMellom(db, org, '2026-10-10', '2026-10-10')).find(v => !v.ansattId);
+  if (lordag) await settInteresse(db, org, ola, lordag.id, true);
+  await settTilgjengelig(db, org, jonas, '2026-10-09', 'kan_ikke', 'Tannlege');
+  await settTilgjengelig(db, org, ola, '2026-10-06', 'kan');
 
   // Terminene januar–august er sendt
   for (const d of ['2026-01-15', '2026-03-15', '2026-05-15']) {

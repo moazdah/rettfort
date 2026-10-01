@@ -12,15 +12,18 @@ import { kr } from '@/lib/penger';
 const nd = (d?: string | null) => (d ? d.split('-').reverse().join('.') : '');
 const MND = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
 const MND_LANG = ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'];
+const DAGK = ['søn', 'man', 'tir', 'ons', 'tor', 'fre', 'lør'];
+const dagKort = (d: string) => { const x = new Date(`${d}T12:00:00Z`); return `${DAGK[x.getUTCDay()]} ${x.getUTCDate()}.${x.getUTCMonth() + 1}.`; };
+const tidKort = (a: string, b: string) => { const k = (t: string) => (t.slice(3, 5) === '00' ? t.slice(0, 2) : t.slice(0, 5)); return `${k(a)}–${k(b)}`; };
 const antall = (milli: number) => String(milli / 1000).replace('.', ',');
 
 type Forslag = Extract<Kort, { type: 'forslag' }>;
 type Valg = 'utfor' | 'vent' | 'avbryt';
 export type Ferdig = (id: string, status: string, melding: string, lenke?: string) => void;
 
-const KNAPP: Record<string, string> = { faktura: 'Send fakturaen', kostnad: 'Før kostnad', betaling: 'Registrer betalingen', purring: 'Send purringen', kreditnota: 'Lag kreditnota', mva: 'Merk som sendt', skannelenke: 'Send lenken', invitasjon: 'Send invitasjonen', lonn: 'Kjør lønn', lonnslipp: 'Send lønnslippen', kunde: 'Legg til kunden' };
-const TITTEL: Record<string, string> = { faktura: 'Faktura', kostnad: 'Kostnad', betaling: 'Innbetaling', purring: 'Purring', kreditnota: 'Kreditnota', mva: 'MVA-melding', skannelenke: 'Skannelenke', invitasjon: 'Invitasjon', lonn: 'Lønnskjøring', lonnslipp: 'Lønnslipp', kunde: 'Ny kunde' };
-const APNE: Record<string, string> = { faktura: 'Åpne faktura', kostnad: 'Åpne bilag', betaling: 'Åpne faktura', purring: 'Åpne faktura', kreditnota: 'Åpne kreditnota', mva: 'Åpne MVA', skannelenke: 'Åpne innboksen', invitasjon: 'Åpne brukere', lonn: 'Åpne lønn', lonnslipp: 'Åpne lønn', kunde: 'Åpne' };
+const KNAPP: Record<string, string> = { faktura: 'Send fakturaen', kostnad: 'Før kostnad', betaling: 'Registrer betalingen', purring: 'Send purringen', kreditnota: 'Lag kreditnota', mva: 'Merk som sendt', skannelenke: 'Send lenken', invitasjon: 'Send invitasjonen', lonn: 'Kjør lønn', lonnslipp: 'Send lønnslippen', kunde: 'Legg til kunden', vaktplan: 'Lag utkast', tildel_vakt: 'Gi vakten', publiser_uke: 'Publiser og varsle' };
+const TITTEL: Record<string, string> = { faktura: 'Faktura', kostnad: 'Kostnad', betaling: 'Innbetaling', purring: 'Purring', kreditnota: 'Kreditnota', mva: 'MVA-melding', skannelenke: 'Skannelenke', invitasjon: 'Invitasjon', lonn: 'Lønnskjøring', lonnslipp: 'Lønnslipp', kunde: 'Ny kunde', vaktplan: 'Vaktplan', tildel_vakt: 'Ledig vakt', publiser_uke: 'Publiser vaktplan' };
+const APNE: Record<string, string> = { faktura: 'Åpne faktura', kostnad: 'Åpne bilag', betaling: 'Åpne faktura', purring: 'Åpne faktura', kreditnota: 'Åpne kreditnota', mva: 'Åpne MVA', skannelenke: 'Åpne innboksen', invitasjon: 'Åpne brukere', lonn: 'Åpne lønn', lonnslipp: 'Åpne lønn', kunde: 'Åpne', vaktplan: 'Åpne vaktplanen', tildel_vakt: 'Åpne vaktplanen', publiser_uke: 'Åpne vaktplanen' };
 const STATUS: Record<string, [string, string]> = { venter: ['Venter på deg', 'venter'], utfort: ['Lagret', 'utfort'], pa_vent: ['På vent', 'pa_vent'], avbrutt: ['Avbrutt', 'avbrutt'] };
 const UTKAST_ART = new Set(['faktura', 'kostnad']);
 
@@ -122,6 +125,18 @@ export function ForslagKort({ k, onUtvid, onFerdig, onEndre, utlos }: { k: Forsl
     sum = ['Netto', d.netto];
   } else if (k.art === 'kunde') {
     rader = [['Navn', d.navn], ...(d.orgnr ? [['Org.nr', d.orgnr] as [string, string]] : []), ['E-post', d.epost ?? 'Ingen'], ['Adresse', [d.adresse, [d.postnr, d.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', ') || 'Ingen']];
+  } else if (k.art === 'vaktplan') {
+    const v = d.vakter as { dato: string; start: string; slutt: string; navn: string | null }[];
+    const dager = [...new Set(v.map(x => x.dato))];
+    rader = dager.map((dg): [ReactNode, ReactNode] => [dagKort(dg), v.filter(x => x.dato === dg).map(x => `${x.navn ? x.navn.split(' ')[0] : 'Ledig'} ${tidKort(x.start, x.slutt)}`).join(', ')]);
+    rader.push(['Ledige vakter', String(d.ledige)], ['Overtid', d.overtidMin ? `${String(Math.round(d.overtidMin / 6) / 10).replace('.', ',')} t` : 'Ingen']);
+    if ((d.hensyn as string[]).length) ekstra = <div className="ak-kort-merknad gul">Tatt hensyn til: {(d.hensyn as string[]).join('; ')}.</div>;
+  } else if (k.art === 'tildel_vakt') {
+    rader = [['Vakt', `${dagKort(d.dato)} ${tidKort(d.start, d.slutt)}`], ['Gi til', `${d.navn}${d.interessert ? ' (har meldt interesse)' : ''}`],
+      ...((d.alternativer as { navn: string; interessert: boolean; merknad: string | null }[]).length ? [['Andre', (d.alternativer as { navn: string; interessert: boolean }[]).map(x => x.navn.split(' ')[0] + (x.interessert ? ' ✓' : '')).join(', ')] as [string, string]] : [])];
+    if (d.merknad) ekstra = <div className="ak-kort-merknad gul">{d.merknad}</div>;
+  } else if (k.art === 'publiser_uke') {
+    rader = [['Uke', String(d.uke)], ['Vakter', `${d.vakter}${d.ledige ? ` (${d.ledige} ledige)` : ''}`], ['Varsles', (d.ansatte as string[]).join(', ') || 'Ingen'], ['Status nå', d.status === 'endret' ? 'Endringer ikke publisert' : 'Utkast']];
   } else if (k.art === 'mva') {
     rader = [['Termin', d.termin.tittel], ['Frist', nd(d.frist)], ['Status', mvaMangler ? `${d.mangler} ${d.mangler === 1 ? 'bevegelse' : 'bevegelser'} i banken mangler bilag` : 'Alt er klart']];
     sum = [d.aBetale >= 0 ? 'Å betale' : 'Til gode', Math.abs(d.aBetale)];

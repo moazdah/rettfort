@@ -9,16 +9,23 @@ export async function db(): Promise<Db> {
   return getDb();
 }
 
-export async function sesjon(): Promise<Sesjon | null> {
+/**
+ * Innlogget bruker. En ansatt (rollen «ansatt») ser bare sin egen vaktplan: foretaket skjules her,
+ * så regnskapssider, API-er og handlinger avviser dem. /vakt bruker { ansatt: true }.
+ */
+export async function sesjon(o: { ansatt?: boolean } = {}): Promise<Sesjon | null> {
   const c = await cookies();
   const d = await getDb();
-  return lesSesjon(d, c.get(SESJON_COOKIE)?.value);
+  const s = await lesSesjon(d, c.get(SESJON_COOKIE)?.value);
+  if (s && s.rolle === 'ansatt' && !o.ansatt) return { ...s, org: null };
+  return s;
 }
 
 /** Krever innlogget bruker med et selskap valgt. Sender til innlogging eller velkomst ellers. */
 export async function kreverSelskap(): Promise<Sesjon & { org: NonNullable<Sesjon['org']> }> {
   const s = await sesjon();
   if (!s) redirect('/logg-inn');
+  if (s.rolle === 'ansatt') redirect('/vakt');
   if (!s.org) redirect('/velkommen');
   if (s.org.type === 'byra') redirect('/byra');
   return s as Sesjon & { org: NonNullable<Sesjon['org']> };
@@ -27,6 +34,7 @@ export async function kreverSelskap(): Promise<Sesjon & { org: NonNullable<Sesjo
 export async function kreverByra(): Promise<Sesjon & { org: NonNullable<Sesjon['org']> }> {
   const s = await sesjon();
   if (!s) redirect('/logg-inn');
+  if (s.rolle === 'ansatt') redirect('/vakt');
   const byra = s.medlemskap.find(m => m.type === 'byra');
   if (!byra) redirect('/hjem');
   return s as Sesjon & { org: NonNullable<Sesjon['org']> };
