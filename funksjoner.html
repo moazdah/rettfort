@@ -34,10 +34,8 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
           <a href="/bak-rettfort" style="height:42px;padding:0 14px;border-radius:99px;font-size:15.5px;color:#3D4759;display:flex;align-items:center;white-space:nowrap" style-hover="background:#ECE7DC;color:#0B2545">Bak Rettført</a>
         </sc-if>
       </nav>
-      <sc-if value="{{ notNarrow }}" hint-placeholder-val="{{ true }}">
-        <a href="https://min.xn--rettfrt-u1a.no/logg-inn" style="height:42px;padding:0 18px;border-radius:99px;border:1px solid #0B2545;font-size:15px;font-weight:500;display:flex;align-items:center;white-space:nowrap;flex:none" style-hover="background:#fff">Logg inn</a>
-      </sc-if>
-      <a href="https://min.xn--rettfrt-u1a.no/registrer" style="margin-left:{{ sgMl }};height:{{ sgH }};padding:{{ sgPad }};border-radius:99px;background:#0B2545;color:#fff;font-size:{{ sgFs }};font-weight:600;display:flex;align-items:center;white-space:nowrap;flex:none" style-hover="background:#16345E;color:#fff">Start gratis</a>
+      <a href="https://min.xn--rettfrt-u1a.no/logg-inn" style="margin-left:{{ sgMl }};height:42px;padding:0 18px;border-radius:99px;border:1px solid #0B2545;font-size:15px;font-weight:500;display:flex;align-items:center;white-space:nowrap;flex:none" style-hover="background:#fff">Logg inn</a>
+      <sc-if value="{{ notNarrow }}" hint-placeholder-val="{{ true }}"><a href="https://min.xn--rettfrt-u1a.no/registrer" style="height:{{ sgH }};padding:{{ sgPad }};border-radius:99px;background:#0B2545;color:#fff;font-size:{{ sgFs }};font-weight:600;display:flex;align-items:center;white-space:nowrap;flex:none" style-hover="background:#16345E;color:#fff">Start gratis</a></sc-if>
     </div>
     <sc-if value="{{ menu }}" hint-placeholder-val="{{ false }}">
       <div style="position:absolute;left:0;right:0;top:68px;background:#fff;border-bottom:1px solid #E7E2D7;box-shadow:0 30px 60px -30px rgba(11,37,69,.35)">
@@ -53,7 +51,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
           <div style="max-width:1240px;margin:0 auto;padding:0 24px 20px;display:flex;flex-wrap:wrap;gap:8px">
             <a href="/#priser" style="height:44px;padding:0 16px;border-radius:99px;background:#F4F1EA;font-size:15px;display:flex;align-items:center">Priser</a>
             <a href="/bak-rettfort" style="height:44px;padding:0 16px;border-radius:99px;background:#F4F1EA;font-size:15px;display:flex;align-items:center">Bak Rettført</a>
-            <a href="https://min.xn--rettfrt-u1a.no/logg-inn" style="height:44px;padding:0 16px;border-radius:99px;border:1px solid #0B2545;font-size:15px;font-weight:500;display:flex;align-items:center">Logg inn</a>
+            <a href="https://min.xn--rettfrt-u1a.no/registrer" style="flex:1 1 100%;height:48px;padding:0 18px;border-radius:99px;background:#0B2545;color:#fff;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:4px">Start gratis</a>
           </div>
         </sc-if>
       </div>
