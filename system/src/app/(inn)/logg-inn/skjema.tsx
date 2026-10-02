@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState, useState } from 'react';
 import { loggInn } from '@/app/handlinger';
 
@@ -15,6 +16,7 @@ export function LoggInnSkjema({ neste }: { neste?: string }) {
       {neste && <input type="hidden" name="neste" value={neste} />}
       <label className="felt" hidden={totrinn}><span>E-post</span><input className="inndata" name="epost" type="email" autoComplete="email" required value={epost} onChange={e => setEpost(e.target.value)} /></label>
       <label className="felt" hidden={totrinn}><span>Passord</span><input className="inndata" name="passord" type="password" autoComplete="current-password" required value={passord} onChange={e => setPassord(e.target.value)} /></label>
+      {!totrinn && <Link href="/glemt-passord" className="liten" style={{ alignSelf: 'flex-start', marginTop: -4 }}>Glemt passord?</Link>}
       {totrinn && (
         <label className="felt"><span>Kode fra autentiseringsappen</span>
           <input className="inndata mono" name="kode" inputMode="numeric" autoComplete="one-time-code" maxLength={7} placeholder="000000" autoFocus style={{ fontSize: 22, letterSpacing: '.3em', textAlign: 'center' }} />

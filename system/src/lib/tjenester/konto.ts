@@ -3,6 +3,8 @@
 
 import type { Db, Sporring } from '../db';
 import { RegnskapsFeil } from '../hovedbok';
+import { randomBytes } from 'node:crypto';
+import { hashPassord, passordFeil, tokenHash } from '../auth';
 
 /** Alt vi har lagret om brukeren som person, som JSON. Regnskapet lastes ned som SAF-T for hvert foretak. */
 export async function mineData(db: Db, brukerId: string) {
@@ -52,4 +54,37 @@ export async function slettKonto(t: Sporring, brukerId: string, idag: string): P
   await t.q(`update bruker set epost = 'slettet-' || id || '@slettet.invalid', navn = 'Slettet bruker', passord_hash = '!', bekreftkode = null, epost_bekreftet = false,
     totp_hemmelig = null, totp_ny = null, slettet = now() where id = $1`, [brukerId]);
   return { foretak: plan.foretakAlene.map(f => f.navn) };
+}
+
+// ---------- Glemt passord ----------
+// Lenken sendes på e-post, gjelder i én time og kan bare brukes én gang. Bare hashen av tokenet lagres.
+
+const LENKE_MINUTTER = 60;
+const MAKS_LENKER_PER_TIME = 3;
+
+/** Lager en lenke for å sette nytt passord. Gir null hvis e-posten ikke finnes, eller hvis det er bedt om for mange lenker. */
+export async function bestillNyttPassord(t: Sporring, epost: string): Promise<{ token: string; navn: string } | null> {
+  const b = await t.en<{ id: string; navn: string }>('select id, navn from bruker where epost = $1 and slettet is null', [epost.trim().toLowerCase()]);
+  if (!b) return null;
+  const n = await t.en<{ n: number }>(`select count(*)::int as n from passord_lenke where bruker_id = $1 and opprettet > now() - interval '1 hour'`, [b.id]);
+  if ((n?.n ?? 0) >= MAKS_LENKER_PER_TIME) return null;
+  const token = randomBytes(32).toString('base64url');
+  await t.q(`insert into passord_lenke (token_hash, bruker_id, utloper) values ($1, $2, now() + interval '${LENKE_MINUTTER} minutes')`, [tokenHash(token), b.id]);
+  return { token, navn: b.navn.split(' ')[0] || b.navn };
+}
+
+/** E-posten lenken gjelder, eller null hvis lenken er ugyldig, brukt eller utløpt. */
+export async function lesPassordLenke(t: Sporring, token: string): Promise<{ epost: string } | null> {
+  return t.en<{ epost: string }>('select b.epost from passord_lenke l join bruker b on b.id = l.bruker_id where l.token_hash = $1 and l.utloper > now() and b.slettet is null', [tokenHash(token)]);
+}
+
+/** Setter nytt passord, bruker opp lenken og logger ut overalt. E-posten regnes som bekreftet, siden lenken kom dit. */
+export async function settNyttPassord(t: Sporring, token: string, passord: string): Promise<{ brukerId: string }> {
+  const pf = passordFeil(passord); if (pf) throw new RegnskapsFeil(pf);
+  const l = await t.en<{ bruker_id: string }>('delete from passord_lenke where token_hash = $1 and utloper > now() returning bruker_id', [tokenHash(token)]);
+  if (!l) throw new RegnskapsFeil('Lenken er brukt eller utløpt. Be om en ny lenke.');
+  await t.q('update bruker set passord_hash = $2, epost_bekreftet = true, bekreftkode = null, totp_feil = 0, totp_sperret_til = null where id = $1', [l.bruker_id, await hashPassord(passord)]);
+  await t.q('delete from passord_lenke where bruker_id = $1', [l.bruker_id]);
+  await t.q('delete from sesjon where bruker_id = $1', [l.bruker_id]);
+  return { brukerId: l.bruker_id };
 }

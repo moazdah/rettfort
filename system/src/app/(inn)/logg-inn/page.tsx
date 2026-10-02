@@ -8,8 +8,8 @@ import { demoInn } from '@/app/handlinger';
 
 export const metadata = { title: 'Logg inn' };
 
-export default async function LoggInn({ searchParams }: { searchParams: Promise<{ neste?: string; slettet?: string }> }) {
-  const { neste: n, slettet } = await searchParams;
+export default async function LoggInn({ searchParams }: { searchParams: Promise<{ neste?: string; slettet?: string; passord?: string }> }) {
+  const { neste: n, slettet, passord } = await searchParams;
   const neste = n && /^\/invitasjon\/[\w-]+$/.test(n) ? n : undefined;
   const s = await sesjon();
   const uferdig = s && !s.bruker.epostBekreftet ? s.bruker.epost : null;
@@ -22,6 +22,7 @@ export default async function LoggInn({ searchParams }: { searchParams: Promise<
         <h1>Logg inn</h1>
         <p className="mut" style={{ marginTop: 8 }}>Regnskap som sjekker seg selv.</p>
         {slettet && <div className="varsel gronn liten" style={{ marginTop: 18 }}>Kontoen er slettet. Takk for at du brukte Rettført.</div>}
+        {passord === 'nytt' && <div className="varsel gronn liten" role="status" style={{ marginTop: 18 }}>Passordet er endret. Logg inn med det nye passordet.</div>}
         {uferdig && <UferdigRegistrering epost={uferdig} />}
         {d.modus === 'testmodus' ? (
           <>

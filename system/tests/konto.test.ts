@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { nyTestDb } from '@/lib/db';
 import { lagTestfirma } from '@/lib/db/eksempel';
-import { mineData, slettPlan, slettKonto } from '@/lib/tjenester/konto';
+import { mineData, slettPlan, slettKonto, bestillNyttPassord, lesPassordLenke, settNyttPassord } from '@/lib/tjenester/konto';
+import { sjekkPassord, opprettSesjon } from '@/lib/auth';
 import { hentPosteringer } from '@/lib/tjenester/bokforing';
 
 describe('din konto', () => {
@@ -39,4 +40,42 @@ describe('din konto', () => {
     // Samme e-post kan registreres på nytt.
     await ny('kari@example.com');
   }, 180000);
+});
+
+describe('glemt passord', () => {
+  it('lenken setter nytt passord én gang, logger ut overalt og sier ingenting om ukjente e-poster', async () => {
+    const db = await nyTestDb();
+    const id = (await db.en<{ id: string }>(`insert into bruker (epost, navn, passord_hash) values ('per@example.com', 'Per Hansen', 'x') returning id`))!.id;
+    await db.tx(t => opprettSesjon(t, id, null));
+    expect(await db.tx(t => bestillNyttPassord(t, 'ukjent@example.com'))).toBeNull();
+
+    const l = (await db.tx(t => bestillNyttPassord(t, ' PER@example.com ')))!;
+    expect(l.navn).toBe('Per');
+    expect(await lesPassordLenke(db, l.token)).toEqual({ epost: 'per@example.com' });
+    expect(await lesPassordLenke(db, 'feil')).toBeNull();
+    // Bare hashen lagres.
+    expect(await db.en('select 1 from passord_lenke where token_hash = $1', [l.token])).toBeNull();
+
+    await expect(db.tx(t => settNyttPassord(t, l.token, 'kort'))).rejects.toThrow(/minst 8/);
+    await db.tx(t => settNyttPassord(t, l.token, 'nytt-passord-123'));
+    const b = (await db.en<{ passord_hash: string; epost_bekreftet: boolean }>('select passord_hash, epost_bekreftet from bruker where id = $1', [id]))!;
+    expect(await sjekkPassord('nytt-passord-123', b.passord_hash)).toBe(true);
+    expect(b.epost_bekreftet).toBe(true);
+    expect(await db.en('select 1 from sesjon where bruker_id = $1', [id])).toBeNull();
+    // Brukt lenke virker ikke igjen.
+    expect(await lesPassordLenke(db, l.token)).toBeNull();
+    await expect(db.tx(t => settNyttPassord(t, l.token, 'enda-et-passord'))).rejects.toThrow(/brukt eller utløpt/);
+  });
+
+  it('utløper etter en time og stopper etter tre lenker i timen', async () => {
+    const db = await nyTestDb();
+    await db.q(`insert into bruker (epost, navn, passord_hash) values ('eva@example.com', 'Eva', 'x')`);
+    const l = (await db.tx(t => bestillNyttPassord(t, 'eva@example.com')))!;
+    await db.q(`update passord_lenke set utloper = now() - interval '1 minute'`);
+    expect(await lesPassordLenke(db, l.token)).toBeNull();
+    await expect(db.tx(t => settNyttPassord(t, l.token, 'nytt-passord-123'))).rejects.toThrow(/utløpt/);
+    expect(await db.tx(t => bestillNyttPassord(t, 'eva@example.com'))).not.toBeNull();
+    expect(await db.tx(t => bestillNyttPassord(t, 'eva@example.com'))).not.toBeNull();
+    expect(await db.tx(t => bestillNyttPassord(t, 'eva@example.com'))).toBeNull();
+  });
 });

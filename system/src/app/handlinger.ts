@@ -34,7 +34,7 @@ import { listSamtaler, hentSamtale as hentSamtaleDb, lagreSamtale as lagreSamtal
 import { valgtLeverandor, leverandorKlar, settLeverandor, type Leverandor } from '@/lib/ai/modell';
 import { lagLenke, hentNye, etterRegistrering, hentInnsending, settTilbake, settFastTilbake, betalUtleggNa, avvis, slettLenke, type Tilbake } from '@/lib/tjenester/innsending';
 import { kr } from '@/lib/penger';
-import { slettKonto } from '@/lib/tjenester/konto';
+import { slettKonto, bestillNyttPassord, settNyttPassord } from '@/lib/tjenester/konto';
 import { merkTimerBrukt, innstillinger as vaktInnstillinger } from '@/lib/tjenester/vaktplan';
 import { oktToken, settOkt, slettOkt } from '@/lib/okt';
 import { synkEkstraAnsatte } from '@/lib/stripe';
@@ -104,6 +104,34 @@ export async function loggInn(_: unknown, fd: FormData): Promise<Resultat<string
   const neste = String(fd.get('neste') ?? '');
   if (/^\/invitasjon\/[\w-]+$/.test(neste)) redirect(neste);
   redirect(res.data === 'byra' ? '/byra' : res.data ? await hjemSti() : '/velkommen');
+}
+
+/** Glemt passord: sender en lenke på e-post. Svaret er det samme om e-posten finnes eller ikke, så ingen kan sjekke hvem som har konto. */
+export async function glemtPassord(_: unknown, fd: FormData): Promise<Resultat<{ lenke?: string }>> {
+  const epost = String(fd.get('epost') ?? '').trim().toLowerCase();
+  return trygt(async () => {
+    if (!gyldigEpost(epost)) throw new RegnskapsFeil('Skriv en gyldig e-postadresse.');
+    const db = await getDb();
+    const l = await db.tx(t => bestillNyttPassord(t, epost));
+    if (!l) return {};
+    const lenke = `${await grunnadresse()}/tilbakestill/${l.token}`;
+    const sendt = await sendEpost({ til: epost, ...maler.nyttPassord(l.navn, lenke) });
+    // Lenken vises bare på skjermen i testmodus. Ellers kunne hvem som helst tatt over en konto.
+    return { lenke: !sendt && db.modus === 'testmodus' ? lenke : undefined };
+  });
+}
+
+export async function nyttPassord(_: unknown, fd: FormData): Promise<Resultat> {
+  const token = String(fd.get('token') ?? '');
+  const passord = String(fd.get('passord') ?? '');
+  const res = await trygt(async () => {
+    if (passord !== String(fd.get('passord2') ?? '')) throw new RegnskapsFeil('Passordene er ikke like.');
+    const db = await getDb();
+    await db.tx(t => settNyttPassord(t, token, passord));
+    await slettOkt();
+  });
+  if (!res.ok) return res;
+  redirect('/logg-inn?passord=nytt');
 }
 
 /** Bare i testmodus: gå rett inn i demo-foretaket uten passord. */

@@ -98,6 +98,16 @@ export const maler = {
         + liten('Har du ikke laget en konto hos oss, kan du se bort fra denne e-posten.'),
     }),
   }),
+  nyttPassord: (navn: string, lenke: string): Mal => ({
+    emne: 'Lag et nytt passord til Rettført',
+    tekst: `Hei ${navn}!\n\nDu har bedt om å lage et nytt passord. Trykk på lenken for å velge et nytt:\n${lenke}\n\nLenken gjelder i én time og kan bare brukes én gang. Har du ikke bedt om dette, kan du se bort fra e-posten. Passordet ditt er ikke endret.`,
+    html: ramme({
+      tittel: 'Lag et nytt passord', forhandsvisning: 'Lenken gjelder i én time',
+      innhold: avsnitt(`Hei ${esc(navn)}! Du har bedt om å lage et nytt passord til Rettført.`)
+        + knapp('Lag nytt passord', lenke)
+        + liten('Lenken gjelder i én time og kan bare brukes én gang. Har du ikke bedt om dette, kan du se bort fra e-posten. Passordet ditt er ikke endret.'),
+    }),
+  }),
   invitasjon: (fra: string, foretak: string, rolle: string, lenke: string): Mal => ({
     emne: `${fra} har invitert deg til ${foretak} i Rettført`,
     tekst: `Hei!\n\n${fra} har invitert deg til regnskapet for ${foretak} i Rettført, ${rolle}.\n\nTrykk på lenken for å godta:\n${lenke}\n\nLenken er personlig. Har du ikke ventet denne invitasjonen, kan du se bort fra den.`,
