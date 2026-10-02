@@ -53,14 +53,24 @@ describe('advarsler', () => {
   it('kan ikke, har vakt, overtid og over 9 t', () => {
     const andre = [v('a', '2026-10-05', '07:00', '15:00')];
     const a = advarsler(v('a', '2026-10-05', '15:00', '22:00'), andre, full, [{ ansattId: 'a', dato: '2026-10-05', status: 'kan_ikke', grunn: 'Tannlege' }]);
-    expect(a.join(' ')).toMatch(/ikke kan jobbe.*Tannlege/);
+    expect(a.join(' ')).toMatch(/ikke kan.*Tannlege/);
     expect(a.join(' ')).toMatch(/allerede en vakt/);
     expect(a.join(' ')).toMatch(/overtid/);
-    expect(advarsler(v('a', '2026-10-06', '07:00', '18:00'), [], full, []).join(' ')).toMatch(/over 9 timer/);
+    expect(advarsler(v('a', '2026-10-06', '07:00', '18:00'), [], full, []).join(' ')).toMatch(/Over 9 t på én dag/);
   });
   it('merarbeid for deltid', () => {
     const andre = ['05', '06', '07'].map(d => v('b', `2026-10-${d}`, '07:00', '15:00'));
     expect(advarsler(v('b', '2026-10-08', '07:00', '15:00'), andre, deltid, []).join(' ')).toMatch(/merarbeid/);
+  });
+  it('hviletid under 11 t', () => {
+    const andre = [v('a', '2026-10-05', '13:00', '23:00')];
+    expect(advarsler(v('a', '2026-10-06', '07:00', '15:00'), andre, full, []).join(' ')).toMatch(/Under 11 t hvile \(8 t etter vakten mandag\)/);
+    expect(advarsler(v('a', '2026-10-06', '07:00', '15:00'), andre, full, [], { hviletid: false })).toEqual([]);
+  });
+  it('grenser fra innstillingene', () => {
+    const andre = ['05', '06', '07', '08'].map(d => v('a', `2026-10-${d}`, '07:00', '15:00'));
+    expect(advarsler(v('a', '2026-10-09', '07:00', '15:00'), andre, full, [], { grenser: { dag: 540, uke: 35 * 60 } }).join(' ')).toMatch(/Gir \w+ 2,5 t overtid \(37,5 t denne uka\)/);
+    expect(advarsler(v('a', '2026-10-09', '07:00', '15:00'), andre, full, [], { overtid: false })).toEqual([]);
   });
   it('ledig vakt gir ingen personadvarsler', () => {
     expect(advarsler(v(null as unknown as string, '2026-10-05', '07:00', '15:00'), [], null, [])).toEqual([]);

@@ -78,14 +78,17 @@ export const plussDager = (dato: string, n: number) => { const d = dag(dato); d.
 
 export interface VaktResultat { arbeid: number; overtid: number; merarbeid: number }
 export interface AnsattUke { arbeid: number; overtid: number; merarbeid: number; avtalt: number | null }
+export interface Grenser { dag: number; uke: number }
+export const STANDARD_GRENSER: Grenser = { dag: DAG_GRENSE, uke: UKE_GRENSE };
 
 const sorter = <T extends VaktInn>(v: T[]) => [...v].sort((a, b) => (a.dato + a.start).localeCompare(b.dato + b.start));
 
 /**
  * Går gjennom alle vaktene i en uke og fordeler overtid og merarbeid på vaktene.
  * Overtid per dag (over 9 t) havner på den vakten som passerer grensen. Det samme gjelder uka (over 40 t).
+ * Grensene kan endres av lederen under Innstillinger.
  */
-export function analyserUke<T extends VaktInn>(vakter: T[], ansatte: AnsattRegel[]): { perVakt: Map<T, VaktResultat>; perAnsatt: Map<string, AnsattUke> } {
+export function analyserUke<T extends VaktInn>(vakter: T[], ansatte: AnsattRegel[], g: Grenser = STANDARD_GRENSER): { perVakt: Map<T, VaktResultat>; perAnsatt: Map<string, AnsattUke> } {
   const perVakt = new Map<T, VaktResultat>();
   const perAnsatt = new Map<string, AnsattUke>();
   for (const a of ansatte) {
@@ -97,16 +100,16 @@ export function analyserUke<T extends VaktInn>(vakter: T[], ansatte: AnsattRegel
       const arbeid = arbeidMin(v);
       sumArbeid += arbeid;
       const forDag = perDag.get(v.dato) ?? 0;
-      // Dag: det som går over 9 t den dagen.
-      const dagOver = Math.max(0, forDag + arbeid - DAG_GRENSE) - Math.max(0, forDag - DAG_GRENSE);
+      // Dag: det som går over grensen den dagen.
+      const dagOver = Math.max(0, forDag + arbeid - g.dag) - Math.max(0, forDag - g.dag);
       perDag.set(v.dato, forDag + arbeid);
-      // Uke: av resten (det som ikke alt er overtid), det som passerer 40 t.
+      // Uke: av resten (det som ikke alt er overtid), det som passerer ukegrensen.
       const vanlig = arbeid - dagOver;
-      const ukeOver = Math.max(0, uke + vanlig - UKE_GRENSE) - Math.max(0, uke - UKE_GRENSE);
+      const ukeOver = Math.max(0, uke + vanlig - g.uke) - Math.max(0, uke - g.uke);
       const innenfor = vanlig - ukeOver;
-      // Merarbeid: deltid over avtalt, men innenfor 40 t.
+      // Merarbeid: deltid over avtalt, men innenfor ukegrensen.
       let mer = 0;
-      if (avtalt != null && avtalt < UKE_GRENSE) mer = Math.max(0, Math.min(uke + innenfor, UKE_GRENSE) - Math.max(uke, avtalt));
+      if (avtalt != null && avtalt < FULL_STILLING) mer = Math.max(0, Math.min(uke + innenfor, g.uke) - Math.max(uke, avtalt));
       uke += vanlig;
       sumOver += dagOver + ukeOver; sumMer += mer;
       perVakt.set(v, { arbeid, overtid: dagOver + ukeOver, merarbeid: mer });
@@ -117,24 +120,55 @@ export function analyserUke<T extends VaktInn>(vakter: T[], ansatte: AnsattRegel
   return { perVakt, perAnsatt };
 }
 
+const UKEDAG = ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'];
+/** «fredag» */
+export const ukedag = (dato: string) => UKEDAG[dag(dato).getUTCDay()];
+
+/** Minutter fra midnatt den første dagen, for å regne hvile mellom vakter (også over midnatt). */
+const absStart = (v: Pick<VaktInn, 'dato' | 'start'>) => Math.round(dag(v.dato).getTime() / 60000) + tilMin(v.start);
+const absSlutt = (v: Pick<VaktInn, 'dato' | 'start' | 'slutt'>) => absStart(v) + varighetMin(v.start, v.slutt);
+
+export interface AdvarselValg { grenser?: Grenser; overtid?: boolean; hviletid?: boolean }
+
 /**
- * Advarsler når en vakt lagres. De stopper ingenting; lederen bestemmer.
- * `andre` er de andre vaktene i uka (uten den som endres).
+ * Advarsler når en vakt lagres. De stopper ingenting; lederen bestemmer («Lagre likevel»).
+ * `andre` er de andre vaktene rundt (uka, og helst dagen før og etter), uten den som endres.
  */
-export function advarsler(ny: VaktInn, andre: VaktInn[], ansatt: AnsattRegel | null, tilgj: Tilgjengelig[]): string[] {
+export function advarsler(ny: VaktInn, andre: VaktInn[], ansatt: AnsattRegel | null, tilgj: Tilgjengelig[], valg: AdvarselValg = {}): string[] {
+  const g = valg.grenser ?? STANDARD_GRENSER, medOt = valg.overtid !== false, medHvile = valg.hviletid !== false;
   const ut: string[] = [];
-  const arbeid = arbeidMin(ny);
-  if (arbeid > DAG_GRENSE) ut.push(`Vakten er over 9 timer (${timer(arbeid)}).`);
-  if (!ansatt || !ny.ansattId) return ut;
+  if (!ansatt || !ny.ansattId) {
+    if (medOt && varighetMin(ny.start, ny.slutt) > g.dag) ut.push(`Over ${timerTall(g.dag)} t på én dag`);
+    return ut;
+  }
   const fornavn = ansatt.navn.split(' ')[0];
+  const { aar, uke } = isoUke(ny.dato);
+  const iUka = andre.filter(v => v.ansattId === ansatt.id && isoUke(v.dato).aar === aar && isoUke(v.dato).uke === uke);
+  if (medOt) {
+    const etter = analyserUke([...iUka, ny], [ansatt], g).perAnsatt.get(ansatt.id)!;
+    const for_ = analyserUke(iUka, [ansatt], g).perAnsatt.get(ansatt.id)!;
+    if (etter.overtid > for_.overtid) ut.push(`Gir ${fornavn} ${timerTall(etter.overtid)} t overtid (${timerTall(etter.arbeid)} t denne uka)`);
+    else if (etter.merarbeid > for_.merarbeid && etter.avtalt != null) ut.push(`Gir ${fornavn} merarbeid: ${timerTall(etter.arbeid)} t, avtalen er ${timerTall(etter.avtalt)} t`);
+    if (varighetMin(ny.start, ny.slutt) > g.dag) ut.push(`Over ${timerTall(g.dag)} t på én dag`);
+  }
+  if (iUka.some(v => v.dato === ny.dato)) ut.push(`${fornavn} har allerede en vakt ${ukedag(ny.dato)}`);
   const t = tilgj.find(x => x.ansattId === ansatt.id && x.dato === ny.dato);
-  if (t?.status === 'kan_ikke') ut.push(`${fornavn} har sagt at hen ikke kan jobbe denne dagen${t.grunn ? ` (${t.grunn})` : ''}.`);
-  if (andre.some(v => v.ansattId === ansatt.id && v.dato === ny.dato)) ut.push(`${fornavn} har allerede en vakt denne dagen.`);
-  const for_ = analyserUke(andre, [ansatt]).perAnsatt.get(ansatt.id)!;
-  const etter = analyserUke([...andre, ny], [ansatt]).perAnsatt.get(ansatt.id)!;
-  if (etter.overtid > for_.overtid) ut.push(`Gir ${timer(etter.overtid - for_.overtid)} overtid for ${fornavn}.`);
-  else if (etter.merarbeid > for_.merarbeid) ut.push(`Gir ${timer(etter.merarbeid - for_.merarbeid)} merarbeid for ${fornavn} (mer enn stillingen, vanlig sats).`);
+  if (t?.status === 'kan_ikke') ut.push(`${fornavn} har sagt at hen ikke kan${t.grunn ? ` («${t.grunn}»)` : ''}`);
+  if (medHvile) {
+    const mine = andre.filter(v => v.ansattId === ansatt.id && v.dato !== ny.dato);
+    const s = absStart(ny), e = absSlutt(ny);
+    const for_ = mine.filter(v => absSlutt(v) <= s).sort((a, b) => absSlutt(b) - absSlutt(a))[0];
+    const etter = mine.filter(v => absStart(v) >= e).sort((a, b) => absStart(a) - absStart(b))[0];
+    if (for_ && s - absSlutt(for_) < 11 * 60) ut.push(`Under 11 t hvile (${timerTall(s - absSlutt(for_))} t etter vakten ${ukedag(for_.dato)})`);
+    if (etter && absStart(etter) - e < 11 * 60) ut.push(`Under 11 t hvile (${timerTall(absStart(etter) - e)} t før vakten ${ukedag(etter.dato)})`);
+  }
   return ut;
+}
+
+/** «7,5» og «45», uten unødvendige desimaler. */
+export function timerTall(min: number): string {
+  const t = Math.round((min / 60) * 10) / 10;
+  return String(t).replace('.', ',');
 }
 
 /** «7,5 t» */
@@ -154,4 +188,5 @@ export const STANDARD_MALER: VaktMal[] = [
   { navn: 'Åpning', start: '07:00', slutt: '15:00' },
   { navn: 'Midt', start: '10:00', slutt: '18:00' },
   { navn: 'Kveld', start: '13:00', slutt: '21:00' },
+  { navn: 'Natt/rydd', start: '21:00', slutt: '23:30' },
 ];

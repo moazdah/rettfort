@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 12;
+export const SKJEMA_VERSJON = 13;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -470,6 +470,55 @@ create table if not exists tilgjengelighet (organisasjon_id uuid not null refere
 create table if not exists fri_foresporsel (id uuid primary key default gen_random_uuid(), organisasjon_id uuid not null references organisasjon(id) on delete cascade, ansatt_id uuid not null references ansatt(id) on delete cascade, dato date not null, grunn text, status text not null default 'venter' check (status in ('venter','godkjent','avslatt')), opprettet timestamptz not null default now());
 create table if not exists vaktuke (organisasjon_id uuid not null references organisasjon(id) on delete cascade, aar int not null, uke int not null, status text not null default 'utkast' check (status in ('utkast','publisert','endret')), publisert timestamptz, berorte jsonb not null default '[]', primary key (organisasjon_id, aar, uke));
 create table if not exists timeliste (organisasjon_id uuid not null references organisasjon(id) on delete cascade, ansatt_id uuid not null references ansatt(id) on delete cascade, aar int not null, uke int not null, arbeid_min int not null, overtid_min int not null default 0, status text not null default 'godkjent' check (status in ('godkjent','brukt')), lonnskjoring_id uuid references lonnskjoring(id) on delete set null, godkjent timestamptz not null default now(), primary key (ansatt_id, aar, uke));
+
+-- Vaktplan v2 (v13): innstillinger, steder, vakttype, kommentarer, upubliserte endringer, fravær, bytter og avvik.
+alter table organisasjon add column if not exists vakt_innstillinger jsonb;
+alter table organisasjon add column if not exists vakt_steder jsonb;
+alter table vakt add column if not exists type text;
+alter table vakt add column if not exists sted text;
+alter table vakt add column if not exists kommentar text;
+alter table vakt add column if not exists ansatt_kommentar text;
+alter table vakt add column if not exists ikke_publisert boolean not null default false;
+alter table vakt add column if not exists slettet boolean not null default false;
+alter table vakt add column if not exists publisert_kopi jsonb;
+alter table ansatt add column if not exists mobil text;
+alter table ansatt add column if not exists i_vaktplan boolean not null default true;
+alter table ansatt add column if not exists ferie_dager numeric not null default 25;
+alter table ansatt add column if not exists avspasering_min int not null default 0;
+alter table ansatt add column if not exists oversikt jsonb;
+alter table ansatt add column if not exists varsel_epost boolean not null default true;
+alter table ansatt add column if not exists sist_inne timestamptz;
+alter table tilgjengelighet add column if not exists timer jsonb;
+alter table timeliste add column if not exists fravaer_min int not null default 0;
+create table if not exists fravaer (
+  id uuid primary key default gen_random_uuid(),
+  organisasjon_id uuid not null references organisasjon(id) on delete cascade,
+  ansatt_id uuid not null references ansatt(id) on delete cascade,
+  fra date not null, til date not null,
+  type text not null, med_lonn boolean not null default true, timer_min int not null default 0,
+  status text not null default 'venter' check (status in ('venter','godkjent','avslatt')),
+  grunn text, svar text, fri_id uuid,
+  opprettet timestamptz not null default now()
+);
+create index if not exists fravaer_org on fravaer (organisasjon_id, fra);
+create table if not exists vakt_bytte (
+  id uuid primary key default gen_random_uuid(),
+  organisasjon_id uuid not null references organisasjon(id) on delete cascade,
+  vakt_id uuid not null references vakt(id) on delete cascade,
+  fra_ansatt uuid not null references ansatt(id) on delete cascade,
+  til_ansatt uuid not null references ansatt(id) on delete cascade,
+  status text not null default 'venter_kollega' check (status in ('venter_kollega','venter_leder','godkjent','avslatt')),
+  opprettet timestamptz not null default now()
+);
+create table if not exists timeavvik (
+  id uuid primary key default gen_random_uuid(),
+  organisasjon_id uuid not null references organisasjon(id) on delete cascade,
+  ansatt_id uuid not null references ansatt(id) on delete cascade,
+  vakt_id uuid references vakt(id) on delete set null,
+  dato date not null, start time, slutt time, tekst text,
+  opprettet timestamptz not null default now()
+);
+create table if not exists vakt_angre (id uuid primary key default gen_random_uuid(), organisasjon_id uuid not null references organisasjon(id) on delete cascade, data jsonb not null, opprettet timestamptz not null default now());
 
 -- Supabase gir tilgang til tabellene i «public» gjennom sitt eget API med en offentlig nøkkel.
 -- Systemet bruker ikke det API-et, så all slik tilgang stenges: radsikkerhet uten regler, og ingen rettigheter
