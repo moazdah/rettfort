@@ -61,7 +61,7 @@ export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org &
   const [lagtTil, setLagtTil] = useState<string[]>([]);
   const [feil, setFeil] = useState('');
   const [venter, setVenter] = useState(false);
-  const [sendt, setSendt] = useState<{ id: string; nr: number; kid: string | null; epostTil: string | null } | null>(null);
+  const [sendt, setSendt] = useState<{ id: string; nr: number; kid: string | null; epostTil: string | null; kreditter?: number | null } | null>(null);
   const [soker, setSoker] = useState(false);
   const [sok, setSok] = useState('');
   const [alle, setAlle] = useState(false);
@@ -133,7 +133,7 @@ export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org &
         <h2>{type === 'tilbud' ? `Tilbud ${sendt.nr} er klart.` : type === 'kvittering' ? `Kvittering ${sendt.nr} er ført som betalt.` : `Faktura ${sendt.nr} er klar.`}</h2>
         <p className="mut" style={{ marginTop: 6 }}>
           {type === 'faktura' ? `${kunde?.navn} skal betale ${kr(sum.total)} kr innen ${forfall.split('-').reverse().join('.')} med KID ${sendt.kid}. ` : ''}
-          {type !== 'tilbud' ? 'Den er ført i regnskapet. ' : ''}{sendt.epostTil ? `Den er sendt på e-post til ${sendt.epostTil} med PDF-en vedlagt.` : 'Kunden har ingen e-postadresse, eller e-posten kunne ikke sendes. Last ned PDF-en og send den selv.'}
+          {type !== 'tilbud' ? 'Den er ført i regnskapet. ' : ''}{sendt.epostTil ? `Den er sendt på e-post til ${sendt.epostTil} med PDF-en vedlagt.` : 'Kunden har ingen e-postadresse, eller e-posten kunne ikke sendes. Last ned PDF-en og send den selv.'}{sendt.kreditter != null ? ` Du har ${sendt.kreditter} av 5 fakturakreditter igjen denne måneden${sendt.kreditter === 0 ? '. Med Start sender du så mange du vil.' : '.'}` : ''}
         </p>
         <div className="rad" style={{ marginTop: 14 }}>
           <Link href={`/salg/${sendt.id}`} className="knapp">Se {type === 'tilbud' ? 'tilbudet' : type === 'kvittering' ? 'kvitteringen' : 'fakturaen'}</Link>

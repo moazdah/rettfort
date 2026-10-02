@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { Kreditter } from '@/components/Kreditter';
+import { gratisBruk } from '@/lib/tjenester/bruk';
+import { harFulltRegnskap } from '@/lib/pakker';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { KjopSkjema, type KjopStart, type InnsendingStart } from '../KjopSkjema';
 import { hentInnsending, antallIInnboks } from '@/lib/tjenester/innsending';
@@ -8,6 +11,7 @@ export const metadata = { title: 'Nytt kjøp' };
 export default async function NyttKjop({ searchParams }: { searchParams: Promise<{ utkast?: string; rett?: string; lev?: string; total?: string; dato?: string; innsending?: string }> }) {
   const s = await kreverSelskap();
   const d = await db();
+  const bruk = harFulltRegnskap(s.org.pakke) ? null : await gratisBruk(d, s.org.id, idag());
   const sp = await searchParams;
   const id = sp.utkast ?? sp.rett;
   let start: KjopStart | undefined;
@@ -46,6 +50,7 @@ export default async function NyttKjop({ searchParams }: { searchParams: Promise
           <Link href="/kjop" className="knapp hvit">Alle kjøp{titt?.n ? <span className="merke gul">{titt.n}</span> : null}</Link>
         </div>
       </div>
+      {bruk && <Kreditter bruk={bruk} bare="kvittering" />}
       <KjopSkjema key={id ?? sp.innsending ?? 'ny'} innsending={innsending} start={start} idag={idag()} mvaRegistrert={s.org.mvaRegistrert} kunder={kunder} bilagEpost={`${s.org.bilagSlug ?? 'firma'}@bilag.rettfort.no`} modus={modus} pakke={s.org.pakke} />
     </div>
   );

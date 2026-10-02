@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { Oppgrader } from '@/components/Oppgrader';
+import { harFulltRegnskap } from '@/lib/pakker';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { kontrollFunn } from '@/lib/tjenester/kontroll';
 import { MANEDER } from '@/lib/vis';
@@ -7,6 +9,7 @@ export const metadata = { title: 'Årsavslutning' };
 
 export default async function Aarsavslutning() {
   const s = await kreverSelskap();
+  if (!harFulltRegnskap(s.org.pakke)) return <Oppgrader tittel={"Årsoppgjøret"} tekst={"Gå gjennom året måned for måned, og få regnskapet klart til skattemeldingen og årsregnskapet."} punkter={["Løpende kontroll gjennom året", "Sjekkliste for avslutningen", "Klar til skattemeldingen"]} />;
   const d = await db();
   const dag = idag();
   const ar = Number(dag.slice(0, 4));

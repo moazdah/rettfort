@@ -1,4 +1,6 @@
 import { kreverSelskap, db } from '@/lib/server';
+import { Oppgrader } from '@/components/Oppgrader';
+import { harFulltRegnskap } from '@/lib/pakker';
 import { kanEndre } from '@/lib/auth';
 import { Handling } from '@/components/Handling';
 import { fjernByraTilgang, trekkInvitasjon } from '@/app/handlinger';
@@ -8,6 +10,7 @@ export const metadata = { title: 'Regnskapsfører' };
 
 export default async function Regnskapsforer() {
   const s = await kreverSelskap();
+  if (!harFulltRegnskap(s.org.pakke)) return <Oppgrader tittel={"Tilgang for regnskapsfører"} tekst={"Gi regnskapsføreren din tilgang til det samme som deg, så kan dere jobbe i det samme regnskapet."} punkter={["Full tilgang eller bare lesing", "Regnskapsføreren ser alt i sanntid", "Trekk tilgangen når du vil"]} />;
   const d = await db();
   const byraer = await d.q<{ id: string; navn: string; rolle: string; status: string; kontakt: string | null }>(
     `select o.id, o.navn, bk.rolle, bk.status, (select b.epost from medlemskap m join bruker b on b.id = m.bruker_id where m.organisasjon_id = o.id order by m.opprettet limit 1) as kontakt from byra_kunde bk join organisasjon o on o.id = bk.byra_id where bk.selskap_id = $1 and bk.status <> 'avsluttet'`, [s.org.id]);

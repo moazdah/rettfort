@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { Oppgrader } from '@/components/Oppgrader';
+import { harFulltRegnskap } from '@/lib/pakker';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { aktuellTermin, mvaStatus, terminFor, type Termin } from '@/lib/tjenester/mva';
 import { kanEndre } from '@/lib/auth';
@@ -25,6 +27,7 @@ function Steg({ nr, tittel, tekst, ferdig, aktiv, children }: { nr: number; titt
 
 export default async function Mva({ searchParams }: { searchParams: Promise<{ fra?: string }> }) {
   const s = await kreverSelskap();
+  if (!harFulltRegnskap(s.org.pakke)) return <Oppgrader tittel={"MVA-meldingen"} tekst={"MVA-meldingen lages av det du har ført, og du ser hva som mangler før fristen."} punkter={["Utkast til hver termin", "Påminnelse før fristen", "Kontroll av satser og fradrag"]} />;
   const d = await db();
   const dag = idag();
   const org = await d.en<{ mva_termin: 'tomnd' | 'aar' | 'ingen'; mva_registrert: boolean; regnskap_fra: string | null }>('select mva_termin, mva_registrert, regnskap_fra::text as regnskap_fra from organisasjon where id = $1', [s.org.id]);

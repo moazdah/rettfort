@@ -627,3 +627,14 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
   .vp-firma { display: none; }
 }
 @media (max-width: 480px) { .vp-til-regnskap { display: none; } }
+
+/* Lås på det som er med i Start og Selskap */
+.laas { display: inline-block; margin-left: 5px; vertical-align: -1px; opacity: .55; flex: none; }
+.ap-laas { width: 44px; height: 44px; border-radius: 50%; background: var(--gul-bg); color: var(--gul-tekst); display: flex; align-items: center; justify-content: center; }
+.ap-laas-liste { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; color: var(--mut, #586174); font-size: 14px; }
+.varsel.kreditter { align-items: center; }
+.kreditter { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.kreditt { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.kreditt-mal { width: 72px; height: 6px; border-radius: 99px; background: var(--linje, #E4DFD4); overflow: hidden; }
+.kreditt-mal > span { display: block; height: 100%; background: var(--ink, #0B2545); border-radius: 99px; }
+.kreditt-mal.kreditt-tom > span { background: var(--rod, #A33A22); }

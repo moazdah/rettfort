@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Logo } from './Logo';
-import { BYRA_I_SALG } from '@/lib/pakker';
+import { BYRA_I_SALG, harAssistent } from '@/lib/pakker';
 import { AssistentKnapp } from './Assistent';
 import { loggUt, settTestPakke, testByra, testfirma, byttForetak, settAiLeverandor } from '@/app/handlinger';
 import { MENY, MER, erGruppe, aktivPa, type MenyPunkt } from './menyvalg';
@@ -15,7 +15,9 @@ const PAKKE: Record<string, string> = { gratis: 'Gratis', start: 'Start', selska
 const ROLLE: Record<string, string> = { eier: 'Eier', full: 'Full tilgang', les: 'Kan se', kvittering: 'Kvitteringer', regnskapsforer_full: 'Regnskapsfører', regnskapsforer_les: 'Regnskapsfører (se)' };
 // «NY» ved Vaktplan de første 30 dagene etter lansering, når det ikke er noe å svare på.
 const VAKTPLAN_NY_TIL = '2026-11-01';
-const NY = [{ t: 'Faktura', href: '/salg/ny', k: 'F' }, { t: 'Kjøp eller kvittering', href: '/kjop/ny', k: 'K' }, { t: 'Vakt', href: '/vaktplan?ny=1', k: 'V', vakt: true }, { t: 'Kontoutskrift', href: '/bank', k: 'B' }];
+const NY = [{ t: 'Faktura', href: '/salg/ny', k: 'F' }, { t: 'Kjøp eller kvittering', href: '/kjop/ny', k: 'K' }, { t: 'Vakt', href: '/vaktplan?ny=1', k: 'V', vakt: true }, { t: 'Kontoutskrift', href: '/bank', k: 'B', laas: true }];
+/** Lås på det som er med i Start og Selskap. Valget er synlig i Gratis, og siden forklarer hva oppgraderingen gir. */
+const Laas = () => <svg className="laas" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-label="Krever oppgradering" role="img"><path d="M6 11h12v10H6z M8 11V7a4 4 0 0 1 8 0v4" /></svg>;
 
 /** Én nedtrekksmeny åpen om gangen. Lukkes ved klikk utenfor, Escape og sidebytte. */
 function useApen() {
@@ -84,7 +86,7 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
           <nav className="valg-rad" aria-label="Hovedmeny">
             {harByra && <Link href="/byra" className="valg tilbake">← Alle kunder</Link>}
             {MENY.map(m => {
-              if (!erGruppe(m)) return <Link key={m.href} href={m.href} className={`valg ${aktivPa(m, sti) ? 'aktiv' : ''}`} aria-current={aktivPa(m, sti) ? 'page' : undefined}>{m.navn}<Teller n={tellerFor(m)} /></Link>;
+              if (!erGruppe(m)) return <Link key={m.href} href={m.href} className={`valg ${aktivPa(m, sti) ? 'aktiv' : ''}`} aria-current={aktivPa(m, sti) ? 'page' : undefined}>{m.navn}{m.kreverBetalt && !betalt && <Laas />}<Teller n={tellerFor(m)} /></Link>;
               const aktiv = m.under.some(u => aktivPa(u, sti)), apen = meny.apen === m.navn;
               const sum = m.under.reduce((s, u) => s + tellerFor(u), 0);
               return (
@@ -94,7 +96,7 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
                     <div className="nedtrekk-panel" role="menu">
                       {m.under.map(u => (
                         <Link key={u.href} href={u.href} role="menuitem" className={`med-tekst ${aktivPa(u, sti) ? 'aktiv' : ''}`}>
-                          <span className="fyll"><b>{u.navn}</b><small>{u.tekst}{u.kreverBetalt && !betalt ? ' · Start og Selskap' : ''}</small></span>
+                          <span className="fyll"><b>{u.navn}{u.kreverBetalt && !betalt && <Laas />}</b><small>{u.tekst}{u.kreverBetalt && !betalt ? ' · Start og Selskap' : ''}</small></span>
                           <Teller n={tellerFor(u)} ny={nyMerke(u)} />
                         </Link>
                       ))}
@@ -110,11 +112,11 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
               <button type="button" className="ny-knapp" aria-label="Ny" aria-expanded={meny.apen === 'ny'} onClick={() => meny.bytt('ny')}><span aria-hidden className="pluss">+</span><span className="ny-tekst">Ny</span></button>
               {meny.apen === 'ny' && (
                 <div className="nedtrekk-panel hoyre" role="menu" style={{ minWidth: 230 }}>
-                  {NY.filter(v => !v.vakt || betalt).map(v => <Link key={v.k} href={v.href} role="menuitem" className="ny-valg"><span>{v.t}</span><kbd>{v.k}</kbd></Link>)}
+                  {NY.filter(v => !v.vakt || betalt).map(v => <Link key={v.k} href={v.href} role="menuitem" className="ny-valg"><span>{v.t}{v.laas && !betalt && <Laas />}</span><kbd>{v.k}</kbd></Link>)}
                 </div>
               )}
             </div>
-            {assistent && <AssistentKnapp />}
+            {assistent && <AssistentKnapp laast={!harAssistent(pakke) && !harByra} />}
             <span className="skille" aria-hidden />
             <div className="nedtrekk profil">
               <button type="button" className={`profil-knapp ${meny.apen === 'profil' ? 'apen' : ''}`} aria-expanded={meny.apen === 'profil'} aria-haspopup="true" onClick={() => meny.bytt('profil')}>
@@ -168,7 +170,7 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
           { href: '/vaktplan', t: 'Vakter', i: I.vakter, n: vaktTeller, aktiv: sti.startsWith('/vaktplan') },
         ].map(m => (
           <Link key={m.href} href={m.href} className={m.aktiv ? 'aktiv' : ''} aria-current={m.aktiv ? 'page' : undefined}>
-            <span className="ikon"><Ikon d={m.i} />{m.n > 0 && <span className="teller">{m.n}</span>}</span>{m.t}
+            <span className="ikon"><Ikon d={m.i} />{m.n > 0 && <span className="teller">{m.n}</span>}</span><span>{m.t}{m.href === '/vaktplan' && !betalt && <Laas />}</span>
           </Link>
         ))}
         <button type="button" className={mer ? 'aktiv' : ''} onClick={() => setMer(true)} aria-haspopup="dialog">
@@ -186,7 +188,7 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
                 <div className="mer-gruppe">{g.navn}</div>
                 {g.under.map(u => (
                   <Link key={u.href} href={u.href} className={`mer-rad ${aktivPa(u, sti) ? 'aktiv' : ''}`}>
-                    <span className="fyll">{u.navn}{u.kreverBetalt && !betalt ? <small> · Start og Selskap</small> : null}</span>
+                    <span className="fyll">{u.navn}{u.kreverBetalt && !betalt ? <><Laas /><small> · Start og Selskap</small></> : null}</span>
                     <Teller n={tellerFor(u)} /><span className="faint">›</span>
                   </Link>
                 ))}

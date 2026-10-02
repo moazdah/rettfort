@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { KontoVelger, KJOPSKONTOER } from '@/components/KontoVelger';
 import { Maskot } from '@/components/Logo';
-import { registrerKjopHandling, lagreKjopUtkastHandling, rettKjopHandling, kontrollKjopHandling, lastOppVedlegg, nyQrLenke, hentSkannet, velgTilbakebetaling } from '@/app/handlinger';
+import { registrerKjopHandling, lagreKjopUtkastHandling, rettKjopHandling, kontrollKjopHandling, lastOppVedlegg, nyQrLenke, hentSkannet, velgTilbakebetaling, kvitteringslesing } from '@/app/handlinger';
 import type { KjopInput, Funn } from '@/lib/tjenester/kjop';
 import { konto as finnKonto } from '@/lib/kontoplan';
 import { kr, tilOre, splittBrutto } from '@/lib/penger';
@@ -130,6 +130,8 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
   const [funn, setFunn] = useState<Funn[]>([]);
   const [forslag, setForslag] = useState<{ nr: number; navn: string; grunn: string } | null>(null);
   const [feil, setFeil] = useState('');
+  // Gratis: 5 kvitteringer som leses av i måneden. Viser hvor mange som er igjen, eller at kredittene er brukt opp.
+  const [kreditt, setKreditt] = useState<{ igjen: number | null; tom?: string } | null>(null);
   const [venter, setVenter] = useState(false);
   const [laster, setLaster] = useState(false);
   const [ferdig, setFerdig] = useState<{ bilagNr: number; id: string; utlegg?: { id: string; trengerValg: boolean; tilbake: Tilbake | null; navn: string | null } } | null>(null);
@@ -192,6 +194,9 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
   const lesInn = async (f: File, v: { id: string; navn: string }) => {
     setVedlegg(v); setKilde('kvittering'); setFase('arbeid'); setBekreftet(false); setLest(null);
     if (!/^image\/|pdf$|xml$/.test(f.type) && !/\.(xml|pdf|jpe?g|png|heic|webp)$/i.test(f.name)) return;
+    const k = await kvitteringslesing();
+    if (!k.ok) { setKreditt({ igjen: 0, tom: k.feil }); return; }
+    setKreditt(k.data!.igjen == null ? null : { igjen: k.data!.igjen });
     setLeser('Leser kvitteringen …');
     try {
       const t = await lesKvittering(f, idag, steg => setLeser(steg));
@@ -324,6 +329,8 @@ export function KjopSkjema({ start, idag, mvaRegistrert, kunder, bilagEpost, mod
         <button type="button" className="knapp hvit" onClick={eksempel}>Bruk eksempelkvittering</button>
         <button type="button" className="knapp hvit" onClick={() => { setKilde('uten_kvittering'); setFase('arbeid'); }}>Fyll ut uten kvittering</button>
       </div>
+      {kreditt?.tom && <div className="varsel gul">{kreditt.tom} <Link className="lenke" href="/innstillinger?vis=abonnement">Se pakkene</Link></div>}
+      {kreditt && !kreditt.tom && kreditt.igjen != null && <div className="varsel info liten">Kvitteringen ble lest av. Du har {kreditt.igjen} av 5 kvitteringskreditter igjen denne måneden.{kreditt.igjen === 0 ? ' Neste må du fylle inn selv, eller oppgrader til Start.' : ''}</div>}
       {feil && <div className="varsel rod">{feil}</div>}
       {visQr && <QrMobil onMottatt={fraMobil} onLukk={() => setVisQr(false)} />}
     </div>

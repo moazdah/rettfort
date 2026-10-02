@@ -30,18 +30,36 @@ export const ekstraAnsatte = (pakke: string, antall: number) => (harVaktplan(pak
 
 /** Pakkene for foretak. Prisene er i øre per måned, uten MVA. */
 export const PAKKER = [
-  { k: 'gratis', n: 'Gratis', pris: 0, d: 'Faktura, kjøp med kvitteringslesing, bank, MVA-melding, frister, rapporter og lønn.' },
-  { k: 'start', n: 'Start', pris: 17900, d: 'Alt i Gratis, pluss vaktplan for 5 ansatte. Ekstra ansatte koster 29 kr i måneden.' },
+  { k: 'gratis', n: 'Gratis', pris: 0, d: '5 fakturaer og 5 kvitteringer som leses av i måneden, kjøp, resultat og balanse.' },
+  { k: 'start', n: 'Start', pris: 17900, d: 'Hele regnskapet uten grenser: bank, MVA-melding, lønn, regnskapsfører og årsoppgjør. Vaktplan for 5 ansatte.' },
   { k: 'selskap', n: 'Selskap', pris: 24900, d: 'Alt i Start, pluss assistenten som fører for deg, og vaktplan for 15 ansatte.' },
 ] as const;
 
 /**
- * Introduksjonspris frem til alle tjenestene er på plass. Stripe krever minst 3 kr per trekk i NOK.
- * Sett til null for å ta ordinær pris.
+ * Introduksjonspris. Avsluttet 2. oktober 2026: nye kunder betaler ordinær pris. Sett et beløp i øre (minst 300)
+ * for å ta den i bruk igjen.
  */
-export const INTROPRIS: number | null = 300;
+export const INTROPRIS: number | null = null;
 
 /** I introduksjonsperioden tar vi ikke betalt for ekstra ansatte. */
 export const tarBetaltForEkstra = () => INTROPRIS === null;
 
 export const prisFor = (pakke: BetaltPakke) => INTROPRIS ?? PAKKER.find(p => p.k === pakke)!.pris;
+
+// ---------- Gratis ----------
+// Gratis er en smakebit: kom i gang med fakturaer og kjøp. Når bedriften trenger bank, MVA-melding, lønn eller
+// regnskapsfører, er det Start. Ingenting som er ført blir borte eller låst; du kan alltid se og laste ned alt.
+
+/** Hvor mye som er med i Gratis per kalendermåned. */
+export const GRATIS_GRENSE = { faktura: 5, kvittering: 5 } as const;
+
+export type Betalt = 'bank' | 'mva' | 'lonn' | 'regnskapsforer' | 'saft' | 'aarsoppgjor';
+export const BETALT_NAVN: Record<Betalt, string> = {
+  bank: 'Bankavstemming', mva: 'MVA-meldingen', lonn: 'Lønn', regnskapsforer: 'Tilgang for regnskapsfører', saft: 'SAF-T', aarsoppgjor: 'Årsoppgjøret',
+};
+
+/** Alt i regnskapet uten grenser. Byrå regnes som betalt. */
+export const harFulltRegnskap = (pakke: string) => pakke !== 'gratis';
+
+/** Feilmeldingen når noe krever Start eller Selskap. */
+export const betaltTekst = (hva: Betalt) => `${BETALT_NAVN[hva]} er med i Start og Selskap. Oppgrader under Innstillinger → Abonnement.`;

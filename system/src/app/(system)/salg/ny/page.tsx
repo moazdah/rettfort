@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { Kreditter } from '@/components/Kreditter';
+import { gratisBruk } from '@/lib/tjenester/bruk';
+import { harFulltRegnskap } from '@/lib/pakker';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { hentOrg, hentSalg, type Kontakt } from '@/lib/tjenester/faktura';
 import { FakturaSkjema, type SalgStart, type Videre } from '../FakturaSkjema';
@@ -8,6 +11,7 @@ export const metadata = { title: 'Ny faktura' };
 export default async function NyFaktura({ searchParams }: { searchParams: Promise<{ utkast?: string; kopi?: string; tilbud?: string }> }) {
   const s = await kreverSelskap();
   const d = await db();
+  const bruk = harFulltRegnskap(s.org.pakke) ? null : await gratisBruk(d, s.org.id, idag());
   const sp = await searchParams;
   const org = await hentOrg(d, s.org.id) as Awaited<ReturnType<typeof hentOrg>> & { faktura_tekst: string | null };
   // Kundene med den sist fakturerte først, så de vanligste ligger øverst.
@@ -33,6 +37,7 @@ export default async function NyFaktura({ searchParams }: { searchParams: Promis
         <div><div className="stikk" style={{ color: 'var(--gul-tekst)' }}>Penger inn</div><h1 style={{ marginTop: 4 }}>{start?.id ? 'Fortsett utkastet' : 'Jeg skal sende en faktura'}</h1></div>
         <Link href="/salg" className="knapp hvit">Alle fakturaer</Link>
       </div>
+      {bruk && <Kreditter bruk={bruk} bare="faktura" />}
       <FakturaSkjema org={org} kunder={kunder} start={start} idag={idag()} videre={videre} />
     </div>
   );

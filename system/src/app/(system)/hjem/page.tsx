@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { Kreditter } from '@/components/Kreditter';
+import { gratisBruk } from '@/lib/tjenester/bruk';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { aktuellTermin, mvaStatus } from '@/lib/tjenester/mva';
 import { nesteFrister, sistRegistrert } from '@/lib/tjenester/oversikt';
@@ -7,7 +9,7 @@ import { Maskot } from '@/components/Logo';
 import { kr, langDato, nd, kortManed } from '@/lib/vis';
 import { norskDato } from '@/lib/frister';
 import { cookies } from 'next/headers';
-import { PAKKER, harVaktplan } from '@/lib/pakker';
+import { PAKKER, harVaktplan, harFulltRegnskap } from '@/lib/pakker';
 import { ventende } from '@/lib/ai/utfor';
 import { kanEndre } from '@/lib/auth';
 import { VenterPaDeg, type Ventende } from '@/components/VenterPaDeg';
@@ -24,6 +26,7 @@ const TITTEL: Record<string, string> = { purring: 'Purring', betaling: 'Betaling
 export default async function Hjem() {
   const s = await kreverSelskap();
   const d = await db();
+  const bruk = harFulltRegnskap(s.org.pakke) ? null : await gratisBruk(d, s.org.id, idag());
   const dag = idag();
   const termin = await aktuellTermin(d, s.org.id, dag);
   const mva = termin ? await mvaStatus(d, s.org.id, termin) : null;
@@ -97,6 +100,7 @@ export default async function Hjem() {
         <div className="mut liten">{langDato(dag)}</div>
         <h1 style={{ marginTop: 6 }}>Hei, {fornavn}.</h1>
       </div>
+      {bruk && <Kreditter bruk={bruk} />}
 
       {valgtPakke && (
         <div className="varsel gul"><div className="fyll">Du valgte <b>{valgtPakke.n}</b>. Fullfør betalingen, så får du alt som er med i pakken.</div><a href={`/pakke/${valgtPakke.k}`} className="knapp liten">Gå til betaling</a></div>

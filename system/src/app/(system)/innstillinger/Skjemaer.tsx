@@ -138,7 +138,7 @@ export function Pakker({ pakke, erEier, betalingPa = false, intropris = null, st
       {feil && <div className="varsel rod">{feil}</div>}
       {melding && <div className="varsel gronn">{melding}</div>}
       {betalingPa && harKunde && erEier && <div><button type="button" className="knapp hvit" disabled={!!venter} onClick={portal}>{venter === 'portal' ? 'Åpner …' : 'Kort, kvitteringer og oppsigelse'}</button></div>}
-      <p className="mut liten">{betalingPa ? 'Du betaler med kort hos Stripe. Kortopplysningene lagres hos Stripe, ikke hos oss. ' : 'Betaling er ikke koblet til i testmodus. '}Lønn er med i alle pakker, uten ekstra pris per ansatt. Ingen bindingstid. Bytter du ned, beholder du alt som er ført.</p>
+      <p className="mut liten">{betalingPa ? 'Du betaler med kort hos Stripe. Kortopplysningene lagres hos Stripe, ikke hos oss. ' : 'Betaling er ikke koblet til i testmodus. '}Lønn er med i Start og Selskap, uten pris per ansatt. Ingen bindingstid. Bytter du ned, beholder du alt som er ført.</p>
     </div>
   );
 }

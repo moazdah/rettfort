@@ -20,7 +20,8 @@ import { sendEpost, maler, grunnadresse, epostPa, qrVedlegg } from '@/lib/epost'
 import { fakturaPdf } from '@/lib/tjenester/fakturaPdf';
 import { hentFakta } from '@/lib/tjenester/assistent';
 import { svar as assistentSvar, type Svar } from '@/lib/assistent';
-import { harAssistent, erTestbruker, BYRA_I_SALG } from '@/lib/pakker';
+import { harAssistent, erTestbruker, BYRA_I_SALG, harFulltRegnskap, betaltTekst, GRATIS_GRENSE, type Betalt } from '@/lib/pakker';
+import { sjekkFakturaGrense, taKvitteringslesing, sendteFakturaer } from '@/lib/tjenester/bruk';
 import { nyHemmelighet, sjekkTotp, otpauthUri } from '@/lib/totp';
 import QRCode from 'qrcode';
 import { lagTestfirma, TESTFIRMA_ORGNR } from '@/lib/db/eksempel';
@@ -324,6 +325,20 @@ export async function oppdaterKontakt(id: string, k: { navn: string; adresse: st
   }, 'Kunden er oppdatert.');
 }
 
+/** Stopper det som krever Start eller Selskap. Det som allerede er ført, kan alltid ses og lastes ned. */
+function kreverBetalt(s: { org: { pakke: string } }, hva: Betalt) {
+  if (!harFulltRegnskap(s.org.pakke)) throw new RegnskapsFeil(betaltTekst(hva));
+}
+
+/** Kalles før en kvittering leses av i nettleseren. Gratis har 5 i måneden; gir hvor mange som er igjen. */
+export async function kvitteringslesing(): Promise<Resultat<{ igjen: number | null }>> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const db = await getDb();
+    return { igjen: await db.tx(t => taKvitteringslesing(t, s.org.id, s.org.pakke, idag())) };
+  });
+}
+
 // ---------- Salg ----------
 
 export async function lagreUtkastSalg(f: FakturaInput): Promise<Resultat<{ id: string }>> {
@@ -336,11 +351,12 @@ export async function lagreUtkastSalg(f: FakturaInput): Promise<Resultat<{ id: s
   }, 'Utkastet er lagret.');
 }
 
-export async function sendSalgHandling(f: FakturaInput, videreKjop: string[] = []): Promise<Resultat<{ id: string; nr: number; kid: string | null; epostTil: string | null }>> {
+export async function sendSalgHandling(f: FakturaInput, videreKjop: string[] = []): Promise<Resultat<{ id: string; nr: number; kid: string | null; epostTil: string | null; kreditter: number | null }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     const db = await getDb();
     const r = await db.tx(async t => {
+      if (f.type === 'faktura' || f.type === 'kvittering') await sjekkFakturaGrense(t, s.org.id, s.org.pakke, idag());
       const id = await lagreSalg(t, s.org.id, f);
       const x = await sendSalg(t, s.org.id, id, s.bruker.id);
       for (const k of videreKjop) await t.q('update kjop set videre_faktura_id = $3 where id = $1 and organisasjon_id = $2', [k, s.org.id, id]);
@@ -357,7 +373,9 @@ export async function sendSalgHandling(f: FakturaInput, videreKjop: string[] = [
         await db.q(`insert into logg (organisasjon_id, bruker_id, handling, ref) values ($1,$2,'epost_sendt',$3)`, [s.org.id, s.bruker.id, `${r.id} til ${epostTil}`]).catch(() => {});
       }
     }
-    return { id: r.id, nr: r.nr, kid: r.kid, epostTil };
+    // Gratis: hvor mange fakturaer som er igjen denne måneden.
+    const kreditter = harFulltRegnskap(s.org.pakke) || f.type === 'tilbud' || f.type === 'kreditnota' ? null : Math.max(0, GRATIS_GRENSE.faktura - await sendteFakturaer(db, s.org.id, idag()));
+    return { id: r.id, nr: r.nr, kid: r.kid, epostTil, kreditter };
   });
 }
 
@@ -464,7 +482,7 @@ export async function slettKjopHandling(id: string): Promise<Resultat> {
 
 export async function lastOppKontoutskrift(fd: FormData): Promise<Resultat<{ maned: string; nye: number }>> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkSkrivetilgang(s); kreverBetalt(s, 'bank');
     const fil = fd.get('fil') as File | null;
     if (!fil || !fil.size) throw new RegnskapsFeil('Velg en fil.');
     if (fil.size > 10 * 1024 * 1024) throw new RegnskapsFeil('Filen er for stor (maks 10 MB).');
@@ -484,7 +502,7 @@ export async function lastOppKontoutskrift(fd: FormData): Promise<Resultat<{ man
 
 export async function behandleBevegelseHandling(id: string, h: Handling): Promise<Resultat> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkSkrivetilgang(s); kreverBetalt(s, 'bank');
     const db = await getDb();
     const m = await db.tx(t => behandleBevegelse(t, s.org.id, id, h, s.bruker.id));
     revalidatePath('/', 'layout');
@@ -494,7 +512,7 @@ export async function behandleBevegelseHandling(id: string, h: Handling): Promis
 
 export async function merkManedFerdigHandling(maned: string): Promise<Resultat> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkSkrivetilgang(s); kreverBetalt(s, 'bank');
     const db = await getDb();
     await db.tx(t => merkManedFerdig(t, s.org.id, maned, s.bruker.id));
     revalidatePath('/', 'layout');
@@ -505,7 +523,7 @@ export async function merkManedFerdigHandling(maned: string): Promise<Resultat> 
 
 export async function sendMvaHandling(termin: Termin): Promise<Resultat<{ aBetale: number }>> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkSkrivetilgang(s); kreverBetalt(s, 'mva');
     const db = await getDb();
     const o = await db.en<{ mva_termin: 'tomnd' | 'aar' | 'ingen' }>('select mva_termin from organisasjon where id = $1', [s.org.id]);
     if (!o || o.mva_termin === 'ingen') throw new RegnskapsFeil('Foretaket er ikke MVA-registrert.');
@@ -532,7 +550,7 @@ export async function vurderFunnHandling(id: string, tekst: string): Promise<Res
 
 export async function lagreLonnsoppsett(v: { ferie: number; lonningsdag: number; otp: string; agaSone: string }): Promise<Resultat> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkSkrivetilgang(s); kreverBetalt(s, 'lonn');
     const db = await getDb();
     await db.q('update organisasjon set ferie_prosent = $2, lonningsdag = $3, otp = $4, aga_sone = $5 where id = $1', [s.org.id, v.ferie, v.lonningsdag, v.otp, v.agaSone]);
     revalidatePath('/lonn');
@@ -541,7 +559,7 @@ export async function lagreLonnsoppsett(v: { ferie: number; lonningsdag: number;
 
 export async function lagreAnsatt(a: { id?: string; navn: string; epost?: string; stilling?: string; lonnType: 'fast' | 'time' | 'provisjon'; manedslonn: number; timesats: number; skatteprosent: number; kontonr?: string; startdato?: string; provisjonProsent?: number; overtidProsent?: number; stillingsprosent?: number; fasteTillegg?: { tekst: string; belop: number; feriepengegrunnlag?: boolean }[]; passordType?: 'fnr' | 'eget' | 'ingen'; passord?: string }): Promise<Resultat> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkSkrivetilgang(s); kreverBetalt(s, 'lonn');
     if (!a.navn.trim()) throw new RegnskapsFeil('Skriv navnet til den ansatte.');
     if (!['fast', 'time', 'provisjon'].includes(a.lonnType)) throw new RegnskapsFeil('Velg hvordan den ansatte får lønn.');
     if (!(a.skatteprosent >= 0 && a.skatteprosent <= 60)) throw new RegnskapsFeil('Skatteprosenten må være mellom 0 og 60.');
@@ -574,7 +592,7 @@ export async function lagreAnsatt(a: { id?: string; navn: string; epost?: string
 
 export async function kjorLonnHandling(periode: string, dato: string, input: LonnInput[], sendNar: SendNar = 'utbetaling'): Promise<Resultat<{ bilagNr: number; sendt: string[]; feilet: string[]; planlagt: number; utenEpost: string[] }>> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkSkrivetilgang(s); kreverBetalt(s, 'lonn');
     if (!['na', 'utbetaling', 'ingen'].includes(sendNar)) throw new RegnskapsFeil('Velg når lønnslippene skal sendes.');
     const db = await getDb();
     const r = await db.tx(async t => {
@@ -595,7 +613,7 @@ export async function kjorLonnHandling(periode: string, dato: string, input: Lon
 /** Sender (eller sender på nytt) lønnslippen for én ansatt og måned, med en gang. */
 export async function sendLonnslippNa(periode: string, ansattId: string): Promise<Resultat<{ til: string }>> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkSkrivetilgang(s); kreverBetalt(s, 'lonn');
     const db = await getDb();
     const r = await db.en<{ id: string; epost: string | null; navn: string }>(`select ls.id, a.epost, a.navn from lonnslipp ls join lonnskjoring l on l.id = ls.lonnskjoring_id join ansatt a on a.id = ls.ansatt_id where l.organisasjon_id = $1 and l.periode = $2 and ls.ansatt_id = $3`, [s.org.id, periode, ansattId]);
     if (!r) throw new RegnskapsFeil('Fant ikke lønnslippen.');
@@ -761,7 +779,7 @@ export async function apneKundeportal(): Promise<Resultat<{ url: string }>> {
 
 export async function inviterRegnskapsforer(epost: string, rolle: 'regnskapsforer_full' | 'regnskapsforer_les'): Promise<Resultat<{ lenke: string; sendt: boolean }>> {
   return trygt(async () => {
-    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    const s = await kreverOrg(); sjekkSkrivetilgang(s); kreverBetalt(s, 'regnskapsforer');
     if (!gyldigEpost(epost)) throw new RegnskapsFeil('Skriv en gyldig e-postadresse.');
     const db = await getDb();
     const token = randomBytes(18).toString('base64url');

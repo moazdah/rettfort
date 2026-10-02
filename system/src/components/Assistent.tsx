@@ -43,7 +43,7 @@ const lagTittel = (t: string) => { const s = t.trim().replace(/\s+/g, ' '); cons
 const Stjerne = ({ s = 16 }: { s?: number }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2l1.8 5.6L19.5 9.5l-5.7 1.9L12 17l-1.8-5.6L4.5 9.5l5.7-1.9z" /><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></svg>;
 
 /** Knappen i toppmenyen. Snakker med panelet via hendelser, så de kan ligge hvor som helst i siden. */
-export function AssistentKnapp() {
+export function AssistentKnapp({ laast = false }: { laast?: boolean }) {
   const [apen, setApen] = useState(false);
   const [mac, setMac] = useState(false);
   useEffect(() => {
@@ -55,7 +55,7 @@ export function AssistentKnapp() {
   return (
     <button type="button" className={`assistent-topp ikke-utskrift ${apen ? 'apen' : ''}`} aria-label={apen ? 'Lukk assistenten' : 'Åpne assistenten'} aria-expanded={apen} title={`Assistent (${mac ? '⌘K' : 'Ctrl+K'})`}
       onClick={() => window.dispatchEvent(new CustomEvent('rf:assistent', { detail: 'bytt' }))}>
-      <Stjerne s={15} /><span className="assistent-topp-tekst">Assistent</span>
+      <Stjerne s={15} /><span className="assistent-topp-tekst">Assistent</span>{laast && <svg className="laas" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-label="Med i Selskap" role="img"><path d="M6 11h12v10H6z M8 11V7a4 4 0 0 1 8 0v4" /></svg>}
     </button>
   );
 }
@@ -231,9 +231,17 @@ export function Assistent({ tilgang = true }: { tilgang?: boolean }) {
       {!tilgang ? (
         <div className="ap-rulle ap-meldinger">
           <div className="ap-velkommen">
+            <div className="ap-laas" aria-hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 11h12v10H6z M8 11V7a4 4 0 0 1 8 0v4" /></svg></div>
             <div className="ap-velkommen-tittel">Assistenten er med i Selskap</div>
-            <p>Den lager fakturaer, fører kostnader, sender purringer, kjører lønn og lager vaktplanen for deg. Du ser alltid forslaget og bekrefter selv før noe lagres.</p>
+            <p>Skriv hva du vil ha gjort, så gjør assistenten det klart. Du ser alltid forslaget og godkjenner selv før noe lagres.</p>
+            <ul className="ap-laas-liste">
+              <li>«Fakturer Havbris AS for 12 timer i september»</li>
+              <li>«Før kvitteringen jeg tok bilde av»</li>
+              <li>«Kjør lønn for oktober»</li>
+              <li>«Hvem skylder meg penger?»</li>
+            </ul>
             <div><Link href="/innstillinger?vis=abonnement" className="knapp">Oppgrader til Selskap</Link></div>
+            <p className="faint liten">Selskap koster 249 kr i måneden uten MVA, og har også vaktplan for 15 ansatte. Ingen bindingstid.</p>
           </div>
         </div>
       ) : visning === 'historikk' ? (

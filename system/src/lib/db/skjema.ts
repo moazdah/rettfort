@@ -1,7 +1,7 @@
 // Databaseskjema. Kjøres ved oppstart (idempotent). Regnskapsreglene håndheves også i databasen:
 // posteringer kan ikke endres eller slettes, hvert bilag må gå i null, låste perioder kan ikke få nye bilag.
 
-export const SKJEMA_VERSJON = 15;
+export const SKJEMA_VERSJON = 16;
 
 export const SKJEMA = /* sql */ `
 create table if not exists skjema_versjon (versjon int primary key, tid timestamptz not null default now());
@@ -524,6 +524,9 @@ alter table timeliste add column if not exists fravaer_uten_min int not null def
 -- Glemt passord: lenken på e-post gjelder i én time og kan bare brukes én gang. Bare hashen lagres.
 create table if not exists passord_lenke (token_hash text primary key, bruker_id uuid not null references bruker(id) on delete cascade, utloper timestamptz not null, opprettet timestamptz not null default now());
 create index if not exists passord_lenke_bruker on passord_lenke (bruker_id);
+
+-- Gratis har grenser per måned. Her telles det som ikke kan telles fra regnskapet, som kvitteringer som er lest av.
+create table if not exists pakke_bruk (organisasjon_id uuid not null references organisasjon(id) on delete cascade, maned text not null, hva text not null, antall int not null default 0, primary key (organisasjon_id, maned, hva));
 create table if not exists vakt_angre (id uuid primary key default gen_random_uuid(), organisasjon_id uuid not null references organisasjon(id) on delete cascade, data jsonb not null, opprettet timestamptz not null default now());
 
 -- Supabase gir tilgang til tabellene i «public» gjennom sitt eget API med en offentlig nøkkel.

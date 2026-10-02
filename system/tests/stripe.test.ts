@@ -47,7 +47,7 @@ describe('Stripe', () => {
     const r = await startBetaling(db, o, 'start', 'eier@betal.no', 'https://min.test');
     expect(r).toEqual({ url: 'https://checkout.stripe.com/c/pay/cs_1' });
     expect(kall.map(k => k.sti)).toEqual(['webhook_endpoints', 'prices', 'prices', 'customers', 'checkout/sessions']);
-    expect(kall[2].data).toContain('unit_amount=300');
+    expect(kall[2].data).toContain('unit_amount=17900');
     expect(kall[2].data).toContain('currency=nok');
     expect(kall[4].data).toContain('success_url=https://min.test/innstillinger?vis=abonnement&betaling={CHECKOUT_SESSION_ID}');
     expect(await webhookHemmeligheter(db)).toEqual(['whsec_test']);

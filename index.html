@@ -237,7 +237,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
 
   <section id="priser" style="scroll-margin-top:72px;background:#F4F1EA;border-top:1px solid #E4DFD4;padding:104px 24px 88px">
     <div style="max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:48px">
-      <div style="text-align:center"><h2 style="margin:0;font-size:clamp(34px,4.2vw,54px);line-height:1.05;letter-spacing:-.035em;font-weight:600">Enkle priser.</h2><p style="margin:14px auto 0;font-size:18px;color:#3D4759;max-width:560px;text-wrap:pretty">Start gratis, eller velg en betalt pakke for 3 kr i måneden mens vi bygger ferdig. Ingen binding.</p></div>
+      <div style="text-align:center"><h2 style="margin:0;font-size:clamp(34px,4.2vw,54px);line-height:1.05;letter-spacing:-.035em;font-weight:600">Enkle priser.</h2><p style="margin:14px auto 0;font-size:18px;color:#3D4759;max-width:560px;text-wrap:pretty">Prøv gratis, og oppgrader når bedriften trenger mer. Ingen bindingstid.</p></div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:22px">
         <div data-rf="pkvalg" role="tablist" aria-label="Velg pakke" style="display:flex;gap:4px;padding:5px;border-radius:99px;background:#EAE5DA;max-width:100%;overflow-x:auto;scrollbar-width:none">
           <sc-for list="{{ pkValg }}" as="v" hint-placeholder-count="3">
@@ -267,7 +267,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
           </div>
         </sc-for>
       </div>
-      <div style="text-align:center;font-size:13.5px;color:#586174;line-height:1.6">Priser eks. MVA. Ekstra ansatte i vaktplanen: 29 kr per ansatt per måned, gratis i introduksjonsperioden.<br><a href="/vilkar" style="color:#0B2545;font-weight:600;border-bottom:1.5px solid #0B2545">Se pris- og abonnementsvilkår</a></div>
+      <div style="text-align:center;font-size:13.5px;color:#586174;line-height:1.6">Priser eks. MVA. Ekstra ansatte i vaktplanen: 29 kr per ansatt per måned.<br><a href="/vilkar" style="color:#0B2545;font-weight:600;border-bottom:1.5px solid #0B2545">Se pris- og abonnementsvilkår</a></div>
     </div>
   </section>
 
@@ -354,23 +354,24 @@ class Component extends DCLogic {
         return { t: x.t, sel: on ? 'true' : 'false', bg: on ? '#0B2545' : '#fff', fg: on ? '#fff' : '#0B2545', bd: on ? '#0B2545' : '#D9D3C6', p, on: () => this.setState({ di: j, dt: 0 }) }; })
     };
     const FAQ = [
-      ['Er Gratis virkelig gratis?', 'Ja. Du kan sende fakturaer, føre kjøp med kvitteringslesing, avstemme banken, lage MVA-meldingen og kjøre lønn uten å betale. Du betaler først når du vil ha vaktplan eller assistenten.'],
-      ['Hva koster vaktplanen?', 'Start har vaktplan for 5 ansatte og Selskap for 15. Har du flere, koster hver ekstra ansatt 29 kr i måneden. I introduksjonsperioden tar vi ikke betalt for ekstra ansatte. Detaljene står i vilkårene.'],
-      ['Kan regnskapsføreren min være med?', 'Ja. Inviter regnskapsføreren fra systemet. Regnskapsføreren får tilgang til det samme som deg, uansett pakke.'],
+      ['Er Gratis virkelig gratis?', 'Ja, uten kort og uten tidsgrense. Hver måned får du 5 fakturaer og 5 kvitteringer som leses av, og du ser resultat og balanse. Bank, MVA-melding, lønn og tilgang for regnskapsfører er med i Start.'],
+      ['Hva koster vaktplanen?', 'Start har vaktplan for 5 ansatte og Selskap for 15. Har du flere, koster hver ekstra ansatt 29 kr i måneden. Detaljene står i vilkårene.'],
+      ['Kan regnskapsføreren min være med?', 'Ja, i Start og Selskap. Inviter regnskapsføreren fra systemet, så får regnskapsføreren tilgang til det samme som deg.'],
       ['Hvordan lages MVA-meldingen?', 'Den lages av det du har ført. Rettført viser hva som mangler før fristen, så du vet at tallene stemmer.'],
       ['Hvordan fungerer vaktplanen?', 'Du legger inn de ansatte og lager uka. De får en lenke på e-post eller SMS, ser vaktene sine, tar ledige vakter og sier fra når de ikke kan. Timene går rett til lønnskjøringen.']
     ];
-    const FUNK = [['Faktura og tilbud med KID', 0], ['Kjøp, med kvitteringer som leses automatisk', 0], ['Bank: last opp kontoutskriften, så avstemmer vi', 0], ['MVA-melding, frister og påminnelser', 0], ['Lønn og lønnsslipper', 0], ['Rapporter og SAF-T', 0], ['Regnskapsføreren din får tilgang', 0], ['Vaktplan med bytter, fri og ledige vakter', 1], ['Timer fra vaktplanen rett til lønn', 1], ['Assistent som fører for deg', 2]];
+    // [tekst, fra pakke (0 Gratis, 1 Start, 2 Selskap), tekst i Gratis når den har en grense]
+    const FUNK = [['Faktura og tilbud med KID', 0, '5 fakturaer i måneden'], ['Kjøp og utgifter', 0], ['Kvitteringer som leses automatisk', 0, '5 kvitteringer som leses av i måneden'], ['Resultat og balanse', 0], ['Bank: last opp kontoutskriften, så avstemmer vi', 1], ['MVA-melding, frister og påminnelser', 1], ['Lønn, lønnsslipper og A-melding', 1], ['Regnskapsfører, SAF-T og årsoppgjør', 1], ['Vaktplan med bytter, fri og ledige vakter', 1], ['Timer fra vaktplanen rett til lønn', 1], ['Assistent som fører for deg', 2]];
     const PK = [
-      { n: 'Gratis', d: 'For deg som vil føre regnskapet selv uten å betale.', pris: '0', per: 'kr / mnd', note: 'Ingen kort. Ingen tidsgrense.', knapp: 'Start gratis', top: ['Hele regnskapet og lønn', 'Kvitteringer leses automatisk', 'Uten vaktplan og assistent'] },
-      { n: 'Start', d: 'For bedriften med ansatte som jobber i vakter.', pris: '3', per: 'kr / mnd · introduksjonspris', note: 'Ordinær pris 179 kr / mnd. Du får beskjed før den endres.', knapp: 'Velg Start', top: ['Alt i Gratis', 'Vaktplan for 5 ansatte', '29 kr / mnd per ekstra ansatt'] },
-      { n: 'Selskap', d: 'For bedriften som vil at assistenten gjør jobben.', pris: '3', per: 'kr / mnd · introduksjonspris', note: 'Ordinær pris 249 kr / mnd. Du får beskjed før den endres.', knapp: 'Velg Selskap', top: ['Alt i Start', 'Vaktplan for 15 ansatte', 'Assistent, 200 svar per måned'], anbefalt: true }
+      { n: 'Gratis', d: 'For deg som vil prøve og sende de første fakturaene.', pris: '0', per: 'kr / mnd', note: 'Ingen kort. Ingen tidsgrense.', knapp: 'Start gratis', top: ['5 fakturaer i måneden', '5 kvitteringer leses av', 'Resultat og balanse'] },
+      { n: 'Start', d: 'Hele regnskapet uten grenser, og vaktplan for de ansatte.', pris: '179', per: 'kr / mnd', note: 'Ingen bindingstid. Si opp når du vil.', knapp: 'Velg Start', top: ['Bank, MVA-melding og lønn', 'Regnskapsfører og årsoppgjør', 'Vaktplan for 5 ansatte'] },
+      { n: 'Selskap', d: 'For bedriften som vil at assistenten gjør jobben.', pris: '249', per: 'kr / mnd', note: 'Ingen bindingstid. Si opp når du vil.', knapp: 'Velg Selskap', top: ['Alt i Start', 'Assistent som fører for deg', 'Vaktplan for 15 ansatte'], anbefalt: true }
     ];
     const valgt = s.pakke ?? 1;
     // Start (i midten) er valgt når siden åpnes.
     const pkValg = PK.map((x, i) => ({ n: x.n, pris: x.pris + ' kr', sel: i === valgt, bg: i === valgt ? '#F6DF6E' : 'transparent', bd: i === valgt ? '#E6CF5C' : 'transparent', fw: i === valgt ? 700 : 500, on: () => this.setState({ pakke: i }) }));
     const pkVis = [PK[valgt]].map(x => ({ ...x, anbefalt: !!x.anbefalt, href: 'https://min.xn--rettfrt-u1a.no/pakke/' + ['gratis', 'start', 'selskap'][valgt],
-      f: FUNK.map(([t, lvl]) => { const ja = valgt >= lvl; return { t, i: ja ? '✓' : '–', fg: ja ? '#0B2545' : '#A5A9B2', dot: ja ? '#E2F1E8' : '#EFEBE2', ic: ja ? '#1F7D52' : '#A5A9B2' }; }) }));
+      f: FUNK.map(([t, lvl, g]) => { const ja = valgt >= lvl; return { t: valgt === 0 && g ? g : t, i: ja ? '✓' : '–', fg: ja ? '#0B2545' : '#A5A9B2', dot: ja ? '#E2F1E8' : '#EFEBE2', ic: ja ? '#1F7D52' : '#A5A9B2' }; }) }));
     const V = (t, k) => k === 'o' ? { t, bg: '#fff', bd: '#0B2545', st: 'dashed' } : t ? { t, bg: '#E9EEF5', bd: '#C9D5E5', st: 'solid' } : { t: '', bg: '#FBFAF6', bd: '#EFEBE2', st: 'solid' };
     return {
       ...demoVals,

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { harFulltRegnskap } from '@/lib/pakker';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { rapportData, oppstilling } from '@/lib/tjenester/rapport';
 import { kr, nd, MANEDER } from '@/lib/vis';
@@ -117,7 +118,7 @@ export default async function Rapporter({ searchParams }: { searchParams: Promis
           <div><h2>For regnskapsføreren</h2><div className="mut liten">Vanlige oppstillinger med kontonummer</div></div>
           <div className="rad">
             <a className="knapp hvit liten" href={`/api/rapport?type=${tab}&ar=${ar}`}>Excel (CSV)</a>
-            <a className="knapp hvit liten" href={`/api/saft?ar=${ar}`}>SAF-T</a>
+            {harFulltRegnskap(s.org.pakke) ? <a className="knapp hvit liten" href={`/api/saft?ar=${ar}`}>SAF-T</a> : <Link className="knapp hvit liten" href="/innstillinger?vis=abonnement" title="SAF-T er med i Start og Selskap">SAF-T · Start</Link>}
           </div>
         </div>
         <nav className="faner">{FANER.map(([k, t]) => <Link key={k} href={`/rapporter?ar=${ar}&tab=${k}`} className={tab === k ? 'aktiv' : ''}>{t}</Link>)}</nav>

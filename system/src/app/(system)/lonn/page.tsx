@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { Oppgrader } from '@/components/Oppgrader';
+import { harFulltRegnskap } from '@/lib/pakker';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { kanEndre } from '@/lib/auth';
 import { AGA_SONER, agaForKjoring } from '@/lib/tjenester/lonn';
@@ -19,6 +21,7 @@ export const metadata = { title: 'Lønn' };
 
 export default async function Lonn({ searchParams }: { searchParams: Promise<{ vis?: string; amelding?: string }> }) {
   const s = await kreverSelskap();
+  if (!harFulltRegnskap(s.org.pakke)) return <Oppgrader tittel={"Lønn"} tekst={"Kjør lønn på få minutter, med skattetrekk, feriepenger og arbeidsgiveravgift regnet ut for deg."} punkter={["Lønnsslipper på e-post", "A-meldingen klar til innsending", "Timer fra vaktplanen rett til lønn"]} />;
   const d = await db();
   const dag = idag();
   const sp = await searchParams;

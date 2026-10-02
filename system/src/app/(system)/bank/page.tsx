@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { Oppgrader } from '@/components/Oppgrader';
+import { harFulltRegnskap } from '@/lib/pakker';
 import { kreverSelskap, db } from '@/lib/server';
 import { avstemming, foreslaAlle } from '@/lib/tjenester/bank';
 import { kanEndre } from '@/lib/auth';
@@ -16,6 +18,7 @@ const MATCH: Record<string, string> = { faktura: 'Innbetaling på faktura', kjop
 
 export default async function Bank({ searchParams }: { searchParams: Promise<{ maned?: string }> }) {
   const s = await kreverSelskap();
+  if (!harFulltRegnskap(s.org.pakke)) return <Oppgrader tittel={"Bankavstemming"} tekst={"Last opp kontoutskriften fra nettbanken, så sjekkes hver bevegelse mot regnskapet, og du får forslag til hva som mangler."} punkter={["Kontoutskrift fra alle norske banker", "Forslag til hver bevegelse", "Lukk måneden når banken og regnskapet stemmer"]} />;
   const d = await db();
   const sp = await searchParams;
   // Regnskapet kan ha fått nye kjøp eller betalinger siden sist. Regn ut forslagene på nytt.
