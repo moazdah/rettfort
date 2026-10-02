@@ -54,6 +54,18 @@ export async function prisId(pakke: BetaltPakke): Promise<string> {
   return p.id;
 }
 
+/**
+ * MVA 25 % i Stripe. Prisene er uten MVA, så Stripe legger MVA på hvert trekk og viser den på kvitteringen.
+ * Lages første gang og huskes i systeminnstillingene.
+ */
+export async function mvaSatsId(t: Sporring): Promise<string> {
+  const lagret = await hentVerdi(t, 'stripe_mva');
+  if (lagret) return lagret;
+  const r = await stripe<{ id: string }>('POST', 'tax_rates', { display_name: 'MVA', description: 'Merverdiavgift 25 %', percentage: 25, inclusive: false, country: 'NO', jurisdiction: 'Norge', metadata: { rettfort: 'mva25' } });
+  await settVerdi(t, 'stripe_mva', r.id);
+  return r.id;
+}
+
 /** Prisen for én ekstra ansatt i vaktplanen per måned. Lages i Stripe første gang. */
 export async function ekstraPrisId(): Promise<string> {
   const oppslag = `rettfort_ekstra_ansatt_${EKSTRA_ANSATT}_mnd`;
@@ -152,7 +164,7 @@ export async function startBetaling(t: Sporring, orgId: string, pakke: BetaltPak
     const a = await stripe<{ status: string; items: { data: { id: string; price: { metadata?: { tillegg?: string } } }[] } }>('GET', `subscriptions/${o.stripe_abonnement}`);
     const pakkelinje = a.items.data.find(i => !i.price.metadata?.tillegg) ?? a.items.data[0];
     if (['active', 'trialing', 'past_due'].includes(a.status)) {
-      await stripe('POST', `subscriptions/${o.stripe_abonnement}`, { items: [{ id: pakkelinje.id, price: pris }], proration_behavior: 'create_prorations', cancel_at_period_end: false, metadata: { org_id: orgId, pakke } });
+      await stripe('POST', `subscriptions/${o.stripe_abonnement}`, { items: [{ id: pakkelinje.id, price: pris }], default_tax_rates: [await mvaSatsId(t)], proration_behavior: 'create_prorations', cancel_at_period_end: false, metadata: { org_id: orgId, pakke } });
       await t.q(`update organisasjon set pakke = $2, abonnement_status = 'active', abonnement_slutt = null where id = $1`, [orgId, pakke]);
       await synkEkstraAnsatte(t, orgId);
       return { byttet: true };
@@ -162,7 +174,7 @@ export async function startBetaling(t: Sporring, orgId: string, pakke: BetaltPak
   const s = await stripe<{ url: string }>('POST', 'checkout/sessions', {
     mode: 'subscription', customer: k, client_reference_id: orgId, locale: 'nb',
     line_items: [{ price: pris, quantity: 1 }, ...await ekstraLinje(t, orgId, pakke)],
-    subscription_data: { metadata: { org_id: orgId, pakke } },
+    subscription_data: { metadata: { org_id: orgId, pakke }, default_tax_rates: [await mvaSatsId(t)] },
     metadata: { org_id: orgId, pakke },
     success_url: `${grunnadresse}/abonnement/takk?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${grunnadresse}/abonnement/bekreft?pakke=${pakke}&avbrutt=1`,

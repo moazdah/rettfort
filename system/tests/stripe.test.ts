@@ -16,6 +16,7 @@ function falskStripe() {
     if (sti === 'prices' && init.method === 'GET') return svar({ data: [] });
     if (sti === 'prices') return svar({ id: 'price_start' });
     if (sti === 'customers') return svar({ id: 'cus_1' });
+    if (sti === 'tax_rates') return svar({ id: 'txr_mva' });
     if (sti === 'checkout/sessions') return svar({ url: 'https://checkout.stripe.com/c/pay/cs_1' });
     if (sti.startsWith('checkout/sessions/')) return svar({ client_reference_id: kall.orgId, status: 'complete', subscription: { id: 'sub_1', status: 'active', customer: 'cus_1', cancel_at_period_end: false, current_period_end: 1790000000, metadata: { org_id: kall.orgId, pakke: 'start' } } });
     if (sti === 'subscriptions/sub_1' && init.method === 'POST') return svar({ id: 'sub_1', status: 'active', customer: 'cus_1', cancel_at_period_end: true, current_period_end: 1793000000, metadata: { pakke: 'start' } });
@@ -46,10 +47,12 @@ describe('Stripe', () => {
     kall.orgId = o;
     const r = await startBetaling(db, o, 'start', 'eier@betal.no', 'https://min.test');
     expect(r).toEqual({ url: 'https://checkout.stripe.com/c/pay/cs_1' });
-    expect(kall.map(k => k.sti)).toEqual(['webhook_endpoints', 'prices', 'prices', 'customers', 'checkout/sessions']);
+    expect(kall.map(k => k.sti)).toEqual(['webhook_endpoints', 'prices', 'prices', 'customers', 'tax_rates', 'checkout/sessions']);
+    expect(kall[4].data).toContain('percentage=25');
     expect(kall[2].data).toContain('unit_amount=17900');
     expect(kall[2].data).toContain('currency=nok');
-    expect(kall[4].data).toContain('success_url=https://min.test/abonnement/takk?session_id={CHECKOUT_SESSION_ID}');
+    expect(kall[5].data).toContain('subscription_data[default_tax_rates][0]=txr_mva');
+    expect(kall[5].data).toContain('success_url=https://min.test/abonnement/takk?session_id={CHECKOUT_SESSION_ID}');
     expect(await webhookHemmeligheter(db)).toEqual(['whsec_test']);
     expect((await db.en<{ pakke: string }>('select pakke from organisasjon where id = $1', [o]))!.pakke).toBe('gratis');
     expect(await fullforBetaling(db, o, 'cs_1')).toBe(true);
