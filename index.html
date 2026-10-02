@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="nb">
 <head>
+<meta charset="utf-8">
+<title>Rettført – regnskapsprogram med faktura, lønn og vaktplan</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Rettført">
+<meta property="og:locale" content="nb_NO">
+<meta property="og:title" content="Rettført – regnskapsprogram med faktura, lønn og vaktplan">
+<meta property="og:description" content="Enkelt regnskapsprogram for enkeltpersonforetak og små AS. Send faktura, ta bilde av kvitteringer, kjør lønn og lag vaktplan. Start gratis.">
+<meta property="og:url" content="https://xn--rettfrt-u1a.no/">
+<meta property="og:image" content="https://xn--rettfrt-u1a.no/assets/delingsbilde.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Rettført: regnskap, lønn og vaktplan på ett sted">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/png" sizes="96x96" href="/assets/ikon-96.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/assets/ikon-192.png">
@@ -16,17 +29,131 @@
   else if (q.has('demo')) location.replace('/demo-bedrift');
 } catch (e) {} })();
 </script>
-<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Regnskap, lønn og vaktplan for deg som driver selv. Skriv hva du vil ha gjort, så fører Rettført det.">
+<meta name="description" content="Enkelt regnskapsprogram for enkeltpersonforetak og små AS. Send faktura, ta bilde av kvitteringer, kjør lønn og lag vaktplan. Start gratis.">
 <link rel="canonical" href="https://xn--rettfrt-u1a.no/">
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@graph": [
-    { "@type": "WebSite", "@id": "https://xn--rettfrt-u1a.no/#website", "url": "https://xn--rettfrt-u1a.no/", "name": "Rettført", "description": "Regnskap, lønn og vaktplan for deg som driver selv. Skriv hva du vil ha gjort, så fører Rettført det.", "creator": { "@id": "https://xn--rettfrt-u1a.no/#mohamad-bokdasji" } },
-    { "@type": "Person", "@id": "https://xn--rettfrt-u1a.no/#mohamad-bokdasji", "name": "Mohamad Bokdasji", "sameAs": ["https://www.linkedin.com/in/mohamad-bokdasji-99b0b5262/"] }
-  ]
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://xn--rettfrt-u1a.no/#organisasjon",
+   "name": "Rettført",
+   "alternateName": [
+    "Rettfort",
+    "rettført.no"
+   ],
+   "url": "https://xn--rettfrt-u1a.no/",
+   "logo": {
+    "@type": "ImageObject",
+    "url": "https://xn--rettfrt-u1a.no/assets/ikon-512.png",
+    "width": 512,
+    "height": 512
+   },
+   "email": "mohbok04@hotmail.com",
+   "founder": {
+    "@id": "https://xn--rettfrt-u1a.no/#mohamad-bokdasji"
+   },
+   "sameAs": [
+    "https://www.linkedin.com/in/mohamad-bokdasji-99b0b5262/"
+   ]
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://xn--rettfrt-u1a.no/#website",
+   "url": "https://xn--rettfrt-u1a.no/",
+   "name": "Rettført",
+   "alternateName": "Rettfort",
+   "inLanguage": "nb-NO",
+   "description": "Enkelt regnskapsprogram for enkeltpersonforetak og små AS. Send faktura, ta bilde av kvitteringer, kjør lønn og lag vaktplan. Start gratis.",
+   "publisher": {
+    "@id": "https://xn--rettfrt-u1a.no/#organisasjon"
+   }
+  },
+  {
+   "@type": "SoftwareApplication",
+   "@id": "https://xn--rettfrt-u1a.no/#program",
+   "name": "Rettført",
+   "alternateName": "Rettfort",
+   "applicationCategory": "BusinessApplication",
+   "applicationSubCategory": "Regnskapsprogram",
+   "operatingSystem": "Nettleser",
+   "url": "https://xn--rettfrt-u1a.no/",
+   "image": "https://xn--rettfrt-u1a.no/assets/delingsbilde.png",
+   "inLanguage": "nb-NO",
+   "description": "Enkelt regnskapsprogram for enkeltpersonforetak og små AS. Send faktura, ta bilde av kvitteringer, kjør lønn og lag vaktplan. Start gratis.",
+   "featureList": [
+    "Faktura og tilbud med KID",
+    "Kvitteringer som leses automatisk",
+    "Bankavstemming",
+    "MVA-melding og frister",
+    "Lønn og lønnsslipp",
+    "Vaktplan for ansatte",
+    "Tilgang for regnskapsfører",
+    "Assistent som fører for deg"
+   ],
+   "offers": [
+    {
+     "@type": "Offer",
+     "name": "Gratis",
+     "description": "5 fakturaer og 5 kvitteringer som leses av i måneden, resultat og balanse.",
+     "price": "0",
+     "priceCurrency": "NOK",
+     "url": "https://xn--rettfrt-u1a.no/vilkar",
+     "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": "0",
+      "priceCurrency": "NOK",
+      "unitText": "måned",
+      "valueAddedTaxIncluded": false
+     }
+    },
+    {
+     "@type": "Offer",
+     "name": "Start",
+     "description": "Hele regnskapet uten grenser: bank, MVA-melding, lønn, regnskapsfører og årsoppgjør. Vaktplan for 5 ansatte.",
+     "price": "179",
+     "priceCurrency": "NOK",
+     "url": "https://xn--rettfrt-u1a.no/vilkar",
+     "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": "179",
+      "priceCurrency": "NOK",
+      "unitText": "måned",
+      "valueAddedTaxIncluded": false
+     }
+    },
+    {
+     "@type": "Offer",
+     "name": "Selskap",
+     "description": "Alt i Start, assistenten som fører for deg og vaktplan for 15 ansatte.",
+     "price": "249",
+     "priceCurrency": "NOK",
+     "url": "https://xn--rettfrt-u1a.no/vilkar",
+     "priceSpecification": {
+      "@type": "UnitPriceSpecification",
+      "price": "249",
+      "priceCurrency": "NOK",
+      "unitText": "måned",
+      "valueAddedTaxIncluded": false
+     }
+    }
+   ],
+   "publisher": {
+    "@id": "https://xn--rettfrt-u1a.no/#organisasjon"
+   }
+  },
+  {
+   "@type": "Person",
+   "@id": "https://xn--rettfrt-u1a.no/#mohamad-bokdasji",
+   "name": "Mohamad Bokdasji",
+   "url": "https://xn--rettfrt-u1a.no/bak-rettfort",
+   "sameAs": [
+    "https://www.linkedin.com/in/mohamad-bokdasji-99b0b5262/"
+   ]
+  }
+ ]
 }
 </script>
 <script src="./support.js"></script>
@@ -34,7 +161,7 @@
 <body>
 <x-dc>
 <helmet>
-<title>Rettført – regnskap, lønn og vaktplan</title>
+<title>Rettført – regnskapsprogram med faktura, lønn og vaktplan</title>
 <template id="__bundler_thumbnail" data-bg-color="#F4F1EA"><svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"><rect width="400" height="400" fill="#F4F1EA"></rect><path d="M120 210l55 55 110-130" fill="none" stroke="#35AE74" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"></path></svg></template>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -105,6 +232,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
   <section data-rf="hero" style="padding:72px 24px 96px">
     <div data-rf="herostakk" style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:56px">
       <div data-rf="herotekst" style="text-align:center;max-width:900px">
+        <p style="margin:0 0 18px;font-size:16px;font-weight:500;color:#586174;letter-spacing:-.005em">Regnskapsprogram for enkeltpersonforetak og små AS</p>
         <h1 style="margin:0;font-size:clamp(40px,6vw,76px);line-height:1.02;letter-spacing:-.045em;font-weight:600;text-wrap:balance">Regnskap, lønn og vaktplan. <span style="background:linear-gradient(transparent 62%,#F6DF6E 62%,#F6DF6E 92%,transparent 92%)">På ett sted.</span></h1>
         <div data-rf="heroknapper" style="margin-top:30px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
           <a href="https://min.xn--rettfrt-u1a.no/registrer" style="height:52px;padding:0 26px;border-radius:99px;background:#0B2545;color:#fff;font-size:16.5px;font-weight:600;display:flex;align-items:center" style-hover="background:#16345E">Start gratis</a>
@@ -309,7 +437,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
   <footer style="border-top:1px solid #E4DFD4;padding:28px 24px">
     <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:20px;flex-wrap:wrap;font-size:14px;color:#586174">
       <img src="assets/rettfort-logo.png" alt="Rettført" style="height:28px;width:auto;margin:0 -8px">
-      <span style="flex:1">© 2026 Rettført</span>
+      <span style="flex:1">© 2026 Rettført · Regnskapsprogram for små bedrifter</span>
       <a href="/personvern" style="color:#586174">Personvern</a>
       <a href="/personvern#cookies" data-samtykke="1" style="color:#586174">Informasjonskapsler</a>
       <a href="/vilkar" style="color:#586174">Vilkår</a>
@@ -360,6 +488,7 @@ class Component extends DCLogic {
         return { t: x.t, sel: on ? 'true' : 'false', bg: on ? '#0B2545' : '#fff', fg: on ? '#fff' : '#0B2545', bd: on ? '#0B2545' : '#D9D3C6', p, on: () => this.setState({ di: j, dt: 0 }) }; })
     };
     const FAQ = [
+      ['Hva er Rettført?', 'Rettført (også skrevet Rettfort) er et norsk regnskapsprogram på nett for enkeltpersonforetak og små aksjeselskap. Du sender faktura med KID, tar bilde av kvitteringer, avstemmer banken, får MVA-meldingen laget, kjører lønn med lønnsslipp og lager vaktplan for de ansatte. Du kan starte gratis.'],
       ['Er Gratis virkelig gratis?', 'Ja, uten kort og uten tidsgrense. Hver måned får du 5 fakturaer og 5 kvitteringer som leses av, og du ser resultat og balanse. Bank, MVA-melding, lønn og tilgang for regnskapsfører er med i Start.'],
       ['Hva koster vaktplanen?', 'Start har vaktplan for 5 ansatte og Selskap for 15. Har du flere, koster hver ekstra ansatt 29 kr i måneden. Detaljene står i vilkårene.'],
       ['Kan regnskapsføreren min være med?', 'Ja, i Start og Selskap. Inviter regnskapsføreren fra systemet, så får regnskapsføreren tilgang til det samme som deg.'],
