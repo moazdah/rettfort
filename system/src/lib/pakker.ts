@@ -31,7 +31,7 @@ export const ekstraAnsatte = (pakke: string, antall: number) => (harVaktplan(pak
 /** Pakkene for foretak. Prisene er i øre per måned, uten MVA. */
 export const PAKKER = [
   { k: 'gratis', n: 'Gratis', pris: 0, d: 'Faktura, kjøp med kvitteringslesing, bank, MVA-melding, frister, rapporter og lønn.' },
-  { k: 'start', n: 'Start', pris: 14900, d: 'Alt i Gratis, pluss vaktplan for 5 ansatte. Ekstra ansatte koster 29 kr i måneden.' },
+  { k: 'start', n: 'Start', pris: 17900, d: 'Alt i Gratis, pluss vaktplan for 5 ansatte. Ekstra ansatte koster 29 kr i måneden.' },
   { k: 'selskap', n: 'Selskap', pris: 24900, d: 'Alt i Start, pluss assistenten som fører for deg, og vaktplan for 15 ansatte.' },
 ] as const;
 
