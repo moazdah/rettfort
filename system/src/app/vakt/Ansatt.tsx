@@ -103,6 +103,7 @@ export function Ansatt({ d }: { d: AnsattData }) {
         </div>
         {mer.length > 0 && <div className="v2a-gruppe"><div className="v2-sm">Arbeid</div>{mer.map(([k, l, i, n]) => <NavKnapp key={k} pa={aktivFane === k} ikon={i} tekst={l} n={n} onClick={() => ga(k)} />)}</div>}
         <div className="v2a-gruppe"><div className="v2-sm">Meg</div><NavKnapp pa={aktivFane === 'minside'} ikon="person" tekst="Min side" onClick={() => ga('minside')} /></div>
+        {d.logo && <img src={d.logo} alt={d.foretak} className="v2a-firmalogo" />}
         <div className="v2a-side-bunn"><Avatar navn={d.meg.navn} art="mork" s={36} /><div className="fyll"><div className="v2a-side-navn">{d.meg.navn}</div><div className="v2-hjelp">{d.foretak}</div></div></div>
       </nav>
       <nav className="v2a-rail" aria-label="Hovedmeny">
@@ -256,7 +257,7 @@ function Oversikt({ c, tilpass }: { c: Ctx; tilpass: () => void }) {
   return (
     <div className="v2a-oversikt">
       <div className="v2a-hei">
-        <div><h1>Hei, {fornavn(d.meg.navn)}.</h1><div className="v2-hjelp stor">Uke {d.uker[0].uke} · {dagDm(d.idag).replace(/\. (\w+)$/, (_, m) => `. ${mndNavn(d.idag)}`)}</div></div>
+        <div>{d.logo && <img src={d.logo} alt={d.foretak} className="v2a-firmalogo hei" />}<h1>Hei, {fornavn(d.meg.navn)}.</h1><div className="v2-hjelp stor">Uke {d.uker[0].uke} · {dagDm(d.idag).replace(/\. (\w+)$/, (_, m) => `. ${mndNavn(d.idag)}`)}</div></div>
         <button type="button" className="v2-rund" aria-label="Tilpass oversikten" onClick={tilpass}><Ikon n="tune" s={22} /></button>
       </div>
       {ingen && !apne.length ? <TomTilstand tittel="Ingen vakter denne uka." tekst="Du får beskjed på e-post når lederen publiserer neste uke." /> : (

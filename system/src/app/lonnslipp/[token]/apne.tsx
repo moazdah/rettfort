@@ -46,7 +46,7 @@ export function ApneLonnslipp({ token, foretak, periode, type, fornavn }: { toke
     <div className="stakk">
       <div className="dokument">
         <div className="rad" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div><b>{d.foretak.navn}</b>{d.foretak.orgnr && <div className="mut">Org.nr {d.foretak.orgnr.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3')}</div>}</div>
+          <div>{d.logoUrl && <img src={d.logoUrl} alt={d.foretak.navn} className="dok-logo" />}<b>{d.foretak.navn}</b>{d.foretak.orgnr && <div className="mut">Org.nr {d.foretak.orgnr.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3')}</div>}</div>
           <div style={{ textAlign: 'right' }}><b style={{ fontSize: 16 }}>Lønnslipp</b><div className="mut">{d.periodeTekst}</div><div className="mut">Utbetalt {d.utbetalt.split('-').reverse().join('.')}</div></div>
         </div>
         <div style={{ margin: '14px 0' }}><b>{d.ansatt.navn}</b><div className="mut">{d.ansatt.stilling ?? ''}{d.ansatt.kontonr ? ` · konto ${formaterKontonr(d.ansatt.kontonr)}` : ''}</div></div>

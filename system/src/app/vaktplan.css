@@ -821,3 +821,8 @@ button[aria-current="page"] > .v2-nav-ikon { background: var(--yellow-soft); }
 @media (max-width: 760px) { .v2a-blokker { columns: 1; } }
 .v2-lenkeboks .fyll { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .v2-lenke { word-break: break-all; font-size: 12.5px; background: #fff; border-radius: 8px; padding: 6px 8px; color: var(--ink); align-self: stretch; }
+
+/* Logoen til foretaket i vaktplanen for ansatte */
+.v2a-firmalogo { display: block; max-height: 40px; max-width: 160px; width: auto; height: auto; object-fit: contain; margin: 0 8px 12px; }
+.v2a-firmalogo.hei { margin: 0 0 12px; }
+@media (min-width: 1024px) { .v2a-firmalogo.hei { display: none; } }

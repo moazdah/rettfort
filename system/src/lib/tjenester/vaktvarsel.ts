@@ -6,6 +6,7 @@ import { sendEpost, maler } from '../epost';
 import { ukeDager } from '../vaktplan';
 import { nyLenke, publiser, vakterMellom, innstillinger } from './vaktplan';
 import { tilVaktplan } from '../verter';
+import { epostLogo } from './logo';
 
 const DAGNAVN = ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'];
 export const dagTekst = (d: string) => { const x = new Date(`${d}T12:00:00Z`); return `${DAGNAVN[x.getUTCDay()]} ${x.getUTCDate()}.${x.getUTCMonth() + 1}.`; };
@@ -21,7 +22,8 @@ export async function varsleAnsatt(db: Db, base: string, orgId: string, foretak:
   const til = a?.epost ?? (a?.kontakt?.includes('@') ? a.kontakt : null);
   if (!a || !til || !a.bruker_id || !a.varsel_epost) return false;
   const lenke = `${tilVaktplan(base)}/vakt/inn/${await nyLenke(db, ansattId)}`;
-  return sendEpost({ til, ...maler.vakt({ navn: a.navn, foretak, tittel, linjer, knappTekst: 'Åpne vaktplanen', lenke }) });
+  const el = await epostLogo(db, orgId);
+  return sendEpost({ til, ...maler.vakt({ navn: a.navn, foretak, tittel, linjer, knappTekst: 'Åpne vaktplanen', lenke, logo: el.logo }), vedlegg: el.vedlegg });
 }
 
 /** Leder får beskjed om nye forespørsler, høyst én gang i timen. */

@@ -7,6 +7,7 @@ import { aktuellTermin, mvaStatus } from '@/lib/tjenester/mva';
 import { sendKlareIBakgrunnen } from '@/lib/tjenester/utsending';
 import { antallIInnboks } from '@/lib/tjenester/innsending';
 import { valgtLeverandor, leverandorKlar } from '@/lib/ai/modell';
+import { logoFor } from '@/lib/tjenester/logo';
 
 export default async function SystemRamme({ children }: { children: React.ReactNode }) {
   const s = await kreverSelskap();
@@ -25,7 +26,7 @@ export default async function SystemRamme({ children }: { children: React.ReactN
   const medAssistent = harAssistent(s.org.pakke) || s.medlemskap.some(m => m.type === 'byra');
   return (
     <div className="ramme">
-      <Meny firma={s.org.navn} pakke={s.org.pakke} bruker={s.bruker.navn} rolle={s.rolle} mvaTeller={mvaTeller} harByra={s.medlemskap.some(m => m.type === 'byra')} testbruker={test} ai={ai} assistent vaktTeller={vaktTeller} idag={idag()} foretak={s.medlemskap.filter(m => m.type === 'selskap')} orgId={s.org.id} epost={s.bruker.epost} innboksTeller={innboksTeller} />
+      <Meny logo={(await logoFor(d, s.org.id, 'meny').catch(() => null))?.dataUrl ?? null} firma={s.org.navn} pakke={s.org.pakke} bruker={s.bruker.navn} rolle={s.rolle} mvaTeller={mvaTeller} harByra={s.medlemskap.some(m => m.type === 'byra')} testbruker={test} ai={ai} assistent vaktTeller={vaktTeller} idag={idag()} foretak={s.medlemskap.filter(m => m.type === 'selskap')} orgId={s.org.id} epost={s.bruker.epost} innboksTeller={innboksTeller} />
       <main className="innhold">
         {d.modus === 'testmodus' && <div className="testmodus ikke-utskrift">Testmodus: databasen er ikke koblet til ennå. Data kan bli nullstilt.</div>}
         {children}

@@ -64,8 +64,17 @@ const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-s
 const bilder = () => (process.env.RETTFORT_URL || 'https://min.xn--rettfrt-u1a.no').replace(/\/$/, '');
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/** Logoen til foretaket som sender, lagt ved som innebygd bilde med cid «firmalogo». Størrelsen i piksler. */
+export interface EpostLogo { bredde: number; hoyde: number }
+
+/** Foretakets logo øverst i kortet, høyst 48 px høy og 200 px bred. */
+const logoHtml = (l: EpostLogo, navn: string) => {
+  const s = Math.min(48 / l.hoyde, 200 / l.bredde, 1), w = Math.round(l.bredde * s), h = Math.round(l.hoyde * s);
+  return `<img src="cid:firmalogo" width="${w}" height="${h}" alt="${esc(navn)}" style="display:block;width:${w}px;height:${h}px;border:0;margin:0 0 20px">`;
+};
+
 /** Rammen rundt alle e-poster: logo og figur øverst, innholdet i et hvitt kort. */
-export function ramme(o: { tittel: string; innhold: string; bunn?: string; forhandsvisning?: string }): string {
+export function ramme(o: { tittel: string; innhold: string; bunn?: string; forhandsvisning?: string; logo?: { bredde: number; hoyde: number; navn: string } }): string {
   const b = bilder();
   return `<!doctype html><html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>${esc(o.tittel)}</title></head>
 <body style="margin:0;padding:0;background:${BEIGE}">
@@ -74,7 +83,7 @@ ${o.forhandsvisning ? `<div style="display:none;max-height:0;overflow:hidden;opa
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px">
 <tr><td style="padding:0 0 12px"><img src="${b}/epost/topp.png" width="520" alt="Rettført" style="display:block;width:100%;max-width:520px;height:auto;border:0;border-radius:16px"></td></tr>
 <tr><td style="background:#ffffff;border:1px solid ${LINJE};border-radius:16px;padding:32px 28px;font-family:${FONT};color:${BLA}">
-<h1 style="margin:0 0 20px;font-size:22px;line-height:1.3;font-weight:700;color:${BLA}">${esc(o.tittel)}</h1>
+${o.logo ? logoHtml(o.logo, o.logo.navn) : ''}<h1 style="margin:0 0 20px;font-size:22px;line-height:1.3;font-weight:700;color:${BLA}">${esc(o.tittel)}</h1>
 ${o.innhold}
 </td></tr>
 <tr><td align="center" style="padding:18px 8px 0;font-family:${FONT};font-size:12px;line-height:1.5;color:#8A909C">${o.bunn ?? 'Rettført · rettført.no'}</td></tr>
@@ -118,7 +127,7 @@ export const maler = {
         + liten('Lenken er personlig. Har du ikke ventet denne invitasjonen, kan du se bort fra den.'),
     }),
   }),
-  faktura: (o: { type: string; nr: number; foretak: string; kunde: string; belop: string; forfall: string | null; kid: string | null; kontonr: string | null }): Mal => {
+  faktura: (o: { type: string; nr: number; foretak: string; kunde: string; belop: string; forfall: string | null; kid: string | null; kontonr: string | null; logo?: EpostLogo }): Mal => {
     const hva = o.type === 'kreditnota' ? 'Kreditnota' : o.type === 'tilbud' ? 'Tilbud' : o.type === 'kvittering' ? 'Kvittering' : 'Faktura';
     const erFaktura = o.type === 'faktura';
     const betal = erFaktura
@@ -134,11 +143,11 @@ export const maler = {
       html: ramme({
         tittel: `${hva} ${o.nr} fra ${o.foretak}`, forhandsvisning: erFaktura ? `${o.belop} kr${o.forfall ? ` · forfall ${o.forfall}` : ''}` : `${hva} ${o.nr}`,
         innhold: tabell + avsnitt(`${{ Faktura: 'Fakturaen', Kreditnota: 'Kreditnotaen', Tilbud: 'Tilbudet', Kvittering: 'Kvitteringen' }[hva]} ligger vedlagt som PDF.`, 'margin:0') + liten('Har du spørsmål, svar på denne e-posten.'),
-        bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
+        bunn: `Sendt av ${esc(o.foretak)} med Rettført`, logo: o.logo ? { ...o.logo, navn: o.foretak } : undefined,
       }),
     };
   },
-  lonnslipp: (o: { navn: string; foretak: string; periode: string; netto: string; utbetalt: string; lenke?: string | null; passordTekst?: string }): Mal => ({
+  lonnslipp: (o: { navn: string; foretak: string; periode: string; netto: string; utbetalt: string; lenke?: string | null; passordTekst?: string; logo?: EpostLogo }): Mal => ({
     emne: `Lønnslipp for ${o.periode} fra ${o.foretak}`,
     tekst: `Hei ${o.navn}!\n\nLønnslippen din for ${o.periode} er klar.\n\nUtbetalt: ${o.netto} kr\nDato: ${o.utbetalt}\n\n${o.lenke ? `Åpne lønnslippen her:\n${o.lenke}\n\nDu trenger ${o.passordTekst ?? 'passordet'} for å åpne den.` : 'Lønnslippen ligger vedlagt som PDF.'}\n\nHar du spørsmål, svar på denne e-posten.\n\nVennlig hilsen\n${o.foretak}`,
     html: ramme({
@@ -148,10 +157,10 @@ export const maler = {
         + (o.lenke
           ? knapp('Åpne lønnslippen', o.lenke) + liten(`Du trenger ${esc(o.passordTekst ?? 'passordet')} for å åpne den. Lønnslippen ligger ikke i e-posten, så den er trygg selv om noen andre ser innboksen din.`)
           : avsnitt('Lønnslippen ligger vedlagt som PDF.', 'margin:0') + liten('Har du spørsmål, svar på denne e-posten.')),
-      bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
+      bunn: `Sendt av ${esc(o.foretak)} med Rettført`, logo: o.logo ? { ...o.logo, navn: o.foretak } : undefined,
     }),
   }),
-  skannelenke: (o: { navn: string | null; foretak: string; type: 'klient' | 'ansatt'; lenke: string; qr?: boolean }): Mal => {
+  skannelenke: (o: { navn: string | null; foretak: string; type: 'klient' | 'ansatt'; lenke: string; qr?: boolean; logo?: EpostLogo }): Mal => {
     const ansatt = o.type === 'ansatt';
     const hva = ansatt ? `utlegg til ${o.foretak}` : `kvitteringer og fakturaer til ${o.foretak}`;
     return {
@@ -163,21 +172,21 @@ export const maler = {
           + knapp(ansatt ? 'Send et utlegg' : 'Send en kvittering', o.lenke)
           + (o.qr ? `<div style="text-align:center;margin:8px 0 18px"><img src="cid:qr-kode" width="180" height="180" alt="QR-kode til lenken" style="display:inline-block;border:1px solid #E4DFD4;border-radius:12px"><div style="font-size:13px;color:#586174;margin-top:6px">Leser du dette på PC-en? Skann koden med mobilkameraet.</div></div>` : '')
           + liten(`${ansatt ? 'Du ser også om utleggene dine er godkjent og betalt. ' : ''}Lenken er personlig. Tips: legg den til på hjemskjermen, så har du den alltid for hånden.`),
-        bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
+        bunn: `Sendt av ${esc(o.foretak)} med Rettført`, logo: o.logo ? { ...o.logo, navn: o.foretak } : undefined,
       }),
     };
   },
   /** Varsler fra vaktplanen: publisert uke, endret vakt, ledig vakt, svar på fri/bytte, og forespørsler til leder. */
-  vakt: (o: { navn: string | null; foretak: string; tittel: string; linjer: string[]; knappTekst: string; lenke: string }): Mal => ({
+  vakt: (o: { navn: string | null; foretak: string; tittel: string; linjer: string[]; knappTekst: string; lenke: string; logo?: EpostLogo }): Mal => ({
     emne: `${o.tittel} · ${o.foretak}`,
     tekst: `Hei${o.navn ? ` ${o.navn.split(' ')[0]}` : ''}!\n\n${o.linjer.join('\n')}\n\n${o.knappTekst}: ${o.lenke}`,
     html: ramme({
       tittel: o.tittel, forhandsvisning: o.linjer[0] ?? o.tittel,
       innhold: avsnitt(`Hei${o.navn ? ` ${esc(o.navn.split(' ')[0])}` : ''}!`) + o.linjer.map(l => avsnitt(esc(l), 'margin:0 0 8px')).join('') + '<div style="height:10px"></div>' + knapp(o.knappTekst, o.lenke),
-      bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
+      bunn: `Sendt av ${esc(o.foretak)} med Rettført`, logo: o.logo ? { ...o.logo, navn: o.foretak } : undefined,
     }),
   }),
-  purring: (o: { nr: number; foretak: string; kunde: string; belop: string; forfall: string; kid: string | null; kontonr: string | null }): Mal => {
+  purring: (o: { nr: number; foretak: string; kunde: string; belop: string; forfall: string; kid: string | null; kontonr: string | null; logo?: EpostLogo }): Mal => {
     const rad = (k: string, v: string, stor = false) => `<tr><td style="padding:10px 0;border-bottom:1px solid ${LINJE};font-size:14px;color:${MUT}">${k}</td><td align="right" style="padding:10px 0;border-bottom:1px solid ${LINJE};font-size:${stor ? 20 : 15}px;font-weight:${stor ? 700 : 600};color:${BLA};font-family:${stor ? FONT : "'SFMono-Regular',Menlo,Consolas,monospace"}">${esc(v)}</td></tr>`;
     return {
       emne: `Påminnelse: faktura ${o.nr} fra ${o.foretak}`,
@@ -187,7 +196,7 @@ export const maler = {
         innhold: avsnitt(`Vi kan ikke se at faktura ${o.nr} er betalt. Den forfalt ${esc(o.forfall)}.`)
           + `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;border-top:1px solid ${LINJE}">${rad('Å betale', `${o.belop} kr`, true)}${o.kontonr ? rad('Kontonummer', o.kontonr) : ''}${o.kid ? rad('KID', o.kid) : ''}</table>`
           + avsnitt('Fakturaen ligger vedlagt som PDF.', 'margin:0') + liten('Har du nylig betalt, kan du se bort fra denne påminnelsen. Har du spørsmål, svar på denne e-posten.'),
-        bunn: `Sendt av ${esc(o.foretak)} med Rettført`,
+        bunn: `Sendt av ${esc(o.foretak)} med Rettført`, logo: o.logo ? { ...o.logo, navn: o.foretak } : undefined,
       }),
     };
   },

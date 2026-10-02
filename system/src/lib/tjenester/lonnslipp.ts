@@ -10,6 +10,7 @@ import { lagLonnslippPdf, type LonnslippPdfData } from '../pdf';
 import { sendEpost, maler } from '../epost';
 import { kr } from '../penger';
 import { manedNavn } from '../vis';
+import { logoFor, epostLogo } from './logo';
 
 export type SendNar = 'na' | 'utbetaling' | 'ingen';
 
@@ -40,8 +41,10 @@ const HENT = `select s.id, s.brutto, s.skatt, s.netto, s.feriepenger, s.linjer, 
 
 const dato = (d: string) => d.split('-').reverse().join('.');
 
-function pdfData(r: Rad): LonnslippPdfData {
+async function pdfData(t: Sporring, r: Rad): Promise<LonnslippPdfData> {
+  const logo = await logoFor(t, r.organisasjon_id, 'lonnslipp');
   return {
+    logo, logoUrl: logo?.dataUrl ?? null,
     foretak: { navn: r.onavn, orgnr: r.orgnr, adresse: r.adresse, postnr: r.postnr, poststed: r.poststed },
     ansatt: { navn: r.anavn, stilling: r.stilling, kontonr: r.akonto },
     periodeTekst: manedNavn(r.periode), utbetalt: r.utbetalingsdato, skatteprosent: Number(r.skatteprosent),
@@ -55,7 +58,7 @@ function pdfData(r: Rad): LonnslippPdfData {
 export async function lonnslippPdf(t: Sporring, orgId: string, periode: string, ansattId: string) {
   const r = await t.en<Rad>(`${HENT} where l.organisasjon_id = $1 and l.periode = $2 and s.ansatt_id = $3`, [orgId, periode, ansattId]);
   if (!r) return null;
-  return { pdf: await lagLonnslippPdf(pdfData(r)), filnavn: `lonnslipp-${periode}-${r.anavn.toLowerCase().replace(/[^a-z0-9æøå]+/g, '-')}.pdf` };
+  return { pdf: await lagLonnslippPdf(await pdfData(t, r)), filnavn: `lonnslipp-${periode}-${r.anavn.toLowerCase().replace(/[^a-z0-9æøå]+/g, '-')}.pdf` };
 }
 
 /** Bestemmer når lønnslippene for en lønnskjøring sendes. Bare ansatte med e-post får den. */
@@ -79,8 +82,9 @@ export async function sendForfalte(db: Db, grunnadresse: string, orgId?: string)
       if (!r.token) await db.q('update lonnslipp set token = $2 where id = $1', [r.id, token]);
       lenke = `${grunnadresse}/lonnslipp/${token}`;
     }
-    const m = maler.lonnslipp({ navn: r.anavn.split(' ')[0], foretak: r.onavn, periode: manedNavn(r.periode), netto: kr(Number(r.netto) + Number(r.utlegg ?? 0)), utbetalt: dato(r.utbetalingsdato), lenke, passordTekst: PASSORD_TEKST[r.slipp_passord_type ?? 'fnr'] });
-    const vedlegg = beskyttet ? undefined : [{ filnavn: `lonnslipp-${r.periode}.pdf`, innhold: await lagLonnslippPdf(pdfData(r)) }];
+    const el = await epostLogo(db, r.organisasjon_id);
+    const m = maler.lonnslipp({ navn: r.anavn.split(' ')[0], foretak: r.onavn, periode: manedNavn(r.periode), netto: kr(Number(r.netto) + Number(r.utlegg ?? 0)), utbetalt: dato(r.utbetalingsdato), lenke, passordTekst: PASSORD_TEKST[r.slipp_passord_type ?? 'fnr'], logo: el.logo });
+    const vedlegg = [...(beskyttet ? [] : [{ filnavn: `lonnslipp-${r.periode}.pdf`, innhold: await lagLonnslippPdf(await pdfData(db, r)) }]), ...el.vedlegg];
     const ok = await sendEpost({ til: r.epost, ...m, svarTil: r.oepost ?? undefined, vedlegg });
     if (ok) sendt.push(r.anavn);
     else { feilet.push(r.anavn); await db.q('update lonnslipp set sendt_tid = null, send_etter = null where id = $1', [r.id]); }
@@ -100,7 +104,7 @@ export async function apneLonnslipp(db: Db, token: string, passord: string): Pro
     throw new RegnskapsFeil(r.slipp_passord_type === 'fnr' ? 'Fødselsnummeret stemmer ikke.' : 'Passordet stemmer ikke.');
   }
   await db.q('update lonnslipp set feil = 0, sperret_til = null, apnet_tid = coalesce(apnet_tid, now()) where id = $1', [r.id]);
-  const data = pdfData(r);
+  const data = await pdfData(db, r);
   return { data, pdf: await lagLonnslippPdf(data) };
 }
 

@@ -12,6 +12,7 @@ import { sendEpost, maler, qrVedlegg } from '../epost';
 import { kr } from '../penger';
 import { finnEllerLagKontakt } from '../tjenester/kjop';
 import { lagLenke } from '../tjenester/innsending';
+import { logoFor, epostLogo } from '../tjenester/logo';
 import { kjorLonn, type LonnInput } from '../tjenester/lonn';
 import { planleggUtsending, sendForfalte, type SendNar } from '../tjenester/lonnslipp';
 import { randomBytes } from 'node:crypto';
@@ -47,8 +48,9 @@ export async function utforForslag(db: Db, o: { orgId: string; brukerId: string;
     let epostTil: string | null = null;
     const p = await fakturaPdf(db, o.orgId, r.fid);
     if (p?.f.kunde?.epost) {
-      const m = maler.faktura({ type: 'faktura', nr: r.nr, foretak: String(p.avsender.navn ?? o.foretak), kunde: p.f.kunde.navn, belop: kr(p.f.total), forfall: p.f.forfall ? p.f.forfall.split('-').reverse().join('.') : null, kid: r.kid, kontonr: p.avsender.kontonr ? String(p.avsender.kontonr) : null });
-      if (await sendEpost({ til: p.f.kunde.epost, ...m, svarTil: p.avsender.epost ? String(p.avsender.epost) : o.brukerEpost, vedlegg: [{ filnavn: p.filnavn, innhold: p.pdf }] })) epostTil = p.f.kunde.epost;
+      const el = await epostLogo(db, o.orgId);
+      const m = maler.faktura({ type: 'faktura', nr: r.nr, foretak: String(p.avsender.navn ?? o.foretak), kunde: p.f.kunde.navn, belop: kr(p.f.total), forfall: p.f.forfall ? p.f.forfall.split('-').reverse().join('.') : null, kid: r.kid, kontonr: p.avsender.kontonr ? String(p.avsender.kontonr) : null, logo: el.logo });
+      if (await sendEpost({ til: p.f.kunde.epost, ...m, svarTil: p.avsender.epost ? String(p.avsender.epost) : o.brukerEpost, vedlegg: [{ filnavn: p.filnavn, innhold: p.pdf }, ...el.vedlegg] })) epostTil = p.f.kunde.epost;
     }
     await ferdig('utfort', { fakturaId: r.fid, nr: r.nr, epostTil });
     const hvorfor = p?.f.kunde?.epost ? 'E-posten kunne ikke sendes' : 'Kunden har ingen e-post';
@@ -83,8 +85,9 @@ export async function utforForslag(db: Db, o: { orgId: string; brukerId: string;
   if (f.art === 'purring') {
     const p = await fakturaPdf(db, o.orgId, String(d.fakturaId));
     if (!p) throw new RegnskapsFeil('Fant ikke fakturaen.');
-    const m = maler.purring({ nr: Number(d.nr), foretak: String(p.avsender.navn ?? o.foretak), kunde: String(d.kunde), belop: kr(Number(d.rest)), forfall: String(d.forfall).split('-').reverse().join('.'), kid: p.f.kid, kontonr: p.avsender.kontonr ? String(p.avsender.kontonr) : null });
-    const ok = await sendEpost({ til: String(d.epost), ...m, svarTil: p.avsender.epost ? String(p.avsender.epost) : o.brukerEpost, vedlegg: [{ filnavn: p.filnavn, innhold: p.pdf }] });
+    const el = await epostLogo(db, o.orgId);
+    const m = maler.purring({ nr: Number(d.nr), foretak: String(p.avsender.navn ?? o.foretak), kunde: String(d.kunde), belop: kr(Number(d.rest)), forfall: String(d.forfall).split('-').reverse().join('.'), kid: p.f.kid, kontonr: p.avsender.kontonr ? String(p.avsender.kontonr) : null, logo: el.logo });
+    const ok = await sendEpost({ til: String(d.epost), ...m, svarTil: p.avsender.epost ? String(p.avsender.epost) : o.brukerEpost, vedlegg: [{ filnavn: p.filnavn, innhold: p.pdf }, ...el.vedlegg] });
     if (!ok) throw new RegnskapsFeil('Purringen kunne ikke sendes. Sjekk at e-post er koblet til, og prøv igjen.');
     await db.q(`insert into logg (organisasjon_id, bruker_id, handling, ref) values ($1,$2,'purring_sendt',$3)`, [o.orgId, o.brukerId, `${d.fakturaId} til ${d.epost}`]).catch(() => {});
     await ferdig('utfort', { til: d.epost });
@@ -177,6 +180,6 @@ export async function forslagPdf(db: Db, orgId: string, id: string): Promise<{ p
   const ekte = res.fakturaId ?? res.kreditnotaId ?? d.fakturaId;
   if (ekte) { const p = await fakturaPdf(db, orgId, String(ekte)); return p && { pdf: p.pdf, filnavn: p.filnavn }; }
   if (f.art !== 'faktura') return null;
-  const pdf = await lagFakturaPdf({ type: 'faktura', nr: null, dato: String(d.dato), forfall: String(d.forfall), levert: null, referanse: (d.referanse as string | null) ?? null, kid: null, avsender: d.avsender as PdfData['avsender'], kunde: d.kunde as PdfData['kunde'], linjer: d.linjer as FakturaLinje[] });
+  const pdf = await lagFakturaPdf({ type: 'faktura', nr: null, dato: String(d.dato), forfall: String(d.forfall), levert: null, referanse: (d.referanse as string | null) ?? null, kid: null, avsender: d.avsender as PdfData['avsender'], kunde: d.kunde as PdfData['kunde'], linjer: d.linjer as FakturaLinje[], logo: await logoFor(db, orgId, 'faktura') });
   return { pdf, filnavn: 'faktura-forslag.pdf' };
 }

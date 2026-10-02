@@ -12,6 +12,8 @@ import { stripePa, fullforBetaling, synkAbonnement, antallAnsatte, abonnementDet
 import { Abonnement } from './Abonnement';
 import { slettPlan } from '@/lib/tjenester/konto';
 import { SlettKonto } from './SlettKonto';
+import { LogoInnstillinger } from './LogoInnstillinger';
+import { hentLogo } from '@/lib/tjenester/logo';
 
 export const metadata = { title: 'Innstillinger' };
 
@@ -34,6 +36,7 @@ export default async function Innstillinger({ searchParams }: { searchParams: Pr
   }
   const o = await d.en<Record<string, string | number | boolean | null> & { navn: string; orgnr: string | null; orgform: string; mva_registrert: boolean; bilag_slug: string | null; regnskap_fra: string | null; pakke: string }>('select *, regnskap_fra::text as regnskap_fra, abonnement_slutt::text as abonnement_slutt from organisasjon where id = $1', [s.org.id]);
   const endre = kanEndre(s.rolle);
+  const logo = vis === 'firma' && endre ? await hentLogo(d, s.org.id) : null;
   const abo = vis === 'abonnement' ? {
     ansatte: await antallAnsatte(d, s.org.id),
     detaljer: stripePa() ? await abonnementDetaljer(d, s.org.id).catch(e => { console.error('Abonnement:', e); return null; }) : null,
@@ -63,6 +66,7 @@ export default async function Innstillinger({ searchParams }: { searchParams: Pr
             </div>
             <p className="faint liten">Navn, org.nr og selskapsform kommer fra Brønnøysundregistrene.</p>
           </section>
+          {endre && <section className="kort stakk"><div><h2>Logo</h2><p className="mut liten">Logoen er med i alle pakker. Du velger selv hvor den skal vises.</p></div><LogoInnstillinger logo={logo?.dataUrl ?? null} bruk={logo?.bruk ?? []} /></section>}
           {endre && <section className="kort"><FirmaSkjema start={{ adresse: o?.adresse ?? '', postnr: o?.postnr ?? '', poststed: o?.poststed ?? '', epost: o?.epost ?? '', telefon: o?.telefon ?? '', mva_termin: o?.mva_termin ?? 'tomnd' }} /></section>}
         </>
       )}

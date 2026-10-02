@@ -41,7 +41,7 @@ function KundeRad({ k, onVelg }: { k: KundeValg; onVelg: () => void }) {
 
 const tilLinje = (l: FakturaLinje): Linje => ({ beskrivelse: l.beskrivelse, antall: antallTekst(l.antallMilli), pris: kr(l.pris), sats: l.sats, konto: l.konto });
 
-export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org & { faktura_tekst: string | null }; kunder: KundeValg[]; start?: SalgStart; idag: string; videre: Videre[] }) {
+export function FakturaSkjema({ org, kunder, start, idag, videre, logo = null }: { logo?: string | null; org: Org & { faktura_tekst: string | null }; kunder: KundeValg[]; start?: SalgStart; idag: string; videre: Videre[] }) {
   const router = useRouter();
   const [type, setType] = useState<SalgType>(start?.type ?? 'faktura');
   const [kunde, setKunde] = useState<Kontakt | null>(start?.kunde ?? null);
@@ -283,7 +283,7 @@ export function FakturaSkjema({ org, kunder, start, idag, videre }: { org: Org &
 
       <div className="forhandsvisning">
         <div className="stikk mut" style={{ marginBottom: 10 }}>Slik ser kunden den</div>
-        <FakturaDokument type={type} dato={dato} forfall={type === 'kvittering' ? null : forfall} levert={levert} referanse={referanse} avsender={{ ...av, orgnr: org.orgnr, orgform: org.orgform, mvaRegistrert: org.mva_registrert } as DokAvsender} kunde={kunde} linjer={fl} />
+        <FakturaDokument type={type} dato={dato} forfall={type === 'kvittering' ? null : forfall} levert={levert} referanse={referanse} avsender={{ ...av, orgnr: org.orgnr, orgform: org.orgform, mvaRegistrert: org.mva_registrert, logo } as DokAvsender} kunde={kunde} linjer={fl} />
       </div>
     </div>
   );

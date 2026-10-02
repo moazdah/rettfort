@@ -22,6 +22,7 @@ import { hentFakta } from '@/lib/tjenester/assistent';
 import { svar as assistentSvar, type Svar } from '@/lib/assistent';
 import { harAssistent, erTestbruker, BYRA_I_SALG, harFulltRegnskap, betaltTekst, GRATIS_GRENSE, type Betalt } from '@/lib/pakker';
 import { sjekkFakturaGrense, taKvitteringslesing, sendteFakturaer } from '@/lib/tjenester/bruk';
+import { epostLogo, lagreLogo, velgLogoSteder, fjernLogo } from '@/lib/tjenester/logo';
 import { nyHemmelighet, sjekkTotp, otpauthUri } from '@/lib/totp';
 import QRCode from 'qrcode';
 import { lagTestfirma, TESTFIRMA_ORGNR } from '@/lib/db/eksempel';
@@ -367,8 +368,9 @@ export async function sendSalgHandling(f: FakturaInput, videreKjop: string[] = [
     let epostTil: string | null = null;
     const p = await fakturaPdf(db, s.org.id, r.id);
     if (p?.f.kunde?.epost) {
-      const m = maler.faktura({ type: p.f.type, nr: r.nr, foretak: String(p.avsender.navn ?? s.org.navn), kunde: p.f.kunde.navn, belop: kr(p.f.total), forfall: p.f.forfall ? p.f.forfall.split('-').reverse().join('.') : null, kid: r.kid, kontonr: p.avsender.kontonr ? String(p.avsender.kontonr) : null });
-      if (await sendEpost({ til: p.f.kunde.epost, ...m, svarTil: p.avsender.epost ? String(p.avsender.epost) : s.bruker.epost, vedlegg: [{ filnavn: p.filnavn, innhold: p.pdf }] })) {
+      const el = await epostLogo(db, s.org.id);
+      const m = maler.faktura({ type: p.f.type, nr: r.nr, foretak: String(p.avsender.navn ?? s.org.navn), kunde: p.f.kunde.navn, belop: kr(p.f.total), forfall: p.f.forfall ? p.f.forfall.split('-').reverse().join('.') : null, kid: r.kid, kontonr: p.avsender.kontonr ? String(p.avsender.kontonr) : null, logo: el.logo });
+      if (await sendEpost({ til: p.f.kunde.epost, ...m, svarTil: p.avsender.epost ? String(p.avsender.epost) : s.bruker.epost, vedlegg: [{ filnavn: p.filnavn, innhold: p.pdf }, ...el.vedlegg] })) {
         epostTil = p.f.kunde.epost;
         await db.q(`insert into logg (organisasjon_id, bruker_id, handling, ref) values ($1,$2,'epost_sendt',$3)`, [s.org.id, s.bruker.id, `${r.id} til ${epostTil}`]).catch(() => {});
       }
@@ -632,7 +634,8 @@ export async function apneLonnslippHandling(token: string, passord: string): Pro
   return trygt(async () => {
     const db = await getDb();
     const r = await apneLonnslipp(db, token, passord);
-    return { data: r.data, pdf: Buffer.from(r.pdf).toString('base64') };
+    // Bildet sendes som data-URL (logoUrl); bytene til PDF-en blir igjen på serveren.
+    return { data: { ...r.data, logo: null }, pdf: Buffer.from(r.pdf).toString('base64') };
   });
 }
 
@@ -751,6 +754,31 @@ export async function lagreInnstillinger(v: Record<string, string | number | boo
     await db.q(`update organisasjon set ${felt.map((k, i) => `${k} = $${i + 2}`).join(', ')}${v.mva_termin ? `, mva_registrert = ${v.mva_termin !== 'ingen'}` : ''} where id = $1`, [s.org.id, ...felt.map(k => v[k])]);
     revalidatePath('/', 'layout');
   }, 'Lagret.');
+}
+
+/** Logoen til foretaket. Med i alle pakker, også Gratis. */
+export async function lastOppLogo(dataUrl: string, bredde: number, hoyde: number): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    await lagreLogo(await getDb(), s.org.id, String(dataUrl), Number(bredde), Number(hoyde));
+    revalidatePath('/', 'layout');
+  }, 'Logoen er lagret.');
+}
+
+export async function velgLogoStederHandling(steder: string[]): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    await velgLogoSteder(await getDb(), s.org.id, Array.isArray(steder) ? steder.map(String) : []);
+    revalidatePath('/', 'layout');
+  }, 'Lagret.');
+}
+
+export async function fjernLogoHandling(): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg(); sjekkSkrivetilgang(s);
+    await fjernLogo(await getDb(), s.org.id);
+    revalidatePath('/', 'layout');
+  }, 'Logoen er fjernet.');
 }
 
 export async function byttPakke(pakke: 'gratis' | 'start' | 'selskap'): Promise<Resultat<{ url?: string; slutt?: string | null }>> {

@@ -2,7 +2,7 @@ import { fakturaSummer, linjeNetto, type FakturaLinje } from '@/lib/hovedbok';
 import { formaterOrgnr } from '@/lib/brreg';
 import { kr, nd, antallTekst, formaterKontonr } from '@/lib/vis';
 
-export interface DokAvsender { navn: string; orgnr?: string | null; adresse?: string | null; postnr?: string | null; poststed?: string | null; kontonr?: string | null; epost?: string | null; telefon?: string | null; tekst?: string | null; mvaRegistrert: boolean; orgform?: string }
+export interface DokAvsender { navn: string; orgnr?: string | null; adresse?: string | null; postnr?: string | null; poststed?: string | null; kontonr?: string | null; epost?: string | null; telefon?: string | null; tekst?: string | null; mvaRegistrert: boolean; orgform?: string; logo?: string | null }
 export interface DokKunde { navn: string; orgnr?: string | null; adresse?: string | null; postnr?: string | null; poststed?: string | null }
 
 const TITTEL: Record<string, string> = { faktura: 'Faktura', tilbud: 'Tilbud', kvittering: 'Kvittering', kreditnota: 'Kreditnota' };
@@ -18,6 +18,7 @@ export function FakturaDokument({ type, nr, dato, forfall, levert, referanse, ki
     <div className="dokument">
       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
         <div style={{ lineHeight: 1.5, minWidth: 0 }}>
+          {avsender.logo && <img src={avsender.logo} alt={avsender.navn} className="dok-logo" />}
           <div style={{ fontWeight: 700, fontSize: 15 }}>{avsender.navn || 'Firmanavn'}</div>
           <div className="mut">{[avsender.adresse, [avsender.postnr, avsender.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', ') || 'Adresse mangler'}</div>
           <div className="mut">{orgTekst}</div>

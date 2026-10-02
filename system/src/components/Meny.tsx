@@ -48,7 +48,7 @@ const I = {
 };
 const Ikon = ({ d }: { d: ReactNode }) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{d}</svg>;
 
-export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '', innboksTeller = 0, ai, assistent = false, vaktTeller = 0, idag = '' }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string; innboksTeller?: number; ai?: { valgt: 'kina' | 'eu'; kina: boolean; eu: boolean }; assistent?: boolean; vaktTeller?: number; idag?: string }) {
+export function Meny({ logo = null, firma, pakke, bruker, rolle, mvaTeller, harByra, testbruker = false, foretak = [], orgId = '', epost = '', innboksTeller = 0, ai, assistent = false, vaktTeller = 0, idag = '' }: { firma: string; pakke: string; bruker: string; rolle: string | null; mvaTeller: number; harByra: boolean; testbruker?: boolean; foretak?: { orgId: string; navn: string }[]; orgId?: string; epost?: string; innboksTeller?: number; ai?: { valgt: 'kina' | 'eu'; kina: boolean; eu: boolean }; assistent?: boolean; vaktTeller?: number; idag?: string; logo?: string | null }) {
   const sti = usePathname();
   const router = useRouter();
   const meny = useApen();
@@ -120,6 +120,7 @@ export function Meny({ firma, pakke, bruker, rolle, mvaTeller, harByra, testbruk
             <span className="skille" aria-hidden />
             <div className="nedtrekk profil">
               <button type="button" className={`profil-knapp ${meny.apen === 'profil' ? 'apen' : ''}`} aria-expanded={meny.apen === 'profil'} aria-haspopup="true" onClick={() => meny.bytt('profil')}>
+                {logo && <img src={logo} alt="" className="firma-logo" />}
                 <span className="firma-navn"><b>{firma}</b><small>{PAKKE[pakke] ?? pakke}</small></span>
                 <span className="avatar">{initialer}</span>
               </button>

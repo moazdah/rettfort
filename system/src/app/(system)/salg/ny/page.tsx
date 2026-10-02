@@ -4,6 +4,7 @@ import { gratisBruk } from '@/lib/tjenester/bruk';
 import { harFulltRegnskap } from '@/lib/pakker';
 import { kreverSelskap, db, idag } from '@/lib/server';
 import { hentOrg, hentSalg, type Kontakt } from '@/lib/tjenester/faktura';
+import { logoFor } from '@/lib/tjenester/logo';
 import { FakturaSkjema, type SalgStart, type Videre } from '../FakturaSkjema';
 
 export const metadata = { title: 'Ny faktura' };
@@ -38,7 +39,7 @@ export default async function NyFaktura({ searchParams }: { searchParams: Promis
         <Link href="/salg" className="knapp hvit">Alle fakturaer</Link>
       </div>
       {bruk && <Kreditter bruk={bruk} bare="faktura" />}
-      <FakturaSkjema org={org} kunder={kunder} start={start} idag={idag()} videre={videre} />
+      <FakturaSkjema logo={(await logoFor(d, s.org.id, 'faktura'))?.dataUrl ?? null} org={org} kunder={kunder} start={start} idag={idag()} videre={videre} />
     </div>
   );
 }

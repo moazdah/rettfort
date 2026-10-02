@@ -3,6 +3,7 @@ import type { Db } from '@/lib/db';
 import * as V from '@/lib/tjenester/vaktplan';
 import { analyserUke, isoUke, ukeDager, flyttUke, plussDager, avtaltMin, arbeidMin } from '@/lib/vaktplan';
 import { grenser } from '@/lib/vaktplan-innstillinger';
+import { logoFor } from '@/lib/tjenester/logo';
 
 /**
  * Det den ansatte ser: publiserte vakter (egne og, hvis lederen tillater det, kollegers), ledige vakter,
@@ -59,6 +60,7 @@ export async function hentAnsattData(d: Db, orgId: string, foretak: string, ansa
   const pub = new Set((await d.q<{ aar: number; uke: number }>(`select aar, uke from vaktuke where organisasjon_id = $1 and status <> 'utkast'`, [orgId])).map(x => `${x.aar}-${x.uke}`));
   return {
     foretak, idag, inn,
+    logo: (await logoFor(d, orgId, 'vaktplan'))?.dataUrl ?? null,
     meg: { id: meg.id, navn: meg.navn, stilling: meg.stilling, lonnType: meg.lonnType, stillingsprosent: meg.stillingsprosent, epost: meg.epost, mobil: meg.mobil, avtalt: avtaltMin(meg) },
     oversikt: Array.isArray(me?.oversikt) ? (me!.oversikt as { id: string; visible: boolean; count?: number }[]) : null,
     varselEpost: me?.varsel_epost ?? true,

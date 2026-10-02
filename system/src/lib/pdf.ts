@@ -15,11 +15,29 @@ const TITTEL: Record<string, string> = { faktura: 'Faktura', tilbud: 'Tilbud', k
 const rens = (s: string | null | undefined) => (s ?? '').replace(/[  ]/g, ' ').replace(/−/g, '-').replace(/[«»]/g, '"').replace(/[–—]/g, '-').replace(/[^\x20-\x7E\xA0-\xFF]/g, '');
 const nd = (d?: string | null) => (d ? d.slice(0, 10).split('-').reverse().join('.') : '');
 
+/** Logoen til foretaket, øverst til venstre. */
+export interface PdfLogo { bytes: Uint8Array; mime: string }
+
+/** Tegner logoen med toppen på y = 806, høyst 48 pt høy og 180 pt bred. Gir hvor navnet skal stå under. */
+async function tegnLogo(doc: PDFDocument, side: PDFPage, logo: PdfLogo | null | undefined, x: number): Promise<number> {
+  if (!logo) return 790;
+  try {
+    const bilde = logo.mime === 'image/png' ? await doc.embedPng(logo.bytes) : await doc.embedJpg(logo.bytes);
+    const skala = Math.min(48 / bilde.height, 180 / bilde.width);
+    const w = bilde.width * skala, h = bilde.height * skala;
+    side.drawImage(bilde, { x, y: 806 - h, width: w, height: h });
+    return 806 - h - 22;
+  } catch {
+    return 790; // Et bilde pdf-lib ikke kan lese, skal aldri stoppe fakturaen.
+  }
+}
+
 export interface PdfData {
   type: string; nr: number | null; dato: string; forfall: string | null; levert: string | null; referanse: string | null; kid: string | null; kreditgrunn?: string | null;
   avsender: { navn: string; orgnr: string | null; adresse: string | null; postnr: string | null; poststed: string | null; kontonr: string | null; epost: string | null; telefon: string | null; tekst: string | null; mvaRegistrert: boolean; orgform: string };
   kunde: { navn: string; orgnr: string | null; adresse: string | null; postnr: string | null; poststed: string | null } | null;
   linjer: FakturaLinje[];
+  logo?: PdfLogo | null;
 }
 
 export async function lagFakturaPdf(f: PdfData): Promise<Uint8Array> {
@@ -36,14 +54,15 @@ export async function lagFakturaPdf(f: PdfData): Promise<Uint8Array> {
     p.drawText(s, { x: o.hoyre ? x - font.widthOfTextAtSize(s, size) : x, y: yy, font, size, color: o.farge ?? BLA });
   };
   const a = f.avsender;
-  tekst(side, a.navn, V, y, { font: fet, size: 14 });
+  const navnY = await tegnLogo(doc, side, f.logo, V);
+  tekst(side, a.navn, V, navnY, { font: fet, size: 14 });
   const avLinjer = [
     [a.adresse, [a.postnr, a.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', '),
     a.orgnr ? `Org.nr ${formaterOrgnr(a.orgnr)}${a.mvaRegistrert ? ' MVA' : ''}` : '',
     a.orgform === 'AS' ? 'Foretaksregisteret' : '',
     [a.epost, a.telefon].filter(Boolean).join('  ·  '),
   ].filter(Boolean);
-  avLinjer.forEach((l, i) => tekst(side, l, V, y - 16 - i * 13, { size: 9.5, farge: MUT }));
+  avLinjer.forEach((l, i) => tekst(side, l, V, navnY - 16 - i * 13, { size: 9.5, farge: MUT }));
   tekst(side, TITTEL[f.type] ?? 'Faktura', H, y, { font: fet, size: 20, hoyre: true });
   const hoyre = [
     `Nr. ${f.nr ?? ''}`, `Dato ${nd(f.dato)}`,
@@ -53,7 +72,7 @@ export async function lagFakturaPdf(f: PdfData): Promise<Uint8Array> {
     f.kid ? `KID ${f.kid}` : '', f.referanse ? `Ref. ${f.referanse}` : '',
   ].filter(Boolean);
   hoyre.forEach((l, i) => tekst(side, l, H, y - 20 - i * 13, { size: 9.5, farge: l.startsWith('KID') ? BLA : MUT, font: l.startsWith('KID') ? fet : reg, hoyre: true }));
-  y -= 40 + Math.max(avLinjer.length, hoyre.length) * 13;
+  y = Math.min(navnY - 40 - avLinjer.length * 13, y - 40 - hoyre.length * 13);
   tekst(side, 'TIL', V, y, { size: 8, farge: MUT, font: fet });
   if (f.kunde) {
     tekst(side, f.kunde.navn, V, y - 14, { font: fet, size: 11 });
@@ -122,6 +141,9 @@ export interface LonnslippPdfData {
   brutto: number; skatt: number; netto: number; feriepenger: number; feriePst: number;
   /** Utlegg som betales tilbake sammen med lønnen. Skattefritt, legges til etter skattetrekket. */
   utlegg?: { tekst: string; belop: number }[];
+  logo?: PdfLogo | null;
+  /** Samme logo som data-URL, til lønnslippen på nettsiden. */
+  logoUrl?: string | null;
 }
 
 /** Lønnslipp som PDF (A4), samme oppsett som den den ansatte ser i systemet. */
@@ -139,13 +161,14 @@ export async function lagLonnslippPdf(l: LonnslippPdfData): Promise<Uint8Array> 
     side.drawText(s, { x: o.hoyre ? x - font.widthOfTextAtSize(s, size) : x, y: yy, font, size, color: o.farge ?? BLA });
   };
   const f = l.foretak;
-  tekst(f.navn, V, y, { font: fet, size: 14 });
+  const navnY = await tegnLogo(doc, side, l.logo, V);
+  tekst(f.navn, V, navnY, { font: fet, size: 14 });
   [[f.adresse, [f.postnr, f.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', '), f.orgnr ? `Org.nr ${formaterOrgnr(f.orgnr)}` : ''].filter(Boolean)
-    .forEach((t, i) => tekst(t, V, y - 16 - i * 13, { size: 9.5, farge: MUT }));
+    .forEach((t, i) => tekst(t, V, navnY - 16 - i * 13, { size: 9.5, farge: MUT }));
   tekst('Lønnslipp', H, y, { font: fet, size: 20, hoyre: true });
   tekst(l.periodeTekst, H, y - 20, { size: 9.5, farge: MUT, hoyre: true });
   tekst(`Utbetalt ${nd(l.utbetalt)}`, H, y - 33, { size: 9.5, farge: MUT, hoyre: true });
-  y -= 80;
+  y = navnY - 80;
   tekst('TIL', V, y, { size: 8, farge: MUT, font: fet });
   tekst(l.ansatt.navn, V, y - 14, { font: fet, size: 11 });
   const info = [l.ansatt.stilling, l.ansatt.kontonr ? `Konto ${formaterKontonr(l.ansatt.kontonr)}` : ''].filter(Boolean).join('  ·  ');

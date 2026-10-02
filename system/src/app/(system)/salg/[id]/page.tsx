@@ -4,6 +4,7 @@ import { kreverSelskap, db, idag } from '@/lib/server';
 import { hentSalg, hentOrg } from '@/lib/tjenester/faktura';
 import { kanEndre } from '@/lib/auth';
 import { FakturaDokument } from '@/components/FakturaDokument';
+import { logoFor } from '@/lib/tjenester/logo';
 import { Posteringer } from '@/components/Posteringer';
 import { kr, nd, SALG_STATUS, SALG_TYPE } from '@/lib/vis';
 import { SalgHandlinger } from './SalgHandlinger';
@@ -19,7 +20,7 @@ export default async function SalgDetalj({ params }: { params: Promise<{ id: str
   if (!f) notFound();
   if (f.status === 'utkast') return <p>Dette er et utkast. <Link className="lenke" href={`/salg/ny?utkast=${f.id}`}>Fortsett utkastet</Link>.</p>;
   const org = await hentOrg(d, s.org.id) as Awaited<ReturnType<typeof hentOrg>> & { faktura_tekst: string | null };
-  const av = { ...org, tekst: org.faktura_tekst, mvaRegistrert: org.mva_registrert, ...(f.avsender ?? {}) };
+  const av = { ...org, tekst: org.faktura_tekst, mvaRegistrert: org.mva_registrert, ...(f.avsender ?? {}), logo: (await logoFor(d, s.org.id, 'faktura'))?.dataUrl ?? null };
   const kreditnotaer = await d.q<{ id: string; nr: number; total: number; dato: string; kreditgrunn: string | null }>(`select id, nr, total, dato::text as dato, kreditgrunn from faktura where krediterer_id = $1 and status <> 'utkast' order by nr`, [id]);
   const orig2 = f.type === 'kreditnota' && f.krediterer_id ? await d.en<{ id: string; nr: number }>('select id, nr from faktura where id = $1 and organisasjon_id = $2', [f.krediterer_id, s.org.id]) : null;
   const betalinger = f.type === 'faktura' && f.nr ? await d.q<{ nr: number; dato: string; belop: number; kilde: string | null }>(
