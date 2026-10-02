@@ -146,3 +146,38 @@ describe('bytter, avvik og tilgang', () => {
     expect(await V.apneLenke(db, ny)).toBeTruthy();
   });
 });
+
+describe('vaktplanen og Lønn snakker sammen', () => {
+  it('fravær følger timelisten til Lønn, og koblingen kan slås av', async () => {
+    const { beregnLonnslipp, fraVaktplan } = await import('@/lib/tjenester/lonn');
+    // Uke 42: Sara (fast) har fri uten lønn, Emma (time) har egenmelding med lønn.
+    const sv = await V.lagreVakt(db, org, { ansattId: sara, dato: '2026-10-14', start: '07:00', slutt: '15:00' });
+    const ev = await V.lagreVakt(db, org, { ansattId: emma, dato: '2026-10-15', start: '13:00', slutt: '21:00' });
+    await V.lagreVakt(db, org, { ansattId: emma, dato: '2026-10-16', start: '13:00', slutt: '21:00' });
+    await V.behandleFravaer(db, org, { kilde: 'ny', ansattId: sara, fra: '2026-10-14', type: 'Fri uten lønn', medLonn: false, handling: 'ledig' });
+    await V.behandleFravaer(db, org, { kilde: 'ny', ansattId: emma, fra: '2026-10-15', type: 'Egenmelding', medLonn: true, handling: 'ledig' });
+    void sv; void ev;
+    await db.q(`delete from timeliste where organisasjon_id = $1`, [org]);
+    await V.godkjennTimeliste(db, org, 2026, 42);
+    const g = await V.godkjenteTimer(db, org);
+    expect(g[sara].fravaerUten).toBe(7.5);
+    expect(g[emma]).toMatchObject({ timer: 7.5, fravaerMed: 7.5 });
+
+    // Lønnslippen: timelønn får fraværet betalt, fastlønn får trekk.
+    const em = { id: emma, navn: 'Emma Lie', lonn_type: 'time' as const, manedslonn: 0, timesats: 20000, skatteprosent: 30 };
+    const se = beregnLonnslipp(em, { ansattId: emma, ...fraVaktplan('time', g[emma]) }, 10.2, 14.1);
+    expect(se.linjer.map(l => [l.tekst, l.belop])).toEqual([['Timelønn', 150000], ['Fravær med lønn', 150000]]);
+    const sa = { id: sara, navn: 'Sara Nilsen', lonn_type: 'fast' as const, manedslonn: 4875000, timesats: 0, skatteprosent: 30 };
+    const ss = beregnLonnslipp(sa, { ansattId: sara, ...fraVaktplan('fast', g[sara]) }, 10.2, 14.1);
+    expect(ss.linjer[1]).toMatchObject({ tekst: 'Trekk for fravær uten lønn', antall: 7.5, sats: 30000, belop: -225000 });
+    expect(ss.brutto).toBe(4875000 - 225000);
+
+    // Uten fravær, og så helt av.
+    const inn = await V.innstillinger(db, org);
+    await V.lagreInnstillinger(db, org, { ...inn, lonn: { on: true, fravaer: false } });
+    expect((await V.godkjenteTimer(db, org))[emma]).toMatchObject({ timer: 7.5, fravaerMed: 0 });
+    await V.lagreInnstillinger(db, org, { ...inn, lonn: { on: false, fravaer: true } });
+    expect(await V.godkjenteTimer(db, org)).toEqual({});
+    await V.lagreInnstillinger(db, org, inn);
+  });
+});

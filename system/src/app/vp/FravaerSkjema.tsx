@@ -37,9 +37,13 @@ export function FravaerSkjema({ b, lukk }: { b: Behandling & { avslag?: boolean 
   const hh = vakter.reduce((s, v) => s + v.arbeid, 0);
   const datoTekst = fra === til ? DagDm(fra) : periode(fra, til, false);
 
+  // Hva som skjer i Lønn. Følger «Koble til Lønn» under Innstillinger.
+  const tilLonn = inn.lonn.on && inn.lonn.fravaer;
+  const timelonn = a?.lonnType === 'time';
   const payText = !hh && iUka ? 'Ingen planlagte timer denne dagen, så ingenting går til Lønn.'
-    : lonn ? (type === 'Ferie' ? `Ferie: ${nf(hh)} t trekkes i lønn og dekkes av feriepenger.` : `Med lønn: ${nf(hh)} t går til Lønn som fravær med lønn.`)
-    : `Uten lønn: ${nf(hh)} t trekkes, og ingenting betales.`;
+    : !tilLonn ? `${lonn ? 'Med' : 'Uten'} lønn: ${nf(hh)} t. Fravær fylles ikke inn i Lønn, fordi koblingen er slått av under Innstillinger.`
+    : lonn ? (type === 'Ferie' ? `Ferie: ${nf(hh)} t dekkes av feriepenger, så ingenting ekstra går til Lønn.` : timelonn ? `Med lønn: ${nf(hh)} t går til Lønn og betales som fravær med lønn.` : `Med lønn: ${n} får månedslønnen som vanlig.`)
+    : timelonn ? `Uten lønn: ${nf(hh)} t betales ikke.` : `Uten lønn: ${nf(hh)} t trekkes i månedslønnen når du kjører lønn.`;
 
   const s = d.saldo[ansattId];
   let saldo = '', minus = false;

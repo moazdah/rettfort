@@ -21,7 +21,22 @@ export interface LonnTillegg { tekst: string; belop: number; feriepengegrunnlag?
 export type LonnType = 'fast' | 'time' | 'provisjon';
 
 /** Det som legges inn for hver ansatt når lønnen kjøres. */
-export interface LonnInput { ansattId: string; timer?: number; overtidTimer?: number; provisjonGrunnlag?: number; tillegg?: LonnTillegg[] }
+export interface LonnInput {
+  ansattId: string; timer?: number; overtidTimer?: number; provisjonGrunnlag?: number; tillegg?: LonnTillegg[];
+  /** Fra vaktplanen: timer fravær med lønn (betales for timelønnede) og uten lønn (trekkes for fastlønnede). */
+  fravaerMedLonn?: number; fravaerUtenLonn?: number;
+}
+
+/** Det vaktplanen har godkjent for en ansatt, gjort om til felt i lønnskjøringen. */
+export function fraVaktplan(lonnType: string, v: { timer: number; overtid: number; fravaerMed?: number; fravaerUten?: number }): Pick<LonnInput, 'timer' | 'overtidTimer' | 'fravaerMedLonn' | 'fravaerUtenLonn'> {
+  const time = lonnType === 'time';
+  return {
+    timer: time ? Math.max(0, Math.round((v.timer - v.overtid) * 100) / 100) : undefined,
+    overtidTimer: v.overtid || undefined,
+    fravaerMedLonn: time && v.fravaerMed ? v.fravaerMed : undefined,
+    fravaerUtenLonn: !time && v.fravaerUten ? v.fravaerUten : undefined,
+  };
+}
 
 export interface AnsattLonn {
   id: string; navn: string; lonn_type: LonnType; manedslonn: number; timesats: number; skatteprosent: number;
@@ -60,9 +75,25 @@ export function beregnLonnslipp(a: AnsattLonn, inn: LonnInput, feriePst: number,
     const belop = Math.round(timer * a.timesats);
     linjer.push({ tekst: 'Timelønn', antall: timer, sats: a.timesats, belop });
     grunnlagFerie += belop;
+    const fravaer = inn.fravaerMedLonn ?? 0;
+    if (fravaer < 0) throw new RegnskapsFeil('Fravær kan ikke være negativt.');
+    if (fravaer > 0) {
+      const f = Math.round(fravaer * a.timesats);
+      linjer.push({ tekst: 'Fravær med lønn', antall: fravaer, sats: a.timesats, belop: f });
+      grunnlagFerie += f;
+    }
   } else if (a.manedslonn > 0) {
     linjer.push({ tekst: 'Fastlønn', belop: a.manedslonn });
     grunnlagFerie += a.manedslonn;
+    const uten = inn.fravaerUtenLonn ?? 0;
+    if (uten < 0) throw new RegnskapsFeil('Fravær kan ikke være negativt.');
+    if (uten > 0) {
+      // Trekk for fravær uten lønn: timene ganger timesatsen, aldri mer enn månedslønnen.
+      const sats = grunntimesats(a);
+      const trekk = Math.min(a.manedslonn, Math.round(uten * sats));
+      linjer.push({ tekst: 'Trekk for fravær uten lønn', antall: uten, sats, belop: -trekk });
+      grunnlagFerie -= trekk;
+    }
   }
   if (a.lonn_type === 'provisjon') {
     const grunnlag = inn.provisjonGrunnlag ?? 0;

@@ -881,7 +881,7 @@ export function avvikTekst(a: AvvikRad): string {
   return `${dag[0].toUpperCase()}${dag.slice(1)} ${x.getUTCDate()}. ${mnd}: ${hva}`;
 }
 
-export interface TimeRad { ansattId: string; navn: string; lonnType: string; arbeid: number; overtid: number; fravaer: number; avvik: AvvikRad[]; status: 'venter' | 'godkjent' }
+export interface TimeRad { ansattId: string; navn: string; lonnType: string; arbeid: number; overtid: number; fravaer: number; fravaerUten: number; avvik: AvvikRad[]; status: 'venter' | 'godkjent' }
 export interface Timeliste { aar: number; uke: number; rader: TimeRad[] }
 
 /** Timene for en uke per ansatt: planlagt, justert for avvik, pluss fravær med lønn (ikke ferie). */
@@ -889,7 +889,7 @@ export async function timerForUke(t: Sporring, orgId: string, aar: number, uke: 
   const d = ukeDager(aar, uke);
   const [ansatte, vakter, av, frav, godkjent, s] = await Promise.all([
     vaktAnsatte(t, orgId, true), vakterMellom(t, orgId, d[0], d[6]), avvik(t, orgId, d[0], d[6]), fravaer(t, orgId, { fra: d[0], til: d[6], status: 'godkjent' }),
-    t.q<{ ansatt_id: string; arbeid_min: number; overtid_min: number; fravaer_min: number }>('select ansatt_id, arbeid_min, overtid_min, fravaer_min from timeliste where organisasjon_id = $1 and aar = $2 and uke = $3', [orgId, aar, uke]),
+    t.q<{ ansatt_id: string; arbeid_min: number; overtid_min: number; fravaer_min: number; fravaer_uten_min: number }>('select ansatt_id, arbeid_min, overtid_min, fravaer_min, fravaer_uten_min from timeliste where organisasjon_id = $1 and aar = $2 and uke = $3', [orgId, aar, uke]),
     innstillinger(t, orgId),
   ]);
   // Faktiske tider der den ansatte har meldt avvik.
@@ -898,11 +898,13 @@ export async function timerForUke(t: Sporring, orgId: string, aar: number, uke: 
   const ut: TimeRad[] = [];
   for (const a of ansatte) {
     const g = godkjent.find(x => x.ansatt_id === a.id);
+    // Fravær med lønn (ikke ferie, som dekkes av feriepenger) betales som timer. Fravær uten lønn trekkes for fastlønnede.
     const fravaerMin = frav.filter(f => f.ansattId === a.id && f.medLonn && f.type !== 'Ferie').reduce((sum, f) => sum + f.timerMin, 0);
-    if (g) { ut.push({ ansattId: a.id, navn: a.navn, lonnType: a.lonnType, arbeid: Number(g.arbeid_min), overtid: Number(g.overtid_min), fravaer: Number(g.fravaer_min), avvik: av.filter(x => x.ansattId === a.id), status: 'godkjent' }); continue; }
+    const utenMin = frav.filter(f => f.ansattId === a.id && !f.medLonn).reduce((sum, f) => sum + f.timerMin, 0);
+    if (g) { ut.push({ ansattId: a.id, navn: a.navn, lonnType: a.lonnType, arbeid: Number(g.arbeid_min), overtid: Number(g.overtid_min), fravaer: Number(g.fravaer_min), fravaerUten: Number(g.fravaer_uten_min ?? 0), avvik: av.filter(x => x.ansattId === a.id), status: 'godkjent' }); continue; }
     const p = r.perAnsatt.get(a.id)!;
-    if (p.arbeid <= 0 && fravaerMin <= 0) continue;
-    ut.push({ ansattId: a.id, navn: a.navn, lonnType: a.lonnType, arbeid: p.arbeid, overtid: p.overtid, fravaer: fravaerMin, avvik: av.filter(x => x.ansattId === a.id), status: 'venter' });
+    if (p.arbeid <= 0 && fravaerMin <= 0 && utenMin <= 0) continue;
+    ut.push({ ansattId: a.id, navn: a.navn, lonnType: a.lonnType, arbeid: p.arbeid, overtid: p.overtid, fravaer: fravaerMin, fravaerUten: utenMin, avvik: av.filter(x => x.ansattId === a.id), status: 'venter' });
   }
   return ut;
 }
@@ -925,7 +927,7 @@ export async function ventendeTimelister(t: Sporring, orgId: string, idag: strin
 export async function godkjennTimeliste(t: Sporring, orgId: string, aar: number, uke: number, hvem: string[] | 'stemmer' | 'alle' = 'alle'): Promise<number> {
   const rader = (await timerForUke(t, orgId, aar, uke)).filter(r => r.status === 'venter' && (hvem === 'alle' || (hvem === 'stemmer' ? !r.avvik.length : hvem.includes(r.ansattId))));
   if (!rader.length) throw new RegnskapsFeil('Ingen timer å godkjenne for denne uka.');
-  for (const r of rader) await t.q('insert into timeliste (organisasjon_id, ansatt_id, aar, uke, arbeid_min, overtid_min, fravaer_min) values ($1,$2,$3,$4,$5,$6,$7) on conflict do nothing', [orgId, r.ansattId, aar, uke, r.arbeid, r.overtid, r.fravaer]);
+  for (const r of rader) await t.q('insert into timeliste (organisasjon_id, ansatt_id, aar, uke, arbeid_min, overtid_min, fravaer_min, fravaer_uten_min) values ($1,$2,$3,$4,$5,$6,$7,$8) on conflict do nothing', [orgId, r.ansattId, aar, uke, r.arbeid, r.overtid, r.fravaer, r.fravaerUten]);
   return rader.length;
 }
 
@@ -936,15 +938,27 @@ export async function autoGodkjenn(t: Sporring, orgId: string, idag: string) {
   }
 }
 
-/** Godkjente timer som ikke er brukt i en lønnskjøring: forslag til timer og overtid i Kjør lønn. */
-export async function godkjenteTimer(t: Sporring, orgId: string): Promise<Record<string, { timer: number; overtid: number; uker: number[] }>> {
-  const r = await t.q<{ ansatt_id: string; arbeid_min: number; overtid_min: number; fravaer_min: number; uke: number }>(`select ansatt_id, arbeid_min, overtid_min, fravaer_min, uke from timeliste where organisasjon_id = $1 and status = 'godkjent' order by aar, uke`, [orgId]);
-  const ut: Record<string, { timer: number; overtid: number; uker: number[] }> = {};
+export interface TimerTilLonn { timer: number; overtid: number; fravaerMed: number; fravaerUten: number; uker: number[] }
+
+/**
+ * Godkjente timer som ikke er brukt i en lønnskjøring: forslag i Kjør lønn.
+ * timer = arbeidede timer (overtiden er med), fravaerMed = fravær med lønn (ikke ferie), fravaerUten = fravær uten lønn.
+ * Tom når lederen har slått av koblingen til Lønn under Innstillinger i vaktplanen.
+ */
+export async function godkjenteTimer(t: Sporring, orgId: string): Promise<Record<string, TimerTilLonn>> {
+  const inn = await innstillinger(t, orgId);
+  if (!inn.lonn.on) return {};
+  const r = await t.q<{ ansatt_id: string; arbeid_min: number; overtid_min: number; fravaer_min: number; fravaer_uten_min: number; uke: number }>(`select ansatt_id, arbeid_min, overtid_min, fravaer_min, fravaer_uten_min, uke from timeliste where organisasjon_id = $1 and status = 'godkjent' order by aar, uke`, [orgId]);
+  const ut: Record<string, TimerTilLonn> = {};
+  const h = (min: unknown) => Number(min ?? 0) / 60;
   for (const x of r) {
-    const e = ut[x.ansatt_id] ??= { timer: 0, overtid: 0, uker: [] };
-    e.timer += (Number(x.arbeid_min) + Number(x.fravaer_min ?? 0)) / 60; e.overtid += Number(x.overtid_min) / 60; e.uker.push(Number(x.uke));
+    const e = ut[x.ansatt_id] ??= { timer: 0, overtid: 0, fravaerMed: 0, fravaerUten: 0, uker: [] };
+    e.timer += h(x.arbeid_min); e.overtid += h(x.overtid_min);
+    if (inn.lonn.fravaer) { e.fravaerMed += h(x.fravaer_min); e.fravaerUten += h(x.fravaer_uten_min); }
+    e.uker.push(Number(x.uke));
   }
-  for (const k of Object.keys(ut)) { ut[k].timer = Math.round(ut[k].timer * 100) / 100; ut[k].overtid = Math.round(ut[k].overtid * 100) / 100; }
+  const rund = (n: number) => Math.round(n * 100) / 100;
+  for (const e of Object.values(ut)) { e.timer = rund(e.timer); e.overtid = rund(e.overtid); e.fravaerMed = rund(e.fravaerMed); e.fravaerUten = rund(e.fravaerUten); }
   return ut;
 }
 

@@ -30,6 +30,7 @@ export interface VaktInnstillinger {
   comments: { on: boolean };
   notif: { on: boolean; pub: boolean; chg: boolean; ans: boolean };
   assistant: { on: boolean };
+  lonn: { on: boolean; fravaer: boolean };
 }
 
 export const STANDARD_INNSTILLINGER: VaktInnstillinger = {
@@ -45,6 +46,7 @@ export const STANDARD_INNSTILLINGER: VaktInnstillinger = {
   comments: { on: true },
   notif: { on: true, pub: true, chg: true, ans: true },
   assistant: { on: true },
+  lonn: { on: true, fravaer: true },
 };
 
 const tall = (v: unknown, std: number, min: number, max: number) => { const n = Number(v); return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : std; };
@@ -74,6 +76,7 @@ export function lesInnstillinger(raa: unknown): VaktInnstillinger {
     comments: { on: bool(g('comments').on, true) },
     notif: { on: bool(n.on, true), pub: bool(n.pub, true), chg: bool(n.chg, true), ans: bool(n.ans, true) },
     assistant: { on: bool(g('assistant').on, true) },
+    lonn: { on: bool(g('lonn').on, true), fravaer: bool(g('lonn').fravaer, true) },
   };
 }
 

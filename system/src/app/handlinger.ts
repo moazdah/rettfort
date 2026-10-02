@@ -35,7 +35,7 @@ import { valgtLeverandor, leverandorKlar, settLeverandor, type Leverandor } from
 import { lagLenke, hentNye, etterRegistrering, hentInnsending, settTilbake, settFastTilbake, betalUtleggNa, avvis, slettLenke, type Tilbake } from '@/lib/tjenester/innsending';
 import { kr } from '@/lib/penger';
 import { slettKonto } from '@/lib/tjenester/konto';
-import { merkTimerBrukt } from '@/lib/tjenester/vaktplan';
+import { merkTimerBrukt, innstillinger as vaktInnstillinger } from '@/lib/tjenester/vaktplan';
 import { oktToken, settOkt, slettOkt } from '@/lib/okt';
 import { synkEkstraAnsatte } from '@/lib/stripe';
 import { erVaktplanVert, vertAv } from '@/lib/verter';
@@ -552,8 +552,8 @@ export async function kjorLonnHandling(periode: string, dato: string, input: Lon
     const r = await db.tx(async t => {
       const k = await kjorLonn(t, s.org.id, periode, dato, input, s.bruker.id);
       await planleggUtsending(t, k.id, sendNar, dato);
-      // Godkjente timer fra vaktplanen er nå brukt i denne lønnen.
-      await merkTimerBrukt(t, s.org.id, k.id, k.slipper.map(x => x.ansattId));
+      // Godkjente timer fra vaktplanen er nå brukt i denne lønnen (når vaktplanen er koblet til Lønn).
+      if ((await vaktInnstillinger(t, s.org.id)).lonn.on) await merkTimerBrukt(t, s.org.id, k.id, k.slipper.map(x => x.ansattId));
       return k;
     });
     const utenEpost = (await db.q<{ navn: string }>(`select a.navn from lonnslipp s join ansatt a on a.id = s.ansatt_id where s.lonnskjoring_id = $1 and (a.epost is null or a.epost = '')`, [r.id])).map(x => x.navn);

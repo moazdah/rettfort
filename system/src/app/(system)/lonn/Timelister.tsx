@@ -14,7 +14,7 @@ export function Timelister({ lister, kanEndre }: { lister: Timeliste[]; kanEndre
   return (
     <section className="kort stakk">
       <h2>Timer fra vaktplanen</h2>
-      <p className="mut liten" style={{ margin: 0 }}>Godkjenn timene for uker som er over. Da fylles de inn under, og overtid får tillegget sitt. Fastlønnede får bare overtiden lagt til.</p>
+      <p className="mut liten" style={{ margin: 0 }}>Godkjenn timene for uker som er over. Da fylles de inn under, og overtid får tillegget sitt. Fastlønnede får overtiden lagt til, og trekk for fravær uten lønn.</p>
       {lister.map(l => (
         <div key={`${l.aar}-${l.uke}`} className="stakk" style={{ gap: 6 }}>
           <div className="rad" style={{ justifyContent: 'space-between' }}>

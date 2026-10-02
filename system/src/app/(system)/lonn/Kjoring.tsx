@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { kjorLonnHandling } from '@/app/handlinger';
-import { beregnLonnslipp, grunntimesats, type LonnInput } from '@/lib/tjenester/lonn';
+import { beregnLonnslipp, grunntimesats, fraVaktplan, type LonnInput } from '@/lib/tjenester/lonn';
+import type { TimerTilLonn } from '@/lib/tjenester/vaktplan';
 import { Maskot } from '@/components/Logo';
 import { AnsattSkjema, type AnsattData } from './Ansatt';
 import { kr, tilOre } from '@/lib/penger';
@@ -11,13 +12,18 @@ import { formaterKontonr, manedNavn, nd } from '@/lib/vis';
 
 type A = AnsattData & { id: string };
 
-export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, orgnr, kanEndre, utlegg = [], fraVakt = {} }: { ansatte: A[]; periode: string; dato: string; ferie: number; agaSats: number; firma: string; orgnr: string | null; kanEndre: boolean; utlegg?: { ansattId: string; belop: number; tekst: string }[]; fraVakt?: Record<string, { timer: number; overtid: number; uker: number[] }> }) {
+export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, orgnr, kanEndre, utlegg = [], fraVakt = {} }: { ansatte: A[]; periode: string; dato: string; ferie: number; agaSats: number; firma: string; orgnr: string | null; kanEndre: boolean; utlegg?: { ansattId: string; belop: number; tekst: string }[]; fraVakt?: Record<string, TimerTilLonn> }) {
   const router = useRouter();
   const [valgt, setValgt] = useState(ansatte[0]?.id ?? '');
-  // Godkjente timer fra vaktplanen fylles inn: timelønn får timene, alle får overtiden.
-  const tekst = (n: number) => String(n).replace('.', ',');
-  const [timer, setTimer] = useState<Record<string, string>>(() => Object.fromEntries(ansatte.filter(a => a.lonn_type === 'time' && fraVakt[a.id]?.timer).map(a => [a.id, tekst(fraVakt[a.id].timer - fraVakt[a.id].overtid)])));
-  const [overtid, setOvertid] = useState<Record<string, string>>(() => Object.fromEntries(ansatte.filter(a => fraVakt[a.id]?.overtid).map(a => [a.id, tekst(fraVakt[a.id].overtid)])));
+  // Godkjente timer fra vaktplanen fylles inn: timelønn får timene og fravær med lønn, alle får overtiden,
+  // og fastlønnede får trekk for fravær uten lønn. Alt kan endres før lønnen kjøres.
+  const tekst = (n: number | undefined) => (n ? String(n).replace('.', ',') : '');
+  const fra = (a: A) => (fraVakt[a.id] ? fraVaktplan(a.lonn_type, fraVakt[a.id]) : {});
+  const startverdi = (f: 'timer' | 'overtidTimer' | 'fravaerMedLonn' | 'fravaerUtenLonn') => Object.fromEntries(ansatte.map(a => [a.id, tekst(fra(a)[f])]).filter(([, v]) => v));
+  const [timer, setTimer] = useState<Record<string, string>>(() => startverdi('timer'));
+  const [overtid, setOvertid] = useState<Record<string, string>>(() => startverdi('overtidTimer'));
+  const [fravaerMed, setFravaerMed] = useState<Record<string, string>>(() => startverdi('fravaerMedLonn'));
+  const [fravaerUten, setFravaerUten] = useState<Record<string, string>>(() => startverdi('fravaerUtenLonn'));
   const [salg, setSalg] = useState<Record<string, string>>({});
   const [tillegg, setTillegg] = useState<Record<string, { tekst: string; belop: string }[]>>({});
   const [utbetaling, setUtbetaling] = useState(dato);
@@ -30,7 +36,7 @@ export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, org
   const medEpost = ansatte.filter(x => x.epost);
 
   const tall = (v: string | undefined) => Number((v ?? '0').replace(/\s/g, '').replace(',', '.')) || 0;
-  const input: LonnInput[] = ansatte.map(a => ({ ansattId: a.id, timer: a.lonn_type === 'time' ? tall(timer[a.id]) : undefined, overtidTimer: tall(overtid[a.id]) || undefined, provisjonGrunnlag: a.lonn_type === 'provisjon' ? tilOre(salg[a.id] ?? '') ?? 0 : undefined, tillegg: (tillegg[a.id] ?? []).filter(t => t.tekst && tilOre(t.belop)).map(t => ({ tekst: t.tekst, belop: tilOre(t.belop) ?? 0 })) }));
+  const input: LonnInput[] = ansatte.map(a => ({ ansattId: a.id, timer: a.lonn_type === 'time' ? tall(timer[a.id]) : undefined, overtidTimer: tall(overtid[a.id]) || undefined, fravaerMedLonn: a.lonn_type === 'time' ? tall(fravaerMed[a.id]) || undefined : undefined, fravaerUtenLonn: a.lonn_type !== 'time' ? tall(fravaerUten[a.id]) || undefined : undefined, provisjonGrunnlag: a.lonn_type === 'provisjon' ? tilOre(salg[a.id] ?? '') ?? 0 : undefined, tillegg: (tillegg[a.id] ?? []).filter(t => t.tekst && tilOre(t.belop)).map(t => ({ tekst: t.tekst, belop: tilOre(t.belop) ?? 0 })) }));
   const slipper = useMemo(() => ansatte.map(a => { try { return beregnLonnslipp(a, input.find(i => i.ansattId === a.id)!, ferie, agaSats); } catch { return null; } }), [ansatte, input, ferie, agaSats]);
   const a = ansatte.find(x => x.id === valgt);
   const slipp = slipper[ansatte.findIndex(x => x.id === valgt)];
@@ -95,7 +101,9 @@ export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, org
             <div className="rad" style={{ justifyContent: 'space-between' }}><h2>{a.navn}</h2>{kanEndre && <button type="button" className="knapp hvit liten" onClick={() => setEndre(true)}>Endre</button>}</div>
             <div className="rutenett to">
               {a.lonn_type === 'time' && <label className="felt"><span>Timer i {manedNavn(periode, false)}</span><input className="inndata mono" inputMode="decimal" value={timer[a.id] ?? ''} onChange={e => setTimer({ ...timer, [a.id]: e.target.value })} placeholder="0" /></label>}
-              {fraVakt[a.id] && <span className="hint">Fra vaktplanen, uke {fraVakt[a.id].uker.join(', ')}{fraVakt[a.id].overtid ? ` (${String(fraVakt[a.id].overtid).replace('.', ',')} t overtid)` : ''}.</span>}
+              {a.lonn_type === 'time' && (fravaerMed[a.id] || fraVakt[a.id]?.fravaerMed) ? <label className="felt"><span>Fravær med lønn (timer)</span><input className="inndata mono" inputMode="decimal" value={fravaerMed[a.id] ?? ''} onChange={e => setFravaerMed({ ...fravaerMed, [a.id]: e.target.value })} placeholder="0" /><span className="hint">Godkjent i vaktplanen, for eksempel egenmelding. Betales med timelønnen.</span></label> : null}
+              {a.lonn_type !== 'time' && a.manedslonn > 0 && (fravaerUten[a.id] || fraVakt[a.id]?.fravaerUten) ? <label className="felt"><span>Fravær uten lønn (timer)</span><input className="inndata mono" inputMode="decimal" value={fravaerUten[a.id] ?? ''} onChange={e => setFravaerUten({ ...fravaerUten, [a.id]: e.target.value })} placeholder="0" /><span className="hint">Trekkes med {kr(grunntimesats(a))} kr per time.</span></label> : null}
+              {fraVakt[a.id] && <span className="hint">Fra vaktplanen, uke {fraVakt[a.id].uker.join(', ')}{fraVakt[a.id].overtid ? `, ${String(fraVakt[a.id].overtid).replace('.', ',')} t overtid` : ''}{fraVakt[a.id].fravaerMed ? `, ${String(fraVakt[a.id].fravaerMed).replace('.', ',')} t fravær med lønn` : ''}{fraVakt[a.id].fravaerUten ? `, ${String(fraVakt[a.id].fravaerUten).replace('.', ',')} t fravær uten lønn` : ''}.</span>}
               {a.lonn_type === 'provisjon' && <label className="felt"><span>Salg som gir provisjon (kr)</span><input className="inndata mono" inputMode="decimal" value={salg[a.id] ?? ''} onChange={e => setSalg({ ...salg, [a.id]: e.target.value })} placeholder="0,00" /><span className="hint">{String(a.provisjon_prosent ?? 0).replace('.', ',')} % gir {kr(Math.round(((tilOre(salg[a.id] ?? '') ?? 0) * (a.provisjon_prosent ?? 0)) / 100))} kr i provisjon.</span></label>}
               <label className="felt"><span>Overtidstimer</span><input className="inndata mono" inputMode="decimal" value={overtid[a.id] ?? ''} onChange={e => setOvertid({ ...overtid, [a.id]: e.target.value })} placeholder="0" /><span className="hint">{kr(Math.round(grunntimesats(a) * (1 + (a.overtid_prosent ?? 40) / 100)))} kr per time ({String(a.overtid_prosent ?? 40).replace('.', ',')} % tillegg).</span></label>
             </div>

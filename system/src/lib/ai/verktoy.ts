@@ -12,7 +12,7 @@ import { hentOrg, forfallFra } from '../tjenester/faktura';
 import { finnDuplikat } from '../tjenester/kjop';
 import { foreslaKonto, konto as finnKonto, kontoType } from '../kontoplan';
 import { splittBrutto } from '../penger';
-import { forhandsvisLonn, type LonnInput } from '../tjenester/lonn';
+import { forhandsvisLonn, fraVaktplan, type LonnInput } from '../tjenester/lonn';
 import { nesteFrister } from '../tjenester/oversikt';
 import { hentUke, forslagUke, vakterMellom, vaktAnsatte, tilgjengelighet, godkjenteTimer } from '../tjenester/vaktplan';
 import { isoUke, ukeDager, advarsler as vaktAdvarsler, kortTid, timer as tTimer } from '../vaktplan';
@@ -215,7 +215,7 @@ export async function kjorVerktoy(k: Ktx, navn: string, a: Record<string, unknow
       for (const [id, v] of Object.entries(fraVakt)) {
         if (inn.some(x => x.ansattId === id)) continue;
         const an = await k.db.en<{ lonn_type: string }>('select lonn_type from ansatt where id = $1', [id]);
-        inn.push({ ansattId: id, timer: an?.lonn_type === 'time' ? Math.max(0, v.timer - v.overtid) : undefined, overtidTimer: v.overtid || undefined });
+        inn.push({ ansattId: id, ...fraVaktplan(an?.lonn_type ?? 'fast', v) });
       }
       const slipper = (await forhandsvisLonn(k.db, k.orgId, inn)).filter(x => x.brutto > 0);
       if (!slipper.length) return { svar: { feil: 'Ingen har lønn med disse tallene. Timelønnede trenger timer.' } };

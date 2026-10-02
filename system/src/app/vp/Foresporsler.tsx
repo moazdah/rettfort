@@ -35,7 +35,7 @@ export function Foresporsler({ fane, setFane }: { fane: 'req' | 'timer'; setFane
         </>
       ) : (
         <div className="v2-stakk">
-          <div className="v2-notat gronn"><Ikon n="payments" s={18} />Godkjente timer går rett til Lønn i regnskapet.</div>
+          {d.innstillinger.lonn.on ? <div className="v2-notat gronn"><Ikon n="payments" s={18} />Godkjente timer går rett til Lønn i regnskapet.</div> : <div className="v2-notat gra"><Ikon n="money_off" s={18} />Koblingen til Lønn er slått av. Timene godkjennes her, men fylles ikke inn i Lønn.</div>}
           {d.timer.map(u => {
             const venter = u.rader.filter(r => r.status === 'venter');
             const stemmer = venter.filter(r => !r.avvik.length);
@@ -64,7 +64,7 @@ export function Foresporsler({ fane, setFane }: { fane: 'req' | 'timer'; setFane
           })}
           {d.alleFravaer.length > 0 && (
             <section className="v2-kort v2-timer">
-              <div className="v2-timer-topp"><div className="fyll"><div className="v2-timer-tittel">Fravær til Lønn</div><div className="v2-hjelp">Godkjent fravær følger med timene til Lønn.</div></div></div>
+              <div className="v2-timer-topp"><div className="fyll"><div className="v2-timer-tittel">Fravær til Lønn</div><div className="v2-hjelp">{d.innstillinger.lonn.on && d.innstillinger.lonn.fravaer ? 'Godkjent fravær følger med timene til Lønn.' : 'Fravær tas ikke med til Lønn.'}</div></div></div>
               {d.alleFravaer.slice(0, 12).map(f => (
                 <div key={f.id} className="v2-timer-rad">
                   <span className="v2-avatar rod" style={{ width: 36, height: 36 }}><Ikon n="event_busy" s={18} /></span>

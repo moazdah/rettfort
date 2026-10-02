@@ -220,7 +220,8 @@ export async function godkjennTimerHandling(aar: number, uke: number, hvem: stri
     const { angre, r: n } = await medAngre(db, s.org.id, { timeliste: rader.map(r => ({ ansattId: r.ansattId, aar, uke })) }, t => V.godkjennTimeliste(t, s.org.id, aar, uke, hvem));
     revalidatePath('/lonn'); oppdater();
     const en = Array.isArray(hvem) && hvem.length === 1 ? rader.find(r => r.ansattId === hvem[0]) : null;
-    return { angre, antall: n, melding: en ? `${timerTall(en.arbeid + en.fravaer)} t for ${fornavn(en.navn)} er godkjent og sendt til Lønn.` : `${n} ${n === 1 ? 'timeliste er' : 'timelister er'} godkjent og sendt til Lønn.` };
+    const tilLonn = (await V.innstillinger(db, s.org.id)).lonn.on ? ' og sendt til Lønn' : '';
+    return { angre, antall: n, melding: en ? `${timerTall(en.arbeid + en.fravaer)} t for ${fornavn(en.navn)} er godkjent${tilLonn}.` : `${n} ${n === 1 ? 'timeliste er' : 'timelister er'} godkjent${tilLonn}.` };
   });
 }
 
