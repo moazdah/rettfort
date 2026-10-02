@@ -250,7 +250,7 @@ export function FakturaSkjema({ org, kunder, start, idag, videre, logo = null }:
           <p className="hint">15 % gjelder næringsmidler som ikke serveres. Servering, som mat på restaurant eller catering med servering, har 25 %.</p>
         </section>
 
-        <section className="kort stakk">
+        <section className="kort stakk" id="din-info">
           <div className="rad" style={{ justifyContent: 'space-between' }}>
             <div><h2>Din info på {type === 'tilbud' ? 'tilbudet' : type === 'kvittering' ? 'kvitteringen' : 'fakturaen'}</h2><div className="mut liten">{[av.navn, av.kontonr && `konto ${av.kontonr}`, av.epost].filter(Boolean).join(' · ')}</div></div>
             <button type="button" className="knapp hvit liten" onClick={() => setAvApen(!avApen)}>{avApen ? 'Lukk' : 'Endre'}</button>
@@ -277,7 +277,6 @@ export function FakturaSkjema({ org, kunder, start, idag, videre, logo = null }:
           </label>
         )}
 
-        {mangel.length > 0 && <div className="varsel gul"><div className="fyll"><b>Før du kan sende:</b><ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>{mangel.map(m => <li key={m}>{m}</li>)}</ul></div></div>}
         {utenOrgnrSak && (
           <div className={`varsel ${utenOrgnr ? 'rod' : 'gul'} stakk`} style={{ gap: 8, alignItems: 'stretch' }} role="note">
             <b>{utenOrgnr ? `Du sender ${hva} uten org.nr` : `Org.nr mangler på ${hva}`}</b>
@@ -290,11 +289,21 @@ export function FakturaSkjema({ org, kunder, start, idag, videre, logo = null }:
             </div>
           </div>
         )}
+        {mangel.length > 0 && (
+          <div className="varsel gul" role="status">
+            <div className="fyll stakk" style={{ gap: 8 }}>
+              <b>Før du kan sende:</b>
+              <ul style={{ margin: 0, paddingLeft: 18 }}>{mangel.map(m => <li key={m}>{m}</li>)}</ul>
+              {mangel.some(m => /Kontonummer|Adressen din|Firmanavnet/.test(m)) && <div><button type="button" className="knapp liten" onClick={() => { setAvApen(true); setTimeout(() => { const e = document.getElementById('din-info'); e?.scrollIntoView({ behavior: 'smooth', block: 'start' }); e?.querySelector<HTMLInputElement>('input[placeholder="1506 22 33445"]')?.focus({ preventScroll: true }); }, 50); }}>Legg inn nå</button></div>}
+            </div>
+          </div>
+        )}
         {feil && <div className="varsel rod" role="alert">{feil}</div>}
         <div className="rad" style={{ justifyContent: 'flex-end' }}>
           <button type="button" className="knapp hvit" disabled={venter} onClick={utkast}>Lagre som utkast</button>
           <button type="button" className="knapp" disabled={venter || mangel.length > 0 || (utenOrgnrSak && !utenOrgnr)} onClick={send}>{venter ? 'Et øyeblikk …' : type === 'tilbud' ? 'Lag tilbudet' : `${type === 'kvittering' ? 'Lag kvittering' : type === 'kreditnota' ? 'Lag kreditnota' : 'Lag faktura'}${utenOrgnrSak && utenOrgnr ? ' uten org.nr' : ''} · ${kr(sum.total)} kr`}</button>
         </div>
+        {!venter && (mangel.length > 0 || (utenOrgnrSak && !utenOrgnr)) && <p className="hint" style={{ textAlign: 'right', margin: 0 }}>{mangel.length > 0 ? `Knappen virker når ${mangel.length === 1 ? 'punktet' : 'punktene'} under «Før du kan sende» er rettet.` : 'Legg inn org.nr, eller velg «Send uten org.nr».'}</p>}
       </div>
 
       <div className="forhandsvisning">
