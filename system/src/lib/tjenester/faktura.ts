@@ -34,15 +34,17 @@ export async function hentOrg(t: Sporring, orgId: string): Promise<Org> {
   return o;
 }
 
+export const ORGNR_MANGLER = 'Org.nr mangler. Hent det fra Brønnøysund under Innstillinger.';
+
 /**
  * Sjekker lovpålagt innhold (bokføringsforskriften § 5-1-1) før sending.
  * Returnerer en liste med det som mangler, formulert slik brukeren forstår det.
  */
-export function mangler(org: Org, kunde: Kontakt | null, f: FakturaInput, avsender?: Record<string, string> | null): string[] {
+export function mangler(org: Org, kunde: Kontakt | null, f: FakturaInput, avsender?: Record<string, string> | null, o: { utenOrgnr?: boolean } = {}): string[] {
   const m: string[] = [];
   const a = { ...org, ...(avsender ?? {}) } as Org;
   if (!a.navn) m.push('Firmanavnet ditt mangler.');
-  if (!org.orgnr) m.push('Org.nr mangler. Hent det fra Brønnøysund under Innstillinger.');
+  if (!org.orgnr) { if (!o.utenOrgnr && f.type !== 'tilbud') m.push(ORGNR_MANGLER); }
   else if (!gyldigOrgnr(org.orgnr)) m.push('Org.nr er ugyldig.');
   if (!a.adresse || !a.postnr) m.push('Adressen din mangler.');
   if (f.type !== 'tilbud' && f.type !== 'kvittering' && !a.kontonr) m.push('Kontonummer for betaling mangler.');
@@ -107,13 +109,18 @@ async function sikreKundenr(t: Sporring, orgId: string, kontaktId: string): Prom
 }
 
 /** Sender (fullfører) et salg: gir nummer og KID, fører i regnskapet. Tilbud føres ikke. */
-export async function sendSalg(t: Sporring, orgId: string, id: string, brukerId?: string | null): Promise<{ nr: number; kid: string | null; bilagNr: number | null }> {
+/**
+ * `utenOrgnr`: brukeren har lest advarselen og vil sende uten org.nr (for eksempel før foretaket er registrert).
+ * Et ugyldig org.nr stopper fortsatt sendingen. Valget logges.
+ */
+export async function sendSalg(t: Sporring, orgId: string, id: string, brukerId?: string | null, o: { utenOrgnr?: boolean } = {}): Promise<{ nr: number; kid: string | null; bilagNr: number | null }> {
   const f = await hentSalg(t, orgId, id);
   if (!f) throw new RegnskapsFeil('Fant ikke dokumentet.');
   if (f.status !== 'utkast') throw new RegnskapsFeil('Dokumentet er allerede sendt.');
   const org = await hentOrg(t, orgId);
-  const m = mangler(org, f.kunde, { ...f, kontaktId: f.kontakt_id }, f.avsender);
+  const m = mangler(org, f.kunde, { ...f, kontaktId: f.kontakt_id }, f.avsender, o);
   if (m.length) throw new RegnskapsFeil(m.join(' '));
+  if (!org.orgnr && f.type !== 'tilbud') await t.q(`insert into logg (organisasjon_id, bruker_id, handling, ref) values ($1,$2,'sendt_uten_orgnr',$3)`, [orgId, brukerId ?? null, id]);
   let nr: number;
   if (f.type === 'tilbud') {
     const r = await t.en<{ nr: number }>(`select coalesce(max(nr), 0) + 1 as nr from faktura where organisasjon_id = $1 and type = 'tilbud'`, [orgId]);

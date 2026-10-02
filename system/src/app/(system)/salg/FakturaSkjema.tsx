@@ -84,7 +84,11 @@ export function FakturaSkjema({ org, kunder, start, idag, videre, logo = null }:
   const avsenderOverstyr = !avAlle && avEndret ? { navn: av.navn, adresse: av.adresse, postnr: av.postnr, poststed: av.poststed, kontonr: av.kontonr, epost: av.epost, telefon: av.telefon, tekst: av.tekst } : null;
   const input = () => ({ id: start?.id, type, kontaktId: kunde?.id ?? null, dato, forfall: type === 'kvittering' ? null : forfall || null, levert: levert || null, referanse: referanse || null, linjer: fl.filter(l => l.beskrivelse.trim() || l.pris), gjentakelse: type === 'faktura' && rep ? 'maned' : null, avsender: avsenderOverstyr });
   const orgMedAv = { ...org, ...av } as Org;
-  const mangel = mangler(orgMedAv, kunde, input(), null);
+  // Org.nr er det eneste som kan mangle ved sending, etter et bevisst valg. Alt annet må være på plass.
+  const mangel = mangler(orgMedAv, kunde, input(), null, { utenOrgnr: true });
+  const utenOrgnrSak = !org.orgnr && type !== 'tilbud';
+  const [utenOrgnr, setUtenOrgnr] = useState(false);
+  const hva = type === 'kvittering' ? 'kvitteringen' : type === 'kreditnota' ? 'kreditnotaen' : 'fakturaen';
   const forslag = videre.filter(v => kunde && v.kontaktId === kunde.id && !lagtTil.includes(v.id));
 
   const velgEnhet = async (e: Enhet) => {
@@ -112,7 +116,7 @@ export function FakturaSkjema({ org, kunder, start, idag, videre, logo = null }:
   const send = async () => {
     setVenter(true); setFeil('');
     if (!(await lagreAvsender())) { setVenter(false); return; }
-    const r = await sendSalgHandling(input(), lagtTil);
+    const r = await sendSalgHandling(input(), lagtTil, utenOrgnrSak && utenOrgnr);
     setVenter(false);
     if (!r.ok) { setFeil(r.feil); return; }
     setSendt(r.data!);
@@ -154,7 +158,7 @@ export function FakturaSkjema({ org, kunder, start, idag, videre, logo = null }:
           <p className="mut liten" style={{ marginTop: 8 }}>{typeHint}</p>
         </div>
 
-        {!org.orgnr && <div className="varsel gul"><div className="fyll">Legg inn organisasjonsnummeret ditt, så står det på fakturaen.</div><Link href="/innstillinger" className="knapp hvit liten">Gå til Innstillinger</Link></div>}
+        {!org.orgnr && <div className="varsel gul"><div className="fyll">Organisasjonsnummeret ditt mangler. Legg det inn, så står det på fakturaen.</div><Link href="/innstillinger" className="knapp hvit liten">Gå til Innstillinger</Link></div>}
 
         <section className="kort stakk">
           <h2>{type === 'tilbud' ? 'Hvem er tilbudet til?' : 'Hvem skal betale?'}</h2>
@@ -274,10 +278,22 @@ export function FakturaSkjema({ org, kunder, start, idag, videre, logo = null }:
         )}
 
         {mangel.length > 0 && <div className="varsel gul"><div className="fyll"><b>Før du kan sende:</b><ul style={{ margin: '4px 0 0', paddingLeft: 18 }}>{mangel.map(m => <li key={m}>{m}</li>)}</ul></div></div>}
+        {utenOrgnrSak && (
+          <div className={`varsel ${utenOrgnr ? 'rod' : 'gul'} stakk`} style={{ gap: 8, alignItems: 'stretch' }} role="note">
+            <b>{utenOrgnr ? `Du sender ${hva} uten org.nr` : `Org.nr mangler på ${hva}`}</b>
+            <span>Er foretaket registrert i Enhetsregisteret, skal organisasjonsnummeret stå på alle salgsdokumenter (bokføringsforskriften § 5-1-1). Uten det oppfyller ikke {hva} kravene. Kunden kan avvise den eller be om en ny, og mangelen kan bli påpekt ved kontroll fra Skatteetaten.</span>
+            <span>Har foretaket ikke fått org.nr ennå, kan du sende uten. {hva.charAt(0).toUpperCase() + hva.slice(1)} blir ført som vanlig, og valget lagres i loggen.</span>
+            <div className="rad" style={{ gap: 8 }}>
+              {utenOrgnr
+                ? <button type="button" className="knapp hvit liten" onClick={() => setUtenOrgnr(false)}>Angre</button>
+                : <><Link href="/innstillinger" className="knapp liten">Legg inn org.nr</Link><button type="button" className="knapp hvit liten" onClick={() => setUtenOrgnr(true)}>Send uten org.nr</button></>}
+            </div>
+          </div>
+        )}
         {feil && <div className="varsel rod" role="alert">{feil}</div>}
         <div className="rad" style={{ justifyContent: 'flex-end' }}>
           <button type="button" className="knapp hvit" disabled={venter} onClick={utkast}>Lagre som utkast</button>
-          <button type="button" className="knapp" disabled={venter || mangel.length > 0} onClick={send}>{venter ? 'Et øyeblikk …' : type === 'tilbud' ? 'Lag tilbudet' : type === 'kvittering' ? `Lag kvittering · ${kr(sum.total)} kr` : `Lag faktura · ${kr(sum.total)} kr`}</button>
+          <button type="button" className="knapp" disabled={venter || mangel.length > 0 || (utenOrgnrSak && !utenOrgnr)} onClick={send}>{venter ? 'Et øyeblikk …' : type === 'tilbud' ? 'Lag tilbudet' : `${type === 'kvittering' ? 'Lag kvittering' : type === 'kreditnota' ? 'Lag kreditnota' : 'Lag faktura'}${utenOrgnrSak && utenOrgnr ? ' uten org.nr' : ''} · ${kr(sum.total)} kr`}</button>
         </div>
       </div>
 

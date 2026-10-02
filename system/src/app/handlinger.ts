@@ -352,14 +352,14 @@ export async function lagreUtkastSalg(f: FakturaInput): Promise<Resultat<{ id: s
   }, 'Utkastet er lagret.');
 }
 
-export async function sendSalgHandling(f: FakturaInput, videreKjop: string[] = []): Promise<Resultat<{ id: string; nr: number; kid: string | null; epostTil: string | null; kreditter: number | null }>> {
+export async function sendSalgHandling(f: FakturaInput, videreKjop: string[] = [], utenOrgnr = false): Promise<Resultat<{ id: string; nr: number; kid: string | null; epostTil: string | null; kreditter: number | null }>> {
   return trygt(async () => {
     const s = await kreverOrg(); sjekkSkrivetilgang(s);
     const db = await getDb();
     const r = await db.tx(async t => {
       if (f.type === 'faktura' || f.type === 'kvittering') await sjekkFakturaGrense(t, s.org.id, s.org.pakke, idag());
       const id = await lagreSalg(t, s.org.id, f);
-      const x = await sendSalg(t, s.org.id, id, s.bruker.id);
+      const x = await sendSalg(t, s.org.id, id, s.bruker.id, { utenOrgnr: utenOrgnr === true });
       for (const k of videreKjop) await t.q('update kjop set videre_faktura_id = $3 where id = $1 and organisasjon_id = $2', [k, s.org.id, id]);
       return { id, ...x };
     });

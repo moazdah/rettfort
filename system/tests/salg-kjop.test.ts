@@ -109,3 +109,22 @@ describe('kjøp', () => {
     expect(res.inntekter).toBeGreaterThan(0);
   });
 });
+
+describe('sende uten org.nr', () => {
+  it('stopper uten bekreftelse, sender med, og logger valget. Ugyldig org.nr stopper alltid', async () => {
+    const d = await nyTestDb();
+    const o = (await d.en<{ id: string }>(`insert into organisasjon (type, navn, adresse, postnr, poststed, kontonr) values ('selskap','Ny Bedrift','Vei 1','0150','Oslo','15062233445') returning id`))!.id;
+    const k = await d.tx(t => finnEllerLagKontakt(t, o, 'kunde', 'Kunde AS', null, { adresse: 'Gate 2', postnr: '5003', poststed: 'Bergen' }));
+    const id = await d.tx(t => lagreSalg(t, o, { type: 'faktura', kontaktId: k, dato: '2026-10-05', forfall: '2026-10-19', linjer: [linje(10000)] }));
+    await expect(d.tx(t => sendSalg(t, o, id))).rejects.toThrow(/Org.nr mangler/);
+    const r = await d.tx(t => sendSalg(t, o, id, null, { utenOrgnr: true }));
+    expect(r.nr).toBeGreaterThan(0);
+    expect(await d.en(`select handling, ref from logg where organisasjon_id = $1 and handling = 'sendt_uten_orgnr'`, [o])).toEqual({ handling: 'sendt_uten_orgnr', ref: id });
+    // Tilbud krever ikke org.nr
+    const tid = await d.tx(t => lagreSalg(t, o, { type: 'tilbud', kontaktId: k, dato: '2026-10-05', linjer: [linje(10000)] }));
+    await expect(d.tx(t => sendSalg(t, o, tid))).resolves.toBeTruthy();
+    await d.q(`update organisasjon set orgnr = '912345678' where id = $1`, [o]);
+    const id2 = await d.tx(t => lagreSalg(t, o, { type: 'faktura', kontaktId: k, dato: '2026-10-05', forfall: '2026-10-19', linjer: [linje(10000)] }));
+    await expect(d.tx(t => sendSalg(t, o, id2, null, { utenOrgnr: true }))).rejects.toThrow(/ugyldig/);
+  });
+});
