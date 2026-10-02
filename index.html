@@ -39,7 +39,10 @@ a{color:#0B2545;text-decoration:none;}
 a:hover{color:#16345E;}
 button{font-family:inherit;cursor:pointer;color:inherit;}
 :focus-visible{outline:2px solid #0B2545;outline-offset:2px;}
-@media (max-width:760px){[data-rf="topnav"]{display:none !important;}[data-rf="topp"]{gap:12px !important;justify-content:space-between;padding:0 16px !important;}}
+@media (max-width:760px){[data-rf="toppvalgfri"],[data-rf="logginn"]{display:none !important;}[data-rf="topp"]{gap:12px !important;padding:0 16px !important;}[data-rf="topnav"]{flex:1}}
+[data-rf="menymobil"]{display:none}
+@media (max-width:760px){[data-rf="menymobil"]{display:flex}[data-rf="menygrid"]{grid-template-columns:1fr !important;padding:12px 16px 16px !important}}
+@media (min-width:761px) and (max-width:1000px){[data-rf="menygrid"]{grid-template-columns:repeat(2,minmax(0,1fr)) !important}}
 @media (max-width:420px){[data-rf="toppknapper"] a{height:38px !important;padding:0 14px !important;font-size:14.5px !important;}}
 [data-rf="aivalg"]::-webkit-scrollbar{display:none;}
 [data-rf="aichat"]>*{flex-shrink:0}
@@ -59,17 +62,35 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
   <header style="position:sticky;top:0;z-index:20;background:rgba(244,241,234,.94);backdrop-filter:blur(10px);border-bottom:1px solid #E4DFD4">
     <div data-rf="topp" style="max-width:1200px;margin:0 auto;height:72px;padding:0 24px;display:flex;align-items:center;gap:40px">
       <a href="/" aria-label="Rettført" style="width:104px;height:26px;overflow:hidden;position:relative;flex:none;display:block"><img src="assets/rettfort-logo.png" alt="Rettført" style="position:absolute;left:-14px;top:-8px;width:130px;height:auto;max-width:none"></a>
-      <nav data-rf="topnav" style="display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;flex:1;min-width:0;height:40px;font-size:15.5px;overflow:hidden;white-space:nowrap">
-        <a href="#funksjoner" style="padding:8px 12px;border-radius:99px;color:#3D4759" style-hover="color:#0B2545;background:#EAE5DA">Funksjoner</a>
-        <a href="#priser" style="padding:8px 12px;border-radius:99px;color:#3D4759" style-hover="color:#0B2545;background:#EAE5DA">Priser</a>
-        <a href="/bak-rettfort" style="padding:8px 12px;border-radius:99px;color:#3D4759" style-hover="color:#0B2545;background:#EAE5DA">Bak Rettført</a>
+      <nav data-rf="topnav" style="display:flex;align-items:center;gap:0 4px;flex:1;min-width:0;height:40px;font-size:15.5px;white-space:nowrap">
+        <button onClick="{{ toggleMeny }}" aria-expanded="{{ menyStr }}" style="height:40px;padding:0 12px;border-radius:99px;border:0;background:{{ menyBg }};color:#0B2545;font:inherit;font-weight:500;display:flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap" style-hover="background:#EAE5DA">Funksjoner<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ menyChev }});transition:transform .25s"><path d="M6 9l6 6l6-6"></path></svg></button>
+        <a data-rf="toppvalgfri" href="#priser" style="padding:8px 12px;border-radius:99px;color:#3D4759" style-hover="color:#0B2545;background:#EAE5DA">Priser</a>
+        <a data-rf="toppvalgfri" href="/bak-rettfort" style="padding:8px 12px;border-radius:99px;color:#3D4759" style-hover="color:#0B2545;background:#EAE5DA">Bak Rettført</a>
       </nav>
       <div data-rf="toppknapper" style="display:flex;align-items:center;gap:8px;flex:none">
-        <a href="https://min.xn--rettfrt-u1a.no/logg-inn" style="height:42px;padding:0 18px;border-radius:99px;border:1px solid #0B2545;color:#0B2545;font-size:15.5px;font-weight:500;display:flex;align-items:center;white-space:nowrap" style-hover="background:#fff">Logg inn</a>
+        <a data-rf="logginn" href="https://min.xn--rettfrt-u1a.no/logg-inn" style="height:42px;padding:0 18px;border-radius:99px;border:1px solid #0B2545;color:#0B2545;font-size:15.5px;font-weight:500;display:flex;align-items:center;white-space:nowrap" style-hover="background:#fff">Logg inn</a>
         <a href="https://min.xn--rettfrt-u1a.no/registrer" style="height:42px;padding:0 20px;border-radius:99px;background:#0B2545;color:#fff;font-size:15.5px;font-weight:600;display:flex;align-items:center;white-space:nowrap" style-hover="background:#16345E">Start gratis</a>
       </div>
     </div>
+    <sc-if value="{{ meny }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:0;right:0;top:72px;background:#fff;border-bottom:1px solid #E4DFD4;box-shadow:0 30px 60px -30px rgba(11,37,69,.35)">
+        <div data-rf="menygrid" style="max-width:1200px;margin:0 auto;padding:20px 24px 24px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px">
+          <sc-for list="{{ menyValg }}" as="m" hint-placeholder-count="6">
+            <a href="{{ m.href }}" style="padding:12px 14px;min-height:64px;border-radius:14px;display:flex;gap:12px;align-items:center;color:#0B2545" style-hover="background:#F4F1EA">
+              <span style="flex:none;width:40px;height:40px;border-radius:12px;background:#FBF0B8;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B2545" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ m.ik }}"></path></svg></span>
+              <span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:16px;font-weight:600">{{ m.n }}</span><span style="font-size:14px;color:#586174">{{ m.line }}</span></span>
+            </a>
+          </sc-for>
+        </div>
+        <div data-rf="menymobil" style="max-width:1200px;margin:0 auto;padding:0 24px 20px;flex-wrap:wrap;gap:8px">
+          <a href="#priser" onClick="{{ lukkMeny }}" style="height:44px;padding:0 16px;border-radius:99px;background:#F4F1EA;font-size:15px;display:flex;align-items:center">Priser</a>
+          <a href="/bak-rettfort" style="height:44px;padding:0 16px;border-radius:99px;background:#F4F1EA;font-size:15px;display:flex;align-items:center">Bak Rettført</a>
+          <a href="https://min.xn--rettfrt-u1a.no/logg-inn" style="height:44px;padding:0 16px;border-radius:99px;border:1px solid #0B2545;font-size:15px;font-weight:500;display:flex;align-items:center">Logg inn</a>
+        </div>
+      </div>
+    </sc-if>
   </header>
+  <sc-if value="{{ meny }}" hint-placeholder-val="{{ false }}"><div onClick="{{ lukkMeny }}" style="position:fixed;inset:0;z-index:10;background:rgba(11,37,69,.12)"></div></sc-if>
 
   <section style="padding:72px 24px 96px">
     <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:56px">
@@ -77,7 +98,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
         <h1 style="margin:0;font-size:clamp(40px,6vw,76px);line-height:1.02;letter-spacing:-.045em;font-weight:600;text-wrap:balance">Regnskap, lønn og vaktplan. <span style="background:linear-gradient(transparent 62%,#F6DF6E 62%,#F6DF6E 92%,transparent 92%)">På ett sted.</span></h1>
         <div style="margin-top:30px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
           <a href="https://min.xn--rettfrt-u1a.no/registrer" style="height:52px;padding:0 26px;border-radius:99px;background:#0B2545;color:#fff;font-size:16.5px;font-weight:600;display:flex;align-items:center" style-hover="background:#16345E">Start gratis</a>
-          <a href="/demo-bedrift" style="height:52px;padding:0 24px;border-radius:99px;border:1px solid #D9D3C6;background:#fff;font-size:16.5px;font-weight:500;display:flex;align-items:center" style-hover="border-color:#0B2545">Se demo</a>
+          <a href="/funksjoner" style="height:52px;padding:0 24px;border-radius:99px;border:1px solid #D9D3C6;background:#fff;font-size:16.5px;font-weight:500;display:flex;align-items:center" style-hover="border-color:#0B2545">Se funksjonene</a>
         </div>
       </div>
 
@@ -292,7 +313,9 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { faq: 0, scrolled: false, ai: 0, at: 0 };
+  state = { faq: 0, scrolled: false, ai: 0, at: 0, meny: false };
+  // «Funksjoner» i toppmenyen: hver funksjon har sin egen side, /funksjoner#navn.
+  MENY = [['faktura', 'Faktura', 'Send faktura og få betalt', 'M7 3h7l5 5v13H7z M14 3v5h5'], ['kjop', 'Kjøp og kostnader', 'Ta bilde, så leses kvitteringen', 'M4 8h3l2-3h6l2 3h3v11H4z M12 17a4 4 0 1 0 0-8a4 4 0 0 0 0 8'], ['bank', 'Bank', 'Avstem kontoen mot utskriften', 'M3 10l9-6l9 6 M5 10v8 M10 10v8 M14 10v8 M19 10v8 M3 20h18'], ['lonn', 'Lønn', 'Lønn og lønnsslipp på få klikk', 'M6 3h12v18H6z M9 7h6 M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01'], ['vaktplan', 'Vaktplan', 'Vakter, bytter og timer til lønn', 'M4 6h16v14H4z M4 10h16 M8 3v4 M16 3v4'], ['assistenten', 'Assistenten', 'Skriv hva du vil, godkjenn forslaget', 'M12 3l1.8 5.4L19 10l-5.2 1.6L12 17l-1.8-5.4L5 10l5.2-1.6z']];
   AI = [
     { tema: 'Faktura', tid: '14:04', u: 'Fakturer Havbris AS for 12 timer rådgivning i september', b: 'Her er fakturaen. Jeg brukte timeprisen fra sist og la til KID.', kt: 'Faktura 1043', l: [['Til', 'Havbris AS'], ['12 t × 1 150 kr', '13 800,00'], ['MVA 25 %', '3 450,00'], ['Å betale', '17 250,00 kr']], s: ['Fant Havbris AS i kunderegisteret', 'Hentet timeprisen fra forrige faktura', 'La til 25 % MVA og KID'], ok: 'Send faktura', f: 'Sendt til post@havbris.no' },
     { tema: 'Kvittering', tid: '09:12', bilde: 'kvittering-biltema.jpg', u: 'Før kvitteringen jeg tok bilde av', b: 'Biltema, 1 249 kr. Jeg fant betalingen i banken også.', kt: 'Kjøp · Biltema', l: [['Konto', '6540 Inventar'], ['MVA 25 %', '249,80'], ['Betalt', '26.09 fra driftskonto'], ['Totalt', '1 249,00 kr']], s: ['Leste kvitteringen: Biltema, 1 249 kr', 'Valgte konto 6540 Inventar', 'Fant betalingen i banken 26.09'], ok: 'Før kjøpet', f: 'Ført og avstemt mot banken' },
@@ -302,8 +325,9 @@ class Component extends DCLogic {
   ];
   componentDidMount() {
     this.aiIv = setInterval(() => this.setState(x => x.at + 100 >= 9600 ? { ai: (x.ai + 1) % this.AI.length, at: 0 } : { at: x.at + 100 }), 100);
-    this.onS = () => { const v = window.scrollY > 8; if (v !== this.state.scrolled) this.setState({ scrolled: v }); }; window.addEventListener('scroll', this.onS, { passive: true }); }
-  componentWillUnmount() { window.removeEventListener('scroll', this.onS); clearInterval(this.aiIv); }
+    this.onS = () => { const v = window.scrollY > 8; if (v !== this.state.scrolled) this.setState({ scrolled: v }); }; window.addEventListener('scroll', this.onS, { passive: true });
+    this.onKey = e => { if (e.key === 'Escape' && this.state.meny) this.setState({ meny: false }); }; window.addEventListener('keydown', this.onKey); }
+  componentWillUnmount() { window.removeEventListener('scroll', this.onS); window.removeEventListener('keydown', this.onKey); clearInterval(this.aiIv); }
   renderVals() {
     const s = this.state;
     const A = this.AI[s.ai], t = s.at;
@@ -346,6 +370,9 @@ class Component extends DCLogic {
     const V = (t, k) => k === 'o' ? { t, bg: '#fff', bd: '#0B2545', st: 'dashed' } : t ? { t, bg: '#E9EEF5', bd: '#C9D5E5', st: 'solid' } : { t: '', bg: '#FBFAF6', bd: '#EFEBE2', st: 'solid' };
     return {
       ...aiVals,
+      meny: s.meny, menyStr: s.meny ? 'true' : 'false', menyBg: s.meny ? '#EAE5DA' : 'transparent', menyChev: s.meny ? '180deg' : '0deg',
+      toggleMeny: () => this.setState(x => ({ meny: !x.meny })), lukkMeny: () => this.setState({ meny: false }),
+      menyValg: this.MENY.map(([k, n, line, ik]) => ({ href: '/funksjoner#' + k, n, line, ik })),
       hdrLinje: s.scrolled ? '#E4DFD4' : 'transparent',
       appNav: ['Hjem', 'Penger ut', 'Penger inn', 'Bank', 'Lønn', 'Vaktplan', 'MVA'].map((t, i) => ({ t, fw: i ? 400 : 600, bd: i ? 'transparent' : '#0B2545' })),
       stolper: [38, 52, 44, 61, 57, 70, 66, 82, 96].map((h, i) => ({ h: h + '%', bg: i === 8 ? '#0B2545' : '#DCE3EC' })),

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Se hvordan Rettført virker: faktura, kjøp og kostnader, bank, lønn, vaktplan og assistenten.">
+<link rel="canonical" href="https://xn--rettfrt-u1a.no/funksjoner">
+<script src="/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Funksjoner – Rettført</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F7F5F0;}
+*{box-sizing:border-box;}
+a{color:#0B2545;text-decoration:none;}
+a:hover{color:#16345E;}
+button{font-family:inherit;cursor:pointer;color:inherit;}
+:focus-visible{outline:2px solid #0B2545;outline-offset:2px;}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="min-height:100vh;background:#F7F5F0;font-family:'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;font-size:16px;line-height:1.5">
+
+  <header style="position:sticky;top:0;z-index:20;background:rgba(247,245,240,.94);backdrop-filter:blur(10px);border-bottom:1px solid #E7E2D7">
+    <div style="max-width:1240px;margin:0 auto;height:68px;padding:{{ hdrPad }};display:flex;align-items:center;gap:{{ hdrGap }}">
+      <a href="/" aria-label="Rettført" style="width:104px;height:26px;overflow:hidden;position:relative;display:block;flex:none"><img src="/assets/rettfort-logo.png" alt="Rettført" style="position:absolute;left:-14px;top:-8px;width:130px;height:auto;max-width:none"></a>
+      <nav style="display:flex;align-items:center;gap:2px;flex:1;min-width:0">
+        <button onClick="{{ toggleMenu }}" aria-expanded="{{ menuStr }}" style="height:42px;padding:{{ fnPad }};border-radius:99px;border:0;background:{{ menuBg }};font-size:15.5px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap" style-hover="background:#ECE7DC">Funksjoner<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ chev }});transition:transform .25s"><path d="M6 9l6 6l6-6"></path></svg></button>
+        <sc-if value="{{ notNarrow }}" hint-placeholder-val="{{ true }}">
+          <a href="/#priser" style="height:42px;padding:0 14px;border-radius:99px;font-size:15.5px;color:#3D4759;display:flex;align-items:center" style-hover="background:#ECE7DC;color:#0B2545">Priser</a>
+          <a href="/bak-rettfort" style="height:42px;padding:0 14px;border-radius:99px;font-size:15.5px;color:#3D4759;display:flex;align-items:center;white-space:nowrap" style-hover="background:#ECE7DC;color:#0B2545">Bak Rettført</a>
+        </sc-if>
+      </nav>
+      <sc-if value="{{ notNarrow }}" hint-placeholder-val="{{ true }}">
+        <a href="https://min.xn--rettfrt-u1a.no/logg-inn" style="height:42px;padding:0 18px;border-radius:99px;border:1px solid #0B2545;font-size:15px;font-weight:500;display:flex;align-items:center;white-space:nowrap;flex:none" style-hover="background:#fff">Logg inn</a>
+      </sc-if>
+      <a href="https://min.xn--rettfrt-u1a.no/registrer" style="height:{{ sgH }};padding:{{ sgPad }};border-radius:99px;background:#0B2545;color:#fff;font-size:{{ sgFs }};font-weight:600;display:flex;align-items:center;white-space:nowrap;flex:none" style-hover="background:#16345E;color:#fff">Start gratis</a>
+    </div>
+    <sc-if value="{{ menu }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:0;right:0;top:68px;background:#fff;border-bottom:1px solid #E7E2D7;box-shadow:0 30px 60px -30px rgba(11,37,69,.35)">
+        <div style="max-width:1240px;margin:0 auto;padding:20px 24px 24px;display:grid;grid-template-columns:{{ menuCols }};gap:6px">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+            <button onClick="{{ t.on }}" style="text-align:left;padding:12px 14px;min-height:64px;border-radius:14px;border:0;background:{{ t.bg }};display:flex;gap:12px;align-items:center" style-hover="background:#F4F1EA">
+              <span style="flex:none;width:40px;height:40px;border-radius:12px;background:#FBF0B8;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0B2545" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.ik }}"></path></svg></span>
+              <span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:16px;font-weight:600">{{ t.n }}</span><span style="font-size:14px;color:#5A6372">{{ t.line }}</span></span>
+            </button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ narrowMenu }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:1240px;margin:0 auto;padding:0 24px 20px;display:flex;flex-wrap:wrap;gap:8px">
+            <a href="/#priser" style="height:44px;padding:0 16px;border-radius:99px;background:#F4F1EA;font-size:15px;display:flex;align-items:center">Priser</a>
+            <a href="/bak-rettfort" style="height:44px;padding:0 16px;border-radius:99px;background:#F4F1EA;font-size:15px;display:flex;align-items:center">Bak Rettført</a>
+            <a href="https://min.xn--rettfrt-u1a.no/logg-inn" style="height:44px;padding:0 16px;border-radius:99px;border:1px solid #0B2545;font-size:15px;font-weight:500;display:flex;align-items:center">Logg inn</a>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </header>
+  <sc-if value="{{ menu }}" hint-placeholder-val="{{ false }}"><div onClick="{{ closeMenu }}" style="position:fixed;inset:0;z-index:10;background:rgba(11,37,69,.12)"></div></sc-if>
+
+  <main style="max-width:1240px;margin:0 auto;padding:{{ mainPad }};display:flex;flex-direction:column;gap:32px">
+    <sc-for list="{{ secs }}" as="s" hint-placeholder-count="3">
+      <section style="display:flex;flex-wrap:wrap;background:#EFEBE3;border-radius:28px;overflow:hidden">
+        <div style="flex:1 1 380px;min-width:0;padding:{{ s.pad }};display:flex;flex-direction:column;justify-content:center;gap:16px;order:{{ s.oText }}">
+          <div style="font-size:15px;color:#5A6372;display:flex;gap:6px;align-items:center"><sc-if value="{{ s.hero }}" hint-placeholder-val="{{ false }}"><button onClick="{{ toggleMenu }}" style="border:0;background:none;padding:0;font-size:15px;color:#5A6372" style-hover="color:#0B2545">Funksjoner</button><span>/</span></sc-if>{{ s.eye }}</div>
+          <sc-if value="{{ s.hero }}" hint-placeholder-val="{{ false }}"><h1 style="margin:0;font-size:{{ h1 }}px;line-height:1.04;letter-spacing:-.035em;font-weight:600;text-wrap:balance">{{ s.h }}</h1></sc-if>
+          <sc-if value="{{ s.notHero }}" hint-placeholder-val="{{ true }}"><h2 style="margin:0;font-size:{{ h2 }}px;line-height:1.08;letter-spacing:-.03em;font-weight:600;text-wrap:balance">{{ s.h }}</h2></sc-if>
+          <p style="margin:0;font-size:18px;line-height:1.55;color:#2E3A4E;max-width:520px;text-wrap:pretty">{{ s.p }}</p>
+          <sc-if value="{{ s.hero }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+              <a href="https://min.xn--rettfrt-u1a.no/registrer" style="height:48px;padding:0 24px;border-radius:99px;background:#0B2545;color:#fff;font-size:16px;font-weight:600;display:flex;align-items:center" style-hover="background:#16345E;color:#fff">Start gratis</a>
+              <a href="{{ s.demo }}" style="height:48px;padding:0 22px;border-radius:99px;border:1px solid #CFC8B9;background:#fff;font-size:16px;font-weight:500;display:flex;align-items:center" style-hover="border-color:#0B2545">Prøv demoen</a>
+            </div>
+          </sc-if>
+        </div>
+
+        <div data-col="1" style="flex:1.3 1 460px;min-width:0;order:{{ s.oCol }};background:radial-gradient(120% 90% at 70% 35%,#FBFAF6 0%,#F1EDE4 55%,#E9E4D8 100%);display:flex;align-items:center;justify-content:center;padding:{{ colPad }}">
+          <div style="width:{{ cw }}px;height:{{ ch }}px;position:relative;flex:none">
+            <div style="position:absolute;left:0;top:0;width:560px;height:420px;zoom:{{ ck }};font-size:11px;line-height:1.4">
+
+              <sc-for list="{{ s.shots }}" as="sh" hint-placeholder-count="1">
+                <div style="position:absolute;left:{{ sh.l }}px;top:{{ sh.t }}px;width:{{ sh.w }}px;height:{{ sh.h }}px;border-radius:{{ sh.r }}px;overflow:hidden;background:#F4F1EA;box-shadow:{{ sh.sd }}">
+                  <img src="{{ sh.src }}" alt="" decoding="async" style="image-rendering:auto;position:absolute;left:{{ sh.il }}px;top:{{ sh.it }}px;width:{{ sh.iw }}px;height:auto;max-width:none;display:block">
+                </div>
+              </sc-for>
+
+              <sc-if value="{{ s.c.f1 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:286px;top:330px;height:36px;padding:0 14px;border-radius:99px;background:#0B2545;color:#fff;font-size:11.5px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:0 14px 30px -14px rgba(11,37,69,.6)"><span style="width:16px;height:16px;border-radius:50%;background:#35AE74;display:flex;align-items:center;justify-content:center;font-size:9px">✓</span>Sendt med KID og ført i regnskapet</div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.f2 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:236px;top:0;width:294px;height:416px;background:#fff;box-shadow:0 30px 60px -24px rgba(11,37,69,.45),0 0 0 1px rgba(11,37,69,.06);padding:26px 26px 20px;display:flex;flex-direction:column;font-size:7.5px;line-height:1.5;color:#1B2433">
+                  <div style="display:flex;justify-content:space-between;gap:10px"><div><div style="font-size:11px;font-weight:700">Havøy Fisk AS</div><div style="color:#5A6372">Strandveien 12, 9008 Tromsø<br>Org.nr 912 345 688 MVA</div></div><div style="text-align:right"><div style="font-size:17px;font-weight:600;letter-spacing:-.02em;line-height:1.1">Faktura</div><div style="font-family:'IBM Plex Mono',monospace;color:#5A6372">Nr. 10010</div></div></div>
+                  <div style="display:flex;justify-content:space-between;gap:10px;margin-top:22px"><div><div style="font-size:6px;font-weight:600;letter-spacing:.12em;color:#5A6372">FAKTURA TIL</div><div style="font-size:8.5px;font-weight:600">Kvam Transport AS</div><div style="color:#5A6372">Org.nr 923 456 783<br>Norheimsund</div></div><div style="display:grid;grid-template-columns:auto auto;gap:1px 10px"><span style="color:#5A6372">Fakturadato</span><span style="font-family:'IBM Plex Mono',monospace">05.10.2026</span><span style="color:#5A6372">Forfall</span><span style="font-family:'IBM Plex Mono',monospace">19.10.2026</span></div></div>
+                  <div style="margin-top:22px;display:grid;grid-template-columns:minmax(0,1fr) 22px 44px 54px;gap:6px;padding-bottom:3px;border-bottom:1px solid #1B2433;font-size:5.5px;font-weight:600;letter-spacing:.1em;color:#5A6372"><span>BESKRIVELSE</span><span style="text-align:right">ANT.</span><span style="text-align:right">PRIS</span><span style="text-align:right">BELØP</span></div>
+                  <div style="display:grid;grid-template-columns:minmax(0,1fr) 22px 44px 54px;gap:6px;padding:5px 0;border-bottom:1px solid #E4DFD4"><span>Konsulenttimer, september 2026</span><span style="text-align:right;font-family:'IBM Plex Mono',monospace">12</span><span style="text-align:right;font-family:'IBM Plex Mono',monospace">1 150,00</span><span style="text-align:right;font-family:'IBM Plex Mono',monospace">13 800,00</span></div>
+                  <div style="width:130px;margin:8px 0 0 auto;display:flex;flex-direction:column;gap:1px"><div style="display:flex;justify-content:space-between"><span style="color:#5A6372">Netto</span><span style="font-family:'IBM Plex Mono',monospace">13 800,00</span></div><div style="display:flex;justify-content:space-between"><span style="color:#5A6372">MVA 25 %</span><span style="font-family:'IBM Plex Mono',monospace">3 450,00</span></div><div style="display:flex;justify-content:space-between;border-top:1px solid #1B2433;padding-top:3px;margin-top:2px;font-size:9px;font-weight:600"><span>Å betale</span><span style="font-family:'IBM Plex Mono',monospace">17 250,00</span></div></div>
+                  <div style="flex:1"></div>
+                  <div style="background:#F4F1EA;border-radius:3px;padding:8px 10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px"><div><div style="font-size:5.5px;font-weight:600;letter-spacing:.12em;color:#5A6372">KONTO</div><div style="font-family:'IBM Plex Mono',monospace">1506 22 33445</div></div><div><div style="font-size:5.5px;font-weight:600;letter-spacing:.12em;color:#5A6372">KID</div><div style="font-family:'IBM Plex Mono',monospace">1001 0042</div></div><div><div style="font-size:5.5px;font-weight:600;letter-spacing:.12em;color:#5A6372">FORFALL</div><div style="font-family:'IBM Plex Mono',monospace">19.10.2026</div></div></div>
+                  <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:5px;border-top:1px solid #E4DFD4;font-size:5.5px;color:#5A6372"><span>post@havoyfisk.no · 77 60 12 34</span><span>Side 1 av 1</span></div>
+                </div>
+                <div style="position:absolute;left:8px;top:230px;width:262px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -24px rgba(11,37,69,.5),0 0 0 1px rgba(11,37,69,.06);padding:14px;display:flex;flex-direction:column;gap:6px">
+                  <div style="display:flex;align-items:center;gap:8px"><span style="width:26px;height:26px;border-radius:50%;background:#F6DF6E;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center">HF</span><span style="flex:1"><b style="font-weight:600">Havøy Fisk AS</b><br><span style="color:#5A6372;font-size:10px">til faktura@kvamtransport.no</span></span></div>
+                  <div style="font-weight:600;font-size:12px">Faktura 10010 · 17 250,00 kr</div>
+                  <div style="color:#5A6372">Forfall 19.10.2026. Bruk KID 1001 0042 når du betaler.</div>
+                  <div style="display:flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid #E4DFD4;border-radius:8px;width:fit-content;font-size:10.5px"><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;padding:1px 4px;border-radius:3px;background:#A33A22;color:#fff">PDF</span>Faktura-10010.pdf</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.f3 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:290px;top:300px;width:262px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -24px rgba(11,37,69,.5),0 0 0 1px rgba(11,37,69,.06);padding:14px;display:flex;gap:10px">
+                  <span style="flex:none;width:30px;height:30px;border-radius:50%;background:#E2F1E8;color:#1F7D52;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span>
+                  <span><b style="font-weight:600;font-size:12.5px">Betaling funnet</b><br><span style="color:#5A6372">Lyngen Bygg AS betalte 135 125,00 kr. Faktura 10008 er merket betalt.</span></span>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.k1 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:30px;top:196px;width:186px;background:#fff;border-radius:12px;box-shadow:0 30px 60px -24px rgba(11,37,69,.5),0 0 0 1px rgba(11,37,69,.06);padding:14px;transform:rotate(-2.5deg);font-family:'IBM Plex Mono',monospace;font-size:9.5px;line-height:1.55;color:#3D4759">
+                  <div style="text-align:center;font-weight:500;font-size:11.5px;color:#0B2545">BILTEMA TROMSØ</div>
+                  <div style="text-align:center">26.09.2026 14:12</div>
+                  <div style="border-top:1px dashed #D9D3C6;margin:7px 0"></div>
+                  <div style="display:flex;justify-content:space-between"><span>HYLLESYSTEM</span><span>1 249,00</span></div>
+                  <div style="display:flex;justify-content:space-between"><span>HERAV MVA</span><span>249,80</span></div>
+                  <div style="border-top:1px dashed #D9D3C6;margin:7px 0"></div>
+                  <div style="display:flex;justify-content:space-between;font-weight:500;color:#0B2545"><span>TOTALT</span><span>1 249,00</span></div>
+                </div>
+                <div style="position:absolute;left:236px;top:176px;width:310px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -24px rgba(11,37,69,.5),0 0 0 1px rgba(11,37,69,.06);padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><span style="width:26px;height:26px;border-radius:50%;background:#E2F1E8;display:flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1F7D52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z M12 17a4 4 0 1 0 0-8a4 4 0 0 0 0 8"></path></svg></span><b style="font-weight:600;font-size:12.5px">Lest av kvitteringen</b></div>
+                  <sc-for list="{{ kFelt }}" as="x" hint-placeholder-count="5"><div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid #F1EEE7"><span style="color:#5A6372">{{ x.k }}</span><span style="font-family:{{ x.ff }}">{{ x.v }}</span></div></sc-for>
+                  <div style="display:flex;gap:6px;align-items:center;color:#1F7D52;font-weight:500;margin-top:2px"><span style="width:14px;height:14px;border-radius:50%;background:#1F7D52;color:#fff;font-size:8px;display:flex;align-items:center;justify-content:center">✓</span>Summen og MVA-satsen stemmer</div>
+                  <span style="margin-top:4px;height:32px;border-radius:9px;background:#0B2545;color:#fff;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center">Før kjøpet</span>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.k2 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:300px;top:262px;width:250px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -24px rgba(11,37,69,.5),0 0 0 1px rgba(11,37,69,.06);padding:14px;display:flex;flex-direction:column;gap:8px">
+                  <div><b style="font-weight:600;font-size:12.5px">Nordlys Kontor AS</b><br><span style="color:#5A6372">Regning 2 990,00 kr · forfall 04.10</span></div>
+                  <div style="font-size:10px;color:#5A6372">Betalt fra</div>
+                  <div style="display:flex;gap:4px;padding:3px;background:#F1EEE7;border-radius:9px"><span style="flex:1;height:28px;border-radius:7px;font-weight:600;display:flex;align-items:center;justify-content:center;color:#5A6372">Ikke betalt</span><span style="flex:1;height:28px;border-radius:7px;background:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(11,37,69,.12)">Driftskonto</span></div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.k3 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:10px;top:40px;width:300px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -30px rgba(11,37,69,.45),0 0 0 1px rgba(11,37,69,.06);padding:16px;display:flex;flex-direction:column;gap:8px">
+                  <div style="font-size:10px;color:#5A6372">Til</div>
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;padding:7px 10px;border-radius:8px;background:#F4F1EA">havoy-fisk@bilag.rettfort.no</div>
+                  <div style="font-size:10px;color:#5A6372;margin-top:2px">Emne</div>
+                  <div style="font-weight:600;font-size:12px">Kvittering Microsoft 365, oktober</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
+                    <span style="display:flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid #E4DFD4;border-radius:8px;font-size:10.5px"><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;padding:1px 4px;border-radius:3px;background:#A33A22;color:#fff">PDF</span>Invoice-E0812.pdf</span>
+                  </div>
+                  <div style="display:flex;justify-content:flex-end"><span style="height:30px;padding:0 14px;border-radius:9px;background:#0B2545;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center">Send</span></div>
+                </div>
+                <div style="position:absolute;left:220px;top:196px;width:330px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -24px rgba(11,37,69,.5),0 0 0 1px rgba(11,37,69,.06);overflow:hidden">
+                  <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center"><b style="font-weight:600;font-size:13px">Innboks</b><span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;background:#FBEFA8;color:#7A5A00">2 nye bilag</span></div>
+                  <sc-for list="{{ kInn }}" as="r" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #EFEBE2"><span style="width:28px;height:28px;border-radius:50%;background:{{ r.ib }};display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;color:{{ r.if }}">{{ r.ic }}</span><span style="flex:1;min-width:0"><b style="font-weight:600">{{ r.t }}</b><br><span style="color:#5A6372;font-size:10px">{{ r.d }}</span></span><span style="height:26px;padding:0 10px;border-radius:8px;border:1px solid #D9D3C6;font-size:10.5px;font-weight:600;display:flex;align-items:center">Før</span></div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.b2 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:20px;top:40px;width:340px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -30px rgba(11,37,69,.45),0 0 0 1px rgba(11,37,69,.06);padding:16px;display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;justify-content:space-between;gap:10px"><span><span style="font-family:'IBM Plex Mono',monospace;color:#5A6372">12.10</span> · VIPPS · KARI HAVØY</span><span style="font-family:'IBM Plex Mono',monospace">−2 000,00</span></div>
+                  <div style="font-size:15px;font-weight:600">Hva var denne betalingen?</div>
+                  <sc-for list="{{ bValg }}" as="v" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;border:1.5px solid {{ v.bd }};background:{{ v.bg }}"><span style="width:14px;height:14px;border-radius:50%;border:1.5px solid #0B2545;display:flex;align-items:center;justify-content:center"><span style="width:7px;height:7px;border-radius:50%;background:{{ v.dot }}"></span></span><span style="flex:1"><b style="font-weight:600">{{ v.t }}</b><br><span style="color:#5A6372;font-size:10px">{{ v.d }}</span></span></div>
+                  </sc-for>
+                </div>
+                <div style="position:absolute;left:350px;top:150px;width:190px;background:#fff;border-radius:12px;box-shadow:0 30px 60px -24px rgba(11,37,69,.5),0 0 0 1px rgba(11,37,69,.06);padding:14px;transform:rotate(-2deg);font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#3D4759">
+                  <div style="font-family:'Schibsted Grotesk',sans-serif;font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:99px;background:#E2F1E8;color:#1F7D52;width:fit-content;margin-bottom:8px">Hentet fra e-post</div>
+                  <div style="color:#0B2545;font-weight:500;font-size:11px">Microsoft 365</div>
+                  <div>Kvittering · 14.10.2026</div>
+                  <div style="border-top:1px dashed #D9D3C6;margin:6px 0"></div>
+                  <div style="display:flex;justify-content:space-between"><span>Business Std</span><span>1 039,20</span></div>
+                  <div style="display:flex;justify-content:space-between"><span>MVA 25 %</span><span>259,80</span></div>
+                  <div style="border-top:1px dashed #D9D3C6;margin:6px 0"></div>
+                  <div style="display:flex;justify-content:space-between;color:#0B2545;font-weight:500"><span>Totalt</span><span>1 299,00</span></div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.b3 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:30px;top:20px;width:340px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -30px rgba(11,37,69,.45),0 0 0 1px rgba(11,37,69,.06);padding:14px 16px">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px;background:#0B2545;color:#fff">1920</span><b style="font-weight:600;font-size:13px">Driftskonto · 2026</b></div>
+                  <sc-for list="{{ bMnd }}" as="m" hint-placeholder-count="10">
+                    <div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-top:1px solid {{ m.sep }}"><span style="flex:1">{{ m.m }}</span><span style="font-size:10px;font-weight:600;color:#1F7D52">✓ Avstemt</span></div>
+                  </sc-for>
+                </div>
+                <div style="position:absolute;left:310px;top:250px;width:236px;background:#0B2545;color:#fff;border-radius:14px;box-shadow:0 30px 60px -24px rgba(11,37,69,.6);padding:16px">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600"><span style="width:18px;height:18px;border-radius:50%;background:#35AE74;display:flex;align-items:center;justify-content:center;font-size:10px">✓</span>Oktober er avstemt</div>
+                  <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin-top:10px;color:#C9D3E2"><span>I banken</span><span style="font-family:'IBM Plex Mono',monospace;text-align:right;color:#fff">661 997,00</span><span>I regnskapet</span><span style="font-family:'IBM Plex Mono',monospace;text-align:right;color:#fff">661 997,00</span></div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.l2 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:200px;top:0;width:300px;height:416px;background:#fff;box-shadow:0 30px 60px -24px rgba(11,37,69,.45),0 0 0 1px rgba(11,37,69,.06);padding:26px 24px;display:flex;flex-direction:column;gap:12px;font-size:9px;color:#1B2433">
+                  <div style="display:flex;justify-content:space-between"><div><div style="font-weight:600">Havøy Fisk AS</div><div style="color:#5A6372">Org.nr 912 345 688</div></div><div style="text-align:right"><div style="font-size:15px;font-weight:600;letter-spacing:-.01em">Lønnslipp</div><div style="color:#5A6372">oktober 2026<br>Utbetalt 25.10.2026</div></div></div>
+                  <div><div style="font-size:11px;font-weight:600">Ali Hassan</div><div style="color:#5A6372">Kokk</div></div>
+                  <div style="display:flex;flex-direction:column;gap:3px">
+                    <div style="display:flex;justify-content:space-between;color:#5A6372;font-size:8px;padding-bottom:3px;border-bottom:1px solid #1B2433"><span>Beskrivelse</span><span>Beløp</span></div>
+                    <div style="display:flex;justify-content:space-between"><span>Fastlønn</span><span style="font-family:'IBM Plex Mono',monospace">36 000,00</span></div>
+                    <div style="display:flex;justify-content:space-between"><span>Skattetrekk 30 %</span><span style="font-family:'IBM Plex Mono',monospace">−10 800,00</span></div>
+                    <div style="display:flex;justify-content:space-between;border-top:1px solid #E4DFD4;padding-top:5px;margin-top:3px;font-size:11px;font-weight:600"><span>Utbetales</span><span style="font-family:'IBM Plex Mono',monospace">25 200,00</span></div>
+                  </div>
+                  <div style="background:#F4F1EA;border-radius:4px;padding:9px 10px;display:flex;flex-direction:column;gap:2px">
+                    <div style="font-size:7px;font-weight:600;letter-spacing:.12em;color:#5A6372;margin-bottom:2px">HITTIL I ÅR</div>
+                    <div style="display:flex;justify-content:space-between"><span>Bruttolønn</span><span style="font-family:'IBM Plex Mono',monospace">360 000,00</span></div>
+                    <div style="display:flex;justify-content:space-between"><span>Skattetrekk</span><span style="font-family:'IBM Plex Mono',monospace">108 000,00</span></div>
+                    <div style="display:flex;justify-content:space-between"><span>Feriepenger opptjent</span><span style="font-family:'IBM Plex Mono',monospace">43 200,00</span></div>
+                  </div>
+                </div>
+                <div style="position:absolute;left:10px;top:250px;width:226px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -24px rgba(11,37,69,.5),0 0 0 1px rgba(11,37,69,.06);padding:14px;display:flex;gap:10px">
+                  <span style="flex:none;width:28px;height:28px;border-radius:50%;background:#FBF0B8;display:flex;align-items:center;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B2545" stroke-width="2"><path d="M3 6h18v12H3z M3 7l9 6l9-6"></path></svg></span>
+                  <span><b style="font-weight:600;font-size:12px">Sendt til Ali</b><br><span style="color:#5A6372">Alle lønnsslippene er sendt på e-post.</span></span>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.l3 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:330px;top:236px;width:216px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -24px rgba(11,37,69,.5),0 0 0 1px rgba(11,37,69,.06);padding:14px">
+                  <div style="font-size:9.5px;font-weight:600;letter-spacing:.1em;color:#5A6372">OVERTID</div>
+                  <div style="font-size:13px;font-weight:600;margin-top:4px">Sara Havøy · 5 timer</div>
+                  <div style="color:#5A6372">Kommer med tillegg i oktoberlønnen når timene er godkjent.</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.a1 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:290px;top:0;width:262px;height:418px;background:#fff;border-radius:16px;box-shadow:0 30px 60px -20px rgba(11,37,69,.55),0 0 0 1px rgba(11,37,69,.06);display:flex;flex-direction:column;overflow:hidden">
+                  <div style="height:42px;flex:none;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid #EFEBE2"><span style="width:22px;height:22px;border-radius:50%;background:#0B2545;color:#F6DF6E;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.6L19.5 9.5l-5.7 1.9L12 17l-1.8-5.6L4.5 9.5l5.7-1.9z"></path></svg></span><b style="font-weight:600;font-size:13px">Assistent</b></div>
+                  <div style="flex:1;min-height:0;padding:12px;display:flex;flex-direction:column;gap:8px;background:#FBFAF7">
+                    <div style="align-self:flex-end;max-width:90%;padding:8px 11px;border-radius:13px 13px 4px 13px;background:#0B2545;color:#fff">Fakturer Havbris AS for 12 timer rådgivning i september</div>
+                    <div style="display:flex;flex-direction:column;gap:2px;font-size:10px;color:#5A6372"><span>✓ Fant Havbris AS i kunderegisteret</span><span>✓ Hentet timeprisen fra forrige faktura</span><span>✓ La til 25 % MVA og KID</span></div>
+                    <div style="background:#fff;border:1px solid #E4DFD4;border-radius:12px;overflow:hidden">
+                      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 11px;border-bottom:1px solid #EFEBE2"><b style="font-weight:600">Faktura til Havbris AS</b><span style="font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:99px;background:#FFF4CC;color:#7A5A00">Venter på deg</span></div>
+                      <div style="padding:7px 11px;display:flex;flex-direction:column;gap:2px"><div style="display:flex;justify-content:space-between"><span style="color:#5A6372">12 t × 1 150 kr</span><span style="font-family:'IBM Plex Mono',monospace">13 800,00</span></div><div style="display:flex;justify-content:space-between"><span style="color:#5A6372">MVA 25 %</span><span style="font-family:'IBM Plex Mono',monospace">3 450,00</span></div><div style="display:flex;justify-content:space-between;font-weight:600"><span>Å betale</span><span style="font-family:'IBM Plex Mono',monospace">17 250,00</span></div></div>
+                      <div style="display:flex;gap:6px;padding:8px 11px;border-top:1px solid #EFEBE2"><span style="height:26px;padding:0 11px;border-radius:8px;background:#0B2545;color:#fff;font-size:10.5px;font-weight:600;display:flex;align-items:center">Send faktura</span><span style="height:26px;padding:0 10px;border-radius:8px;border:1px solid #D9D3C6;font-size:10.5px;display:flex;align-items:center">Endre</span></div>
+                    </div>
+                  </div>
+                  <div style="flex:none;padding:10px 12px;border-top:1px solid #EFEBE2"><div style="height:34px;border:1px solid #D9D3C6;border-radius:10px;display:flex;align-items:center;padding:0 4px 0 11px;gap:6px"><span style="flex:1;color:#8A909C">Skriv hva du vil ha gjort …</span><span style="width:26px;height:26px;border-radius:7px;background:#C9CDD5;color:#fff;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 19V5M5 12l7-7 7 7"></path></svg></span></div></div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.a2 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:20px;top:20px;width:360px;background:#fff;border-radius:16px;box-shadow:0 30px 60px -24px rgba(11,37,69,.45),0 0 0 1px rgba(11,37,69,.06);padding:14px;display:flex;flex-direction:column;gap:9px">
+                  <div style="align-self:flex-end;padding:8px 11px;border-radius:13px 13px 4px 13px;background:#0B2545;color:#fff">Hvem skylder meg penger?</div>
+                  <div style="color:#2E3A4E">To kunder har ubetalte fakturaer, til sammen <b style="font-weight:600">163 937,50 kr</b>.</div>
+                  <div style="border:1px solid #E4DFD4;border-radius:12px;overflow:hidden">
+                    <div style="display:flex;align-items:center;gap:10px;padding:9px 11px"><span style="flex:1"><b style="font-weight:600">Kvam Transport AS</b><br><span style="color:#5A6372;font-size:10px">Faktura 10009 · forfalt 19.09</span></span><span style="font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:99px;background:#FBE4DE;color:#A33A22">Forfalt</span><span style="font-family:'IBM Plex Mono',monospace;width:72px;text-align:right">139 437,50</span></div>
+                    <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border-top:1px solid #EFEBE2"><span style="flex:1"><b style="font-weight:600">Havbris AS</b><br><span style="color:#5A6372;font-size:10px">Faktura 10011 · forfall 30.10</span></span><span style="font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:99px;background:#FBEFA8;color:#7A5A00">Ikke betalt</span><span style="font-family:'IBM Plex Mono',monospace;width:72px;text-align:right">24 500,00</span></div>
+                  </div>
+                  <span style="align-self:flex-start;height:30px;padding:0 13px;border-radius:9px;background:#0B2545;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center">Send purring til Kvam Transport</span>
+                </div>
+                <div style="position:absolute;left:330px;top:260px;width:220px;background:#fff;border-radius:14px;box-shadow:0 30px 60px -24px rgba(11,37,69,.5),0 0 0 1px rgba(11,37,69,.06);padding:14px;display:flex;flex-direction:column;gap:6px">
+                  <div style="font-size:9.5px;font-weight:600;letter-spacing:.1em;color:#5A6372">DU KAN OGSÅ SPØRRE</div>
+                  <span style="padding:6px 10px;border-radius:99px;border:1px solid #D9D3C6;width:fit-content">Når er neste frist?</span>
+                  <span style="padding:6px 10px;border-radius:99px;border:1px solid #D9D3C6;width:fit-content">Hvordan gikk september?</span>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ s.c.a3 }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;left:10px;top:24px;width:350px;background:#fff;border-radius:16px;box-shadow:0 30px 60px -24px rgba(11,37,69,.45),0 0 0 1px rgba(11,37,69,.06);padding:14px;display:flex;flex-direction:column;gap:9px">
+                  <div style="align-self:flex-end;padding:8px 11px;border-radius:13px 13px 4px 13px;background:#0B2545;color:#fff">Kjør lønn for oktober</div>
+                  <div style="color:#2E3A4E">Timene fra vaktplanen er med. Sara har 5 timer overtid med tillegg.</div>
+                  <div style="border:1px solid #E4DFD4;border-radius:12px;overflow:hidden">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 11px;border-bottom:1px solid #EFEBE2"><b style="font-weight:600">Lønn oktober</b><span style="font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:99px;background:#FFF4CC;color:#7A5A00">Venter på deg</span></div>
+                    <div style="padding:7px 11px;display:flex;flex-direction:column;gap:2px"><div style="display:flex;justify-content:space-between"><span style="color:#5A6372">Ansatte</span><span style="font-family:'IBM Plex Mono',monospace">4</span></div><div style="display:flex;justify-content:space-between"><span style="color:#5A6372">Skattetrekk</span><span style="font-family:'IBM Plex Mono',monospace">29 080,00</span></div><div style="display:flex;justify-content:space-between;font-weight:600"><span>Utbetales 25.10</span><span style="font-family:'IBM Plex Mono',monospace">67 860,00 kr</span></div></div>
+                    <div style="display:flex;gap:6px;padding:8px 11px;border-top:1px solid #EFEBE2"><span style="height:26px;padding:0 11px;border-radius:8px;background:#0B2545;color:#fff;font-size:10.5px;font-weight:600;display:flex;align-items:center">Godkjenn lønn</span><span style="height:26px;padding:0 10px;border-radius:8px;border:1px solid #D9D3C6;font-size:10.5px;display:flex;align-items:center">Endre</span></div>
+                  </div>
+                </div>
+                <div style="position:absolute;left:316px;top:270px;width:234px;background:#0B2545;color:#fff;border-radius:14px;box-shadow:0 30px 60px -24px rgba(11,37,69,.6);padding:16px;display:flex;gap:10px">
+                  <span style="flex:none;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F6DF6E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h12v10H6z M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>
+                  <span><b style="font-weight:600;font-size:12.5px">Du godkjenner alt</b><br><span style="color:#C9D3E2">Ingenting blir ført eller sendt før du trykker.</span></span>
+                </div>
+              </sc-if>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-for>
+
+    <section style="background:#0B2545;color:#fff;border-radius:28px;padding:44px;display:flex;flex-wrap:wrap;align-items:center;gap:20px 32px">
+      <h2 style="margin:0;flex:1 1 320px;font-size:{{ h2 }}px;line-height:1.1;letter-spacing:-.03em;font-weight:600">Klar på to minutter.</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="https://min.xn--rettfrt-u1a.no/registrer" style="height:50px;padding:0 26px;border-radius:99px;background:#F6DF6E;color:#0B2545;font-size:16px;font-weight:600;display:flex;align-items:center" style-hover="background:#F9E88F;color:#0B2545">Start gratis</a>
+        <button onClick="{{ goNext }}" style="height:50px;padding:0 22px;border-radius:99px;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;font-size:16px;font-weight:500;display:flex;align-items:center;gap:8px" style-hover="border-color:#fff">Neste: {{ nextName }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6l-6 6"></path></svg></button>
+      </div>
+    </section>
+  </main>
+
+  <footer style="max-width:1240px;margin:0 auto;padding:20px 24px 32px;display:flex;gap:8px 20px;flex-wrap:wrap;font-size:14px;color:#5A6372">
+    <span style="flex:1">© 2026 Rettført</span><a href="/personvern" style="color:#5A6372">Personvern</a><a href="/personvern#cookies" data-samtykke="1" style="color:#5A6372">Informasjonskapsler</a><a href="/vilkar" style="color:#5A6372">Vilkår</a><a href="/bak-rettfort" style="color:#5A6372">Bak Rettført</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: 'faktura', w: 1200, cw: 560, menu: false };
+  rootRef = React.createRef();
+  ORDER = ['faktura', 'kjop', 'bank', 'lonn', 'vaktplan', 'assistenten'];
+  NAMES = { faktura: 'Faktura', kjop: 'Kjøp og kostnader', bank: 'Bank', lonn: 'Lønn', vaktplan: 'Vaktplan', assistenten: 'Assistenten' };
+  IMG = { 'faktura-1': 2420, 'faktura-2': 2420, 'kjop-1': 2420, 'kjop-2': 2420, 'bank-1': 2420, 'lonn-1': 2420, 'oversikt-1': 2420, 'vakt-leder-3': 2420, 'vp2-ansatt': 548, 'vp2-leder': 1621, 'vp2-uke': 1698 };
+  EXT = { 'vp2-ansatt': 'png', 'vp2-leder': 'png', 'vp2-uke': 'png' };
+  SHOTS = {
+    f1: [['faktura-2', 272, 340, 980, 1172, 0, 12, 330, 14], ['faktura-2', 1270, 345, 880, 745, 296, 70, 260, 14]],
+    f3: [['faktura-1', 272, 150, 1875, 1100, 0, 0, 560, 14]],
+    k1: [['kjop-2', 270, 150, 1880, 660, 10, 0, 540, 14]],
+    k2: [['kjop-1', 272, 150, 1875, 1100, 0, 0, 560, 14]],
+    b1: [['bank-1', 272, 160, 1875, 1100, 0, 0, 560, 14]],
+    l1: [['lonn-1', 272, 150, 1875, 840, 0, 0, 540, 14], ['lonn-1', 1270, 1020, 880, 492, 250, 236, 300, 14]],
+    l3: [['lonn-1', 272, 352, 1876, 633, 0, 30, 560, 14]],
+    v1: [['vp2-leder', 155, 345, 760, 403, 0, 110, 380, 12], ['vp2-ansatt', 37, 12, 416, 678, 300, 6, 250, 34]],
+    v2: [['vp2-uke', 163, 184, 1000, 680, 0, 26, 540, 12]],
+    v3: [['vakt-leder-3', 235, 140, 1380, 1150, 0, 40, 400, 14], ['vakt-leder-3', 1645, 305, 540, 895, 340, 10, 210, 30]],
+    a1: [['oversikt-1', 272, 150, 1875, 1100, 0, 50, 460, 14]]
+  };
+  LINES = { faktura: ['Send faktura og få betalt', 'M7 3h7l5 5v13H7z M14 3v5h5'], kjop: ['Ta bilde, så leses kvitteringen', 'M4 8h3l2-3h6l2 3h3v11H4z M12 17a4 4 0 1 0 0-8a4 4 0 0 0 0 8'], bank: ['Avstem kontoen mot utskriften', 'M3 10l9-6l9 6 M5 10v8 M10 10v8 M14 10v8 M19 10v8 M3 20h18'], lonn: ['Lønn og lønnsslipp på få klikk', 'M6 3h12v18H6z M9 7h6 M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01'], vaktplan: ['Vakter, bytter og timer til lønn', 'M4 6h16v14H4z M4 10h16 M8 3v4 M16 3v4'], assistenten: ['Skriv hva du vil, godkjenn forslaget', 'M12 3l1.8 5.4L19 10l-5.2 1.6L12 17l-1.8-5.4L5 10l5.2-1.6z'] };
+  PAGES = {
+    faktura: [
+      ['f1', 'Faktura', 'Send faktura på et minutt', 'Velg kunden, skriv hva du har levert og send. Du ser fakturaen slik kunden får den mens du fyller ut, og KID lages for deg.'],
+      ['f2', 'Slik ser kunden den', 'En ryddig faktura i A4', 'Kontonummer, KID og forfall står der kunden leter etter dem. Fakturaen kommer som PDF på e-post og kan betales rett fra nettbanken.'],
+      ['f3', 'Betaling', 'Du ser når pengene er kommet', 'Innbetalinger finnes når du laster opp kontoutskriften. Forfalte fakturaer blir markert, og du kan sende purring.']
+    ],
+    kjop: [
+      ['k1', 'Kjøp og kostnader', 'Registrer en kostnad på sekunder', 'Ta bilde av kvitteringen eller last den opp. Leverandør, dato, sum og MVA leses av, og du ser hva som blir ført før du lagrer.'],
+      ['k2', 'Oversikt', 'Alle kjøp på ett sted', 'Se hva som er betalt og hva som gjenstår. Regninger du ikke har betalt ennå, markerer du som betalt når pengene går ut.'],
+      ['k3', 'Bilag på e-post', 'Videresend kvitteringen, så ligger den klar', 'Bedriften får sin egen bilagsadresse. Kvitteringer og EHF-fakturaer du sender dit, havner i innboksen og kan føres med ett trykk.']
+    ],
+    bank: [
+      ['b1', 'Bank', 'Banken avstemt hver måned', 'Last opp kontoutskriften fra nettbanken. Hver bevegelse sjekkes mot regnskapet, og du får forslag til hva den hører til.'],
+      ['b2', 'Det som er uklart', 'Du svarer bare der det trengs', 'En Vipps til deg selv? Velg om det var uttak, lønn eller utlegg. Mangler en kvittering, hentes den fra e-posten hvis den ligger der.'],
+      ['b3', 'Månedsslutt', 'Lukk måneden når alt stemmer', 'Da er banken og regnskapet like, og MVA-meldingen bygger på riktige tall. Direkte kobling til banken kommer.']
+    ],
+    lonn: [
+      ['l1', 'Lønn', 'Lønn på få minutter', 'Godkjenn timene fra vaktplanen, se over lønnsslippene og kjør lønnen. Skattetrekk, feriepenger og arbeidsgiveravgift regnes ut, og A-meldingen er klar.'],
+      ['l2', 'Lønnsslipp', 'Se lønnsslippen før den sendes', 'Hver ansatt får lønnsslippen på e-post. Du ser nøyaktig hva som står på den før du kjører lønnen.'],
+      ['l3', 'Timer og overtid', 'Overtid blir med, uten at du regner', 'Timer utover avtalt arbeidstid blir markert. Du godkjenner timene, og tillegget kommer med i lønnen.']
+    ],
+    vaktplan: [
+      ['v1', 'Vaktplan', 'Vaktplanen alle har med seg', 'De ansatte ser vaktene sine på mobilen, ber om fri, bytter og tar ledige vakter. Du får forespørslene samlet og bestemmer.'],
+      ['v2', 'Lederpanelet', 'Hele uka på ett blikk', 'Se hvem som jobber når, hvor mange timer hver har, og hva som venter på deg. Endringer blir synlige for de ansatte først når du publiserer.'],
+      ['v3', 'Innstillinger', 'Du bestemmer hva de ansatte kan gjøre', 'Slå av eller på bytter, ledige vakter og fravær. Det du slår av, forsvinner for de ansatte, og du ser hvordan det ser ut for dem.']
+    ],
+    assistenten: [
+      ['a1', 'Assistenten', 'Skriv hva du vil ha gjort', 'Assistenten finner kunden, henter timeprisen og lager en ferdig faktura. Du ser forslaget og sender når det stemmer.'],
+      ['a2', 'Spør om tallene', 'Svar uten å lete i rapporter', 'Spør hvem som skylder deg penger eller når neste frist er. Svaret bygger på regnskapet ditt, og du kan handle rett fra svaret.'],
+      ['a3', 'Lønn og vakter', 'Også lønn, kjøp og vaktplan', 'Be om lønnskjøring eller en ny vakt. Ingenting blir ført før du godkjenner, og alt kan endres før det sendes.']
+    ]
+  };
+  componentDidMount() {
+    // Hver funksjon har sin egen adresse: /funksjoner#lonn. Menyen på forsiden lenker hit.
+    this.fraAdresse = () => { const p = decodeURIComponent(location.hash.slice(1)); if (this.PAGES[p] && p !== this.state.page) this.setState({ page: p, menu: false }); };
+    this.fraAdresse(); window.addEventListener('hashchange', this.fraAdresse);
+    const upd = () => { const r = this.rootRef.current; if (!r) return; const c = r.querySelector('[data-col]'); const nw = r.clientWidth < 640; this.setState({ w: r.clientWidth, cw: c ? c.clientWidth - (nw ? 32 : 64) : 560 }); };
+    this.onKey = e => { if (e.key === 'Escape') this.setState({ menu: false }); }; window.addEventListener('keydown', this.onKey);
+    if (window.ResizeObserver && this.rootRef.current) { this.ro = new ResizeObserver(upd); this.ro.observe(this.rootRef.current); }
+    setTimeout(upd, 50);
+  }
+  componentWillUnmount() { this.ro && this.ro.disconnect(); window.removeEventListener('keydown', this.onKey); window.removeEventListener('hashchange', this.fraAdresse); }
+  componentDidUpdate() {
+    if (this.vist === this.state.page) return;
+    const forste = this.vist === undefined; this.vist = this.state.page;
+    if (location.hash.slice(1) !== this.state.page && !(forste && !location.hash)) history.replaceState(null, '', '#' + this.state.page);
+    document.title = this.NAMES[this.state.page] + ' – Rettført';
+    if (!forste) window.scrollTo(0, 0);
+  }
+  shot([img, x, y, w, h, l, t, dw, r], j) {
+    const k = dw / w;
+    return { src: '/assets/skjerm/' + img + '.' + (this.EXT[img] || 'jpg'), l, t, w: dw, h: Math.round(h * k), r, iw: Math.round(this.IMG[img] * k), il: Math.round(-x * k), it: Math.round(-y * k),
+      sd: j ? '0 30px 60px -20px rgba(11,37,69,.55),0 0 0 1px rgba(11,37,69,.08)' : '0 30px 60px -30px rgba(11,37,69,.45),0 0 0 1px rgba(11,37,69,.08)' };
+  }
+  renderVals() {
+    const s = this.state, w = s.w, wide = w >= 900, narrow = w < 640;
+    const ck = Math.max(.4, Math.min(1.35, s.cw / 560));
+    const secs = this.PAGES[s.page].map(([c, eye, h, p], j) => ({
+      eye, h, p, hero: j === 0, notHero: j !== 0, demo: '/demo-bedrift#' + s.page,
+      pad: narrow ? '32px 24px 8px' : wide ? '56px 48px 56px 56px' : '44px 40px 12px',
+      oText: wide && j % 2 === 1 ? 2 : 1, oCol: wide && j % 2 === 1 ? 1 : 2,
+      c: { [c]: true }, shots: (this.SHOTS[c] || []).map((d, i) => this.shot(d, i))
+    }));
+    const ix = this.ORDER.indexOf(s.page), nx = this.ORDER[(ix + 1) % this.ORDER.length];
+    const mono = "'IBM Plex Mono',monospace";
+    return {
+      rootRef: this.rootRef, secs, ck: ck.toFixed(4), cw: Math.round(560 * ck), ch: Math.round(420 * ck),
+      h1: narrow ? 38 : wide ? 56 : 46, h2: narrow ? 30 : wide ? 42 : 36,
+      tabs: this.ORDER.map(p => ({ n: this.NAMES[p], line: this.LINES[p][0], ik: this.LINES[p][1], bg: p === s.page ? '#F4F1EA' : 'transparent', fw: p === s.page ? 600 : 500, on: () => this.setState({ page: p, menu: false }) })),
+      menu: s.menu, menuStr: s.menu ? 'true' : 'false', menuBg: s.menu ? '#ECE7DC' : 'transparent', chev: s.menu ? '180deg' : '0deg',
+      toggleMenu: () => this.setState(x => ({ menu: !x.menu })), closeMenu: () => this.setState({ menu: false }),
+      menuCols: narrow ? '1fr' : w < 1000 ? 'repeat(2,minmax(0,1fr))' : 'repeat(3,minmax(0,1fr))', notNarrow: w >= 760, narrowMenu: s.menu && w < 760,
+      hdrPad: w < 760 ? '0 16px' : '0 24px', hdrGap: w < 760 ? '8px' : '28px', fnPad: w < 760 ? '0 10px' : '0 14px',
+      sgH: w < 440 ? '38px' : '42px', sgPad: w < 440 ? '0 14px' : '0 20px', sgFs: w < 440 ? '14.5px' : '15px',
+      mainPad: narrow ? '20px 12px 16px' : '40px 24px 24px', colPad: narrow ? '28px 16px' : '40px 32px',
+      nextName: this.NAMES[nx], goNext: () => this.setState({ page: nx, menu: false }),
+      kFelt: [['Leverandør', 'Biltema Tromsø', 'inherit'], ['Dato', '26.09.2026', mono], ['Konto', '6540 Inventar', 'inherit'], ['MVA 25 %', '249,80', mono], ['Sum', '1 249,00', mono]].map(([k, v, ff]) => ({ k, v, ff })),
+      kInn: [['PDF', '#FBE4DE', '#A33A22', 'Microsoft 365', 'Kvittering · 1 299,00 kr · i dag'], ['EHF', '#E2F1E8', '#1F7D52', 'Nordlys Kontor AS', 'Faktura · 2 990,00 kr · i går']].map(([ic, ib, f, t, d]) => ({ ic, ib, if: f, t, d })),
+      bValg: [['Uttak til meg selv', 'Penger du tar ut av selskapet', 1], ['Lønn', 'Føres som lønn til deg'], ['Utlegg', 'Du har lagt ut for selskapet'], ['Overføring til egen konto', 'Mellom selskapets kontoer']]
+        .map(([t, d, on]) => ({ t, d, bd: on ? '#0B2545' : '#E4DFD4', bg: on ? '#F7F5F0' : '#fff', dot: on ? '#0B2545' : 'transparent' })),
+      bMnd: ['Januar', 'Februar', 'Mars', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober'].map((m, j) => ({ m, sep: j ? '#EFEBE2' : 'transparent' }))
+    };
+  }
+}
+</script>
+<script src="/samtykke.js" defer></script>
+</body>
+</html>
