@@ -1,0 +1,171 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { kjorLonnHandling } from '@/app/handlinger';
+import { beregnLonnslipp, grunntimesats, fraVaktplan, type LonnInput } from '@/lib/tjenester/lonn';
+import type { TimerTilLonn } from '@/lib/tjenester/vaktplan';
+import { Maskot } from '@/components/Logo';
+import { AnsattSkjema, type AnsattData } from './Ansatt';
+import { kr, tilOre } from '@/lib/penger';
+import { formaterKontonr, manedNavn, nd } from '@/lib/vis';
+
+type A = AnsattData & { id: string };
+
+export function LonnKjoring({ ansatte, periode, dato, ferie, agaSats, firma, orgnr, kanEndre, utlegg = [], fraVakt = {} }: { ansatte: A[]; periode: string; dato: string; ferie: number; agaSats: number; firma: string; orgnr: string | null; kanEndre: boolean; utlegg?: { ansattId: string; belop: number; tekst: string }[]; fraVakt?: Record<string, TimerTilLonn> }) {
+  const router = useRouter();
+  const [valgt, setValgt] = useState(ansatte[0]?.id ?? '');
+  // Godkjente timer fra vaktplanen fylles inn: timelønn får timene og fravær med lønn, alle får overtiden,
+  // og fastlønnede får trekk for fravær uten lønn. Alt kan endres før lønnen kjøres.
+  const tekst = (n: number | undefined) => (n ? String(n).replace('.', ',') : '');
+  const fra = (a: A) => (fraVakt[a.id] ? fraVaktplan(a.lonn_type, fraVakt[a.id]) : {});
+  const startverdi = (f: 'timer' | 'overtidTimer' | 'fravaerMedLonn' | 'fravaerUtenLonn') => Object.fromEntries(ansatte.map(a => [a.id, tekst(fra(a)[f])]).filter(([, v]) => v));
+  const [timer, setTimer] = useState<Record<string, string>>(() => startverdi('timer'));
+  const [overtid, setOvertid] = useState<Record<string, string>>(() => startverdi('overtidTimer'));
+  const [fravaerMed, setFravaerMed] = useState<Record<string, string>>(() => startverdi('fravaerMedLonn'));
+  const [fravaerUten, setFravaerUten] = useState<Record<string, string>>(() => startverdi('fravaerUtenLonn'));
+  const [salg, setSalg] = useState<Record<string, string>>({});
+  const [tillegg, setTillegg] = useState<Record<string, { tekst: string; belop: string }[]>>({});
+  const [utbetaling, setUtbetaling] = useState(dato);
+  const [ny, setNy] = useState(false);
+  const [endre, setEndre] = useState(false);
+  const [feil, setFeil] = useState('');
+  const [venter, setVenter] = useState(false);
+  const [ferdig, setFerdig] = useState<{ bilagNr: number; sendt: string[]; feilet: string[]; planlagt: number; utenEpost: string[] } | null>(null);
+  const [sendNar, setSendNar] = useState<'na' | 'utbetaling' | 'ingen'>('utbetaling');
+  const medEpost = ansatte.filter(x => x.epost);
+
+  const tall = (v: string | undefined) => Number((v ?? '0').replace(/\s/g, '').replace(',', '.')) || 0;
+  const input: LonnInput[] = ansatte.map(a => ({ ansattId: a.id, timer: a.lonn_type === 'time' ? tall(timer[a.id]) : undefined, overtidTimer: tall(overtid[a.id]) || undefined, fravaerMedLonn: a.lonn_type === 'time' ? tall(fravaerMed[a.id]) || undefined : undefined, fravaerUtenLonn: a.lonn_type !== 'time' ? tall(fravaerUten[a.id]) || undefined : undefined, provisjonGrunnlag: a.lonn_type === 'provisjon' ? tilOre(salg[a.id] ?? '') ?? 0 : undefined, tillegg: (tillegg[a.id] ?? []).filter(t => t.tekst && tilOre(t.belop)).map(t => ({ tekst: t.tekst, belop: tilOre(t.belop) ?? 0 })) }));
+  const slipper = useMemo(() => ansatte.map(a => { try { return beregnLonnslipp(a, input.find(i => i.ansattId === a.id)!, ferie, agaSats); } catch { return null; } }), [ansatte, input, ferie, agaSats]);
+  const a = ansatte.find(x => x.id === valgt);
+  const slipp = slipper[ansatte.findIndex(x => x.id === valgt)];
+  const utleggFor = (id: string) => utlegg.filter(u => u.ansattId === id);
+  const utleggSum = (id: string) => utleggFor(id).reduce((s, u) => s + u.belop, 0);
+  const sumNetto = slipper.reduce((s, x) => s + (x?.netto ?? 0) + (x ? utleggSum(x.ansattId) : 0), 0);
+  const sumAga = slipper.reduce((s, x) => s + (x?.aga ?? 0), 0);
+  const kontroll: { t: string; ok: boolean }[] = [
+    ...ansatte.filter(x => !x.kontonr).map(x => ({ t: `${x.navn} mangler kontonummer.`, ok: false })),
+    ...ansatte.filter(x => !x.skatteprosent).map(x => ({ t: `${x.navn} har 0 % skattetrekk. Sjekk skattekortet.`, ok: false })),
+    ...slipper.flatMap(x => x?.advarsler.map(t => ({ t, ok: false })) ?? []),
+    ...ansatte.filter(x => x.lonn_type === 'time' && !tall(timer[x.id])).map(x => ({ t: `${x.navn} har ingen timer denne måneden. Får ikke lønn.`, ok: false })),
+    ...ansatte.filter(x => x.lonn_type === 'provisjon' && !tilOre(salg[x.id] ?? '')).map(x => ({ t: `${x.navn} har ikke fått lagt inn salg denne måneden, så det blir ingen provisjon.`, ok: false })),
+  ];
+  if (!kontroll.length) kontroll.push({ t: 'Alt ser riktig ut. Lønnen føres i regnskapet når du kjører den.', ok: true });
+
+  const kjor = async () => {
+    setVenter(true); setFeil('');
+    const r = await kjorLonnHandling(periode, utbetaling, input, sendNar);
+    setVenter(false);
+    if (!r.ok) { setFeil(r.feil); return; }
+    setFerdig(r.data!); router.refresh();
+  };
+
+  if (ferdig != null) return (
+    <div className="kort rad" style={{ flexWrap: 'nowrap', alignItems: 'flex-start', gap: 18 }}>
+      <Maskot storrelse={72} />
+      <div><h2>Lønn for {manedNavn(periode)} er kjørt.</h2>
+        {(ferdig.sendt.length > 0 || ferdig.planlagt > 0 || ferdig.feilet.length > 0 || ferdig.utenEpost.length > 0) && (
+          <div className="stakk" style={{ gap: 6, marginTop: 10 }}>
+            {ferdig.sendt.length > 0 && <div className="varsel gronn">Lønnslippen er sendt på e-post til {ferdig.sendt.join(', ')}.</div>}
+            {ferdig.planlagt > 0 && <div className="varsel info">{ferdig.planlagt === 1 ? 'Lønnslippen sendes' : `${ferdig.planlagt} lønnslipper sendes`} på e-post om morgenen {nd(utbetaling)}.</div>}
+            {ferdig.feilet.length > 0 && <div className="varsel gul">Kunne ikke sende til {ferdig.feilet.join(', ')}. Last ned lønnslippen under «Tidligere» og send den selv.</div>}
+            {ferdig.utenEpost.length > 0 && <div className="varsel gul">{ferdig.utenEpost.join(', ')} har ikke e-post. Last ned lønnslippen under «Tidligere».</div>}
+          </div>
+        )}
+        <p className="mut" style={{ marginTop: 6 }}>Ført som bilag {ferdig.bilagNr}. Betal {kr(sumNetto)} kr til de ansatte {nd(utbetaling)}. Skattetrekk og arbeidsgiveravgift finner du under Frister. A-meldingen sendes innen den 5. i neste måned. Tallene står klare under «Tidligere».</p></div>
+    </div>
+  );
+  if (ny || !ansatte.length) return ny || kanEndre ? <AnsattSkjema onFerdig={() => setNy(false)} ferie={ferie} agaSats={agaSats} /> : <p className="mut">Ingen ansatte.</p>;
+  if (endre && a) return <AnsattSkjema a={a} onFerdig={() => setEndre(false)} ferie={ferie} agaSats={agaSats} />;
+
+  return (
+    <div className="rutenett delt">
+      <div className="stakk" style={{ gap: 16 }}>
+        <section className="kort stakk">
+          <div className="rad" style={{ justifyContent: 'space-between' }}><h2>{manedNavn(periode)[0].toUpperCase() + manedNavn(periode).slice(1)}</h2><label className="rad liten mut">Utbetales <input className="inndata" style={{ width: 160, padding: '6px 10px' }} type="date" value={utbetaling} onChange={e => setUtbetaling(e.target.value)} /></label></div>
+          <div className="stakk" style={{ gap: 6 }}>
+            {ansatte.map((x, i) => (
+              <button type="button" key={x.id} className={`valgkort ${valgt === x.id ? 'valgt' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: 12 }} onClick={() => setValgt(x.id)}>
+                <span className="avatar">{x.navn.split(' ').map(n => n[0]).slice(0, 2).join('')}</span>
+                <span style={{ flex: 1 }}><b style={{ display: 'block', fontWeight: 600 }}>{x.navn}</b><span className="mut liten">{x.lonn_type === 'fast' ? `Fast · ${kr(x.manedslonn)} kr` : x.lonn_type === 'time' ? `Timelønn · ${kr(x.timesats)} kr/t` : `Provisjon ${String(x.provisjon_prosent ?? 0).replace('.', ',')} %${x.manedslonn ? ` + ${kr(x.manedslonn)} kr fast` : ''}`}</span></span>
+                <span style={{ textAlign: 'right' }}><b className="belop" style={{ display: 'block' }}>{kr((slipper[i]?.netto ?? 0) + utleggSum(x.id))}</b><span className="mut liten">{utleggSum(x.id) ? `utbetales, med ${kr(utleggSum(x.id))} i utlegg` : 'utbetales'}</span></span>
+              </button>
+            ))}
+          </div>
+          {kanEndre && <button type="button" className="lenke" style={{ alignSelf: 'flex-start' }} onClick={() => setNy(true)}>+ Legg til ansatt</button>}
+        </section>
+
+        {a && (
+          <section className="kort stakk">
+            <div className="rad" style={{ justifyContent: 'space-between' }}><h2>{a.navn}</h2>{kanEndre && <button type="button" className="knapp hvit liten" onClick={() => setEndre(true)}>Endre</button>}</div>
+            <div className="rutenett to">
+              {a.lonn_type === 'time' && <label className="felt"><span>Timer i {manedNavn(periode, false)}</span><input className="inndata mono" inputMode="decimal" value={timer[a.id] ?? ''} onChange={e => setTimer({ ...timer, [a.id]: e.target.value })} placeholder="0" /></label>}
+              {a.lonn_type === 'time' && (fravaerMed[a.id] || fraVakt[a.id]?.fravaerMed) ? <label className="felt"><span>Fravær med lønn (timer)</span><input className="inndata mono" inputMode="decimal" value={fravaerMed[a.id] ?? ''} onChange={e => setFravaerMed({ ...fravaerMed, [a.id]: e.target.value })} placeholder="0" /><span className="hint">Godkjent i vaktplanen, for eksempel egenmelding. Betales med timelønnen.</span></label> : null}
+              {a.lonn_type !== 'time' && a.manedslonn > 0 && (fravaerUten[a.id] || fraVakt[a.id]?.fravaerUten) ? <label className="felt"><span>Fravær uten lønn (timer)</span><input className="inndata mono" inputMode="decimal" value={fravaerUten[a.id] ?? ''} onChange={e => setFravaerUten({ ...fravaerUten, [a.id]: e.target.value })} placeholder="0" /><span className="hint">Trekkes med {kr(grunntimesats(a))} kr per time.</span></label> : null}
+              {fraVakt[a.id] && <span className="hint">Fra vaktplanen, uke {fraVakt[a.id].uker.join(', ')}{fraVakt[a.id].overtid ? `, ${String(fraVakt[a.id].overtid).replace('.', ',')} t overtid` : ''}{fraVakt[a.id].fravaerMed ? `, ${String(fraVakt[a.id].fravaerMed).replace('.', ',')} t fravær med lønn` : ''}{fraVakt[a.id].fravaerUten ? `, ${String(fraVakt[a.id].fravaerUten).replace('.', ',')} t fravær uten lønn` : ''}.</span>}
+              {a.lonn_type === 'provisjon' && <label className="felt"><span>Salg som gir provisjon (kr)</span><input className="inndata mono" inputMode="decimal" value={salg[a.id] ?? ''} onChange={e => setSalg({ ...salg, [a.id]: e.target.value })} placeholder="0,00" /><span className="hint">{String(a.provisjon_prosent ?? 0).replace('.', ',')} % gir {kr(Math.round(((tilOre(salg[a.id] ?? '') ?? 0) * (a.provisjon_prosent ?? 0)) / 100))} kr i provisjon.</span></label>}
+              <label className="felt"><span>Overtidstimer</span><input className="inndata mono" inputMode="decimal" value={overtid[a.id] ?? ''} onChange={e => setOvertid({ ...overtid, [a.id]: e.target.value })} placeholder="0" /><span className="hint">{kr(Math.round(grunntimesats(a) * (1 + (a.overtid_prosent ?? 40) / 100)))} kr per time ({String(a.overtid_prosent ?? 40).replace('.', ',')} % tillegg).</span></label>
+            </div>
+            <span className="mut liten">Legg til på lønnslippen denne måneden</span>
+            {(tillegg[a.id] ?? []).map((t, i) => (
+              <div key={i} className="rad" style={{ flexWrap: 'nowrap' }}>
+                <input className="inndata" style={{ flex: 2 }} value={t.tekst} onChange={e => setTillegg({ ...tillegg, [a.id]: tillegg[a.id].map((x, j) => (j === i ? { ...x, tekst: e.target.value } : x)) })} placeholder="F.eks. bonus eller overtid" />
+                <input className="inndata mono" style={{ flex: 1 }} inputMode="decimal" value={t.belop} onChange={e => setTillegg({ ...tillegg, [a.id]: tillegg[a.id].map((x, j) => (j === i ? { ...x, belop: e.target.value } : x)) })} placeholder="0,00" />
+                <button type="button" className="knapp hvit liten" aria-label="Fjern" onClick={() => setTillegg({ ...tillegg, [a.id]: tillegg[a.id].filter((_, j) => j !== i) })}>×</button>
+              </div>
+            ))}
+            <div className="rad">{['Bonus', 'Annet tillegg'].map(t => <button type="button" key={t} className="knapp hvit liten" onClick={() => setTillegg({ ...tillegg, [a.id]: [...(tillegg[a.id] ?? []), { tekst: t, belop: '' }] })}>+ {t}</button>)}</div>
+            <p className="mut liten">Skattetrekk: {String(a.skatteprosent).replace('.', ',')} % fra skattekortet.</p>
+          </section>
+        )}
+
+        <section className="kort stakk">
+          <h2>Kontroll før du kjører lønn</h2>
+          {kontroll.map((c, i) => <div key={i} className={`varsel ${c.ok ? 'gronn' : 'gul'}`}>{c.t}</div>)}
+          <div className="mut liten">Arbeidsgiveravgift {kr(sumAga)} kr ({String(agaSats).replace('.', ',')} %) kommer i tillegg.</div>
+        </section>
+        {feil && <div className="varsel rod" role="alert">{feil}</div>}
+        {kanEndre && medEpost.length > 0 && (
+          <section className="kort stakk">
+            <h2>Når skal lønnslippen sendes?</h2>
+            <div className="lonnstyper">
+              {([['utbetaling', 'På utbetalingsdagen', `Om morgenen ${nd(utbetaling)}.`], ['na', 'Med en gang', 'Når du kjører lønnen.'], ['ingen', 'Ikke send', 'Du laster den ned og sender selv.']] as const).map(([k, t, h]) => (
+                <button type="button" key={k} className={`valgkort ${sendNar === k ? 'valgt' : ''}`} aria-pressed={sendNar === k} onClick={() => setSendNar(k)}><b>{t}</b><span className="mut liten">{h}</span></button>
+              ))}
+            </div>
+            <span className="mut liten">Sendes til {medEpost.map(x => x.navn.split(' ')[0]).join(', ')}.{ansatte.length > medEpost.length ? ` ${ansatte.filter(x => !x.epost).map(x => x.navn.split(' ')[0]).join(', ')} har ikke e-post.` : ''}</span>
+          </section>
+        )}
+        {kanEndre && (
+          <div className="rad" style={{ justifyContent: 'space-between' }}>
+            <span>Totalt til utbetaling <b className="belop">{kr(sumNetto)} kr</b></span>
+            <button type="button" className="knapp" disabled={venter || sumNetto <= 0} onClick={() => { if (confirm(`Kjøre lønn for ${manedNavn(periode)}? Den føres i regnskapet og kan bare rettes med en korrigering.`)) kjor(); }}>{venter ? 'Kjører …' : `Kjør lønn for ${manedNavn(periode, false)}`}</button>
+          </div>
+        )}
+      </div>
+
+      {a && slipp && (
+        <div className="forhandsvisning">
+          <div className="stikk mut" style={{ marginBottom: 10 }}>Lønnslipp som {a.navn.split(' ')[0].toUpperCase()} får</div>
+          <div className="dokument">
+            <div className="rad" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div><b>{firma}</b><div className="mut">{orgnr ? `Org.nr ${orgnr.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3')}` : ''}</div></div>
+              <div style={{ textAlign: 'right' }}><b style={{ fontSize: 16 }}>Lønnslipp</b><div className="mut">{manedNavn(periode)}</div><div className="mut">Utbetalt {nd(utbetaling)}</div></div>
+            </div>
+            <div style={{ margin: '14px 0' }}><b>{a.navn}</b><div className="mut">{a.stilling ?? ''}{a.kontonr ? ` · konto ${formaterKontonr(a.kontonr)}` : ''}</div></div>
+            <table><thead><tr><th>Beskrivelse</th><th style={{ textAlign: 'right' }}>Beløp</th></tr></thead>
+              <tbody>
+                {slipp.linjer.map((l, i) => <tr key={i}><td>{l.tekst}{l.antall != null ? ` · ${String(l.antall).replace('.', ',')} t à ${kr(l.sats ?? 0)}` : ''}</td><td className="belop" style={{ textAlign: 'right' }}>{kr(l.belop)}</td></tr>)}
+                <tr><td>Skattetrekk {String(a.skatteprosent).replace('.', ',')} %</td><td className="belop" style={{ textAlign: 'right' }}>−{kr(slipp.skatt)}</td></tr>
+                {utleggFor(a.id).map((u, i) => <tr key={`u${i}`}><td>Refusjon av utlegg: {u.tekst}</td><td className="belop" style={{ textAlign: 'right' }}>{kr(u.belop)}</td></tr>)}
+              </tbody>
+            </table>
+            <div className="rad" style={{ justifyContent: 'space-between', fontWeight: 700, fontSize: 15, marginTop: 10 }}><span>Utbetalt</span><span className="belop">{kr(slipp.netto + utleggSum(a.id))} kr</span></div>
+            <div className="mut liten" style={{ marginTop: 10 }}>Feriepenger opptjent denne måneden: {kr(slipp.feriepenger)} kr ({String(ferie).replace('.', ',')} %)</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

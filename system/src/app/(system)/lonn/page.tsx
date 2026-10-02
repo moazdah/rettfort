@@ -1,0 +1,118 @@
+import Link from 'next/link';
+import { Oppgrader } from '@/components/Oppgrader';
+import { harFulltRegnskap } from '@/lib/pakker';
+import { kreverSelskap, db, idag } from '@/lib/server';
+import { kanEndre } from '@/lib/auth';
+import { AGA_SONER, agaForKjoring } from '@/lib/tjenester/lonn';
+import { kr, nd, manedNavn } from '@/lib/vis';
+import { LonnOppsett } from './Oppsett';
+import { LonnKjoring } from './Kjoring';
+import type { AnsattData } from './Ansatt';
+import { Utfylling } from '@/components/Utfylling';
+import { SendSlipp } from './SendSlipp';
+import { utleggTilLonn } from '@/lib/tjenester/innsending';
+import { ventendeTimelister, godkjenteTimer, innstillinger as vaktInnstillinger } from '@/lib/tjenester/vaktplan';
+import { tilVaktplan } from '@/lib/verter';
+import { grunnadresse } from '@/lib/epost';
+import { harVaktplan } from '@/lib/pakker';
+import { Timelister } from './Timelister';
+
+export const metadata = { title: 'Lønn' };
+
+export default async function Lonn({ searchParams }: { searchParams: Promise<{ vis?: string; amelding?: string }> }) {
+  const s = await kreverSelskap();
+  if (!harFulltRegnskap(s.org.pakke)) return <Oppgrader tittel={"Lønn"} tekst={"Kjør lønn på få minutter, med skattetrekk, feriepenger og arbeidsgiveravgift regnet ut for deg."} punkter={["Lønnsslipper på e-post", "A-meldingen klar til innsending", "Timer fra vaktplanen rett til lønn"]} />;
+  const d = await db();
+  const dag = idag();
+  const sp = await searchParams;
+  const o = await d.en<{ ferie_prosent: number; lonningsdag: number | null; otp: string | null; aga_sone: string; navn: string; orgnr: string | null; utlegg_tilbake: string | null }>('select ferie_prosent, lonningsdag, otp, aga_sone, navn, orgnr, utlegg_tilbake from organisasjon where id = $1', [s.org.id]);
+  const utlegg = await utleggTilLonn(d, s.org.id);
+  // Vaktplanen sender godkjente timer og fravær hit, med mindre lederen har slått av koblingen.
+  const vaktPakke = harVaktplan(s.org.pakke);
+  const koblet = vaktPakke && (await vaktInnstillinger(d, s.org.id)).lonn.on;
+  const vakt = vaktPakke && koblet;
+  const timelister = vakt ? await ventendeTimelister(d, s.org.id, dag) : [];
+  const vpAdresse = tilVaktplan(await grunnadresse());
+  const fraVakt = vakt ? await godkjenteTimer(d, s.org.id) : {};
+  const ansatte = await d.q<AnsattData & { id: string }>(`select id, navn, epost, stilling, lonn_type, manedslonn, timesats, skatteprosent, kontonr, startdato::text as startdato, provisjon_prosent, overtid_prosent, stillingsprosent, faste_tillegg, slipp_passord_type from ansatt where organisasjon_id = $1 and aktiv order by navn`, [s.org.id]);
+  const kjoringer = await d.q<{ periode: string; utbetalingsdato: string; brutto: number; skatt: number; netto: number; aga: number; feriepenger: number; nr: number | null }>(`select l.periode, l.utbetalingsdato::text as utbetalingsdato, l.brutto, l.skatt, l.netto, l.aga, l.feriepenger, b.nr from lonnskjoring l left join bilag b on b.id = l.bilag_id where l.organisasjon_id = $1 order by l.periode desc`, [s.org.id]);
+  const kjort = new Set(kjoringer.map(k => k.periode));
+  // Neste måned som ikke er kjørt, fra og med denne måneden.
+  let periode = dag.slice(0, 7);
+  while (kjort.has(periode)) { const [y, m] = periode.split('-').map(Number); periode = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, '0')}`; }
+  const [py, pm] = periode.split('-').map(Number);
+  const sisteDag = new Date(Date.UTC(py, pm, 0)).getUTCDate();
+  const dato = `${periode}-${String(Math.min(o?.lonningsdag ?? sisteDag, sisteDag)).padStart(2, '0')}`;
+  const agaSats = AGA_SONER[o?.aga_sone ?? '1']?.sats ?? 14.1;
+  const forste = o?.lonningsdag == null;
+  const vis = forste ? 'oppsett' : ['kjor', 'historikk', 'oppsett'].includes(sp.vis ?? '') ? sp.vis! : 'kjor';
+  const ar = dag.slice(0, 4);
+  const hittil = kjoringer.filter(k => k.periode.startsWith(ar));
+  // A-melding: tallene for valgt måned (standard: siste kjørte), per ansatt og for virksomheten.
+  const amPeriode = sp.amelding && kjort.has(sp.amelding) ? sp.amelding : kjoringer[0]?.periode;
+  const amKjoring = kjoringer.find(k => k.periode === amPeriode);
+  const amSlipper = amPeriode ? await d.q<{ id: string; navn: string; brutto: number; skatt: number; netto: number; epost: string | null; send_etter: string | null; sendt_tid: string | null; apnet_tid: string | null }>(`select a.id, a.navn, a.epost, ls.brutto, ls.skatt, ls.netto, ls.send_etter::text as send_etter, ls.sendt_tid::text as sendt_tid, ls.apnet_tid::text as apnet_tid from lonnslipp ls join lonnskjoring l on l.id = ls.lonnskjoring_id join ansatt a on a.id = ls.ansatt_id where l.organisasjon_id = $1 and l.periode = $2 order by a.navn`, [s.org.id, amPeriode]) : [];
+  const sone = AGA_SONER[o?.aga_sone ?? '1'];
+  const amAga = amPeriode ? await agaForKjoring(d, s.org.id, amPeriode) : 0;
+  const amFrist = amPeriode ? (() => { const [y, m] = amPeriode.split('-').map(Number); return m === 12 ? `05.01.${y + 1}` : `05.${String(m + 1).padStart(2, '0')}.${y}`; })() : '';
+
+  return (
+    <div className="stakk" style={{ gap: 20 }}>
+      <div className="hode">
+        <div><h1>Lønn</h1><div className="mut" style={{ marginTop: 6 }}>{ansatte.length} {ansatte.length === 1 ? 'ansatt' : 'ansatte'}{hittil.length ? ` · utbetalt ${kr(hittil.reduce((a, k) => a + k.netto, 0), { desimaler: false })} kr i ${ar}` : ''}</div></div>
+        {!forste && <nav className="faner">{[['kjor', 'Kjør lønn'], ['historikk', 'Tidligere'], ['oppsett', 'Oppsett']].map(([k, t]) => <Link key={k} href={`/lonn?vis=${k}`} className={vis === k ? 'aktiv' : ''}>{t}</Link>)}</nav>}
+      </div>
+      {vis === 'oppsett' && <LonnOppsett forste={forste} start={{ ferie: o?.ferie_prosent ?? 10.2, lonningsdag: o?.lonningsdag ?? null, otp: o?.otp ?? null, agaSone: o?.aga_sone ?? '1', utleggTilbake: o?.utlegg_tilbake ?? null }} />}
+      {vis === 'kjor' && vaktPakke && !koblet && <div className="varsel info liten">Timer fra vaktplanen fylles ikke inn, fordi koblingen er slått av. Du kan slå den på under <a href={`${vpAdresse}/?vis=innst`}>Vaktplan → Innstillinger</a>.</div>}
+      {vis === 'kjor' && timelister.length > 0 && <Timelister lister={timelister} kanEndre={kanEndre(s.rolle)} />}
+      {vis === 'kjor' && <LonnKjoring fraVakt={fraVakt} ansatte={ansatte} periode={periode} dato={dato} ferie={o?.ferie_prosent ?? 10.2} agaSats={agaSats} firma={o?.navn ?? ''} orgnr={o?.orgnr ?? null} kanEndre={kanEndre(s.rolle)} utlegg={utlegg.map(u => ({ ansattId: u.ansatt_id, belop: Number(u.belop), tekst: u.tekst }))} />}
+      {vis === 'historikk' && amKjoring && (
+        <section className="kort stakk">
+          <div className="rad" style={{ justifyContent: 'space-between' }}>
+            <div><h2>A-melding for {manedNavn(amKjoring.periode)}</h2><div className="mut liten">Frist {amFrist}. Du sender selv i Altinn. Tallene står klare under, trykk for å kopiere.</div></div>
+            {kjoringer.length > 1 && <nav className="faner">{kjoringer.slice(0, 4).map(k => <Link key={k.periode} href={`/lonn?vis=historikk&amelding=${k.periode}`} className={k.periode === amKjoring.periode ? 'aktiv' : ''}>{manedNavn(k.periode).split(' ')[0]}</Link>)}</nav>}
+          </div>
+          <ol className="mut liten" style={{ margin: 0, paddingLeft: 18 }}>
+            <li>Logg inn i Altinn med BankID, velg {o?.navn ?? 'foretaket'} og åpne a-meldingen for {manedNavn(amKjoring.periode)}.</li>
+            <li>Første gang må hver ansatt registreres med fødselsnummer, stillingsprosent og yrke. Deretter er det bare tallene under.</li>
+            <li>Kryss av etter hvert. Når alt er fylt inn, sjekk at summene stemmer og send.</li>
+          </ol>
+          <Utfylling id={`amelding-${s.org.id}-${amKjoring.periode}`} lenke="https://www.altinn.no/" lenketekst="Gå til Altinn"
+            rader={[
+              ...amSlipper.map(a => ({ tekst: `${a.navn}: lønn og forskuddstrekk`, verdier: [{ etikett: 'Lønn', verdi: kr(a.brutto) }, { etikett: 'Forskuddstrekk', verdi: kr(a.skatt) }] })),
+              { tekst: `Arbeidsgiveravgift, sone ${o?.aga_sone ?? '1'} (${sone?.sats ?? 14.1} %)`, verdier: [{ etikett: 'Grunnlag', verdi: kr(amKjoring.brutto) }, { etikett: 'Avgift', verdi: kr(amAga) }] },
+              { tekst: 'Sum forskuddstrekk for virksomheten', verdier: [{ etikett: 'Sum', verdi: kr(amKjoring.skatt) }] },
+            ]} />
+        </section>
+      )}
+      {vis === 'historikk' && amKjoring && (
+        <section className="kort stakk">
+          <h2>Lønnslipper for {manedNavn(amKjoring.periode)}</h2>
+          <div className="liste">
+            {amSlipper.map(a => (
+              <div key={a.id} className="linje">
+                <div className="fyll"><div className="tittel">{a.navn}</div><div className="mut liten">{a.epost ? `${a.epost} · ` : ''}
+                  {a.apnet_tid ? `Sendt og åpnet ${nd(a.apnet_tid.slice(0, 10))}` : a.sendt_tid ? `Sendt på e-post ${nd(a.sendt_tid.slice(0, 10))}` : a.send_etter ? `Sendes på e-post ${nd(a.send_etter.slice(0, 10))}` : a.epost ? 'Ikke sendt på e-post' : 'Har ikke e-post'}
+                </div></div>
+                <b className="belop">{kr(a.netto)}</b>
+                {kanEndre(s.rolle) && a.epost && <SendSlipp periode={amKjoring.periode} ansattId={a.id} sendt={!!a.sendt_tid} />}
+                <a className="knapp hvit liten" href={`/api/lonn/slipp?periode=${amKjoring.periode}&ansatt=${a.id}`} target="_blank" rel="noreferrer">PDF</a>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      {vis === 'historikk' && (
+        <section className="kort stakk">
+          <div className="rad" style={{ justifyContent: 'space-between' }}><h2>Kjørte lønninger</h2><a className="knapp hvit liten" href={`/api/lonn?ar=${ar}`}>Lønnsoversikt og feriepengeliste (CSV)</a></div>
+          {kjoringer.length ? (
+            <div style={{ overflowX: 'auto' }}><table className="tabell">
+              <thead><tr><th>Måned</th><th>Utbetalt</th><th className="h">Brutto</th><th className="h">Skattetrekk</th><th className="h">Netto</th><th className="h">AGA</th><th className="h">Feriepenger</th><th>Bilag</th></tr></thead>
+              <tbody>{kjoringer.map(k => <tr key={k.periode}><td>{manedNavn(k.periode)}</td><td>{nd(k.utbetalingsdato)}</td><td className="h belop">{kr(k.brutto)}</td><td className="h belop">{kr(k.skatt)}</td><td className="h belop">{kr(k.netto)}</td><td className="h belop">{kr(k.aga)}</td><td className="h belop">{kr(k.feriepenger)}</td><td className="mono">{k.nr}</td></tr>)}</tbody>
+            </table></div>
+          ) : <p className="mut">Ingen lønn er kjørt ennå.</p>}
+        </section>
+      )}
+    </div>
+  );
+}

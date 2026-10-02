@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&display=block" rel="stylesheet">
+<title>Rettført Vaktplan v2 – prototype</title>
+<style>
+body{margin:0;background:#E9E5DC;font-family:'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;-webkit-font-smoothing:antialiased}
+a{color:#0B2545}a:hover{color:#16345E}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit}
+button:focus-visible,[tabindex]:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #F6DF6E;outline-offset:2px}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column">
+  <!-- Prototype control bar -->
+  <div style="background:#FFFFFF;border-bottom:1px solid #E4DFD4;padding:12px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:16px 28px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <img src="assets/rettfort-logo.png" alt="Rettført" style="height:40px;margin:-8px -14px">
+      <div style="width:1px;height:22px;background:#E4DFD4"></div>
+      <div style="font-weight:600;font-size:17px">Vaktplan</div>
+      <div style="font-size:12px;color:#586174;background:#FFF4CC;border-radius:99px;padding:3px 10px;font-weight:500;color:#7A5A00">Prototype · ansatt, alle formater</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px 24px;margin-left:auto;align-items:center">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#586174;font-weight:500">Rolle</span>
+        <div style="display:flex;background:#F4F1EA;border-radius:99px;padding:3px">
+          <button style="border:0;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;background:#0B2545;color:#fff;cursor:pointer">Ansatt</button>
+          <a href="{{ leaderHref }}" style="border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;color:#586174;text-decoration:none">Leder</a>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#586174;font-weight:500">Format</span>
+        <div style="display:flex;background:#F4F1EA;border-radius:99px;padding:3px">
+          <sc-for list="{{ fmtOpts }}" as="o" hint-placeholder-count="5">
+            <button onClick="{{ o.pick }}" style="border:0;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#586174;font-weight:500">Funksjoner</span>
+        <div style="display:flex;background:#F4F1EA;border-radius:99px;padding:3px">
+          <sc-for list="{{ modeOpts }}" as="o" hint-placeholder-count="2">
+            <button onClick="{{ o.pick }}" style="border:0;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#586174;font-weight:500">Tilstand</span>
+        <div style="display:flex;background:#F4F1EA;border-radius:99px;padding:3px">
+          <sc-for list="{{ stateOpts }}" as="o" hint-placeholder-count="4">
+            <button onClick="{{ o.pick }}" style="border:0;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:40px;padding:32px 24px 48px">
+    <!-- Screen index -->
+    <div style="width:220px;display:flex;flex-direction:column;gap:2px;padding-top:8px">
+      <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#586174;font-weight:600;padding:0 12px 8px">Skjermer · ansatt</div>
+      <sc-for list="{{ index }}" as="it" hint-placeholder-count="14">
+        <button onClick="{{ it.go }}" style="text-align:left;border:0;border-radius:10px;padding:9px 12px;font-size:14px;cursor:pointer;background:{{ it.bg }};font-weight:{{ it.weight }};color:{{ it.fg }}">{{ it.label }}</button>
+      </sc-for>
+      <div style="font-size:12px;color:#586174;padding:16px 12px 0;line-height:1.5;text-wrap:pretty">Alt i skjermen er klikkbart. Bytt «Funksjoner» for å se menyen med bare grunnfunksjonene.</div>
+    </div>
+
+    <!-- Phone -->
+    <div style="width:{{ fx.boxW }};height:{{ fx.boxH }};flex-shrink:0">
+    <div style="width:{{ fx.outW }};height:{{ fx.outH }};transform:{{ fx.transform }};transform-origin:top left;border-radius:{{ fx.outR }};background:{{ fx.bg }};padding:{{ fx.pad }};box-shadow:0 30px 60px -20px rgba(11,37,69,.35),0 0 0 1px {{ fx.ring }} inset;display:flex;flex-direction:column">
+      <sc-if value="{{ fx.chrome }}" hint-placeholder-val="{{ false }}">
+        <div style="height:40px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 14px;background:#EFEBE2;border-bottom:1px solid #E4DFD4;border-radius:12px 12px 0 0">
+          <span style="width:12px;height:12px;border-radius:99px;background:#C9CDD5"></span>
+          <span style="width:12px;height:12px;border-radius:99px;background:#C9CDD5"></span>
+          <span style="width:12px;height:12px;border-radius:99px;background:#C9CDD5"></span>
+          <div style="flex:0 1 420px;margin:0 auto;height:26px;border-radius:99px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;color:#586174"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">lock</span>vaktplan.rettført.no</div>
+          <div style="width:52px"></div>
+        </div>
+      </sc-if>
+      <div data-screen-label="{{ screenLabel }}" style="position:relative;width:{{ fx.w }};height:{{ fx.h }};border-radius:{{ fx.r }};overflow:hidden;background:#F4F1EA;flex-shrink:0">
+        <!-- status bar -->
+        <sc-if value="{{ fx.status }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;top:0;left:0;right:0;height:{{ lay.top }};display:flex;align-items:center;justify-content:space-between;padding:{{ fx.statusPad }};z-index:30;font-size:{{ fx.statusFont }};font-weight:600;background:#F4F1EA">
+          <span>10:00</span>
+          <sc-if value="{{ fx.notch }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:50%;top:10px;width:110px;height:30px;margin-left:-55px;background:#0B1424;border-radius:99px"></div></sc-if>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">signal_cellular_alt</span>
+            <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">wifi</span>
+            <div style="width:26px;height:12px;border:1.5px solid #0B2545;border-radius:4px;padding:1.5px"><div style="width:70%;height:100%;background:#0B2545;border-radius:1.5px"></div></div>
+          </div>
+        </div></sc-if>
+        <sc-if value="{{ fx.sideNotch }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:8px;top:50%;width:30px;height:110px;margin-top:-55px;background:#0B1424;border-radius:99px;z-index:40"></div></sc-if>
+
+        <!-- scroll area -->
+        <div ref="{{ scrollRef }}" style="position:absolute;top:{{ lay.top }};left:{{ lay.navLeft }};right:{{ lay.panelW }};bottom:{{ scrollBottom }};overflow-y:auto;overflow-x:hidden">
+        <div style="max-width:{{ lay.maxW }};margin:0 auto;padding:{{ lay.pad }}">
+
+          <!-- ===== OVERSIKT ===== -->
+          <sc-if value="{{ is.oversikt }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:12px 20px 28px;display:flex;flex-direction:column;gap:22px">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+                <div>
+                  <h1 style="margin:0;font-size:30px;font-weight:700;letter-spacing:-.01em">Hei, Jonas.</h1>
+                  <div style="color:#586174;font-size:15px;margin-top:4px">Uke 41 · mandag 5. oktober</div>
+                </div>
+                <button aria-label="Tilpass oversikten" onClick="{{ go.tilpass }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;box-shadow:0 1px 3px rgba(11,37,69,.08);cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">tune</span></button>
+              </div>
+
+              <sc-if value="{{ st.loading }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="height:168px;border-radius:18px;background:#E4DFD4;animation:pulse 1.4s ease-in-out infinite"></div>
+                  <div style="height:14px;width:120px;border-radius:99px;background:#E4DFD4;animation:pulse 1.4s ease-in-out infinite"></div>
+                  <div style="height:76px;border-radius:14px;background:#FFFFFF;animation:pulse 1.4s ease-in-out infinite"></div>
+                  <div style="height:76px;border-radius:14px;background:#FFFFFF;animation:pulse 1.4s ease-in-out infinite"></div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ st.error }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#FFFFFF;border-radius:18px;padding:28px 22px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+                  <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;color:#A2371C">wifi_off</span>
+                  <div style="font-size:17px;font-weight:600">Fikk ikke kontakt. Prøv igjen.</div>
+                  <button onClick="{{ retry }}" style="height:48px;padding:0 22px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer">Prøv igjen</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ st.empty }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#FFFFFF;border-radius:18px;padding:28px 22px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+                  <img src="assets/mascot-hip.png" alt="" style="width:96px;height:96px;object-fit:contain">
+                  <div style="font-size:17px;font-weight:600">Ingen vakter denne uka.</div>
+                  <div style="font-size:14px;color:#586174">Du får beskjed på e-post når lederen publiserer neste uke.</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ st.normal }}" hint-placeholder-val="{{ true }}">
+                <div style="columns:{{ ovCols }};column-gap:20px">
+                <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="4">
+                  <sc-if value="{{ b.isNext }}">
+                    <button onClick="{{ openS1 }}" style="width:100%;break-inside:avoid;margin-bottom:22px;text-align:left;border:0;cursor:pointer;background:#0B2545;color:#FFFFFF;border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 24px -12px rgba(11,37,69,.5)">
+                      <div style="display:flex;justify-content:space-between;align-items:center">
+                        <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#C9D6EA">Neste vakt</span>
+                        <span style="background:#F6DF6E;color:#0B2545;border-radius:99px;padding:4px 10px;font-size:13px;font-weight:600">om 3 timer</span>
+                      </div>
+                      <div>
+                        <div style="font-size:15px;color:#C9D6EA">I dag, mandag 5. okt</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;letter-spacing:-.02em;margin-top:2px">13:00–21:00</div>
+                        <div style="font-size:15px;margin-top:2px">Kveld · Nordhavn Sentrum</div>
+                      </div>
+                      <div style="border-top:1px solid #16345E;padding-top:12px;display:flex;flex-direction:column;gap:8px">
+                        <div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:#C9D6EA">Denne uka</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:500">22,5 av 22,5 t</span></div>
+                        <div style="height:6px;border-radius:99px;background:#16345E"><div style="height:100%;width:100%;border-radius:99px;background:#F6DF6E"></div></div>
+                      </div>
+                    </button>
+                  </sc-if>
+                  <sc-if value="{{ b.isWaiting }}">
+                    <div style="display:flex;flex-direction:column;gap:10px;break-inside:avoid;margin-bottom:22px">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Venter på deg</span>
+                        <span style="background:#F6DF6E;color:#0B2545;border-radius:99px;min-width:22px;height:22px;padding:0 7px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ waitingCount }}</span>
+                        <button onClick="{{ go.bytter }}" style="margin-left:auto;border:0;background:transparent;font-size:14px;font-weight:600;cursor:pointer;padding:10px 0">Se alle</button>
+                      </div>
+                      <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                        <sc-for list="{{ b.items }}" as="w" hint-placeholder-count="3">
+                          <button onClick="{{ w.go }}" style="width:100%;text-align:left;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:{{ w.border }}">
+                            <div style="width:40px;height:40px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ w.bg }};color:{{ w.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1">{{ w.icon }}</span></div>
+                            <div style="flex:1;min-width:0">
+                              <div style="font-size:15px;font-weight:600">{{ w.title }}</div>
+                              <div style="font-size:13px;color:#586174;margin-top:2px">{{ w.sub }}</div>
+                            </div>
+                            <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8A909C">chevron_right</span>
+                          </button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ b.isUpcoming }}">
+                    <div style="display:flex;flex-direction:column;gap:10px;break-inside:avoid;margin-bottom:22px">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Kommende vakter</span>
+                        <button onClick="{{ go.vakter }}" style="margin-left:auto;border:0;background:transparent;font-size:14px;font-weight:600;cursor:pointer;padding:10px 0">Se alle</button>
+                      </div>
+                      <sc-for list="{{ b.items }}" as="c" hint-placeholder-count="3">
+                        <div style="display:flex;gap:12px;align-items:stretch">
+                          <div style="width:44px;flex-shrink:0;text-align:center;padding-top:8px">
+                            <div style="font-size:13px;color:#586174">{{ c.dayShort }}</div>
+                            <div style="font-size:24px;font-weight:700;line-height:1.1">{{ c.dayNum }}</div>
+                          </div>
+                          <button onClick="{{ c.open }}" style="flex:1;min-width:0;text-align:left;border:0;cursor:pointer;background:#FFFFFF;border-radius:14px;box-shadow:0 1px 3px rgba(11,37,69,.06);display:flex;overflow:hidden">
+                            <div style="width:6px;flex-shrink:0;background:{{ c.stripe }}"></div>
+                            <div style="flex:1;padding:12px 14px;display:flex;align-items:center;gap:10px">
+                              <div style="flex:1;min-width:0">
+                                <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600">{{ c.time }}</div>
+                                <div style="font-size:14px;color:#586174;margin-top:2px">{{ c.sub }}</div>
+                              </div>
+                              <sc-if value="{{ c.hasPill }}"><span style="border-radius:99px;padding:4px 10px;font-size:12px;font-weight:600;background:{{ c.pillBg }};color:{{ c.pillFg }}">{{ c.pill }}</span></sc-if>
+                            </div>
+                          </button>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ b.isOpen }}">
+                    <div style="display:flex;flex-direction:column;gap:10px;break-inside:avoid;margin-bottom:22px">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Ledige vakter du kan ta</span>
+                        <button onClick="{{ go.ledige }}" style="margin-left:auto;border:0;background:transparent;font-size:14px;font-weight:600;cursor:pointer;padding:10px 0">Se alle</button>
+                      </div>
+                      <sc-for list="{{ b.items }}" as="o" hint-placeholder-count="2">
+                        <div style="background:#FFFFFF;border-radius:14px;box-shadow:0 1px 3px rgba(11,37,69,.06);display:flex;overflow:hidden">
+                          <div style="width:6px;flex-shrink:0;background:#F6DF6E"></div>
+                          <div style="flex:1;padding:14px;display:flex;flex-direction:column;gap:10px">
+                            <button onClick="{{ o.open }}" style="text-align:left;border:0;background:transparent;padding:0;cursor:pointer">
+                              <div style="font-size:14px;color:#586174">{{ o.dayLong }}</div>
+                              <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;margin-top:2px">{{ o.time }}</div>
+                              <div style="font-size:14px;color:#586174;margin-top:2px">{{ o.sub }}</div>
+                            </button>
+                            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                              <span style="font-size:13px;color:#7A5A00;background:#FFF4CC;border-radius:99px;padding:4px 10px;font-weight:500">{{ o.note }}</span>
+                              <button onClick="{{ o.toggle }}" style="margin-left:auto;height:44px;padding:0 16px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;border:{{ o.btnBorder }};background:{{ o.btnBg }};color:{{ o.btnFg }}">{{ o.btnLabel }}</button>
+                            </div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ===== TILPASS ===== -->
+          <sc-if value="{{ is.tilpass }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 28px;display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;height:52px">
+                <button onClick="{{ cancelTilpass }}" style="border:0;background:transparent;font-size:16px;cursor:pointer;padding:12px 4px;color:#586174">Avbryt</button>
+                <div style="font-size:17px;font-weight:700">Tilpass oversikten</div>
+                <button onClick="{{ saveTilpass }}" style="border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer;height:40px;padding:0 16px;border-radius:10px">Lagre</button>
+              </div>
+              <div style="font-size:14px;color:#586174;padding:0 4px">Dra for å endre rekkefølgen. Trykk på øyet for å skjule en blokk.</div>
+              <div style="background:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(11,37,69,.06)">
+                <sc-for list="{{ draftRows }}" as="r" hint-placeholder-count="4">
+                  <div draggable="true" onDragStart="{{ r.dragStart }}" onDragOver="{{ r.dragOver }}" onDrop="{{ r.drop }}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:{{ r.border }};background:{{ r.bg }}">
+                    <span aria-label="Dra for å flytte" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#8A909C;cursor:grab;width:28px;text-align:center">drag_indicator</span>
+                    <div style="flex:1;font-size:15px;font-weight:600;color:{{ r.labelColor }}">{{ r.label }}</div>
+                    <sc-if value="{{ r.hasCount }}">
+                      <div style="display:flex;align-items:center;gap:2px;background:#F4F1EA;border-radius:99px">
+                        <button aria-label="Færre" onClick="{{ r.dec }}" style="width:36px;height:36px;border:0;background:transparent;border-radius:99px;cursor:pointer;font-size:18px">−</button>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;width:16px;text-align:center">{{ r.count }}</span>
+                        <button aria-label="Flere" onClick="{{ r.inc }}" style="width:36px;height:36px;border:0;background:transparent;border-radius:99px;cursor:pointer;font-size:18px">+</button>
+                      </div>
+                    </sc-if>
+                    <button aria-label="{{ r.eyeLabel }}" onClick="{{ r.toggle }}" style="width:44px;height:44px;border:0;background:transparent;border-radius:99px;cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:{{ r.eyeColor }}">{{ r.eye }}</span></button>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== VAKTER (liste) ===== -->
+          <sc-if value="{{ is.vakter }}" hint-placeholder-val="{{ false }}">
+            <div style="position:sticky;top:0;z-index:5;background:#F4F1EA;padding:8px 16px 10px;display:flex;align-items:center;gap:8px;height:62px">
+              <div style="flex:1;font-size:24px;font-weight:700">Oktober</div>
+              <sc-if value="{{ showViewToggle }}" hint-placeholder-val="{{ false }}">
+                <div role="tablist" aria-label="Visning" style="display:flex;background:#EFEBE2;border-radius:99px;padding:3px;margin-right:4px">
+                  <sc-for list="{{ viewOpts }}" as="t" hint-placeholder-count="2">
+                    <button role="tab" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" style="height:38px;padding:0 16px;border:0;border-radius:99px;font-size:14px;font-weight:600;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.shadow }}">{{ t.label }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <button aria-label="Kalender" onClick="{{ go.kalender }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">calendar_month</span></button>
+              <button aria-label="Filter" onClick="{{ sheetFilter }}" style="position:relative;width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">filter_list</span>
+                <sc-if value="{{ filterActive }}"><span style="position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:99px;background:#F6DF6E;border:2px solid #fff"></span></sc-if>
+              </button>
+              <button aria-label="Mer" onClick="{{ sheetMenu }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">more_horiz</span></button>
+            </div>
+            <sc-if value="{{ st.loading }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:8px 16px;display:flex;flex-direction:column;gap:12px">
+                <div style="height:72px;border-radius:14px;background:#FFFFFF;margin-left:56px;animation:pulse 1.4s ease-in-out infinite"></div>
+                <div style="height:72px;border-radius:14px;background:#FFFFFF;margin-left:56px;animation:pulse 1.4s ease-in-out infinite"></div>
+                <div style="height:72px;border-radius:14px;background:#FFFFFF;margin-left:56px;animation:pulse 1.4s ease-in-out infinite"></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ st.error }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:16px;background:#FFFFFF;border-radius:18px;padding:28px 22px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+                <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;color:#A2371C">wifi_off</span>
+                <div style="font-size:17px;font-weight:600">Fikk ikke kontakt. Prøv igjen.</div>
+                <button onClick="{{ retry }}" style="height:48px;padding:0 22px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer">Prøv igjen</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ st.listShow }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ vList }}" hint-placeholder-val="{{ true }}">
+              <div style="padding:0 16px 24px;display:flex;flex-direction:column;gap:6px">
+                <sc-if value="{{ hasActiveFilter }}">
+                  <div style="padding:0 0 4px 56px"><button onClick="{{ clearActiveFilter }}" aria-label="Fjern filter" style="height:36px;border-radius:99px;border:0;background:#0B2545;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0 8px 0 12px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">filter_list</span>{{ activeFilterName }}<span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">close</span></button></div>
+                </sc-if>
+                <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174;padding:6px 0 4px 56px">Uke 41 · 5.–11. okt</div>
+                <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+                  <div data-day="{{ d.idx }}" style="display:flex;gap:12px;align-items:flex-start;padding:6px 0;border-radius:14px;background:{{ d.selBg }}">
+                    <button onClick="{{ d.pick }}" aria-label="{{ d.long }}" style="position:sticky;top:68px;width:44px;flex-shrink:0;border:0;background:transparent;cursor:pointer;padding:6px 0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px">
+                      <span style="font-size:13px;color:{{ d.shortColor }};font-weight:500">{{ d.short }}</span>
+                      <span style="width:36px;height:36px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;background:{{ d.numBg }};color:{{ d.numFg }}">{{ d.num }}</span>
+                    </button>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+                      <sc-if value="{{ d.empty }}">
+                        <div style="font-size:14px;color:#8A909C;padding:14px 4px">Ingen vakter denne dagen</div>
+                      </sc-if>
+                      <sc-for list="{{ d.cards }}" as="c" hint-placeholder-count="1">
+                        <button onClick="{{ c.open }}" style="width:100%;text-align:left;cursor:pointer;background:#FFFFFF;border-radius:14px;box-shadow:0 1px 3px rgba(11,37,69,.06);display:flex;overflow:hidden;border:0;transition:transform .15s ease">
+                          <div style="width:6px;flex-shrink:0;background:{{ c.stripe }}"></div>
+                          <div style="flex:1;min-width:0;padding:11px 12px;display:flex;align-items:center;gap:10px">
+                            <div style="width:36px;height:36px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:{{ c.avBg }};color:{{ c.avFg }}">{{ c.ini }}</div>
+                            <div style="flex:1;min-width:0">
+                              <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:{{ c.timeColor }}">{{ c.time }}</div>
+                              <div style="font-size:13px;color:#586174;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.sub }}</div>
+                              <div style="font-size:13px;margin-top:1px;color:{{ c.nameColor }};font-weight:500">{{ c.name }}</div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                              <sc-if value="{{ c.hasPill }}"><span style="border-radius:99px;padding:3px 9px;font-size:12px;font-weight:600;white-space:nowrap;background:{{ c.pillBg }};color:{{ c.pillFg }}">{{ c.pill }}</span></sc-if>
+                              <sc-if value="{{ c.hasComment }}"><span aria-label="Har kommentar" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#586174">chat_bubble</span></sc-if>
+                            </div>
+                          </div>
+                        </button>
+                      </sc-for>
+                      <sc-if value="{{ d.showAv }}">
+                        <div style="display:flex;align-items:center;gap:8px;min-height:44px;padding:0 0 0 4px;border-radius:12px;background:{{ d.avBg }}">
+                          <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:{{ d.avColor }}">{{ d.avIcon }}</span>
+                          <span style="flex:1;min-width:0;font-size:13px;font-weight:500;color:{{ d.avColor }};text-wrap:pretty">{{ d.avTxt }}</span>
+                          <div role="group" aria-label="{{ d.avAria }}" style="display:flex;gap:4px;padding:3px">
+                            <sc-for list="{{ d.avOpts }}" as="o">
+                              <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:38px;border-radius:99px;padding:0 12px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">{{ o.icon }}</span>{{ o.label }}</button>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </div>
+                </sc-for>
+                <div style="display:flex;align-items:center;gap:10px;padding:14px 0 0 56px;color:#8A909C;font-size:13px">
+                  <div style="flex:1;border-top:1.5px dashed #E4DFD4"></div><span>Slutt på publisert periode</span><div style="flex:1;border-top:1.5px dashed #E4DFD4"></div>
+                </div>
+              </div>
+              </sc-if>
+              <sc-if value="{{ vWeek }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:0 16px 24px;display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:2px 2px">
+                    <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Uke 41 · 5.–11. okt</span>
+                    <span style="margin-left:auto;font-size:13px;color:#586174">Dine timer <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:#0B2545">22,5 av 22,5 t</span></span>
+                  </div>
+                  <div style="overflow-x:{{ weekOverflow }};margin:0 -16px;padding:0 16px 4px">
+                    <div style="display:grid;grid-template-columns:{{ weekCols }};gap:8px;align-items:start">
+                      <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+                        <div data-day="{{ d.idx }}" style="display:flex;flex-direction:column;gap:6px;min-width:0;border-radius:14px;padding:4px 5px 8px;background:{{ d.colBg }}">
+                          <button onClick="{{ d.pick }}" aria-label="{{ d.long }}" style="border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;height:44px;padding:0">
+                            <span style="font-size:13px;font-weight:500;color:{{ d.shortColor }}">{{ d.short }}</span>
+                            <span style="width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;background:{{ d.numBg }};color:{{ d.numFg }}">{{ d.num }}</span>
+                          </button>
+                          <sc-if value="{{ d.empty }}">
+                            <div style="font-size:12px;color:#8A909C;text-align:center;padding:8px 2px">Ingen vakter</div>
+                          </sc-if>
+                          <sc-for list="{{ d.cards }}" as="c" hint-placeholder-count="1">
+                            <button onClick="{{ c.open }}" style="width:100%;text-align:left;cursor:pointer;background:#FFFFFF;border-radius:12px;box-shadow:0 1px 3px rgba(11,37,69,.06);display:flex;overflow:hidden;border:0;padding:0;transition:transform .15s ease,box-shadow .15s ease" style-hover="transform:translateY(-1px);box-shadow:0 6px 16px -8px rgba(11,37,69,.3)">
+                              <div style="width:5px;flex-shrink:0;background:{{ c.stripe }}"></div>
+                              <div style="flex:1;min-width:0;padding:8px 8px 9px;display:flex;flex-direction:column;gap:2px">
+                                <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;line-height:1.3;overflow-wrap:anywhere;color:{{ c.timeColor }}">{{ c.time }}</div>
+                                <div style="font-size:12px;color:#586174;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.type }}</div>
+                                <div style="font-size:12px;font-weight:500;line-height:1.3;color:{{ c.nameColor }}">{{ c.name }}</div>
+                                <sc-if value="{{ c.hasPill }}"><span style="align-self:flex-start;margin-top:3px;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:600;white-space:nowrap;background:{{ c.pillBg }};color:{{ c.pillFg }}">{{ c.pill }}</span></sc-if>
+                              </div>
+                            </button>
+                          </sc-for>
+                          <sc-if value="{{ d.showAv }}">
+                            <div style="display:flex;flex-direction:column;gap:4px;margin-top:2px;padding-top:8px;border-top:1.5px dashed #E4DFD4">
+                              <div style="display:flex;align-items:flex-start;justify-content:center;gap:4px;font-size:12px;font-weight:500;text-align:center;line-height:1.3;padding:0 2px;color:{{ d.avColor }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">{{ d.avIcon }}</span><span>{{ d.avTxt }}</span></div>
+                              <div role="group" aria-label="{{ d.avAria }}" style="display:flex;flex-direction:column;gap:4px">
+                                <sc-for list="{{ d.avOpts }}" as="o">
+                                  <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:40px;border-radius:10px;padding:0 6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">{{ o.icon }}</span>{{ o.label }}</button>
+                                </sc-for>
+                              </div>
+                            </div>
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px;color:#586174;padding:4px 2px 0">
+                    <sc-for list="{{ legend }}" as="l" hint-placeholder-count="4">
+                      <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:{{ l.c }}"></span>{{ l.label }}</span>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ st.empty }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:16px;background:#FFFFFF;border-radius:18px;padding:28px 22px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+                <img src="assets/mascot-hip.png" alt="" style="width:96px;height:96px;object-fit:contain">
+                <div style="font-size:17px;font-weight:600">Ingen vakter denne uka.</div>
+              </div>
+            </sc-if>
+          </sc-if>
+
+          <!-- ===== KALENDER ===== -->
+          <sc-if value="{{ is.kalender }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 24px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:center;gap:8px;height:52px">
+                <button aria-label="Tilbake til listen" onClick="{{ go.vakter }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">view_agenda</span></button>
+                <div style="flex:1;text-align:center;font-size:20px;font-weight:700">Oktober 2026</div>
+                <button aria-label="Forrige måned" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">chevron_left</span></button>
+                <button aria-label="Neste måned" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">chevron_right</span></button>
+              </div>
+              <div style="background:#FFFFFF;border-radius:18px;padding:12px 8px;box-shadow:0 1px 3px rgba(11,37,69,.06)">
+                <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));text-align:center;font-size:12px;color:#586174;font-weight:600;padding-bottom:6px">
+                  <span>man</span><span>tir</span><span>ons</span><span>tor</span><span>fre</span><span>lør</span><span>søn</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px">
+                  <sc-for list="{{ month }}" as="m" hint-placeholder-count="35">
+                    <button onClick="{{ m.pick }}" aria-label="{{ m.aria }}" style="height:66px;border:0;border-radius:10px;cursor:pointer;padding:4px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;background:{{ m.bg }};visibility:{{ m.vis }}">
+                      <span style="width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:{{ m.weight }};background:{{ m.numBg }};color:{{ m.numFg }}">{{ m.num }}</span>
+                      <div style="display:flex;flex-direction:column;gap:2px;width:100%;align-items:center">
+                        <sc-for list="{{ m.chips }}" as="ch">
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:14px;height:14px;border-radius:4px;padding:0 3px;min-width:22px;font-weight:600;background:{{ ch.bg }};color:{{ ch.fg }}">{{ ch.t }}</span>
+                        </sc-for>
+                      </div>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px;color:#586174;padding:0 4px">
+                <sc-for list="{{ legend }}" as="l" hint-placeholder-count="4">
+                  <span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:{{ l.c }}"></span>{{ l.label }}</span>
+                </sc-for>
+              </div>
+              <div style="font-size:14px;color:#586174;padding:0 4px">Trykk på en dag for å se den i listen.</div>
+            </div>
+          </sc-if>
+
+          <!-- ===== LEDIGE ===== -->
+          <sc-if value="{{ is.ledige }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 28px;display:flex;flex-direction:column;gap:14px">
+              <div style="height:52px;display:flex;align-items:center"><h1 style="margin:0;font-size:24px;font-weight:700">Ledige vakter</h1></div>
+              <sc-for list="{{ openList }}" as="o" hint-placeholder-count="2">
+                <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);display:flex;overflow:hidden">
+                  <div style="width:6px;flex-shrink:0;background:#F6DF6E"></div>
+                  <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+                    <button onClick="{{ o.open }}" style="text-align:left;border:0;background:transparent;padding:0;cursor:pointer;display:flex;gap:12px;align-items:flex-start">
+                      <div style="flex:1">
+                        <div style="font-size:14px;color:#586174">{{ o.dayLong }}</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;margin-top:2px">{{ o.time }}</div>
+                        <div style="font-size:14px;color:#586174;margin-top:2px">{{ o.sub }}</div>
+                      </div>
+                      <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8A909C;margin-top:4px">chevron_right</span>
+                    </button>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px">
+                      <sc-for list="{{ o.notes }}" as="n">
+                        <span style="display:flex;align-items:center;gap:5px;border-radius:99px;padding:4px 10px;font-size:13px;font-weight:500;background:{{ n.bg }};color:{{ n.fg }};border:{{ n.border }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">{{ n.icon }}</span>{{ n.t }}</span>
+                      </sc-for>
+                    </div>
+                    <button onClick="{{ o.toggle }}" style="height:48px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;border:{{ o.btnBorder }};background:{{ o.btnBg }};color:{{ o.btnFg }}">{{ o.btnLabel }}</button>
+                  </div>
+                </div>
+              </sc-for>
+              <div style="display:flex;gap:10px;align-items:flex-start;padding:4px 4px;font-size:14px;color:#586174;line-height:1.45">
+                <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">info</span>
+                <span>Når du melder interesse, bestemmer lederen hvem som får vakten. Du får beskjed på e-post.</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== BYTTER ===== -->
+          <sc-if value="{{ is.bytter }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 28px;display:flex;flex-direction:column;gap:14px">
+              <div style="height:52px;display:flex;align-items:center;gap:8px">
+                <button aria-label="Tilbake" onClick="{{ go.mer }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:{{ backDisp }};align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">arrow_back</span></button>
+                <h1 style="margin:0;font-size:24px;font-weight:700">Bytter</h1>
+              </div>
+              <div role="tablist" style="display:flex;background:#EFEBE2;border-radius:99px;padding:4px">
+                <sc-for list="{{ swapTabs }}" as="t" hint-placeholder-count="2">
+                  <button role="tab" onClick="{{ t.pick }}" style="flex:1;height:40px;border:0;border-radius:99px;font-size:15px;font-weight:600;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.shadow }}">{{ t.label }}</button>
+                </sc-for>
+              </div>
+              <sc-for list="{{ swapList }}" as="s">
+                <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);display:flex;overflow:hidden">
+                  <div style="width:6px;flex-shrink:0;background:{{ s.stripe }}"></div>
+                  <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;gap:12px;align-items:center">
+                      <div style="width:40px;height:40px;border-radius:99px;background:#EFEBE2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">{{ s.ini }}</div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:15px;font-weight:600">{{ s.title }}</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;margin-top:2px">{{ s.time }}</div>
+                        <div style="font-size:13px;color:#586174;margin-top:1px">{{ s.sub }}</div>
+                      </div>
+                    </div>
+                    <span style="align-self:flex-start;display:flex;align-items:center;gap:5px;border-radius:99px;padding:4px 10px;font-size:13px;font-weight:600;background:{{ s.stBg }};color:{{ s.stFg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">{{ s.stIcon }}</span>{{ s.status }}</span>
+                    <sc-if value="{{ s.hasActions }}">
+                      <div style="display:flex;gap:8px">
+                        <button onClick="{{ s.accept }}" style="flex:1;height:48px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer">Ta vakten</button>
+                        <button onClick="{{ s.decline }}" style="flex:1;height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer">Nei takk</button>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ swapEmpty }}">
+                <div style="padding:36px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+                  <img src="assets/mascot-hip.png" alt="" style="width:110px;height:110px;object-fit:contain">
+                  <div style="font-size:17px;font-weight:600">Du har ikke sendt noen bytter.</div>
+                  <div style="font-size:14px;color:#586174;max-width:260px">Åpne en av vaktene dine og trykk «Gi bort / bytt vakt».</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ===== TILGJENGELIGHET ===== -->
+          <sc-if value="{{ is.tilg }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 28px;display:flex;flex-direction:column;gap:14px">
+              <div style="height:52px;display:flex;align-items:center;gap:8px">
+                <button aria-label="Tilbake" onClick="{{ go.mer }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:{{ backDisp }};align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">arrow_back</span></button>
+                <h1 style="margin:0;font-size:24px;font-weight:700;flex:1">Tilgjengelighet</h1>
+              </div>
+              <div role="tablist" style="display:flex;background:#EFEBE2;border-radius:99px;padding:4px">
+                <sc-for list="{{ availTabs }}" as="t" hint-placeholder-count="2">
+                  <button role="tab" onClick="{{ t.pick }}" style="flex:1;height:40px;border:0;border-radius:99px;font-size:15px;font-weight:600;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.shadow }}">{{ t.label }}</button>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <button aria-label="Forrige uke" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">chevron_left</span></button>
+                <div style="flex:1;text-align:center;font-weight:600;font-size:16px">Uke 41 · 5.–11. okt</div>
+                <button aria-label="Neste uke" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">chevron_right</span></button>
+              </div>
+
+              <sc-if value="{{ availSimple }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <sc-for list="{{ availDays }}" as="a" hint-placeholder-count="7">
+                    <div style="background:#FFFFFF;border-radius:14px;box-shadow:0 1px 3px rgba(11,37,69,.06);padding:12px 14px;display:flex;flex-direction:column;gap:10px">
+                      <div style="display:flex;align-items:baseline;gap:8px">
+                        <div style="font-size:15px;font-weight:600;width:96px">{{ a.label }}</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#586174">{{ a.shiftTxt }}</div>
+                      </div>
+                      <div role="radiogroup" aria-label="{{ a.label }}" style="display:flex;background:#F4F1EA;border-radius:10px;padding:3px;gap:3px">
+                        <sc-for list="{{ a.opts }}" as="o">
+                          <button role="radio" onClick="{{ o.pick }}" style="flex:1;height:40px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;border:{{ o.border }};background:{{ o.bg }};color:{{ o.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1">{{ o.icon }}</span>{{ o.label }}</button>
+                        </sc-for>
+                      </div>
+                      <sc-if value="{{ a.showReason }}">
+                        <input value="{{ a.reason }}" onChange="{{ a.setReason }}" placeholder="Grunn (valgfritt)" style="height:44px;border-radius:10px;border:1px solid #E4DFD4;padding:0 12px;font-size:15px;font-family:inherit;background:#FBFAF6;color:#0B2545" />
+                      </sc-if>
+                      <sc-if value="{{ a.warn }}">
+                        <div style="display:flex;gap:8px;align-items:flex-start;background:#FBEDEA;color:#A2371C;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">warning</span><span>{{ a.warnTxt }}</span></div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ availDetailed }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:14px">
+                <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);padding:10px 8px 8px 0">
+                  <div style="display:grid;grid-template-columns:34px repeat(7,minmax(0,1fr));gap:2px;align-items:end;padding-bottom:6px">
+                    <span></span>
+                    <sc-for list="{{ gridHead }}" as="h" hint-placeholder-count="7">
+                      <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px">
+                        <span style="font-size:11px;color:#586174">{{ h.short }}</span>
+                        <span style="width:26px;height:26px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:{{ h.bg }};color:{{ h.fg }}">{{ h.num }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <sc-for list="{{ gridRows }}" as="row" hint-placeholder-count="18">
+                    <div style="display:grid;grid-template-columns:34px repeat(7,minmax(0,1fr));gap:2px;margin-bottom:2px">
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#8A909C;text-align:right;padding-right:4px;line-height:20px">{{ row.label }}</span>
+                      <sc-for list="{{ row.cells }}" as="c">
+                        <button aria-label="{{ c.aria }}" onClick="{{ c.tap }}" style="height:20px;border:0;border-radius:4px;cursor:pointer;padding:0;background:{{ c.bg }}"></button>
+                      </sc-for>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="font-size:13px;color:#586174;padding:0 4px">Trykk i en rute for å bytte mellom Kan jobbe, Kan ikke og tom.</div>
+              </div></sc-if>
+
+              <div style="background:#FBFAF6;border:1px solid #E4DFD4;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;justify-content:space-between;font-size:14px"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#1F7D52"></span>Kan jobbe</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600">{{ availSum.yes }}</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:14px"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#A2371C"></span>Kan ikke</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600">{{ availSum.no }}</span></div>
+              </div>
+              <button onClick="{{ saveAvail }}" style="height:52px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:16px;font-weight:600;cursor:pointer">Lagre</button>
+            </div>
+          </sc-if>
+
+          <!-- ===== FRAVÆR ===== -->
+          <sc-if value="{{ is.fravaer }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 28px;display:flex;flex-direction:column;gap:14px">
+              <div style="height:52px;display:flex;align-items:center;gap:8px">
+                <button aria-label="Tilbake" onClick="{{ go.mer }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:{{ backDisp }};align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">arrow_back</span></button>
+                <h1 style="margin:0;font-size:24px;font-weight:700">Fravær</h1>
+              </div>
+              <div role="tablist" style="display:flex;background:#EFEBE2;border-radius:99px;padding:4px">
+                <sc-for list="{{ absTabs }}" as="t" hint-placeholder-count="2">
+                  <button role="tab" onClick="{{ t.pick }}" style="flex:1;height:40px;border:0;border-radius:99px;font-size:15px;font-weight:600;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }};box-shadow:{{ t.shadow }}">{{ t.label }}</button>
+                </sc-for>
+              </div>
+              <sc-if value="{{ absIsList }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-direction:column;gap:14px">
+                <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                  <sc-for list="{{ absList }}" as="a" hint-placeholder-count="3">
+                    <div style="display:flex;gap:12px;align-items:center;padding:14px 16px;border-top:{{ a.border }}">
+                      <div style="width:40px;height:40px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ a.bg }};color:{{ a.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1">{{ a.icon }}</span></div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:15px;font-weight:600">{{ a.type }}</div>
+                        <div style="font-size:13px;color:#586174;margin-top:2px">{{ a.period }}</div>
+                      </div>
+                      <span style="font-size:13px;font-weight:600;color:{{ a.fg }}">{{ a.status }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <button onClick="{{ sheetAbs }}" style="height:52px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">add</span>Ny søknad</button>
+              </div></sc-if>
+              <sc-if value="{{ absIsSaldo }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:14px">
+                <div style="background:#0B2545;color:#fff;border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:10px">
+                  <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#C9D6EA">Feriedager igjen i 2026</div>
+                  <div style="font-family:'IBM Plex Mono',monospace;font-size:44px;font-weight:600;line-height:1">18<span style="font-size:20px;color:#C9D6EA"> av 25</span></div>
+                  <div style="height:6px;border-radius:99px;background:#16345E"><div style="height:100%;width:72%;border-radius:99px;background:#F6DF6E"></div></div>
+                </div>
+                <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                  <div style="display:flex;justify-content:space-between;padding:14px 16px;font-size:15px"><span>Ferie brukt</span><span style="font-family:'IBM Plex Mono',monospace">7 dager</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:14px 16px;font-size:15px;border-top:1px solid #EFEBE2"><span>Egenmelding brukt</span><span style="font-family:'IBM Plex Mono',monospace">1 dag</span></div>
+                  <div style="display:flex;justify-content:space-between;padding:14px 16px;font-size:15px;border-top:1px solid #EFEBE2"><span>Avspasering til gode</span><span style="font-family:'IBM Plex Mono',monospace">0,0 t</span></div>
+                </div>
+              </div></sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ===== TIMER ===== -->
+          <sc-if value="{{ is.timer }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 28px;display:flex;flex-direction:column;gap:14px">
+              <div style="height:52px;display:flex;align-items:center"><h1 style="margin:0;font-size:24px;font-weight:700">Timer</h1></div>
+              <div style="background:#FFFFFF;border-radius:18px;box-shadow:0 1px 3px rgba(11,37,69,.06);padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div><div style="font-size:13px;color:#586174">Periode</div><div style="font-size:16px;font-weight:600">28. sep – 4. okt</div></div>
+                  <div style="text-align:right"><div style="font-size:13px;color:#586174">Sum</div><div style="font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600">30,50 t</div></div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1;background:#F4F1EA;border-radius:12px;padding:10px 12px"><div style="font-size:12px;color:#586174;display:flex;align-items:center;gap:4px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">check_circle</span>Godkjent</div><div style="font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600">27,00 t</div></div>
+                  <div style="flex:1;background:#FFF4CC;border-radius:12px;padding:10px 12px"><div style="font-size:12px;color:#7A5A00;display:flex;align-items:center;gap:4px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">radio_button_unchecked</span>Venter</div><div style="font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:600;color:#7A5A00">3,50 t</div></div>
+                </div>
+              </div>
+              <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174;padding:4px 4px 0;display:flex;justify-content:space-between"><span>Uke 40, 28. sep – 4. okt</span><span style="font-family:'IBM Plex Mono',monospace">(30,50)</span></div>
+              <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                <sc-for list="{{ hours }}" as="h" hint-placeholder-count="5">
+                  <div style="padding:13px 16px;border-top:{{ h.border }};display:flex;flex-direction:column;gap:6px">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <div style="width:42px;text-align:center;flex-shrink:0"><div style="font-size:12px;color:#586174">{{ h.short }}</div><div style="font-size:18px;font-weight:700;line-height:1.1">{{ h.num }}</div></div>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:500">{{ h.time }}</div>
+                        <div style="font-size:13px;margin-top:2px;display:flex;align-items:center;gap:4px;color:{{ h.stColor }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">{{ h.stIcon }}</span>{{ h.status }}</div>
+                      </div>
+                      <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600">{{ h.h }}</div>
+                    </div>
+                    <sc-if value="{{ h.hasDev }}">
+                      <div style="margin-left:54px;font-size:13px;color:#7A5A00;background:#FFF4CC;border:1px solid #EAD88A;border-radius:10px;padding:8px 10px">{{ h.dev }}</div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ f.deviations }}">
+                <button onClick="{{ sheetDev }}" style="height:52px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">edit_note</span>Meld inn timer som avviker</button>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ===== MER ===== -->
+          <sc-if value="{{ is.mer }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 28px;display:flex;flex-direction:column;gap:18px">
+              <div style="height:52px;display:flex;align-items:center;gap:10px">
+                <img src="assets/rettfort-logo.png" alt="Rettført" style="height:44px;margin:-8px -14px">
+                <div style="width:1px;height:20px;background:#E4DFD4;margin-left:4px"></div>
+                <div style="font-weight:600;font-size:17px">Vaktplan</div>
+              </div>
+              <sc-for list="{{ moreGroups }}" as="g" hint-placeholder-count="2">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174;padding:0 4px">{{ g.title }}</div>
+                  <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                    <sc-for list="{{ g.items }}" as="i">
+                      <button onClick="{{ i.go }}" style="width:100%;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:14px;padding:0 16px;height:56px;border-top:{{ i.border }}">
+                        <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#0B2545">{{ i.icon }}</span>
+                        <span style="flex:1;text-align:left;font-size:16px;font-weight:500">{{ i.label }}</span>
+                        <sc-if value="{{ i.hasBadge }}"><span style="background:#F6DF6E;border-radius:99px;min-width:22px;height:22px;padding:0 7px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ i.badge }}</span></sc-if>
+                        <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8A909C">chevron_right</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <!-- ===== KOLLEGER ===== -->
+          <sc-if value="{{ is.kolleger }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 28px;display:flex;flex-direction:column;gap:14px">
+              <div style="height:52px;display:flex;align-items:center;gap:8px">
+                <button aria-label="Tilbake" onClick="{{ go.mer }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:{{ backDisp }};align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">arrow_back</span></button>
+                <h1 style="margin:0;font-size:24px;font-weight:700">Kolleger</h1>
+              </div>
+              <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                <sc-for list="{{ colleagues }}" as="p" hint-placeholder-count="5">
+                  <button onClick="{{ p.tap }}" style="width:100%;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:{{ p.border }};text-align:left">
+                    <span style="width:40px;height:40px;border-radius:99px;background:#EFEBE2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">{{ p.ini }}</span>
+                    <span style="flex:1"><span style="display:block;font-size:15px;font-weight:600">{{ p.name }}</span><span style="display:block;font-size:13px;color:#586174">{{ p.role }}</span></span>
+                    <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8A909C">chevron_right</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== MIN SIDE ===== -->
+          <sc-if value="{{ is.minside }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 16px 28px;display:flex;flex-direction:column;gap:16px">
+              <div style="height:52px;display:flex;align-items:center;gap:8px">
+                <button aria-label="Tilbake" onClick="{{ go.mer }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:{{ backDisp }};align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(11,37,69,.08)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">arrow_back</span></button>
+                <h1 style="margin:0;font-size:24px;font-weight:700">Min side</h1>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;padding:0 4px">
+                <div style="width:64px;height:64px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700">JB</div>
+                <div><div style="font-size:20px;font-weight:700">Jonas Berg</div><div style="font-size:14px;color:#586174">Kafémedarbeider · Nordhavn Kafé AS</div></div>
+              </div>
+              <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                <div style="display:flex;gap:14px;align-items:center;padding:13px 16px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#586174">mail</span><div style="flex:1"><div style="font-size:12px;color:#586174">E-post</div><div style="font-size:15px">jonas.berg@epost.no</div></div></div>
+                <div style="display:flex;gap:14px;align-items:center;padding:13px 16px;border-top:1px solid #EFEBE2"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#586174">call</span><div style="flex:1"><div style="font-size:12px;color:#586174">Telefon</div><div style="font-size:15px;font-family:'IBM Plex Mono',monospace">412 55 108</div></div></div>
+                <div style="display:flex;gap:14px;align-items:center;padding:13px 16px;border-top:1px solid #EFEBE2"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#586174">badge</span><div style="flex:1"><div style="font-size:12px;color:#586174">Avtale</div><div style="font-size:15px">Fast 60 % · <span style="font-family:'IBM Plex Mono',monospace">22,5 t/uke</span></div></div></div>
+              </div>
+              <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174;padding:0 4px">Innstillinger</div>
+              <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                <sc-for list="{{ notif }}" as="n" hint-placeholder-count="2">
+                  <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;border-top:{{ n.border }}">
+                    <div style="flex:1"><div style="font-size:15px;font-weight:500;color:{{ n.color }}">{{ n.label }}</div><div style="font-size:13px;color:#586174">{{ n.sub }}</div></div>
+                    <button role="switch" aria-checked="{{ n.on }}" aria-label="{{ n.label }}" onClick="{{ n.toggle }}" disabled="{{ n.disabled }}" style="width:52px;height:32px;border-radius:99px;border:0;padding:3px;cursor:pointer;display:flex;justify-content:{{ n.justify }};background:{{ n.bg }}"><span style="width:26px;height:26px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)"></span></button>
+                  </div>
+                </sc-for>
+                <div style="display:flex;gap:14px;align-items:center;padding:12px 16px;border-top:1px solid #EFEBE2">
+                  <div style="flex:1"><div style="font-size:15px;font-weight:500">Språk</div><div style="font-size:13px;color:#586174">Engelsk kommer senere</div></div>
+                  <span style="font-size:15px;color:#586174">Bokmål</span>
+                </div>
+              </div>
+              <button onClick="{{ logout }}" style="height:52px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:16px;font-weight:600;cursor:pointer;color:#A2371C;display:flex;align-items:center;justify-content:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">logout</span>Logg ut</button>
+            </div>
+          </sc-if>
+        </div>
+        </div>
+
+        <!-- ===== VAKTDETALJ (hel skjerm på mobil, sidepanel på nettbrett liggende og PC) ===== -->
+          <sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;top:{{ lay.top }};bottom:{{ scrollBottom }};left:{{ det.left }};right:0;width:{{ det.w }};z-index:9;overflow-y:auto;overflow-x:hidden;background:#F4F1EA;border-left:{{ det.border }};box-shadow:{{ det.shadow }};animation:fadeIn .2s ease">
+            <div style="display:flex;flex-direction:column">
+              <div style="padding:8px 16px 24px;background:{{ dt.headBg }};color:{{ dt.headFg }};border-bottom:{{ dt.headBorder }}">
+                <div style="display:flex;align-items:center;justify-content:space-between;height:52px">
+                  <button aria-label="{{ detBackLabel }}" onClick="{{ back }}" style="width:44px;height:44px;border-radius:99px;border:0;background:{{ dt.btnBg }};color:{{ dt.headFg }};cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">{{ detBackIcon }}</span></button>
+                  <div style="font-size:16px;font-weight:600">{{ dt.title }}</div>
+                  <div style="width:44px"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:14px;margin-top:8px">
+                  <button onClick="{{ dt.whoTap }}" style="width:56px;height:56px;border-radius:99px;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;background:{{ dt.avBg }};color:{{ dt.avFg }}">{{ dt.ini }}</button>
+                  <div>
+                    <div style="font-size:15px;opacity:.85">{{ dt.who }}</div>
+                    <div style="font-size:15px;opacity:.85">{{ dt.dayLong }}</div>
+                  </div>
+                </div>
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:36px;font-weight:600;letter-spacing:-.02em;margin-top:14px">{{ dt.time }}</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:14px;font-weight:600"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">{{ dt.kindIcon }}</span>{{ dt.kindLabel }}</div>
+              </div>
+              <div style="padding:16px;display:flex;flex-direction:column;gap:16px">
+                <sc-if value="{{ dt.hasStatus }}">
+                  <div role="status" style="display:flex;gap:10px;align-items:flex-start;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.4;background:{{ dt.statusBg }};color:{{ dt.statusFg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">{{ dt.statusIcon }}</span><span>{{ dt.status }}</span></div>
+                </sc-if>
+                <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                  <sc-for list="{{ dt.rows }}" as="r" hint-placeholder-count="5">
+                    <div style="display:flex;gap:14px;align-items:center;padding:13px 16px;border-top:{{ r.border }}">
+                      <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#586174;width:22px">{{ r.icon }}</span>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:12px;color:#586174">{{ r.label }}</div>
+                        <div style="font-size:15px;font-weight:500;margin-top:1px;font-family:{{ r.font }}">{{ r.value }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ dt.hasPeers }}">
+                    <div style="display:flex;gap:14px;align-items:flex-start;padding:13px 16px;border-top:1px solid #EFEBE2">
+                      <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#586174;width:22px;margin-top:2px">group</span>
+                      <div style="flex:1">
+                        <div style="font-size:12px;color:#586174">Jobber samtidig</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+                          <sc-for list="{{ dt.peers }}" as="p">
+                            <button onClick="{{ p.tap }}" style="display:flex;align-items:center;gap:8px;border:1px solid #E4DFD4;background:#FBFAF6;border-radius:99px;padding:4px 12px 4px 4px;cursor:pointer;min-height:40px">
+                              <span style="width:30px;height:30px;border-radius:99px;background:#EFEBE2;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">{{ p.ini }}</span>
+                              <span style="font-size:14px;font-weight:500">{{ p.first }}</span>
+                            </button>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ dt.hasComment }}">
+                    <div style="display:flex;gap:14px;align-items:flex-start;padding:13px 16px;border-top:1px solid #EFEBE2;background:#FBFAF6">
+                      <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1;color:#586174;width:22px;margin-top:2px">chat_bubble</span>
+                      <div style="flex:1">
+                        <div style="font-size:12px;color:#586174">Kommentar fra Kari (leder)</div>
+                        <div style="font-size:15px;margin-top:2px;line-height:1.4">{{ dt.comment }}</div>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+                <sc-if value="{{ dt.hasActions }}">
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174;padding:4px 4px 0">Hva vil du gjøre?</div>
+                    <sc-for list="{{ dt.actions }}" as="a" hint-placeholder-count="3">
+                      <button onClick="{{ a.run }}" style="width:100%;height:56px;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 18px;border:{{ a.border }};background:{{ a.bg }};color:{{ a.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">{{ a.icon }}</span>{{ a.label }}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+
+
+
+        <!-- FAB -->
+        <sc-if value="{{ showFab }}" hint-placeholder-val="{{ false }}">
+          <button aria-label="{{ fabLabel }}" onClick="{{ fabRun }}" style="position:absolute;right:{{ lay.fabRight }};bottom:{{ lay.fabBottom }};z-index:12;width:56px;height:56px;border-radius:18px;border:0;background:#0B2545;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -6px rgba(11,37,69,.5)"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:28px;line-height:1">add</span></button>
+        </sc-if>
+
+        <!-- rail nav (mobil liggende, nettbrett stående) -->
+        <sc-if value="{{ lay.rail }}" hint-placeholder-val="{{ false }}">
+          <nav aria-label="Hovedmeny" style="position:absolute;left:0;top:{{ lay.top }};bottom:0;width:{{ lay.navLeft }};background:#FFFFFF;border-right:1px solid #E4DFD4;display:flex;flex-direction:column;align-items:center;justify-content:{{ lay.railJustify }};gap:6px;padding:16px 0 16px {{ lay.railPad }};z-index:10">
+            <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+              <button onClick="{{ n.go }}" aria-current="{{ n.current }}" style="width:68px;height:56px;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;color:{{ n.fg }}">
+                <span style="width:52px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;background:{{ n.bg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1">{{ n.icon }}</span></span>
+                <span style="font-size:11px;font-weight:{{ n.weight }}">{{ n.label }}</span>
+                <sc-if value="{{ n.hasBadge }}"><span style="position:absolute;top:0;left:50%;margin-left:8px;background:#F6DF6E;color:#0B2545;border-radius:99px;min-width:18px;height:18px;padding:0 5px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">{{ n.badge }}</span></sc-if>
+              </button>
+            </sc-for>
+          </nav>
+        </sc-if>
+
+        <!-- side nav (nettbrett liggende, PC) -->
+        <sc-if value="{{ lay.side }}" hint-placeholder-val="{{ false }}">
+          <nav aria-label="Hovedmeny" style="position:absolute;left:0;top:{{ lay.top }};bottom:0;width:{{ lay.navLeft }};background:#FFFFFF;border-right:1px solid #E4DFD4;display:flex;flex-direction:column;gap:20px;padding:16px 12px;overflow-y:auto;z-index:10">
+            <div style="display:flex;align-items:center;gap:10px;padding:0 8px;height:44px">
+              <img src="assets/rettfort-logo.png" alt="Rettført" style="height:40px;margin:-8px -14px">
+              <div style="width:1px;height:20px;background:#E4DFD4;margin-left:4px"></div>
+              <div style="font-weight:600;font-size:16px">Vaktplan</div>
+            </div>
+            <sc-for list="{{ sideGroups }}" as="g" hint-placeholder-count="3">
+              <div style="display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174;padding:0 10px 6px">{{ g.title }}</div>
+                <sc-for list="{{ g.items }}" as="i">
+                  <button onClick="{{ i.go }}" aria-current="{{ i.current }}" style="display:flex;align-items:center;gap:12px;height:44px;padding:0 10px;border:0;border-radius:10px;cursor:pointer;text-align:left;background:{{ i.bg }};color:{{ i.fg }}">
+                    <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1">{{ i.icon }}</span>
+                    <span style="flex:1;font-size:15px;font-weight:{{ i.weight }}">{{ i.label }}</span>
+                    <sc-if value="{{ i.hasBadge }}"><span style="background:#F6DF6E;color:#0B2545;border-radius:99px;min-width:22px;height:22px;padding:0 7px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ i.badge }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-for>
+            <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 8px 0;border-top:1px solid #EFEBE2">
+              <div style="width:36px;height:36px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">JB</div>
+              <div style="min-width:0"><div style="font-size:14px;font-weight:600">Jonas Berg</div><div style="font-size:12px;color:#586174">Nordhavn Kafé AS</div></div>
+            </div>
+          </nav>
+        </sc-if>
+
+        <!-- bottom nav -->
+        <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+          <nav aria-label="Hovedmeny" style="position:absolute;left:0;right:0;bottom:0;height:86px;background:#FFFFFF;border-top:1px solid #E4DFD4;display:flex;padding:6px 6px 24px;z-index:10">
+            <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+              <button onClick="{{ n.go }}" aria-current="{{ n.current }}" style="flex:1;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;color:{{ n.fg }}">
+                <span style="width:56px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;background:{{ n.bg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:23px;line-height:1">{{ n.icon }}</span></span>
+                <span style="font-size:12px;font-weight:{{ n.weight }}">{{ n.label }}</span>
+                <sc-if value="{{ n.hasBadge }}"><span style="position:absolute;top:0;left:50%;margin-left:8px;background:#F6DF6E;color:#0B2545;border-radius:99px;min-width:18px;height:18px;padding:0 5px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">{{ n.badge }}</span></sc-if>
+              </button>
+            </sc-for>
+          </nav>
+        </sc-if>
+        <sc-if value="{{ fx.home }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;bottom:8px;left:50%;width:134px;height:5px;margin-left:-67px;border-radius:99px;background:#0B2545;z-index:40"></div></sc-if>
+
+        <!-- toast -->
+        <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:{{ lay.navLeft }};right:{{ lay.panelW }};bottom:{{ lay.toastBottom }};z-index:60;display:flex;justify-content:center;padding:0 16px;pointer-events:none"><div role="status" style="width:100%;max-width:440px;pointer-events:auto;background:#0B2545;color:#fff;border-radius:14px;padding:12px 12px 12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 24px -8px rgba(11,37,69,.5);animation:fadeIn .2s ease">
+            <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#F6DF6E">check_circle</span>
+            <span style="flex:1;font-size:14px;line-height:1.35">{{ toast.text }}</span>
+            <sc-if value="{{ toast.canUndo }}"><button onClick="{{ undo }}" style="border:0;background:transparent;color:#F6DF6E;font-size:14px;font-weight:700;cursor:pointer;height:36px;padding:0 8px">Angre</button></sc-if>
+          </div></div>
+        </sc-if>
+
+        <!-- sheets -->
+        <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;z-index:50;display:flex;flex-direction:{{ shx.dir }};justify-content:flex-end">
+            <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(11,37,69,.35);animation:fadeIn .2s ease"></div>
+            <div role="dialog" aria-modal="true" style="position:relative;background:#F4F1EA;border-radius:{{ shx.radius }};max-height:{{ shx.maxH }};height:{{ shx.h }};width:{{ shx.w }};overflow-y:auto;padding:{{ shx.pad }};animation:{{ shx.anim }};display:flex;flex-direction:column;gap:14px">
+              <div style="width:40px;height:5px;border-radius:99px;background:#C9CDD5;align-self:center;flex-shrink:0;display:{{ shx.handle }}"></div>
+
+              <sc-if value="{{ sh.filter }}">
+                <div style="display:flex;flex-direction:column;gap:14px">
+                <sc-if value="{{ fPick }}">
+                  <div style="display:flex;flex-direction:column;gap:14px">
+                    <div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:19px;font-weight:700">Filter</div><button aria-label="Lukk" onClick="{{ closeSheet }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">close</span></button></div>
+                    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174;padding:0 4px">Mine filtre</div>
+                    <div role="radiogroup" aria-label="Mine filtre" style="background:#FFFFFF;border-radius:16px;overflow:hidden">
+                      <sc-for list="{{ savedFilters }}" as="sf" hint-placeholder-count="2">
+                        <div style="display:flex;align-items:center;border-top:{{ sf.border }}">
+                          <button role="radio" aria-checked="{{ sf.on }}" onClick="{{ sf.pick }}" style="flex:1;min-width:0;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:12px;padding:10px 16px;min-height:56px;text-align:left">
+                            <span style="width:22px;height:22px;border-radius:99px;flex-shrink:0;border:{{ sf.ring }}"></span>
+                            <span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">{{ sf.name }}</span><span style="display:block;font-size:13px;color:#586174;margin-top:1px">{{ sf.desc }}</span></span>
+                          </button>
+                          <sc-if value="{{ sf.canDelete }}"><button aria-label="Slett filter" onClick="{{ sf.remove }}" style="width:44px;height:44px;margin-right:6px;border:0;background:transparent;border-radius:99px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#586174"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">delete</span></button></sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <button onClick="{{ startCreate }}" style="height:52px;border-radius:12px;border:1.5px dashed #C9CDD5;background:transparent;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">add</span>Opprett filter</button>
+                    <button onClick="{{ closeSheet }}" style="height:52px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:16px;font-weight:600;cursor:pointer">{{ filterApply }}</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ fCreate }}">
+                  <div style="display:flex;flex-direction:column;gap:14px">
+                    <div style="display:flex;align-items:center;justify-content:space-between">
+                      <button onClick="{{ cancelCreate }}" style="border:0;background:transparent;font-size:16px;cursor:pointer;padding:12px 4px;color:#586174">Avbryt</button>
+                      <div style="font-size:17px;font-weight:700">Opprett filter</div>
+                      <button onClick="{{ saveCreate }}" style="border:0;font-size:15px;font-weight:600;cursor:pointer;height:40px;padding:0 16px;border-radius:10px;background:{{ fSaveBg }};color:{{ fSaveFg }}">Lagre</button>
+                    </div>
+                    <label style="display:flex;flex-direction:column;gap:6px">
+                      <span style="font-size:13px;color:#586174;font-weight:600;padding:0 4px">Navn på filteret</span>
+                      <input value="{{ fName }}" onChange="{{ setFName }}" placeholder="F.eks. Mine vakter på Brygga" style="height:48px;border-radius:12px;border:1px solid #E4DFD4;padding:0 14px;font-size:16px;font-family:inherit;background:#FFFFFF;color:#0B2545" />
+                    </label>
+                    <div style="font-size:13px;color:#586174;font-weight:600;padding:0 4px">Vis</div>
+                    <div style="background:#FFFFFF;border-radius:16px;overflow:hidden">
+                      <sc-for list="{{ filterRows }}" as="r" hint-placeholder-count="6">
+                        <button role="checkbox" aria-checked="{{ r.on }}" onClick="{{ r.toggle }}" style="width:100%;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 16px;height:52px;border-top:{{ r.border }}">
+                          <span style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:{{ r.c }};color:{{ r.ic }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1">{{ r.icon }}</span></span>
+                          <span style="flex:1;text-align:left;font-size:15px;font-weight:500">{{ r.label }}</span>
+                          <span style="width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:{{ r.boxBg }};border:{{ r.boxBorder }};color:#fff"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">{{ r.check }}</span></span>
+                        </button>
+                      </sc-for>
+                    </div>
+                    <div style="background:#FFFFFF;border-radius:16px;overflow:hidden">
+                      <sc-for list="{{ filterMore }}" as="r" hint-placeholder-count="3">
+                        <div style="border-top:{{ r.border }}">
+                          <button onClick="{{ r.toggle }}" aria-expanded="{{ r.expanded }}" style="width:100%;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:12px;padding:0 16px;height:52px">
+                            <span style="flex:1;text-align:left;font-size:15px;font-weight:500">{{ r.label }}</span>
+                            <span style="font-size:14px;color:#586174">{{ r.value }}</span>
+                            <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8A909C">{{ r.chev }}</span>
+                          </button>
+                          <sc-if value="{{ r.isOpen }}">
+                            <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 14px">
+                              <sc-for list="{{ r.chips }}" as="c">
+                                <button role="checkbox" aria-checked="{{ c.on }}" onClick="{{ c.pick }}" style="height:40px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;border:{{ c.border }};background:{{ c.bg }};color:{{ c.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1">{{ c.icon }}</span>{{ c.label }}</button>
+                              </sc-for>
+                            </div>
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                      <button onClick="{{ resetFilter }}" style="height:44px;border:0;background:transparent;font-size:15px;font-weight:600;cursor:pointer;padding:0 8px;color:#586174">Tilbakestill</button>
+                      <span style="margin-left:auto;font-size:14px;color:#586174">{{ filterCount }}</span>
+                    </div>
+                  </div>
+                </sc-if>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ sh.menu }}"><div style="display:flex;flex-direction:column;gap:14px">
+                <div style="font-size:19px;font-weight:700">Uke 41 · 5.–11. okt</div>
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+                  <div style="background:#FFFFFF;border-radius:14px;padding:12px"><div style="font-size:12px;color:#586174">Timer</div><div style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">22,5 t</div></div>
+                  <div style="background:#FFFFFF;border-radius:14px;padding:12px"><div style="font-size:12px;color:#586174">Vakter</div><div style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">3</div></div>
+                  <div style="background:#FFFFFF;border-radius:14px;padding:12px"><div style="font-size:12px;color:#586174">Overtid</div><div style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">0 t</div></div>
+                </div>
+                <button onClick="{{ refresh }}" style="height:52px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">refresh</span>Oppdater</button>
+              </div></sc-if>
+
+              <sc-if value="{{ sh.person }}"><div style="display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;gap:14px">
+                  <div style="width:56px;height:56px;border-radius:99px;background:#EFEBE2;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">{{ person.ini }}</div>
+                  <div><div style="font-size:19px;font-weight:700">{{ person.name }}</div><div style="font-size:14px;color:#586174">{{ person.role }}</div></div>
+                </div>
+                <div style="background:#FFFFFF;border-radius:16px;overflow:hidden">
+                  <div style="padding:12px 16px 4px;font-size:12px;color:#586174">Vakter samme dag</div>
+                  <sc-for list="{{ person.shifts }}" as="s">
+                    <div style="padding:6px 16px 12px;display:flex;justify-content:space-between;font-size:15px"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600">{{ s.time }}</span><span style="color:#586174">{{ s.sub }}</span></div>
+                  </sc-for>
+                  <sc-if value="{{ person.noShifts }}"><div style="padding:6px 16px 12px;font-size:14px;color:#8A909C">Ingen vakter denne dagen</div></sc-if>
+                </div>
+                <sc-if value="{{ f.contact }}">
+                  <div style="display:flex;gap:8px">
+                    <button style="flex:1;height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">call</span>Ring</button>
+                    <button style="flex:1;height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">sms</span>Send SMS</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ f.noContact }}"><div style="font-size:13px;color:#586174">Lederen har ikke delt kontaktinfo.</div></sc-if>
+              </div></sc-if>
+
+              <sc-if value="{{ sh.swap }}"><div style="display:flex;flex-direction:column;gap:14px">
+                <div style="font-size:19px;font-weight:700">Gi bort / bytt vakt</div>
+                <div style="font-size:14px;color:#586174;font-family:'IBM Plex Mono',monospace">{{ dt.dayLong }} · {{ dt.time }}</div>
+                <div style="display:flex;background:#EFEBE2;border-radius:99px;padding:4px">
+                  <sc-for list="{{ swapModes }}" as="t" hint-placeholder-count="2">
+                    <button onClick="{{ t.pick }}" style="flex:1;height:40px;border:0;border-radius:99px;font-size:15px;font-weight:600;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ swapGive }}"><div style="font-size:14px;color:#586174;line-height:1.45;padding:0 4px">Vakten blir ledig, og kollegene dine kan melde interesse. Du har vakten til lederen har godkjent.</div></sc-if>
+                <sc-if value="{{ swapWith }}">
+                  <div style="background:#FFFFFF;border-radius:16px;overflow:hidden">
+                    <sc-for list="{{ swapPeople }}" as="p">
+                      <button role="radio" aria-checked="{{ p.on }}" onClick="{{ p.pick }}" style="width:100%;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:{{ p.border }};text-align:left">
+                        <span style="width:36px;height:36px;border-radius:99px;background:#EFEBE2;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">{{ p.ini }}</span>
+                        <span style="flex:1"><span style="display:block;font-size:15px;font-weight:600">{{ p.name }}</span><span style="display:block;font-size:13px;color:#586174">{{ p.note }}</span></span>
+                        <span style="width:22px;height:22px;border-radius:99px;border:{{ p.ring }}"></span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <button onClick="{{ sendSwap }}" style="height:52px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:16px;font-weight:600;cursor:pointer">Send forespørsel</button>
+              </div></sc-if>
+
+              <sc-if value="{{ sh.text }}"><div style="display:flex;flex-direction:column;gap:14px">
+                <div style="font-size:19px;font-weight:700">{{ textSheet.title }}</div>
+                <div style="font-size:14px;color:#586174">{{ textSheet.sub }}</div>
+                <input placeholder="{{ textSheet.ph }}" style="height:52px;border-radius:12px;border:1px solid #E4DFD4;padding:12px;font-size:15px;font-family:inherit;background:#FFFFFF;color:#0B2545;" />
+                <button onClick="{{ textSheet.send }}" style="height:52px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:16px;font-weight:600;cursor:pointer">{{ textSheet.btn }}</button>
+              </div></sc-if>
+
+              <sc-if value="{{ sh.availForm }}"><div style="display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <button onClick="{{ closeSheet }}" style="border:0;background:transparent;font-size:16px;cursor:pointer;padding:12px 4px;color:#586174">Avbryt</button>
+                  <div style="font-size:17px;font-weight:700">Legg til tilgjengelighet</div>
+                  <button onClick="{{ saveAvailForm }}" style="border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer;height:40px;padding:0 14px;border-radius:10px">Lagre</button>
+                </div>
+                <div style="display:flex;background:#EFEBE2;border-radius:99px;padding:4px">
+                  <sc-for list="{{ afKind }}" as="t" hint-placeholder-count="2">
+                    <button onClick="{{ t.pick }}" style="flex:1;height:40px;border:0;border-radius:99px;font-size:15px;font-weight:600;cursor:pointer;background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</button>
+                  </sc-for>
+                </div>
+                <div style="background:#FFFFFF;border-radius:16px;overflow:hidden">
+                  <div style="display:flex;align-items:center;padding:0 16px;height:52px"><span style="flex:1;font-size:15px">Dato</span><span style="font-size:15px;font-weight:600">Lørdag 10. okt</span></div>
+                  <div style="display:flex;align-items:center;padding:0 16px;height:52px;border-top:1px solid #EFEBE2"><span style="flex:1;font-size:15px">Hele dagen</span>
+                    <button role="switch" aria-checked="{{ af.allDay }}" aria-label="Hele dagen" onClick="{{ af.toggleAll }}" style="width:52px;height:32px;border-radius:99px;border:0;padding:3px;cursor:pointer;display:flex;justify-content:{{ af.justify }};background:{{ af.bg }}"><span style="width:26px;height:26px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)"></span></button>
+                  </div>
+                  <sc-if value="{{ af.showTimes }}"><div style="display:flex;flex-direction:column;gap:0">
+                    <div style="display:flex;align-items:center;padding:0 16px;height:52px;border-top:1px solid #EFEBE2"><span style="flex:1;font-size:15px">Start</span><span style="font-family:'IBM Plex Mono',monospace;font-size:15px;background:#F4F1EA;border-radius:8px;padding:6px 10px">10:00</span></div>
+                    <div style="display:flex;align-items:center;padding:0 16px;height:52px;border-top:1px solid #EFEBE2"><span style="flex:1;font-size:15px">Slutt</span><span style="font-family:'IBM Plex Mono',monospace;font-size:15px;background:#F4F1EA;border-radius:8px;padding:6px 10px">18:00</span></div>
+                  </div></sc-if>
+                  <div style="display:flex;align-items:center;padding:0 16px;min-height:52px;border-top:1px solid #EFEBE2;gap:8px;flex-wrap:wrap"><span style="flex:1;font-size:15px">Gjenta</span>
+                    <sc-for list="{{ afRepeat }}" as="t" hint-placeholder-count="3">
+                      <button onClick="{{ t.pick }}" style="height:36px;border-radius:99px;padding:0 12px;font-size:13px;font-weight:600;cursor:pointer;border:{{ t.border }};background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</button>
+                    </sc-for>
+                  </div>
+                </div>
+                <input placeholder="Kommentar (valgfritt)" style="height:52px;border-radius:12px;border:1px solid #E4DFD4;padding:12px;font-size:15px;font-family:inherit;background:#FFFFFF;color:#0B2545" />
+              </div></sc-if>
+
+              <sc-if value="{{ sh.absForm }}"><div style="display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <button onClick="{{ closeSheet }}" style="border:0;background:transparent;font-size:16px;cursor:pointer;padding:12px 4px;color:#586174">Avbryt</button>
+                  <div style="font-size:17px;font-weight:700">Ny søknad</div>
+                  <button onClick="{{ sendAbs }}" style="border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer;height:40px;padding:0 14px;border-radius:10px">Send</button>
+                </div>
+                <div style="font-size:13px;color:#586174;font-weight:600;padding:0 4px">Type</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                  <sc-for list="{{ absTypes }}" as="t" hint-placeholder-count="6">
+                    <button onClick="{{ t.pick }}" style="height:40px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;border:{{ t.border }};background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</button>
+                  </sc-for>
+                </div>
+                <div style="background:#FFFFFF;border-radius:16px;overflow:hidden">
+                  <div style="display:flex;align-items:center;padding:0 16px;height:52px"><span style="flex:1;font-size:15px">Hele dager</span><span role="switch" aria-checked="true" style="width:52px;height:32px;border-radius:99px;padding:3px;display:flex;justify-content:flex-end;background:#1F7D52"><span style="width:26px;height:26px;border-radius:99px;background:#fff"></span></span></div>
+                  <div style="display:flex;align-items:center;padding:0 16px;height:52px;border-top:1px solid #EFEBE2"><span style="flex:1;font-size:15px">Fra</span><span style="font-size:15px;font-weight:600">Mandag 19. okt</span></div>
+                  <div style="display:flex;align-items:center;padding:0 16px;height:52px;border-top:1px solid #EFEBE2"><span style="flex:1;font-size:15px">Til</span><span style="font-size:15px;font-weight:600">Fredag 23. okt</span></div>
+                  <div style="display:flex;align-items:center;padding:0 16px;height:52px;border-top:1px solid #EFEBE2;background:#FBFAF6"><span style="flex:1;font-size:14px;color:#586174">Bruker av saldo</span><span style="font-family:'IBM Plex Mono',monospace;font-size:14px">5 av 18 dager</span></div>
+                </div>
+                <input placeholder="Kommentar (valgfritt)" style="height:52px;border-radius:12px;border:1px solid #E4DFD4;padding:12px;font-size:15px;font-family:inherit;background:#FFFFFF;color:#0B2545" />
+                <button style="height:48px;border-radius:12px;border:1.5px dashed #C9CDD5;background:transparent;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;color:#586174"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">attach_file</span>Legg ved fil</button>
+              </div></sc-if>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const DAYS=[['man.','Mandag',5,'man'],['tir.','Tirsdag',6,'tir'],['ons.','Onsdag',7,'ons'],['tor.','Torsdag',8,'tor'],['fre.','Fredag',9,'fre'],['lør.','Lørdag',10,'lør'],['søn.','Søndag',11,'søn']];
+const dayLong=i=>`${DAYS[i][1]} ${DAYS[i][2]}. okt`;
+const K={
+  mine:{c:'#0B2545',label:'Min vakt',icon:'person'},
+  colleague:{c:'#C9CDD5',label:'Kollegas vakt',icon:'group'},
+  open:{c:'#F6DF6E',label:'Ledig vakt',icon:'front_hand'},
+  swap:{c:'#C9D6EA',label:'Vil bytte bort',icon:'swap_horiz'},
+  avail:{c:'#1F7D52',label:'Kan jobbe',icon:'check_circle'},
+  absence:{c:'#A2371C',label:'Kan ikke / fravær',icon:'block'},
+};
+const P={
+  JB:{name:'Jonas Berg',role:'Kafémedarbeider · Fast 60 %'},
+  SN:{name:'Sara Nilsen',role:'Skiftleder · Fast 100 %'},
+  AH:{name:'Ali Hassan',role:'Kokk · Fast 80 %'},
+  EL:{name:'Emma Lie',role:'Kafémedarbeider · Timelønn'},
+  MH:{name:'Mari Holm',role:'Barista · Timelønn'},
+  KL:{name:'Kari Lund',role:'Daglig leder'},
+};
+const S='Nordhavn Sentrum',B='Nordhavn Brygga';
+const SH=[
+  {id:'s1',day:0,kind:'mine',ini:'JB',start:'13:00',end:'21:00',type:'Kveld',place:S,comment:'Varelevering kl. 15. Ta imot og sjekk mot pakkseddelen.'},
+  {id:'c1',day:0,kind:'colleague',ini:'SN',start:'07:00',end:'15:00',type:'Åpning',place:S},
+  {id:'c2',day:0,kind:'colleague',ini:'AH',start:'10:00',end:'18:00',type:'Midt',place:S},
+  {id:'c3',day:1,kind:'colleague',ini:'SN',start:'07:00',end:'15:00',type:'Åpning',place:B},
+  {id:'c4',day:1,kind:'colleague',ini:'AH',start:'10:00',end:'18:00',type:'Midt',place:B},
+  {id:'s2',day:2,kind:'mine',ini:'JB',start:'13:00',end:'21:00',type:'Kveld',place:B},
+  {id:'c5',day:2,kind:'colleague',ini:'SN',start:'07:00',end:'15:00',type:'Åpning',place:B},
+  {id:'c6',day:3,kind:'swap',ini:'MH',start:'07:00',end:'15:00',type:'Åpning',place:S},
+  {id:'c7',day:3,kind:'colleague',ini:'SN',start:'10:00',end:'18:00',type:'Midt',place:B},
+  {id:'a1',day:4,kind:'absence',ini:'JB',type:'Kan ikke: Tannlege'},
+  {id:'s3',day:4,kind:'mine',ini:'JB',start:'13:00',end:'21:00',type:'Kveld',place:S,pending:true},
+  {id:'c8',day:4,kind:'colleague',ini:'SN',start:'07:00',end:'15:00',type:'Åpning',place:S},
+  {id:'v1',day:5,kind:'avail',ini:'JB',type:'Kan jobbe'},
+  {id:'o1',day:5,kind:'open',start:'10:00',end:'18:00',type:'Midt',place:S,others:1},
+  {id:'c9',day:5,kind:'colleague',ini:'SN',start:'07:00',end:'15:00',type:'Åpning',place:B},
+  {id:'v2',day:6,kind:'avail',ini:'JB',type:'Kan jobbe'},
+  {id:'o2',day:6,kind:'open',start:'13:00',end:'21:00',type:'Kveld',place:B,others:0},
+];
+const SCREENS=[['oversikt','Oversikt'],['tilpass','Tilpass oversikten'],['vakter','Vakter · liste'],['kalender','Vakter · kalender'],['filter','Filter (ark)'],['detalj','Vaktdetalj'],['ledige','Ledige vakter'],['bytter','Bytter'],['tilg','Tilgjengelighet'],['fravaer','Fravær'],['timer','Timer'],['mer','Mer'],['kolleger','Kolleger'],['minside','Min side']];
+const TAB={oversikt:'oversikt',tilpass:'oversikt',vakter:'vakter',kalender:'vakter',detalj:'vakter',ledige:'ledige',timer:'timer'};
+const DEF_BLOCKS=[{id:'next',label:'Neste vakt',visible:true},{id:'waiting',label:'Venter på deg',visible:true,count:3},{id:'upcoming',label:'Kommende vakter',visible:true,count:3},{id:'open',label:'Ledige vakter du kan ta',visible:true,count:3}];
+const FMT={
+  mp:{label:'Mobil stående',w:390,h:844,pad:12,outR:58,r:46,bg:'#0B1424',top:46,status:true,notch:true,home:true,nav:'bottom'},
+  ml:{label:'Mobil liggende',w:844,h:390,pad:12,outR:58,r:46,bg:'#0B1424',top:0,sideNotch:true,home:true,nav:'rail',navW:100,railPad:30},
+  tp:{label:'Nettbrett stående',w:820,h:1180,pad:16,outR:40,r:26,bg:'#0B1424',top:28,status:true,home:true,nav:'rail',navW:88,railPad:0},
+  tl:{label:'Nettbrett liggende',w:1180,h:820,pad:16,outR:40,r:26,bg:'#0B1424',top:28,status:true,home:true,nav:'side',navW:236},
+  pc:{label:'PC',w:1440,h:860,pad:0,outR:12,r:0,bg:'#FFFFFF',top:0,chrome:true,nav:'side',navW:248},
+};
+const flags=all=>({colleagues:all,open:all,swap:all,avail:all,absence:all,comments:all,deviations:all,contact:all,noContact:!all});
+
+class Component extends DCLogic {
+  state={screen:'oversikt',hist:[],sel:'s1',mode:'all',vstate:'normal',interest:{o1:true},filter:{mine:true,absence:true,swap:true,open:true,avail:true,colleague:true},
+    sheet:null,person:null,fsel:{sted:[],type:[],ansatt:[]},fopen:null,toast:null,blocks:DEF_BLOCKS,draft:null,dragIdx:null,selDay:null,
+    swapTab:'mottatt',sent:[],marisDone:null,swapMode:'give',swapPick:'SN',availTab:'enkel',
+    avail:['unset','unset','unset','unset','no','yes','yes'],reasons:{4:'Tannlege'},
+    grid:{},absTab:'list',absType:'Ferie',af:{allDay:true,repeat:'Aldri',kind:'yes'},notif:{email:true},textSheet:null,fmt:(()=>{const f=new URLSearchParams(location.search).get('fmt');return ['mp','ml','tp','tl','pc'].includes(f)?f:'mp';})(),vview:null,panel:false,vw:window.innerWidth};
+  scrollRef=React.createRef();
+  componentWillUnmount(){window.removeEventListener('resize',this._rs);}
+  componentDidMount(){this._rs=()=>this.setState({vw:window.innerWidth});window.addEventListener('resize',this._rs);const g={};for(let h=10;h<18;h++)g['5-'+h]='yes';for(let h=12;h<22;h++)g['6-'+h]='yes';for(let h=8;h<12;h++)g['4-'+h]='no';this.setState({grid:g});}
+  go(screen,extra={}){if(screen==='detalj'&&FMT[this.state.fmt].nav==='side'){this.setState(s=>({sel:extra.sel||s.sel,panel:true,sheet:null}));return;}
+    this.setState(s=>({screen,sheet:null,panel:false,hist:[...s.hist,s.screen],...extra}),()=>{const el=this.scrollRef.current;if(el&&!extra.keepScroll)el.scrollTop=0;});}
+  toast(text,undo){clearTimeout(this._t);this.setState({toast:{text,undo}});this._t=setTimeout(()=>this.setState({toast:null}),5000);}
+  openShift(id){const s=SH.find(x=>x.id===id);if(s.kind==='avail'||s.kind==='absence'){if(this.f().avail)return this.go('tilg');return;}this.go('detalj',{sel:id});}
+  f(){return flags(this.state.mode==='all');}
+  setAvail(i,v){const prev=this.state.avail[i],next=prev===v?'unset':v,hasShift=SH.some(x=>x.day===i&&x.kind==='mine'),d=DAYS[i][1].toLowerCase();
+    const undo=()=>this.setState(s=>{const a=[...s.avail];a[i]=prev;return{avail:a};});
+    this.setState(s=>{const a=[...s.avail];a[i]=next;return{avail:a};});
+    if(next==='no'&&hasShift)this.toast(`Du har bedt om fri ${d}. Lederen får beskjed.`,undo);
+    else if(next==='no')this.toast(`Lagret: du kan ikke jobbe ${d}.`,undo);
+    else if(next==='yes')this.toast(`Lagret: du kan jobbe ${d}.`,undo);
+    else this.toast(hasShift?`Forespørselen om fri ${d} er trukket.`:`Tilgjengeligheten for ${d} er fjernet.`,undo);}
+  toggleInterest(id){const was=!!this.state.interest[id];const d=DAYS[SH.find(x=>x.id===id).day][1].toLowerCase();
+    this.setState(s=>({interest:{...s.interest,[id]:!was}}));
+    if(!was)this.toast(`Du har meldt interesse for ${d}.`,()=>this.setState(s=>({interest:{...s.interest,[id]:false}})));
+    else this.toast(`Du har trukket deg fra ${d}.`,()=>this.setState(s=>({interest:{...s.interest,[id]:true}})));}
+  card(s){const k=K[s.kind],f=this.f(),int=!!this.state.interest[s.id];
+    let pill=null,pb='',pf='';
+    if(s.kind==='mine'&&this.state.avail[s.day]==='no'&&(f.absence||f.avail)){pill='Fri søkt';pb='#FBEDEA';pf='#A2371C';}
+    if(s.kind==='open'){pill=int?'Meldt interesse':'Ledig';pb='#FFF4CC';pf='#7A5A00';}
+    if(s.kind==='swap'){pill='Vil bytte';pb='#E8EEF7';pf='#0B2545';}
+    if(s.kind==='avail'){pill='Kan jobbe';pb='#E2F1E8';pf='#1F7D52';}
+    if(s.kind==='absence'){pill='Kan ikke';pb='#FBEDEA';pf='#A2371C';}
+    const mine=s.kind==='mine';
+    const nm=s.kind==='open'?((s.others+(int?1:0))?`${s.others+(int?1:0)} har meldt interesse`:'Ingen har meldt interesse ennå'):(mine?'Deg':P[s.ini].name);
+    return {...s,time:s.start?`${s.start}–${s.end}`:'Hele dagen',stripe:k.c,sub:[s.type,s.place].filter(Boolean).join(' · '),name:nm,
+      nameColor:mine?'#0B2545':'#586174',avBg:mine?'#0B2545':s.kind==='open'?'#FFF4CC':s.kind==='avail'?'#E2F1E8':s.kind==='absence'?'#FBEDEA':'#EFEBE2',
+      avFg:mine?'#fff':s.kind==='open'?'#7A5A00':s.kind==='avail'?'#1F7D52':s.kind==='absence'?'#A2371C':'#0B2545',ini:s.kind==='open'?'?':s.ini,
+      timeColor:s.kind==='colleague'?'#586174':'#0B2545',hasPill:!!pill,pill,pillBg:pb,pillFg:pf,hasComment:!!s.comment&&f.comments,
+      dayShort:DAYS[s.day][0],dayNum:DAYS[s.day][2],dayLong:dayLong(s.day),open:()=>this.openShift(s.id)};}
+  visibleKinds(){const f=this.f(),fl=this.state.filter;return k=>{
+    if(k==='colleague'||k==='swap'){if(!f.colleagues)return false;}
+    if(k==='open'&&!f.open)return false;if(k==='avail'&&!f.avail)return false;if(k==='absence'&&!f.avail&&!f.absence)return false;return fl[k]!==false;};}
+  openItem(s){const f=this.f(),int=!!this.state.interest[s.id];const c=this.card(s);
+    const notes=[{t:'Mer enn stillingen din (30 t totalt)',icon:'trending_up',bg:'#FFF4CC',fg:'#7A5A00',border:'1px solid #EAD88A'}];
+    if(int)notes.unshift({t:'Du har meldt interesse',icon:'check',bg:'#E2F1E8',fg:'#1F7D52',border:'1px solid #E2F1E8'});
+    notes.push({t:c.name,icon:'group',bg:'#F4F1EA',fg:'#586174',border:'1px solid #EFEBE2'});
+    return {...c,notes,note:int?'Du har meldt interesse':'Gir deg merarbeid',btnLabel:int?'Trekk meg':'Jeg tar den',btnBg:int?'#FFFFFF':'#0B2545',btnFg:int?'#0B2545':'#FFFFFF',btnBorder:int?'1px solid #E4DFD4':'0',toggle:()=>this.toggleInterest(s.id)};}
+
+  renderVals(){
+    const st={fsel:{sted:[],type:[],ansatt:[]},...this.state},f=this.f(),vk=this.visibleKinds();
+    const is={};SCREENS.forEach(([k])=>is[k]=st.screen===k);
+    const goto=k=>()=>this.go(k);
+    const go={};['oversikt','tilpass','vakter','kalender','ledige','bytter','tilg','fravaer','timer','mer','kolleger','minside'].forEach(k=>go[k]=k==='tilpass'?()=>this.go('tilpass',{draft:st.blocks.map(b=>({...b}))}):goto(k));
+    const sel=k=>st.vstate===k;
+    const stt={loading:sel('loading'),error:sel('error'),empty:sel('empty'),normal:sel('normal'),listShow:sel('normal')};
+    // nav
+    const tab=TAB[st.screen]||'mer';
+    const navDef=[['oversikt','Oversikt','home',0],['vakter','Vakter','calendar_month',0],f.open&&['ledige','Ledige','front_hand',SH.filter(s=>s.kind==='open').length],['timer','Timer','schedule',1],['mer','Mer','menu',f.swap?1:0]].filter(Boolean);
+    const nav=navDef.map(([k,l,i,b])=>{const a=tab===k;return{label:l,icon:i,go:goto(k),current:a?'page':'false',fg:a?'#0B2545':'#586174',bg:a?'#FFF4CC':'transparent',fill:a?1:0,weight:a?700:500,hasBadge:!!b,badge:b};});
+    // overview
+    const waitItems=[f.swap&&{icon:'swap_horiz',title:'Mari vil gi bort torsdag 8. okt',sub:'07:00–15:00 · Åpning · Sentrum',bg:'#E8EEF7',fg:'#0B2545',go:goto('bytter')},
+      (f.avail||f.absence)&&{icon:'event_busy',title:'Fri fredag 9. okt',sub:'Venter på lederen',bg:'#FBEDEA',fg:'#A2371C',go:()=>this.go('detalj',{sel:'s3'})},
+      f.open&&st.interest.o1&&{icon:'front_hand',title:'Lørdag 10. okt: du har meldt interesse',sub:'Lederen bestemmer hvem som får vakten',bg:'#FFF4CC',fg:'#7A5A00',go:goto('ledige')}].filter(Boolean);
+    const mineCards=SH.filter(s=>s.kind==='mine').map(s=>this.card(s));
+    const opens=SH.filter(s=>s.kind==='open').map(s=>this.openItem(s));
+    const blocks=st.blocks.filter(b=>b.visible).filter(b=>!(b.id==='open'&&!f.open)&&!(b.id==='waiting'&&!waitItems.length)).map(b=>({...b,isNext:b.id==='next',isWaiting:b.id==='waiting',isUpcoming:b.id==='upcoming',isOpen:b.id==='open',
+      items:b.id==='waiting'?waitItems.slice(0,b.count).map((w,i)=>({...w,border:i?'1px solid #EFEBE2':'0'})):b.id==='upcoming'?mineCards.slice(0,b.count):b.id==='open'?opens.slice(0,b.count):[]}));
+    // tilpass
+    const draft=st.draft||st.blocks;
+    const draftRows=draft.filter(b=>!(b.id==='open'&&!f.open)).map((b,i)=>({label:b.label,count:b.count,hasCount:b.count!=null,border:i?'1px solid #EFEBE2':'0',bg:st.dragIdx===i?'#FBFAF6':'#FFFFFF',
+      labelColor:b.visible?'#0B2545':'#8A909C',eye:b.visible?'visibility':'visibility_off',eyeColor:b.visible?'#0B2545':'#8A909C',eyeLabel:b.visible?'Skjul':'Vis',
+      toggle:()=>this.setState(s=>({draft:(s.draft||s.blocks).map(x=>x.id===b.id?{...x,visible:!x.visible}:x)})),
+      dec:()=>this.setState(s=>({draft:(s.draft||s.blocks).map(x=>x.id===b.id?{...x,count:Math.max(1,x.count-1)}:x)})),
+      inc:()=>this.setState(s=>({draft:(s.draft||s.blocks).map(x=>x.id===b.id?{...x,count:Math.min(5,x.count+1)}:x)})),
+      dragStart:e=>{e.dataTransfer.effectAllowed='move';this.setState({dragIdx:i});},dragOver:e=>e.preventDefault(),
+      drop:e=>{e.preventDefault();const from=this.state.dragIdx;if(from==null)return;this.setState(s=>{const a=[...(s.draft||s.blocks)];const [m]=a.splice(from,1);a.splice(i,0,m);return{draft:a,dragIdx:null};});}}));
+    // vakter
+    const fs=st.fsel,pass=s=>!(s.place&&fs.sted.includes(s.place))&&!(s.start&&fs.type.includes(s.type))&&!(s.ini&&fs.ansatt.includes(s.ini));
+    const days=DAYS.map((d,i)=>{const cards=SH.filter(s=>s.day===i&&s.kind!=='avail'&&s.kind!=='absence'&&vk(s.kind)&&pass(s)).map(s=>this.card(s));const today=i===0;
+      const av=st.avail[i],hasShift=SH.some(x=>x.day===i&&x.kind==='mine'),reason=st.reasons[i];
+      const showAv=f.avail&&st.filter.avail!==false&&st.filter.absence!==false;
+      const avTxt=av==='yes'?'Du kan jobbe':av==='no'?(hasShift?`Kan ikke${reason?': '+reason:''} · fri søkt`:`Kan ikke${reason?': '+reason:''}`):(hasShift?'Får du ikke jobbet?':'Kan du jobbe?');
+      const avOpts=(hasShift?[['no','Kan ikke','block','#FBEDEA','#A2371C']]:[['yes','Kan','check','#E2F1E8','#1F7D52'],['no','Kan ikke','block','#FBEDEA','#A2371C']]).map(([k,l,ic,bg,fg])=>{const on=av===k;
+        return{label:l,icon:on?ic:(k==='yes'?'add':ic),on:on?'true':'false',bg:on?fg:'#FFFFFF',fg:on?'#FFFFFF':'#0B2545',border:on?`1px solid ${fg}`:'1px solid #E4DFD4',pick:()=>this.setAvail(i,k)};});
+      const avState={yes:['#E2F1E8','#1F7D52','check_circle'],no:['#FBEDEA','#A2371C','block']}[av]||['transparent','#586174','event_available'];
+      return{idx:i,short:d[0],num:d[2],long:dayLong(i),cards,empty:!cards.length,showAv,avTxt,avOpts,avBg:avState[0],avColor:avState[1],avIcon:avState[2],avAria:`Tilgjengelighet ${dayLong(i).toLowerCase()}`,numBg:today?'#0B2545':'transparent',numFg:today?'#FFFFFF':'#0B2545',shortColor:today?'#0B2545':'#586174',
+        selBg:st.selDay===i?'#FFF4CC':'transparent',colBg:st.selDay===i?'#FFF4CC':today?'#FBFAF6':'transparent',pick:()=>this.setState({selDay:i})};});
+    const filterActive=Object.values(st.filter).some(v=>!v)||Object.values(st.fsel).some(a=>a.length);
+    // kalender
+    const own=[2,5,7,9,12,14,16,19,21,23,26,28,30],openD={10:1,11:1,17:2},availD=[10,11,24],absD=[9];
+    const month=[];for(let i=0;i<35;i++){const n=i-2;const v=n>=1&&n<=31;const chips=[];
+      const wk=n>=5&&n<=11?st.avail[n-5]:null,isAv=wk?wk==='yes':availD.includes(n),isAbs=wk?wk==='no':absD.includes(n);
+      if(v){if(own.includes(n))chips.push({t:'13',bg:'#0B2545',fg:'#fff'});if(f.open&&openD[n])chips.push({t:openD[n]+' led',bg:'#F6DF6E',fg:'#0B2545'});
+        if(f.avail&&isAv)chips.push({t:'kan',bg:'#E2F1E8',fg:'#1F7D52'});if((f.avail||f.absence)&&isAbs)chips.push({t:'fri',bg:'#FBEDEA',fg:'#A2371C'});}
+      const today=n===5,inWeek=n>=5&&n<=11;
+      month.push({num:v?n:'',vis:v?'visible':'hidden',chips:chips.slice(0,2),aria:v?`${n}. oktober`:'',bg:inWeek?'#FBFAF6':'transparent',numBg:today?'#0B2545':'transparent',numFg:today?'#fff':'#0B2545',weight:today?700:500,
+        pick:()=>{if(!inWeek){this.go('vakter');return;}const di=n-5;this.go('vakter',{selDay:di,keepScroll:true});setTimeout(()=>{const el=this.scrollRef.current;const t=el&&el.querySelector(`[data-day="${di}"]`);if(t)el.scrollTop=t.offsetTop-70;},30);}});}
+    const legend=[{c:'#0B2545',label:'Min vakt'},f.open&&{c:'#F6DF6E',label:'Ledig'},f.avail&&{c:'#1F7D52',label:'Kan jobbe'},(f.avail||f.absence)&&{c:'#A2371C',label:'Fravær'}].filter(Boolean);
+    // detalj
+    const s=SH.find(x=>x.id===st.sel)||SH[0],k=K[s.kind],mine=s.kind==='mine',int=!!st.interest[s.id];
+    const head={mine:['#0B2545','#FFFFFF'],open:['#F6DF6E','#0B2545'],swap:['#C9D6EA','#0B2545'],colleague:['#C9CDD5','#0B2545']}[s.kind]||['#0B2545','#fff'];
+    const peers=SH.filter(x=>x.day===s.day&&x.id!==s.id&&(x.kind==='colleague'||x.kind==='swap'||(x.kind==='mine'&&!mine))).map(x=>({ini:x.ini,first:P[x.ini].name.split(' ')[0],tap:()=>this.setState({sheet:'person',person:x.ini})}));
+    const rows=[{icon:'location_on',label:'Sted',value:s.place},{icon:'sell',label:'Vakttype',value:s.type},{icon:'schedule',label:'Tid og pause',value:`${s.start}–${s.end} · pause 30 min`,font:"'IBM Plex Mono',monospace"},{icon:'timelapse',label:'Varighet',value:'7,5 t',font:"'IBM Plex Mono',monospace"}];
+    if(mine)rows.push({icon:'badge',label:'Avtale',value:'Fast 60 % · 22,5 t/uke'});
+    rows.forEach((r,i)=>{r.border=i?'1px solid #EFEBE2':'0';r.font=r.font||'inherit';});
+    let actions=[],status=null,sIcon='hourglass_top',sBg='#FFF4CC',sFg='#7A5A00';
+    const A=(label,icon,run,primary)=>({label,icon,run,bg:primary?'#0B2545':'#FFFFFF',fg:primary?'#FFFFFF':'#0B2545',border:primary?'0':'1px solid #E4DFD4'});
+    if(mine){
+      if(f.swap)actions.push(A('Gi bort / bytt vakt','swap_horiz',()=>this.setState({sheet:'swap'}),true));
+      if((f.avail||f.absence)&&!s.pending)actions.push(A('Be om fri denne dagen','event_busy',()=>this.setState({sheet:'text',textSheet:{title:'Be om fri',sub:`${dayLong(s.day)} · ${s.start}–${s.end}`,ph:'Grunn (valgfritt)',btn:'Send forespørsel',msg:'Du har bedt om fri. Lederen får beskjed.'}})));
+      if(f.comments)actions.push(A('Legg til kommentar','add_comment',()=>this.setState({sheet:'text',textSheet:{title:'Legg til kommentar',sub:'Lederen og kollegene på vakten ser kommentaren.',ph:'Skriv en kommentar',btn:'Lagre kommentar',msg:'Kommentaren er lagret.'}})));
+      if(s.pending&&(f.avail||f.absence)){status='Du har bedt om fri. Lederen har ikke svart ennå.';}
+    } else if(s.kind==='open'){
+      actions.push(int?A('Trekk meg','undo',()=>this.toggleInterest(s.id)):A('Jeg tar den','front_hand',()=>this.toggleInterest(s.id),true));
+      status=int?'Du har meldt interesse. Lederen bestemmer hvem som får vakten.':'Gir deg merarbeid. Du har 22,5 t denne uka, avtalen din er 22,5 t.';
+      if(int){sIcon='check_circle';sBg='#E2F1E8';sFg='#1F7D52';}else{sIcon='trending_up';}
+    } else if(s.kind==='swap'){
+      actions.push(A('Ta vakten','check',()=>{this.setState({marisDone:'accepted'});this.toast('Du har sagt ja. Lederen må godkjenne byttet.');},true));
+      status='Mari vil gi bort denne vakten.';sIcon='swap_horiz';sBg='#E8EEF7';sFg='#0B2545';
+    }
+    const who=s.kind==='open'?'Ledig vakt':mine?'Jonas Berg (deg)':P[s.ini].name;
+    const dt={headBg:head[0],headFg:head[1],headBorder:s.kind==='colleague'?'0':'0',btnBg:mine?'#16345E':'rgba(255,255,255,.55)',title:k.label,ini:s.kind==='open'?'?':s.ini,
+      avBg:mine?'#F6DF6E':'#FFFFFF',avFg:'#0B2545',who,dayLong:dayLong(s.day),time:`${s.start}–${s.end}`,kindIcon:k.icon,kindLabel:s.type+' · '+s.place.replace('Nordhavn ',''),
+      whoTap:()=>{if(s.ini&&!mine)this.setState({sheet:'person',person:s.ini});},rows,peers,hasPeers:f.colleagues&&peers.length>0,hasComment:f.comments&&!!s.comment,comment:s.comment,
+      actions,hasActions:actions.length>0,hasStatus:!!status,status,statusIcon:sIcon,statusBg:sBg,statusFg:sFg};
+    // person
+    const pi=st.person,pp=pi&&P[pi];
+    const person=pp?{ini:pi,name:pp.name,role:pp.role,shifts:SH.filter(x=>x.ini===pi&&x.day===s.day&&x.start).map(x=>({time:`${x.start}–${x.end}`,sub:x.type+' · '+x.place.replace('Nordhavn ','')})),noShifts:!SH.some(x=>x.ini===pi&&x.day===s.day&&x.start)}:{shifts:[]};
+    // bytter
+    const tabs=(cur,opts,set)=>opts.map(([k,l])=>({label:l,pick:()=>set(k),bg:cur===k?'#FFFFFF':'transparent',fg:cur===k?'#0B2545':'#586174',shadow:cur===k?'0 1px 3px rgba(11,37,69,.12)':'none'}));
+    const swapTabs=tabs(st.swapTab,[['mottatt','Mottatt'],['sendt','Sendt']],k=>this.setState({swapTab:k}));
+    const ST={wait:['Venter på deg','#FFF4CC','#7A5A00','hourglass_top'],col:['Venter på kollega','#FFF4CC','#7A5A00','hourglass_top'],lead:['Venter på leder','#E8EEF7','#0B2545','hourglass_top'],ok:['Godkjent','#E2F1E8','#1F7D52','check_circle'],no:['Avslått','#FBEDEA','#A2371C','cancel']};
+    const sw=(o,stk,acts)=>{const x=ST[stk];return{...o,status:x[0],stBg:x[1],stFg:x[2],stIcon:x[3],hasActions:!!acts,...(acts||{})};};
+    let swapList=[];
+    if(st.swapTab==='mottatt'){
+      const mk=st.marisDone==='accepted'?'lead':st.marisDone==='declined'?'no':'wait';
+      swapList=[sw({ini:'MH',title:'Mari vil gi bort torsdag 8. okt',time:'07:00–15:00',sub:'Åpning · Nordhavn Sentrum',stripe:'#C9D6EA'},mk,mk==='wait'&&{accept:()=>{this.setState({marisDone:'accepted'});this.toast('Du har sagt ja. Lederen må godkjenne byttet.',()=>this.setState({marisDone:null}));},decline:()=>{this.setState({marisDone:'declined'});this.toast('Du har sagt nei takk.',()=>this.setState({marisDone:null}));}}),
+        sw({ini:'SN',title:'Sara byttet med deg 28. sep',time:'07:00–15:00',sub:'Åpning · Nordhavn Brygga',stripe:'#C9CDD5'},'ok')];
+    } else swapList=st.sent.map(x=>sw(x,x.st));
+    const swapEmpty=st.swapTab==='sendt'&&!st.sent.length;
+    const swapModes=tabs(st.swapMode,[['give','Gi bort'],['with','Bytt med kollega']],k=>this.setState({swapMode:k}));
+    const swapPeople=['SN','AH','EL','MH'].map((p,i)=>({ini:p,name:P[p].name,note:p==='EL'?'Ingen vakt denne dagen':p==='SN'?'Har Åpning samme dag':'Har vakt samme uke',on:st.swapPick===p?'true':'false',ring:st.swapPick===p?'7px solid #0B2545':'2px solid #C9CDD5',border:i?'1px solid #EFEBE2':'0',pick:()=>this.setState({swapPick:p})}));
+    // tilg
+    const availTabs=tabs(st.availTab,[['enkel','Enkel'],['detaljert','Detaljert']],k=>this.setState({availTab:k}));
+    const shiftDays={0:'13:00–21:00',2:'13:00–21:00',4:'13:00–21:00'};
+    const availDays=DAYS.map((d,i)=>{const v=st.avail[i];const O=[['yes','Kan','check','#E2F1E8','#1F7D52'],['unset','Ikke satt','remove','#FFFFFF','#0B2545'],['no','Kan ikke','block','#FBEDEA','#A2371C']];
+      return{label:`${d[1]} ${d[2]}.`,shiftTxt:shiftDays[i]?`Vakt ${shiftDays[i]}`:'',showReason:v==='no',reason:st.reasons[i]||'',setReason:e=>{const val=e.target.value;this.setState(s=>({reasons:{...s.reasons,[i]:val}}));},
+        warn:v==='no'&&!!shiftDays[i],warnTxt:i===4?'Du har vakt denne dagen. Forespørselen om fri er sendt til lederen.':`Du har vakt ${d[1].toLowerCase()} ${shiftDays[i]}. Når du lagrer, sender vi en forespørsel om fri til lederen.`,
+        opts:O.map(([k,l,ic,bg,fg])=>({label:l,icon:ic,bg:v===k?bg:'transparent',fg:v===k?fg:'#586174',border:v===k?`1px solid ${k==='unset'?'#E4DFD4':bg}`:'1px solid transparent',pick:()=>this.setState(s=>{const a=[...s.avail];a[i]=k;return{avail:a};})}))};});
+    const gridHead=DAYS.map((d,i)=>({short:d[3],num:d[2],bg:i===0?'#0B2545':'transparent',fg:i===0?'#fff':'#0B2545'}));
+    const gridRows=[];for(let h=6;h<24;h++)gridRows.push({label:h%2===0?String(h).padStart(2,'0'):'',cells:DAYS.map((d,i)=>{const v=st.grid[i+'-'+h];
+      return{aria:`${d[1]} kl. ${h}: ${v==='yes'?'Kan jobbe':v==='no'?'Kan ikke':'ikke satt'}`,bg:v==='yes'?'#1F7D52':v==='no'?'#A2371C':(h%2?'#F4F1EA':'#EFEBE2'),
+        tap:()=>this.setState(s=>{const g={...s.grid};const cur=g[i+'-'+h];g[i+'-'+h]=cur==='yes'?'no':cur==='no'?undefined:'yes';return{grid:g};})};})});
+    const fmt=n=>n.toFixed(1).replace('.',',')+' t';
+    let availSum;
+    if(st.availTab==='enkel'){const y=st.avail.filter(v=>v==='yes').length,n=st.avail.filter(v=>v==='no').length;availSum={yes:`${y} ${y===1?'dag':'dager'}`,no:`${n} ${n===1?'dag':'dager'}`};}
+    else{const vals=Object.values(st.grid);availSum={yes:fmt(vals.filter(v=>v==='yes').length),no:fmt(vals.filter(v=>v==='no').length)};}
+    // fravær
+    const absTabs=tabs(st.absTab,[['list','Søknader'],['saldo','Saldo']],k=>this.setState({absTab:k}));
+    const absRaw=[...(st.absSent?[{type:'Ferie',period:'19.–23. okt 2026 · 5 dager',k:'wait'}]:[]),{type:'Fri: Tannlege',period:'Fredag 9. okt 2026',k:'wait'},{type:'Egenmelding',period:'6. aug 2026 · 1 dag',k:'ok'},{type:'Ferie',period:'22.–26. juni 2026 · 5 dager',k:'ok'},{type:'Avspasering',period:'14. april 2026 · 4 t',k:'no'}];
+    const AK={wait:['Venter','hourglass_top','#FFF4CC','#7A5A00'],ok:['Godkjent','check_circle','#E2F1E8','#1F7D52'],no:['Avslått','cancel','#FBEDEA','#A2371C']};
+    const absList=absRaw.map((a,i)=>({...a,status:AK[a.k][0],icon:AK[a.k][1],bg:AK[a.k][2],fg:AK[a.k][3],border:i?'1px solid #EFEBE2':'0'}));
+    const absTypes=['Ferie','Egenmelding','Avspasering','Permisjon med lønn','Permisjon uten lønn','Annet'].map(t=>({label:t,pick:()=>this.setState({absType:t}),bg:st.absType===t?'#0B2545':'#FFFFFF',fg:st.absType===t?'#fff':'#0B2545',border:st.absType===t?'1px solid #0B2545':'1px solid #E4DFD4'}));
+    // timer
+    const hours=[['søn.',4,'17:00–20:30','venter',"3,50"],['lør.',3,'10:00–14:30','ok','4,50'],['fre.',2,'13:00–21:00','ok','7,50'],['ons.',30,'13:00–21:00','ok','7,50'],['man.',28,'13:00–21:00','ok','7,50']].map((h,i)=>({short:h[0],num:h[1],time:h[2],h:h[4],border:i?'1px solid #EFEBE2':'0',
+      status:h[3]==='ok'?'Godkjent av leder':'Venter på godkjenning',stIcon:h[3]==='ok'?'check_circle':'radio_button_unchecked',stColor:h[3]==='ok'?'#586174':'#7A5A00',hasDev:i===0,dev:'Du jobbet 30 min lenger enn planlagt (17:00–20:00).'}));
+    // mer
+    const items=(arr)=>arr.filter(Boolean).map((x,i)=>({...x,border:i?'1px solid #EFEBE2':'0',hasBadge:!!x.badge}));
+    const moreGroups=[{title:'Arbeid',items:items([f.avail&&{label:'Tilgjengelighet',icon:'event_available',go:goto('tilg')},f.absence&&{label:'Fravær',icon:'beach_access',go:goto('fravaer')},f.swap&&{label:'Bytter',icon:'swap_horiz',go:goto('bytter'),badge:1},f.colleagues&&{label:'Kolleger',icon:'group',go:goto('kolleger')}])},
+      {title:'Meg',items:items([{label:'Min side',icon:'person',go:goto('minside')},{label:'Innstillinger',icon:'settings',go:goto('minside')}])}].filter(g=>g.items.length);
+    const colleagues=['KL','SN','AH','EL','MH'].map((p,i)=>({ini:p,name:P[p].name,role:P[p].role,border:i?'1px solid #EFEBE2':'0',tap:()=>this.setState({sheet:'person',person:p})}));
+    const sw2=(on)=>({justify:on?'flex-end':'flex-start',bg:on?'#1F7D52':'#C9CDD5'});
+    const notif=[{label:'Varsler på e-post',sub:'Ny uke, endringer og svar',on:st.notif.email?'true':'false',...sw2(st.notif.email),color:'#0B2545',disabled:false,toggle:()=>this.setState(s=>({notif:{email:!s.notif.email}}))},
+      {label:'Varsler på SMS',sub:'Kommer senere',on:'false',...sw2(false),color:'#8A909C',disabled:true,toggle:()=>{}}].map((n,i)=>({...n,border:i?'1px solid #EFEBE2':'0'}));
+    // filter sheet
+    const FR=[['mine','Mine vakter','#0B2545','#fff','person'],['absence','Fravær','#A2371C','#fff','block'],['swap','Byttbar','#C9D6EA','#0B2545','swap_horiz'],['open','Ledig','#F6DF6E','#0B2545','front_hand'],['avail','Tilgjengelighet','#E2F1E8','#1F7D52','check_circle'],['colleague','Kollegers vakter','#C9CDD5','#0B2545','group']]
+      .filter(([k])=>vk.call?(k==='mine'||(k==='colleague'||k==='swap'?f.colleagues:k==='open'?f.open:f.avail||f.absence)):true);
+    const filterRows=FR.map(([k,l,c,ic,icon],i)=>{const on=st.filter[k]!==false;return{label:l,c,ic,icon,cb:'0',on:on?'true':'false',border:i?'1px solid #EFEBE2':'0',boxBg:on?'#0B2545':'#FFFFFF',boxBorder:on?'0':'2px solid #C9CDD5',check:on?'check':'',
+      toggle:()=>this.setState(s=>({filter:{...s.filter,[k]:!on}}))};});
+    const FM={sted:['Sted',[S,B]],type:['Vakttype',['Åpning','Midt','Kveld','Natt/rydd']],ansatt:['Ansatt',f.colleagues?['JB','SN','AH','EL','MH']:['JB']]};
+    const filterMore=Object.entries(FM).map(([key,[l,opts]],i)=>{const sel=st.fsel[key];const n=opts.filter(o=>!sel.includes(o)).length;const open=st.fopen===key;
+      return{label:l,value:n===opts.length?'Alle':`${n} av ${opts.length}`,border:i?'1px solid #EFEBE2':'0',isOpen:open,expanded:open?'true':'false',chev:open?'expand_less':'expand_more',
+        toggle:()=>this.setState({fopen:open?null:key}),
+        chips:opts.map(o=>{const on=!sel.includes(o);const lab=key==='ansatt'?(o==='JB'?'Meg':P[o].name.split(' ')[0]):o.replace('Nordhavn ','');
+          return{label:lab,on:on?'true':'false',icon:on?'check':'add',bg:on?'#0B2545':'#FFFFFF',fg:on?'#fff':'#586174',border:on?'1px solid #0B2545':'1px solid #E4DFD4',
+            pick:()=>this.setState(s=>({fsel:{...s.fsel,[key]:on?[...s.fsel[key],o]:s.fsel[key].filter(x=>x!==o)}}))};})};});
+    const visCount=days.reduce((a,d)=>a+d.cards.length,0);
+    const filterApply=`Vis ${visCount} ${visCount===1?'vakt':'vakter'}`;
+    const ALL={mine:true,absence:true,swap:true,open:true,avail:true,colleague:true},NOF={sted:[],type:[],ansatt:[]};
+    const saved=[{id:'alle',name:'Alle vakter',desc:'Standard',filter:ALL,fsel:NOF},{id:'mine',name:'Bare mine vakter',desc:'Skjuler kollegers og ledige vakter',filter:{...ALL,colleague:false,swap:false,open:false},fsel:NOF},...(st.saved||[])];
+    const activeF=st.activeF||'alle';
+    const savedFilters=saved.map((x,i)=>({name:x.name,desc:x.desc,on:activeF===x.id?'true':'false',ring:activeF===x.id?'7px solid #0B2545':'2px solid #C9CDD5',border:i?'1px solid #EFEBE2':'0',canDelete:!!x.custom,
+      pick:()=>this.setState({activeF:x.id,filter:{...x.filter},fsel:{...x.fsel}}),
+      remove:()=>{this.setState(s=>({saved:(s.saved||[]).filter(y=>y.id!==x.id),...(activeF===x.id?{activeF:'alle',filter:ALL,fsel:NOF}:{})}));this.toast(`Filteret «${x.name}» er slettet.`);}}));
+    const fName=st.fName||'';
+    // avail form
+    const af=st.af;
+    const afKind=tabs(af.kind,[['yes','Kan jobbe'],['no','Kan ikke']],k=>this.setState(s=>({af:{...s.af,kind:k}})));
+    const afRepeat=['Aldri','Hver uke','Annenhver uke'].map(t=>({label:t,pick:()=>this.setState(s=>({af:{...s.af,repeat:t}})),bg:af.repeat===t?'#0B2545':'#FFFFFF',fg:af.repeat===t?'#fff':'#0B2545',border:af.repeat===t?'1px solid #0B2545':'1px solid #E4DFD4'}));
+    const sheet=st.sheet;
+    const fab=st.screen==='tilg'&&f.avail?['Legg til tilgjengelighet',()=>this.setState({sheet:'availForm'})]:st.screen==='fravaer'&&st.absTab==='list'?null:null;
+    const ts=st.textSheet||{};
+    const F=FMT[st.fmt],wide=F.nav==='side',navW=F.nav==='bottom'?0:F.navW,panelOn=wide&&st.panel;
+    const outW=F.w+2*F.pad,outH=F.h+2*F.pad+(F.chrome?40:0);
+    const avW=st.vw-48-(st.vw>=1100?260:0),sc=Math.min(1,Math.max(.3,avW/outW));
+    const vWeek=st.vview?st.vview==='uke':st.fmt!=='mp',isVak=st.screen==='vakter'&&vWeek;
+    const contentW=F.w-navW-(panelOn?400:0);
+    const fx={boxW:Math.round(outW*sc)+'px',boxH:Math.round(outH*sc)+'px',outW:outW+'px',outH:outH+'px',transform:'scale('+sc+')',outR:F.outR+'px',bg:F.bg,pad:F.pad+'px',ring:F.chrome?'#E4DFD4':'#2A3446',
+      w:F.w+'px',h:F.h+'px',r:F.r+'px',chrome:!!F.chrome,status:!!F.status,notch:!!F.notch,sideNotch:!!F.sideNotch,home:!!F.home,statusPad:F.notch?'4px 30px 0 34px':'0 28px',statusFont:F.notch?'15px':'13px'};
+    const lay={top:F.top+'px',navLeft:navW+'px',panelW:panelOn?'400px':'0px',side:F.nav==='side',rail:F.nav==='rail',railPad:(F.railPad||0)+'px',railJustify:st.fmt==='ml'?'center':'flex-start',
+      maxW:st.fmt==='mp'?'none':isVak?'1280px':st.screen==='oversikt'&&contentW>=900?'1040px':'720px',pad:{mp:'0',ml:'0 8px',tp:'8px 16px',tl:'12px 20px',pc:'16px 28px'}[st.fmt],
+      toastBottom:F.nav==='bottom'?'100px':'24px',fabBottom:F.nav==='bottom'?'104px':'24px',fabRight:panelOn?'418px':'18px'};
+    const shSide=F.nav!=='bottom';
+    const shx={dir:shSide?'row':'column',radius:shSide?'22px 0 0 22px':'22px 22px 0 0',maxH:shSide?'100%':'88%',h:shSide?'100%':'auto',w:shSide?(st.fmt==='ml'?'380px':'420px'):'auto',
+      pad:shSide?'20px 20px 28px':'10px 16px 34px',anim:shSide?'slideIn .25s ease':'sheetUp .25s ease',handle:shSide?'none':'block'};
+    const det={left:panelOn?'auto':navW+'px',w:panelOn?'400px':'auto',border:panelOn?'1px solid #E4DFD4':'0',shadow:panelOn?'-12px 0 32px -20px rgba(11,37,69,.35)':'none'};
+    const actK=({detalj:'vakter',kalender:'vakter',tilpass:'oversikt'})[st.screen]||st.screen;
+    const sItem=(k,l,i,b,g)=>{const on=actK===k;return{label:l,icon:i,go:g||goto(k),current:on?'page':'false',bg:on?'#FFF4CC':'transparent',fg:on?'#0B2545':'#586174',weight:on?700:500,hasBadge:!!b,badge:b};};
+    const LK={'Tilgjengelighet':'tilg','Fravær':'fravaer','Bytter':'bytter','Kolleger':'kolleger','Min side':'minside'};
+    const sideGroups=[{title:'Vaktplan',items:navDef.filter(Boolean).filter(x=>x[0]!=='mer').map(([k,l,i,b])=>sItem(k,l,i,b))},
+      ...moreGroups.map(g=>({title:g.title,items:g.items.map(x=>sItem(LK[x.label]||('_'+x.label),x.label,x.icon,x.badge,x.go))}))];
+    const viewOpts=tabs(vWeek?'uke':'liste',[['liste','Liste'],['uke','Uke']],k=>this.setState({vview:k})).map(t=>({...t,on:(t.label==='Uke')===vWeek?'true':'false'}));
+    const fmtOpts=Object.entries(FMT).map(([k,v])=>({label:v.label,bg:st.fmt===k?'#0B2545':'transparent',fg:st.fmt===k?'#fff':'#586174',
+      pick:()=>this.setState(s=>{const w=FMT[k].nav==='side';let screen=s.screen,hist=s.hist,panel=false;
+        if(screen==='detalj'&&w){screen=hist.length?hist[hist.length-1]:'vakter';hist=hist.slice(0,-1);panel=true;}
+        else if(s.panel&&w)panel=true;
+        else if(s.panel&&!w){hist=[...hist,screen];screen='detalj';}
+        return{fmt:k,screen,hist,panel,sheet:null};})}));
+    return {
+      leaderHref:'Vaktplan%20v2%20Leder.dc.html?fmt='+st.fmt,fmtOpts,fx,lay,shx,det,sideGroups,viewOpts,showViewToggle:st.fmt!=='mp',vWeek,vList:!vWeek,
+      weekCols:st.fmt==='ml'?'repeat(7,minmax(190px,1fr))':'repeat(7,minmax(0,1fr))',weekOverflow:st.fmt==='ml'?'auto':'visible',
+      ovCols:String(contentW>=700?2:1),backDisp:wide?'none':'flex',
+      showDetail:st.screen==='detalj'||panelOn,detBackIcon:panelOn?'close':'arrow_back',detBackLabel:panelOn?'Lukk':'Tilbake',
+      modeOpts:[['all','Alt på'],['basic','Bare grunnfunksjoner']].map(([k,l])=>({label:l,bg:st.mode===k?'#0B2545':'transparent',fg:st.mode===k?'#fff':'#586174',pick:()=>this.setState({mode:k,screen:k==='basic'&&!['oversikt','vakter','kalender','timer','mer','minside','detalj'].includes(st.screen)?'mer':st.screen,sel:k==='basic'&&!st.sel.startsWith('s')?'s1':st.sel,sheet:null})})),
+      stateOpts:[['normal','Normal'],['loading','Laster'],['empty','Tom'],['error','Feil']].map(([k,l])=>({label:l,bg:st.vstate===k?'#0B2545':'transparent',fg:st.vstate===k?'#fff':'#586174',pick:()=>this.setState({vstate:k,screen:['oversikt','vakter'].includes(st.screen)?st.screen:'oversikt',sheet:null})})),
+      index:SCREENS.filter(([k])=>!(st.mode==='basic'&&['ledige','bytter','tilg','fravaer','kolleger'].includes(k))).map(([k,l])=>{const a=k==='filter'?(st.sheet==='filter'):st.screen===k&&!(st.sheet==='filter');
+        return{label:l,bg:a?'#FFFFFF':'transparent',weight:a?600:400,fg:a?'#0B2545':'#586174',go:()=>{if(k==='filter'){this.go('vakter');setTimeout(()=>this.setState({sheet:'filter'}),10);}else if(k==='tilpass')go.tilpass();else this.go(k);}};}),
+      screenLabel:(SCREENS.find(x=>x[0]===st.screen)||[,''])[1],
+      is,go,st:stt,f,navItems:nav,scrollRef:this.scrollRef,scrollBottom:F.nav==='bottom'?'86px':'0px',showNav:F.nav==='bottom'&&st.screen!=='tilpass',
+      openS1:()=>this.go('detalj',{sel:'s1'}),retry:()=>this.setState({vstate:'normal'}),
+      waitingCount:waitItems.length,blocks,draftRows,
+      cancelTilpass:()=>this.setState({screen:'oversikt',draft:null}),
+      saveTilpass:()=>{this.setState(s=>({blocks:s.draft||s.blocks,draft:null,screen:'oversikt'}));this.toast('Oversikten er lagret.');},
+      days,filterActive,month,legend,dt,back:()=>{if(panelOn){this.setState({panel:false});return;}this.setState(s=>({screen:s.hist.length?s.hist[s.hist.length-1]:'vakter',hist:s.hist.slice(0,-1)}));},
+      openList:opens,swapTabs,swapList,swapEmpty,swapModes,swapPeople,swapGive:st.swapMode==='give',swapWith:st.swapMode==='with',
+      sendSwap:()=>{const item={ini:'JB',title:st.swapMode==='give'?`Gi bort ${dayLong(s.day).toLowerCase()}`:`Bytt med ${P[st.swapPick].name.split(' ')[0]}`,time:`${s.start}–${s.end}`,sub:`${s.type} · ${s.place}`,stripe:'#C9D6EA',st:st.swapMode==='give'?'lead':'col'};
+        this.setState(x=>({sheet:null,sent:[item,...x.sent]}));this.toast('Forespørselen er sendt.',()=>this.setState(x=>({sent:x.sent.slice(1)})));},
+      availTabs,availSimple:st.availTab==='enkel',availDetailed:st.availTab==='detaljert',availDays,gridHead,gridRows,availSum,
+      saveAvail:()=>{const n=st.avail.filter((v,i)=>v==='no'&&shiftDays[i]&&i!==4).length;this.toast(n?`Lagret. ${n} forespørsel om fri er sendt til lederen.`:'Tilgjengeligheten er lagret.');},
+      absTabs,absIsList:st.absTab==='list',absIsSaldo:st.absTab==='saldo',absList,absTypes,
+      sheetAbs:()=>this.setState({sheet:'absForm'}),sendAbs:()=>{this.setState({sheet:null,absSent:true});this.toast('Søknaden er sendt til lederen.',()=>this.setState({absSent:false}));},
+      hours,sheetDev:()=>this.setState({sheet:'text',textSheet:{title:'Meld inn timer som avviker',sub:'Skriv hvilken vakt det gjelder og hva som var annerledes.',ph:'F.eks. Søndag 4. okt: jobbet til 20:30',btn:'Send til lederen',msg:'Timene er sendt til lederen.'}}),
+      moreGroups,colleagues,notif,logout:()=>this.toast('Du er logget ut. Vi sender en ny lenke når du vil logge inn.'),
+      hasSheet:!!sheet,sh:{filter:sheet==='filter',menu:sheet==='menu',person:sheet==='person',swap:sheet==='swap',text:sheet==='text',availForm:sheet==='availForm',absForm:sheet==='absForm'},
+      closeSheet:()=>this.setState({sheet:null}),sheetFilter:()=>this.setState({sheet:'filter',fmode:null}),sheetMenu:()=>this.setState({sheet:'menu'}),
+      refresh:()=>{this.setState({sheet:null});this.toast('Vaktplanen er oppdatert.');},
+      resetFilter:()=>this.setState({filter:{mine:true,absence:true,swap:true,open:true,avail:true,colleague:true},fsel:{sted:[],type:[],ansatt:[]},fopen:null}),filterApply,savedFilters,
+      fPick:st.fmode!=='create',fCreate:st.fmode==='create',fName,filterCount:`${visCount} ${visCount===1?'vakt':'vakter'} passer`,
+      fSaveBg:fName.trim()?'#0B2545':'#E4DFD4',fSaveFg:fName.trim()?'#FFFFFF':'#8A909C',
+      setFName:e=>this.setState({fName:e.target.value}),
+      startCreate:()=>this.setState(s=>({fmode:'create',fName:'',fprev:{filter:s.filter,fsel:s.fsel,activeF:s.activeF},filter:{mine:true,absence:true,swap:true,open:true,avail:true,colleague:true},fsel:{sted:[],type:[],ansatt:[]},fopen:null})),
+      cancelCreate:()=>this.setState(s=>({fmode:null,...(s.fprev||{})})),
+      saveCreate:()=>{const n=(this.state.fName||'').trim();if(!n)return;const id='u'+Date.now();
+        const off=Object.entries(this.state.filter).filter(([,v])=>!v).length+Object.values(this.state.fsel).reduce((a,x)=>a+x.length,0);
+        this.setState(s=>({fmode:null,saved:[...(s.saved||[]),{id,name:n,desc:off?`${off} valg skjult`:'Viser alt',custom:true,filter:{...s.filter},fsel:{...s.fsel}}],activeF:id}));
+        this.toast(`Filteret «${n}» er lagret.`);},
+      activeFilterName:(saved.find(x=>x.id===activeF)||saved[0]).name,hasActiveFilter:activeF!=='alle',
+      clearActiveFilter:()=>this.setState({activeF:'alle',filter:ALL,fsel:NOF}),
+      saveFilter:()=>{this.setState({sheet:null});this.toast('Filteret er lagret som ditt.');},
+      person,textSheet:{...ts,send:()=>{this.setState({sheet:null});this.toast(ts.msg);}},
+      af:{allDay:af.allDay?'true':'false',showTimes:!af.allDay,...sw2(af.allDay),toggleAll:()=>this.setState(s=>({af:{...s.af,allDay:!s.af.allDay}}))},afKind,afRepeat,
+      saveAvailForm:()=>{this.setState({sheet:null});this.toast('Tilgjengeligheten er lagret.');},
+      showFab:!!fab,fabLabel:fab?fab[0]:'',fabRun:fab?fab[1]:()=>{},
+      hasToast:!!st.toast,toast:{text:st.toast?st.toast.text:'',canUndo:!!(st.toast&&st.toast.undo)},
+      undo:()=>{const u=st.toast&&st.toast.undo;clearTimeout(this._t);this.setState({toast:null});if(u)u();},
+    };
+  }
+}
+</script>
+</body>
+</html>
