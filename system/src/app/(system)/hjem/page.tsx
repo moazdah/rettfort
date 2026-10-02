@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AbonnementVarsel } from '@/components/AbonnementVarsel';
 import { Kreditter } from '@/components/Kreditter';
 import { gratisBruk } from '@/lib/tjenester/bruk';
 import { kreverSelskap, db, idag } from '@/lib/server';
@@ -27,6 +28,7 @@ export default async function Hjem() {
   const s = await kreverSelskap();
   const d = await db();
   const bruk = harFulltRegnskap(s.org.pakke) ? null : await gratisBruk(d, s.org.id, idag());
+  const abo = await d.en<{ abonnement_status: string | null; abonnement_slutt: string | null }>('select abonnement_status, abonnement_slutt::text as abonnement_slutt from organisasjon where id = $1', [s.org.id]);
   const dag = idag();
   const termin = await aktuellTermin(d, s.org.id, dag);
   const mva = termin ? await mvaStatus(d, s.org.id, termin) : null;
@@ -101,6 +103,7 @@ export default async function Hjem() {
         <h1 style={{ marginTop: 6 }}>Hei, {fornavn}.</h1>
       </div>
       {bruk && <Kreditter bruk={bruk} />}
+      {abo && <AbonnementVarsel pakke={s.org.pakke} status={abo.abonnement_status} slutt={abo.abonnement_slutt} eier={s.rolle === 'eier'} eierNavn={null} />}
 
       {valgtPakke && (
         <div className="varsel gul"><div className="fyll">Du valgte <b>{valgtPakke.n}</b>. Fullfør betalingen, så får du alt som er med i pakken.</div><a href={`/pakke/${valgtPakke.k}`} className="knapp liten">Gå til betaling</a></div>

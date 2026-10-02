@@ -66,7 +66,7 @@ export async function ekstraPrisId(): Promise<string> {
   return p.id;
 }
 
-async function antallAnsatte(t: Sporring, orgId: string): Promise<number> {
+export async function antallAnsatte(t: Sporring, orgId: string): Promise<number> {
   return Number((await t.en<{ n: string }>('select count(*) as n from ansatt where organisasjon_id = $1 and aktiv', [orgId]))?.n ?? 0);
 }
 
@@ -164,8 +164,8 @@ export async function startBetaling(t: Sporring, orgId: string, pakke: BetaltPak
     line_items: [{ price: pris, quantity: 1 }, ...await ekstraLinje(t, orgId, pakke)],
     subscription_data: { metadata: { org_id: orgId, pakke } },
     metadata: { org_id: orgId, pakke },
-    success_url: `${grunnadresse}/innstillinger?vis=abonnement&betaling={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${grunnadresse}/innstillinger?vis=abonnement&avbrutt=1`,
+    success_url: `${grunnadresse}/abonnement/takk?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${grunnadresse}/abonnement/bekreft?pakke=${pakke}&avbrutt=1`,
   });
   return { url: s.url };
 }
@@ -220,4 +220,37 @@ export async function sigOpp(t: Sporring, orgId: string): Promise<string | null>
   const a = await stripe<Abonnement>('POST', `subscriptions/${o.stripe_abonnement}`, { cancel_at_period_end: true });
   await lagreAbonnement(t, a, orgId);
   return new Date(a.current_period_end * 1000).toISOString().slice(0, 10);
+}
+
+/** Angre en oppsigelse før perioden er ute. */
+export async function angreOppsigelse(t: Sporring, orgId: string): Promise<void> {
+  const o = await t.en<{ stripe_abonnement: string | null }>('select stripe_abonnement from organisasjon where id = $1', [orgId]);
+  if (!o?.stripe_abonnement) throw new RegnskapsFeil('Fant ikke abonnementet.');
+  await lagreAbonnement(t, await stripe<Abonnement>('POST', `subscriptions/${o.stripe_abonnement}`, { cancel_at_period_end: false }), orgId);
+}
+
+export interface Kvittering { dato: string; tekst: string; belop: number; betalt: boolean; pdf: string | null }
+export interface AbonnementDetaljer {
+  status: string; sagtOpp: boolean; periodeSlutt: string; nesteBelop: number;
+  kort: { merke: string; siste4: string; utlop: string } | null; kvitteringer: Kvittering[];
+}
+
+const KORT: Record<string, string> = { visa: 'Visa', mastercard: 'Mastercard', amex: 'American Express' };
+
+/** Neste trekk, kortet og kvitteringene, rett fra Stripe. Beløp i øre med MVA slik Stripe trekker dem. */
+export async function abonnementDetaljer(t: Sporring, orgId: string): Promise<AbonnementDetaljer | null> {
+  const o = await t.en<{ stripe_abonnement: string | null; stripe_kunde: string | null }>('select stripe_abonnement, stripe_kunde from organisasjon where id = $1', [orgId]);
+  if (!o?.stripe_abonnement || !o.stripe_kunde) return null;
+  type Pm = { card?: { brand: string; last4: string; exp_month: number; exp_year: number } } | null;
+  const a = await stripe<Abonnement & { default_payment_method: Pm; items: { data: { quantity: number; price: { unit_amount: number } }[] } }>('GET', `subscriptions/${o.stripe_abonnement}`, { expand: ['default_payment_method'] });
+  const f = await stripe<{ data: { created: number; total: number; status: string; invoice_pdf: string | null; lines: { data: { description: string | null }[] } }[] }>('GET', 'invoices', { customer: o.stripe_kunde, limit: 12 });
+  const kort = a.default_payment_method?.card;
+  const netto = a.items.data.reduce((s, i) => s + i.price.unit_amount * i.quantity, 0);
+  return {
+    status: a.status, sagtOpp: a.cancel_at_period_end,
+    periodeSlutt: new Date(a.current_period_end * 1000).toISOString().slice(0, 10),
+    nesteBelop: Math.round(netto * 1.25),
+    kort: kort ? { merke: KORT[kort.brand] ?? kort.brand, siste4: kort.last4, utlop: `${String(kort.exp_month).padStart(2, '0')}/${String(kort.exp_year).slice(2)}` } : null,
+    kvitteringer: f.data.map(x => ({ dato: new Date(x.created * 1000).toISOString().slice(0, 10), tekst: x.lines.data[0]?.description ?? 'Rettført', belop: x.total, betalt: x.status === 'paid', pdf: x.invoice_pdf })),
+  };
 }

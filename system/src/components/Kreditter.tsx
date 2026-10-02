@@ -19,7 +19,7 @@ export function Kreditter({ bruk, bare }: { bruk: GratisBruk; bare?: 'faktura' |
         );
       })}
       <span className="fyll" />
-      <Link className="lenke" href="/innstillinger?vis=abonnement">{tomt ? 'Oppgrader for å fortsette' : 'Ubegrenset med Start'}</Link>
+      <Link className="lenke" href="/abonnement/bekreft?pakke=start">{tomt ? 'Oppgrader for å fortsette' : 'Ubegrenset med Start'}</Link>
     </div>
   );
 }

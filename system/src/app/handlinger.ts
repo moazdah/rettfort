@@ -27,7 +27,7 @@ import QRCode from 'qrcode';
 import { lagTestfirma, TESTFIRMA_ORGNR } from '@/lib/db/eksempel';
 import { gyldigFnr, planleggUtsending, sendForfalte, apneLonnslipp, type SendNar } from '@/lib/tjenester/lonnslipp';
 import type { LonnslippPdfData } from '@/lib/pdf';
-import { stripePa, startBetaling, sigOpp, portalLenke } from '@/lib/stripe';
+import { stripePa, startBetaling, sigOpp, portalLenke, angreOppsigelse } from '@/lib/stripe';
 import { svarSomAgent, type Tur } from '@/lib/ai/agent';
 import { kjorVerktoy, type Kort } from '@/lib/ai/verktoy';
 import { utforForslag, type Valg } from '@/lib/ai/utfor';
@@ -766,6 +766,18 @@ export async function byttPakke(pakke: 'gratis' | 'start' | 'selskap'): Promise<
     revalidatePath('/', 'layout');
     return 'url' in r ? { url: r.url } : {};
   });
+}
+
+/** Angre en oppsigelse før perioden er ute. Bare eieren. */
+export async function angreOppsigelseHandling(): Promise<Resultat> {
+  return trygt(async () => {
+    const s = await kreverOrg();
+    if (s.rolle !== 'eier') throw new RegnskapsFeil('Bare eieren kan endre abonnementet.');
+    const db = await getDb();
+    if (!stripePa()) { await db.q('update organisasjon set abonnement_slutt = null where id = $1', [s.org.id]); revalidatePath('/', 'layout'); return; }
+    await angreOppsigelse(db, s.org.id);
+    revalidatePath('/', 'layout');
+  }, 'Oppsigelsen er angret.');
 }
 
 /** Kort, kvitteringer og oppsigelse hos Stripe. */

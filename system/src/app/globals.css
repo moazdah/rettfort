@@ -638,3 +638,36 @@ table.tabell tr.sum td { font-weight: 600; border-top: 1px solid var(--linje); b
 .kreditt-mal { width: 72px; height: 6px; border-radius: 99px; background: var(--linje, #E4DFD4); overflow: hidden; }
 .kreditt-mal > span { display: block; height: 100%; background: var(--ink, #0B2545); border-radius: 99px; }
 .kreditt-mal.kreditt-tom > span { background: var(--rod, #A33A22); }
+
+/* Abonnement og betaling */
+.bekreft-rutenett { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 820px) { .bekreft-rutenett { grid-template-columns: 1fr; } }
+.hake { width: 20px; height: 20px; flex: none; border-radius: 50%; background: var(--gronn-bg); color: var(--gronn); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.pris-rad { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 15px; }
+.pris-rad > span:first-child { display: flex; flex-direction: column; gap: 2px; }
+.pris-rad small { font-size: 12.5px; }
+.pris-rad.skille { border-top: 1px solid var(--linje); padding-top: 12px; }
+.pris-rad.sum { border-top: 1px solid var(--tekst, #0B2545); padding-top: 12px; font-weight: 600; font-size: 17px; }
+.abonnement-rader { display: flex; flex-direction: column; border-top: 1px solid var(--linje); }
+.abonnement-rad { display: grid; grid-template-columns: 130px minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--linje-3, #EFEBE2); }
+.abonnement-rad > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.abonnement-rad small { font-size: 12.5px; color: var(--mut, #586174); font-weight: 400; }
+.liste > .abonnement-rad, .kort.liste > .abonnement-rad { grid-template-columns: 150px minmax(0, 1fr) auto auto; padding: 12px 18px; }
+@media (max-width: 640px) { .abonnement-rad { grid-template-columns: 1fr auto; } .abonnement-rad > span:first-child { grid-column: 1 / -1; } .liste > .abonnement-rad, .kort.liste > .abonnement-rad { grid-template-columns: 1fr auto; } }
+.pakke-kort.din { border-color: var(--tekst, #0B2545); }
+.rutenett.tre { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 820px) { .rutenett.tre { grid-template-columns: 1fr; } }
+.lenke.dempet { color: var(--mut, #586174); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; font: inherit; }
+.knapp.rod-kant { border-color: var(--rod, #A33A22); color: var(--rod, #A33A22); }
+.spinner { display: inline-block; width: 15px; height: 15px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; animation: rf-snurr .7s linear infinite; vertical-align: -3px; margin-right: 6px; }
+@keyframes rf-snurr { to { transform: rotate(360deg); } }
+.bekreft-bak { position: fixed; inset: 0; z-index: 80; background: rgba(11,37,69,.35); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.bekreft-ark { background: var(--kort, #fff); border-radius: 18px; padding: 24px; max-width: 460px; width: 100%; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 30px 60px -20px rgba(11,37,69,.45); }
+.bekreft-knapper { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 6px; }
+@media (max-width: 640px) {
+  .bekreft-bak { align-items: flex-end; padding: 0; }
+  .bekreft-ark { border-radius: 18px 18px 0 0; max-width: none; }
+  .bekreft-knapper { flex-direction: column-reverse; }
+  .bekreft-knapper .knapp { width: 100%; justify-content: center; }
+}
+.abonnement-varsel { align-items: center; flex-wrap: wrap; }

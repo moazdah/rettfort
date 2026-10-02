@@ -7,9 +7,9 @@ import { formaterOrgnr } from '@/lib/brreg';
 import { Kopier } from '@/components/Kopier';
 import { Handling } from '@/components/Handling';
 import { trekkInvitasjon } from '@/app/handlinger';
-import { FirmaSkjema, FakturaInnstillinger, Inviter, Pakker, Laas, Apningsbalanse } from './Skjemaer';
-import { stripePa, fullforBetaling, synkAbonnement } from '@/lib/stripe';
-import { INTROPRIS } from '@/lib/pakker';
+import { FirmaSkjema, FakturaInnstillinger, Inviter, Laas, Apningsbalanse } from './Skjemaer';
+import { stripePa, fullforBetaling, synkAbonnement, antallAnsatte, abonnementDetaljer } from '@/lib/stripe';
+import { Abonnement } from './Abonnement';
 import { slettPlan } from '@/lib/tjenester/konto';
 import { SlettKonto } from './SlettKonto';
 
@@ -34,6 +34,11 @@ export default async function Innstillinger({ searchParams }: { searchParams: Pr
   }
   const o = await d.en<Record<string, string | number | boolean | null> & { navn: string; orgnr: string | null; orgform: string; mva_registrert: boolean; bilag_slug: string | null; regnskap_fra: string | null; pakke: string }>('select *, regnskap_fra::text as regnskap_fra, abonnement_slutt::text as abonnement_slutt from organisasjon where id = $1', [s.org.id]);
   const endre = kanEndre(s.rolle);
+  const abo = vis === 'abonnement' ? {
+    ansatte: await antallAnsatte(d, s.org.id),
+    detaljer: stripePa() ? await abonnementDetaljer(d, s.org.id).catch(e => { console.error('Abonnement:', e); return null; }) : null,
+    eierNavn: (await d.en<{ navn: string }>(`select b.navn from medlemskap m join bruker b on b.id = m.bruker_id where m.organisasjon_id = $1 and m.rolle = 'eier' order by m.opprettet limit 1`, [s.org.id]))?.navn ?? null,
+  } : null;
   const brukere = await d.q<{ navn: string; epost: string; rolle: string }>('select b.navn, b.epost, m.rolle from medlemskap m join bruker b on b.id = m.bruker_id where m.organisasjon_id = $1 order by m.opprettet', [s.org.id]);
   const inv = await d.q<{ id: string; epost: string; rolle: string }>(`select id, epost, rolle from invitasjon where organisasjon_id = $1 and status = 'venter' and rolle not like 'regnskapsforer%' order by opprettet`, [s.org.id]);
   const laast = await laastTil(d, s.org.id);
@@ -99,7 +104,7 @@ export default async function Innstillinger({ searchParams }: { searchParams: Pr
         );
       })()}
       {vis === 'sikkerhet' && <section className="kort stakk"><h2>Totrinns innlogging</h2><Totrinn pa={totrinnPa} /></section>}
-      {vis === 'abonnement' && <section className="kort stakk"><h2>Abonnement</h2><Pakker pakke={o?.pakke ?? 'gratis'} erEier={s.rolle === 'eier'} betalingPa={stripePa()} intropris={INTROPRIS} status={(o?.abonnement_status as string | null) ?? null} slutt={o?.abonnement_slutt ? String(o.abonnement_slutt).slice(0, 10) : null} harKunde={!!o?.stripe_kunde} betalt={betalt} avbrutt={!!sp.avbrutt} /></section>}
+      {vis === 'abonnement' && <section className="stakk"><h2>Abonnement</h2><Abonnement pakke={o?.pakke ?? 'gratis'} status={(o?.abonnement_status as string | null) ?? null} slutt={o?.abonnement_slutt ? String(o.abonnement_slutt).slice(0, 10) : null} eier={s.rolle === 'eier'} eierNavn={abo?.eierNavn ?? null} ansatte={abo?.ansatte ?? 0} detaljer={abo?.detaljer ?? null} betalingPa={stripePa()} avbrutt={!!sp.avbrutt} />{betalt === false && <div className="varsel gul">Vi fant ikke betalingen ennå. Last siden på nytt om litt.</div>}</section>}
 
       {vis === 'avansert' && (
         <>

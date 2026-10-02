@@ -10,7 +10,7 @@ export function Oppgrader({ tittel, tekst, punkter }: { tittel: string; tekst: s
         <p className="mut" style={{ margin: 0 }}>{tekst}</p>
         <ul className="stakk" style={{ margin: 0, paddingLeft: 20, gap: 6 }}>{punkter.map(p => <li key={p}>{p}</li>)}</ul>
         <div className="rad" style={{ gap: 8, flexWrap: 'wrap' }}>
-          <Link className="knapp" href="/innstillinger?vis=abonnement">Se pakkene</Link>
+          <Link className="knapp" href="/abonnement/bekreft?pakke=start">Oppgrader til Start</Link><Link className="lenke liten" href="/innstillinger?vis=abonnement">Se alle pakkene</Link>
           <span className="mut liten">Start koster 179 kr i måneden uten MVA. Ingen bindingstid.</span>
         </div>
       </section>

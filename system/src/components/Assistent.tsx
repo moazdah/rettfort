@@ -240,7 +240,7 @@ export function Assistent({ tilgang = true }: { tilgang?: boolean }) {
               <li>«Kjør lønn for oktober»</li>
               <li>«Hvem skylder meg penger?»</li>
             </ul>
-            <div><Link href="/innstillinger?vis=abonnement" className="knapp">Oppgrader til Selskap</Link></div>
+            <div><Link href="/abonnement/bekreft?pakke=selskap" className="knapp">Oppgrader til Selskap</Link></div>
             <p className="faint liten">Selskap koster 249 kr i måneden uten MVA, og har også vaktplan for 15 ansatte. Ingen bindingstid.</p>
           </div>
         </div>

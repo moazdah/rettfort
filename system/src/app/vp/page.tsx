@@ -25,7 +25,7 @@ export default async function VaktplanForside({ searchParams }: { searchParams: 
           <Logo bredde={120} />
           <h1>Vaktplan er med i Start og Selskap</h1>
           <p className="mut">Lag ukeplanen på et par minutter, la de ansatte ta ledige vakter og be om fri fra mobilen, og send timene rett til lønn. Overtid og merarbeid regnes ut for deg.</p>
-          <div><a href={`${minAdresse()}/innstillinger?vis=abonnement`} className="knapp">Se pakkene</a></div>
+          <div><a href={`${minAdresse()}/abonnement/bekreft?pakke=start`} className="knapp">Oppgrader til Start</a></div>
         </div>
       </main>
     );

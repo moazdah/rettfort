@@ -49,7 +49,7 @@ describe('Stripe', () => {
     expect(kall.map(k => k.sti)).toEqual(['webhook_endpoints', 'prices', 'prices', 'customers', 'checkout/sessions']);
     expect(kall[2].data).toContain('unit_amount=17900');
     expect(kall[2].data).toContain('currency=nok');
-    expect(kall[4].data).toContain('success_url=https://min.test/innstillinger?vis=abonnement&betaling={CHECKOUT_SESSION_ID}');
+    expect(kall[4].data).toContain('success_url=https://min.test/abonnement/takk?session_id={CHECKOUT_SESSION_ID}');
     expect(await webhookHemmeligheter(db)).toEqual(['whsec_test']);
     expect((await db.en<{ pakke: string }>('select pakke from organisasjon where id = $1', [o]))!.pakke).toBe('gratis');
     expect(await fullforBetaling(db, o, 'cs_1')).toBe(true);
