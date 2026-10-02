@@ -190,3 +190,13 @@ export const STANDARD_MALER: VaktMal[] = [
   { navn: 'Kveld', start: '13:00', slutt: '21:00' },
   { navn: 'Natt/rydd', start: '21:00', slutt: '23:30' },
 ];
+
+const MND_KORT = ['jan', 'feb', 'mar', 'apr', 'mai', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'des'];
+/** «lørdag 10. okt» */
+export const datoTekst = (d: string) => `${ukedag(d)} ${Number(d.slice(8))}. ${MND_KORT[Number(d.slice(5, 7)) - 1]}`;
+/** «Lørdag 10. okt» */
+export const datoLang = (d: string) => { const t = datoTekst(d); return t[0].toUpperCase() + t.slice(1); };
+/** «10. okt» */
+export const dm = (d: string) => `${Number(d.slice(8))}. ${MND_KORT[Number(d.slice(5, 7)) - 1]}`;
+/** «Fredagsvakten» */
+export const dagsvakten = (d: string) => { const u = ukedag(d); return `${u[0].toUpperCase()}${u.slice(1)}svakten`; };

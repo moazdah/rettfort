@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0..1,0&display=block" rel="stylesheet">
+<title>Rettført Vaktplan v2 – leder</title>
+<style>
+body{margin:0;background:#E9E5DC;font-family:'Schibsted Grotesk',system-ui,sans-serif;color:#0B2545;-webkit-font-smoothing:antialiased}
+a{color:#0B2545}a:hover{color:#16345E}
+*{box-sizing:border-box}
+button,input,textarea{font-family:inherit;color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #F6DF6E;outline-offset:2px}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:.55}50%{opacity:1}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column">
+  <div style="background:#FFFFFF;border-bottom:1px solid #E4DFD4;padding:12px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 26px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <img src="assets/rettfort-logo.png" alt="Rettført" style="height:40px;margin:-8px -14px">
+      <div style="width:1px;height:22px;background:#E4DFD4"></div>
+      <div style="font-weight:600;font-size:17px">Vaktplan</div>
+      <div style="font-size:12px;background:#FFF4CC;border-radius:99px;padding:3px 10px;font-weight:500;color:#7A5A00">Prototype · leder, alle formater</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px 22px;margin-left:auto;align-items:center">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#586174;font-weight:500">Rolle</span>
+        <div style="display:flex;background:#F4F1EA;border-radius:99px;padding:3px">
+          <a href="{{ empHref }}" style="border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;color:#586174;text-decoration:none">Ansatt</a>
+          <span style="border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;background:#0B2545;color:#fff">Leder</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#586174;font-weight:500">Format</span>
+        <div style="display:flex;flex-wrap:wrap;background:#F4F1EA;border-radius:99px;padding:3px">
+          <sc-for list="{{ fmtOpts }}" as="o" hint-placeholder-count="5">
+            <button onClick="{{ o.pick }}" style="border:0;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#586174;font-weight:500">Pakke</span>
+        <div style="display:flex;background:#F4F1EA;border-radius:99px;padding:3px">
+          <sc-for list="{{ pakkeOpts }}" as="o" hint-placeholder-count="2">
+            <button onClick="{{ o.pick }}" style="border:0;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#586174;font-weight:500">Uke</span>
+        <div style="display:flex;background:#F4F1EA;border-radius:99px;padding:3px">
+          <sc-for list="{{ wsOpts }}" as="o" hint-placeholder-count="3">
+            <button onClick="{{ o.pick }}" style="border:0;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:12px;color:#586174;font-weight:500">Tilstand</span>
+        <div style="display:flex;background:#F4F1EA;border-radius:99px;padding:3px">
+          <sc-for list="{{ vsOpts }}" as="o" hint-placeholder-count="4">
+            <button onClick="{{ o.pick }}" style="border:0;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:40px;padding:32px 24px 48px">
+    <div style="width:220px;display:flex;flex-direction:column;gap:2px;padding-top:8px">
+      <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#586174;font-weight:600;padding:0 12px 8px">Skjermer · leder</div>
+      <sc-for list="{{ index }}" as="it" hint-placeholder-count="11">
+        <button onClick="{{ it.go }}" style="text-align:left;border:0;border-radius:10px;padding:9px 12px;font-size:14px;cursor:pointer;background:{{ it.bg }};font-weight:{{ it.weight }};color:{{ it.fg }}">{{ it.label }}</button>
+      </sc-for>
+      <div style="font-size:12px;color:#586174;padding:16px 12px 0;line-height:1.5;text-wrap:pretty">Trykk i en tom rute for å lage en vakt. På nettbrett og PC kan du dra vakter mellom dager og ansatte.</div>
+    </div>
+
+    <div style="width:{{ fx.boxW }};height:{{ fx.boxH }};flex-shrink:0">
+    <div style="width:{{ fx.outW }};height:{{ fx.outH }};transform:{{ fx.transform }};transform-origin:top left;border-radius:{{ fx.outR }};background:{{ fx.bg }};padding:{{ fx.pad }};box-shadow:0 30px 60px -20px rgba(11,37,69,.35),0 0 0 1px {{ fx.ring }} inset;display:flex;flex-direction:column">
+      <sc-if value="{{ fx.chrome }}" hint-placeholder-val="{{ true }}">
+        <div style="height:40px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 14px;background:#EFEBE2;border-bottom:1px solid #E4DFD4;border-radius:12px 12px 0 0">
+          <span style="width:12px;height:12px;border-radius:99px;background:#C9CDD5"></span>
+          <span style="width:12px;height:12px;border-radius:99px;background:#C9CDD5"></span>
+          <span style="width:12px;height:12px;border-radius:99px;background:#C9CDD5"></span>
+          <div style="flex:0 1 420px;margin:0 auto;height:26px;border-radius:99px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;color:#586174"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">lock</span>vaktplan.rettført.no</div>
+          <div style="width:52px"></div>
+        </div>
+      </sc-if>
+      <div data-screen-label="{{ screenLabel }}" style="position:relative;width:{{ fx.w }};height:{{ fx.h }};border-radius:{{ fx.r }};overflow:hidden;background:#F4F1EA;flex-shrink:0">
+        <sc-if value="{{ fx.status }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:0;left:0;right:0;height:{{ lay.top }};display:flex;align-items:center;justify-content:space-between;padding:{{ fx.statusPad }};z-index:30;font-size:{{ fx.statusFont }};font-weight:600;background:#FFFFFF">
+          <span>10:00</span>
+          <sc-if value="{{ fx.notch }}"><div style="position:absolute;left:50%;top:10px;width:110px;height:30px;margin-left:-55px;background:#0B1424;border-radius:99px"></div></sc-if>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">signal_cellular_alt</span>
+            <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">wifi</span>
+            <div style="width:26px;height:12px;border:1.5px solid #0B2545;border-radius:4px;padding:1.5px"><div style="width:70%;height:100%;background:#0B2545;border-radius:1.5px"></div></div>
+          </div>
+        </div></sc-if>
+        <sc-if value="{{ fx.sideNotch }}"><div style="position:absolute;left:8px;top:50%;width:30px;height:110px;margin-top:-55px;background:#0B1424;border-radius:99px;z-index:40"></div></sc-if>
+
+        <!-- header -->
+        <header style="position:absolute;top:{{ lay.top }};left:{{ lay.navLeft }};right:0;height:{{ lay.hdrH }};background:#FFFFFF;border-bottom:1px solid #E4DFD4;z-index:11;display:flex;flex-direction:column">
+          <div style="height:{{ hdr.row1H }};display:flex;align-items:center;gap:14px;padding:0 {{ hdr.padX }}">
+            <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+              <img src="assets/rettfort-logo.png" alt="Rettført" style="height:40px;margin:-8px -14px">
+              <sc-if value="{{ hdr.brandWord }}"><div style="display:flex;align-items:center;gap:10px"><div style="width:1px;height:20px;background:#E4DFD4;margin-left:4px"></div><div style="font-weight:600;font-size:16px">Vaktplan</div></div></sc-if>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:#586174;background:#F4F1EA;border-radius:99px;height:30px;padding:0 12px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis">Nordhavn Kafé AS</div>
+            <sc-if value="{{ hdr.tabsInline }}">
+              <nav aria-label="Hovedmeny" style="display:flex;gap:4px;margin-left:12px">
+                <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+                  <button onClick="{{ t.go }}" aria-current="{{ t.current }}" style="height:40px;border:0;border-radius:99px;padding:0 14px;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:15px;font-weight:{{ t.weight }};background:{{ t.bg }};color:{{ t.fg }}">
+                    <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">{{ t.icon }}</span>{{ t.label }}
+                    <sc-if value="{{ t.hasBadge }}"><span style="background:#F6DF6E;color:#0B2545;border-radius:99px;min-width:22px;height:22px;padding:0 7px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ t.badge }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </nav>
+            </sc-if>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0">
+              <a href="https://min.rettført.no" target="_blank" aria-label="Til regnskapet (åpnes i ny fane)" style="height:40px;border-radius:99px;padding:0 12px;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;text-decoration:none;color:#0B2545">
+                <sc-if value="{{ hdr.regText }}"><span>Til regnskapet</span></sc-if>
+                <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">open_in_new</span>
+              </a>
+              <sc-if value="{{ hdr.asst }}">
+                <button onClick="{{ toggleAsst }}" aria-pressed="{{ asstBtn.pressed }}" style="height:40px;border-radius:99px;padding:0 14px;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid #E4DFD4;background:{{ asstBtn.bg }};color:{{ asstBtn.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">auto_awesome</span>Assistent</button>
+              </sc-if>
+              <div aria-label="Kari Lund" style="width:40px;height:40px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">KL</div>
+            </div>
+          </div>
+          <sc-if value="{{ hdr.tabsBelow }}">
+            <nav aria-label="Hovedmeny" style="height:56px;display:flex;align-items:center;gap:4px;padding:0 {{ hdr.padX }};border-top:1px solid #EFEBE2;overflow-x:auto">
+              <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+                <button onClick="{{ t.go }}" aria-current="{{ t.current }}" style="height:44px;border:0;border-radius:99px;padding:0 14px;display:flex;align-items:center;gap:8px;cursor:pointer;font-size:15px;white-space:nowrap;font-weight:{{ t.weight }};background:{{ t.bg }};color:{{ t.fg }}">
+                  <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">{{ t.icon }}</span>{{ t.label }}
+                  <sc-if value="{{ t.hasBadge }}"><span style="background:#F6DF6E;color:#0B2545;border-radius:99px;min-width:22px;height:22px;padding:0 7px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ t.badge }}</span></sc-if>
+                </button>
+              </sc-for>
+            </nav>
+          </sc-if>
+        </header>
+
+        <!-- scroll area -->
+        <div ref="{{ scrollRef }}" style="position:absolute;top:{{ lay.contentTop }};left:{{ lay.navLeft }};right:0;bottom:{{ lay.bottom }};overflow-y:auto;overflow-x:hidden">
+        <div style="max-width:{{ lay.maxW }};margin:0 auto;padding:{{ lay.pad }}">
+
+          <!-- ===== UKE ===== -->
+          <sc-if value="{{ is.uke }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px">
+                <div style="display:flex;align-items:center;gap:6px">
+                  <button aria-label="Forrige uke" onClick="{{ otherWeek }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;box-shadow:0 1px 3px rgba(11,37,69,.08);cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">chevron_left</span></button>
+                  <div style="padding:0 6px">
+                    <h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em;line-height:1.1">Uke 41</h1>
+                    <div style="font-size:14px;color:#586174;margin-top:2px">5.–11. okt 2026</div>
+                  </div>
+                  <button aria-label="Neste uke" onClick="{{ otherWeek }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;box-shadow:0 1px 3px rgba(11,37,69,.08);cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">chevron_right</span></button>
+                </div>
+                <span style="display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:99px;font-size:13px;font-weight:600;background:{{ wsBadge.bg }};color:{{ wsBadge.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1">{{ wsBadge.icon }}</span>{{ wsBadge.label }}</span>
+                <button onClick="{{ publish.run }}" disabled="{{ publish.disabled }}" style="margin-left:auto;height:44px;padding:0 18px;border-radius:12px;border:0;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;cursor:{{ publish.cursor }};background:{{ publish.bg }};color:{{ publish.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">send</span>{{ publish.label }}</button>
+              </div>
+
+              <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+                <div role="group" aria-label="Visning" style="display:flex;background:#FFFFFF;border-radius:99px;padding:3px;box-shadow:0 1px 3px rgba(11,37,69,.06)">
+                  <sc-for list="{{ viewOpts }}" as="o" hint-placeholder-count="3">
+                    <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:38px;border:0;border-radius:99px;padding:0 16px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+                  </sc-for>
+                </div>
+                <div role="group" aria-label="Sted" style="display:flex;background:#FFFFFF;border-radius:99px;padding:3px;box-shadow:0 1px 3px rgba(11,37,69,.06)">
+                  <sc-for list="{{ placeOpts }}" as="o" hint-placeholder-count="3">
+                    <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:38px;border:0;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+                  </sc-for>
+                </div>
+              </div>
+
+              <sc-if value="{{ hasBanner }}">
+                <div style="display:flex;align-items:center;gap:10px;background:#FBFAF6;border:1.5px dashed #8A909C;border-radius:14px;padding:12px 16px;font-size:14px;color:#0B2545"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#586174">visibility_off</span><span style="text-wrap:pretty">{{ bannerText }}</span></div>
+              </sc-if>
+
+              <sc-if value="{{ vsLoading }}">
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="height:150px;border-radius:18px;background:#FFFFFF;animation:pulse 1.4s ease-in-out infinite"></div>
+                  <div style="height:340px;border-radius:18px;background:#E4DFD4;animation:pulse 1.4s ease-in-out infinite"></div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ vsError }}">
+                <div style="background:#FFFFFF;border-radius:18px;padding:32px 22px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center">
+                  <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:34px;line-height:1;color:#A2371C">wifi_off</span>
+                  <div style="font-size:17px;font-weight:600">Fikk ikke kontakt. Prøv igjen.</div>
+                  <button onClick="{{ retry }}" style="height:48px;padding:0 22px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer">Prøv igjen</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ vsEmpty }}">
+                <div style="background:#FFFFFF;border-radius:18px;padding:32px 22px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+                  <img src="assets/mascot-hip.png" alt="" style="width:96px;height:96px;object-fit:contain">
+                  <div style="font-size:17px;font-weight:600">Ingen vakter i uke 41 ennå.</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center">
+                    <button onClick="{{ emptyCreate }}" style="height:48px;padding:0 20px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer">Lag første vakt</button>
+                    <sc-if value="{{ sel }}"><button onClick="{{ emptyAsk }}" style="height:48px;padding:0 20px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">auto_awesome</span>Be assistenten om et forslag</button></sc-if>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ vsNormal }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:18px">
+                  <section aria-label="Trenger svar" style="background:#FFFFFF;border-radius:18px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                    <div style="display:flex;align-items:center;gap:8px;padding:12px 18px 10px">
+                      <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Trenger svar</span>
+                      <sc-if value="{{ hasNeeds }}"><span style="background:#F6DF6E;color:#0B2545;border-radius:99px;min-width:22px;height:22px;padding:0 7px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ needsCount }}</span></sc-if>
+                      <button onClick="{{ goForesp }}" style="margin-left:auto;border:0;background:transparent;font-size:14px;font-weight:600;cursor:pointer;height:36px;padding:0 4px">Se alle</button>
+                    </div>
+                    <sc-if value="{{ noNeeds }}">
+                      <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;border-top:1px solid #EFEBE2;font-size:15px;color:#586174"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1;color:#1F7D52">task_alt</span>Alt er besvart.</div>
+                    </sc-if>
+                    <sc-for list="{{ needs }}" as="r" hint-placeholder-count="4">
+                      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 18px;border-top:1px solid #EFEBE2">
+                        <div style="display:flex;align-items:center;gap:12px;flex:1 1 260px;min-width:0">
+                          <div style="width:40px;height:40px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ r.iconBg }};color:{{ r.iconFg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:21px;line-height:1">{{ r.icon }}</span></div>
+                          <div style="min-width:0">
+                            <div style="font-size:15px;font-weight:600">{{ r.title }}</div>
+                            <div style="font-size:13px;color:#586174;margin-top:2px;text-wrap:pretty">{{ r.sub }}</div>
+                          </div>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px">
+                          <sc-for list="{{ r.actions }}" as="a">
+                            <button onClick="{{ a.run }}" style="height:44px;padding:0 16px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;background:{{ a.bg }};color:{{ a.fg }};border:{{ a.border }}">{{ a.label }}</button>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </section>
+
+                  <!-- uke: rutenett -->
+                  <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ true }}">
+                    <div style="background:#FFFFFF;border-radius:18px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow-x:auto">
+                      <div style="display:grid;grid-template-columns:{{ gridCols }};min-width:{{ gridMin }}">
+                        <div style="padding:12px 14px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174;display:flex;align-items:flex-end">Ansatt</div>
+                        <sc-for list="{{ gridDays }}" as="d" hint-placeholder-count="7">
+                          <button onClick="{{ d.pick }}" aria-label="{{ d.aria }}" style="border:0;border-left:1px solid #EFEBE2;background:transparent;cursor:pointer;padding:10px 6px;display:flex;align-items:center;justify-content:center;gap:6px">
+                            <span style="font-size:13px;color:#586174;font-weight:500">{{ d.short }}</span>
+                            <span style="width:30px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;background:{{ d.numBg }};color:{{ d.numFg }}">{{ d.num }}</span>
+                          </button>
+                        </sc-for>
+                        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+                          <sc-if value="{{ r.isOpen }}">
+                            <div style="border-top:1px solid #EFEBE2;background:#FFF9E0;padding:12px 14px;display:flex;align-items:center;gap:10px">
+                              <div style="width:34px;height:34px;border-radius:99px;background:#F6DF6E;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">front_hand</span></div>
+                              <div style="min-width:0"><div style="font-size:14px;font-weight:600">Ledige vakter</div><div style="font-size:12px;color:#7A5A00">{{ r.sub }}</div></div>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ r.isEmp }}">
+                            <button onClick="{{ r.open }}" aria-label="{{ r.aria }}" style="border:0;border-top:1px solid #EFEBE2;background:#FFFFFF;cursor:pointer;text-align:left;padding:10px 14px;display:flex;align-items:center;gap:10px;min-width:0">
+                              <div style="width:34px;height:34px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">{{ r.ini }}</div>
+                              <div style="min-width:0;flex:1;display:flex;flex-direction:column;gap:4px">
+                                <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</div>
+                                <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#586174">{{ r.hours }}</div>
+                                <sc-if value="{{ r.hasBar }}"><div style="height:4px;border-radius:99px;background:#EFEBE2"><div style="height:100%;border-radius:99px;width:{{ r.barW }};background:{{ r.barC }}"></div></div></sc-if>
+                                <sc-if value="{{ r.hasOt }}"><div style="font-size:12px;font-weight:600;color:#7A5A00">{{ r.ot }}</div></sc-if>
+                              </div>
+                            </button>
+                          </sc-if>
+                          <sc-for list="{{ r.cells }}" as="c">
+                            <div onMouseEnter="{{ c.enter }}" onMouseLeave="{{ c.leave }}" onDragOver="{{ c.over }}" onDrop="{{ c.drop }}" style="border-top:1px solid #EFEBE2;border-left:1px solid #EFEBE2;padding:5px;display:flex;flex-direction:column;gap:4px;min-width:0;min-height:72px;background:{{ c.bg }}">
+                              <sc-for list="{{ c.chips }}" as="ch">
+                                <button onClick="{{ ch.open }}" draggable="{{ ch.drag }}" onDragStart="{{ ch.dragStart }}" aria-label="{{ ch.aria }}" style="width:100%;min-width:0;text-align:left;cursor:pointer;border-radius:10px;padding:6px 8px 6px 11px;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:44px;background:{{ ch.bg }};border:{{ ch.border }};box-shadow:inset 4px 0 0 {{ ch.stripe }}">
+                                  <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis">{{ ch.time }}</span>
+                                  <span style="font-size:12px;color:#586174;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis">{{ ch.sub }}</span>
+                                  <sc-if value="{{ ch.hasFlag }}"><span style="font-size:11px;font-weight:600;border-radius:99px;padding:1px 7px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:{{ ch.flagBg }};color:{{ ch.flagFg }}">{{ ch.flag }}</span></sc-if>
+                                </button>
+                              </sc-for>
+                              <sc-for list="{{ c.tags }}" as="t">
+                                <span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;border-radius:8px;padding:4px 6px;min-width:0;background:{{ t.bg }};color:{{ t.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1">{{ t.icon }}</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.label }}</span></span>
+                              </sc-for>
+                              <button onClick="{{ c.add }}" aria-label="{{ c.addLabel }}" style="flex:1;min-height:{{ c.addH }};border:1.5px dashed #C9CDD5;border-radius:10px;background:#FBFAF6;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#586174;opacity:{{ c.addOp }};transition:opacity .15s ease"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">add</span></button>
+                            </div>
+                          </sc-for>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <!-- uke: mobil -->
+                  <sc-if value="{{ isStrip }}">
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;padding:0 10px">
+                        <sc-for list="{{ gridDays }}" as="d">
+                          <button onClick="{{ d.pick }}" aria-label="{{ d.aria }}" style="border:0;background:transparent;cursor:pointer;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0">
+                            <span style="font-size:11px;color:#586174">{{ d.short }}</span>
+                            <span style="width:24px;height:24px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:{{ d.numBg }};color:{{ d.numFg }}">{{ d.num }}</span>
+                          </button>
+                        </sc-for>
+                      </div>
+                      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+                        <div style="border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 3px rgba(11,37,69,.06);background:{{ r.cardBg }}">
+                          <sc-if value="{{ r.isOpen }}">
+                            <div style="display:flex;align-items:center;gap:8px;padding:0 4px;min-height:32px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">front_hand</span><span style="font-size:14px;font-weight:600">Ledige vakter</span><span style="margin-left:auto;font-size:12px;color:#7A5A00">{{ r.sub }}</span></div>
+                          </sc-if>
+                          <sc-if value="{{ r.isEmp }}">
+                            <button onClick="{{ r.open }}" aria-label="{{ r.aria }}" style="border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0 4px;min-height:36px;text-align:left">
+                              <div style="width:28px;height:28px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">{{ r.ini }}</div>
+                              <span style="font-size:14px;font-weight:600;flex:1;min-width:0">{{ r.name }}</span>
+                              <sc-if value="{{ r.hasOt }}"><span style="font-size:11px;font-weight:600;color:#7A5A00;background:#FFF4CC;border-radius:99px;padding:2px 8px">{{ r.ot }}</span></sc-if>
+                              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#586174">{{ r.hours }}</span>
+                            </button>
+                          </sc-if>
+                          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+                            <sc-for list="{{ r.mini }}" as="m">
+                              <button onClick="{{ m.run }}" aria-label="{{ m.aria }}" style="height:46px;border-radius:9px;cursor:pointer;padding:0 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:0;background:{{ m.bg }};border:{{ m.border }};color:{{ m.fg }}">
+                                <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;white-space:nowrap">{{ m.label }}</span>
+                                <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:13px;line-height:1">{{ m.icon }}</span>
+                              </button>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+
+                  <!-- dag -->
+                  <sc-if value="{{ isDag }}">
+                    <div style="display:flex;flex-direction:column;gap:14px">
+                      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px">
+                        <sc-for list="{{ dayPicker }}" as="d" hint-placeholder-count="7">
+                          <button onClick="{{ d.pick }}" aria-pressed="{{ d.on }}" aria-label="{{ d.aria }}" style="height:64px;border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:{{ d.bg }};color:{{ d.fg }};border:{{ d.border }}">
+                            <span style="font-size:12px">{{ d.short }}</span>
+                            <span style="font-size:19px;font-weight:700">{{ d.num }}</span>
+                            <span style="font-size:11px;font-family:'IBM Plex Mono',monospace">{{ d.count }}</span>
+                          </button>
+                        </sc-for>
+                      </div>
+                      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+                        <h2 style="margin:0;font-size:19px;font-weight:700">{{ dayTitle }}</h2>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#586174">{{ daySum }}</span>
+                      </div>
+                      <sc-for list="{{ dayNotes }}" as="n">
+                        <div style="display:flex;align-items:center;gap:8px;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:500;background:{{ n.bg }};color:{{ n.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">{{ n.icon }}</span>{{ n.label }}</div>
+                      </sc-for>
+                      <div style="display:grid;grid-template-columns:{{ dayCols }};gap:10px">
+                        <sc-for list="{{ dayItems }}" as="it" hint-placeholder-count="4">
+                          <button onClick="{{ it.open }}" aria-label="{{ it.aria }}" style="text-align:left;cursor:pointer;border-radius:14px;padding:14px 16px 14px 18px;display:flex;align-items:center;gap:12px;min-height:72px;background:{{ it.bg }};border:{{ it.border }};box-shadow:inset 5px 0 0 {{ it.stripe }},0 1px 3px rgba(11,37,69,.06)">
+                            <div style="width:40px;height:40px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:{{ it.avBg }};color:{{ it.avFg }}">{{ it.ini }}<sc-if value="{{ it.isOpen }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">front_hand</span></sc-if></div>
+                            <div style="flex:1;min-width:0">
+                              <div style="font-size:15px;font-weight:600">{{ it.name }}</div>
+                              <div style="font-size:13px;color:#586174;margin-top:2px">{{ it.sub }}</div>
+                              <sc-if value="{{ it.hasFlag }}"><span style="display:inline-block;margin-top:6px;font-size:12px;font-weight:600;border-radius:99px;padding:2px 9px;background:{{ it.flagBg }};color:{{ it.flagFg }}">{{ it.flag }}</span></sc-if>
+                            </div>
+                            <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;white-space:nowrap">{{ it.time }}</span>
+                          </button>
+                        </sc-for>
+                      </div>
+                      <sc-if value="{{ noDayItems }}"><div style="font-size:15px;color:#586174;padding:4px 2px">Ingen vakter denne dagen.</div></sc-if>
+                      <button onClick="{{ addDay }}" style="height:52px;border-radius:14px;border:1.5px dashed #C9CDD5;background:#FBFAF6;cursor:pointer;font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">add</span>{{ addDayLabel }}</button>
+                    </div>
+                  </sc-if>
+
+                  <!-- måned -->
+                  <sc-if value="{{ isMnd }}">
+                    <div style="background:#FFFFFF;border-radius:18px;box-shadow:0 1px 3px rgba(11,37,69,.06);padding:14px">
+                      <div style="font-size:17px;font-weight:700;padding:0 4px 10px">Oktober 2026</div>
+                      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+                        <sc-for list="{{ monthHead }}" as="h" hint-placeholder-count="7"><div style="font-size:12px;color:#586174;font-weight:600;text-align:center;padding:4px 0">{{ h }}</div></sc-for>
+                        <sc-for list="{{ monthCells }}" as="c" hint-placeholder-count="35">
+                          <button onClick="{{ c.pick }}" aria-label="{{ c.aria }}" style="min-height:{{ c.h }};border-radius:10px;cursor:pointer;padding:6px;display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;text-align:left;background:{{ c.bg }};border:{{ c.border }};color:{{ c.fg }}">
+                            <span style="font-size:14px;font-weight:700">{{ c.num }}</span>
+                            <sc-if value="{{ c.hasCount }}"><span style="font-size:11px;font-family:'IBM Plex Mono',monospace;background:#0B2545;color:#fff;border-radius:6px;padding:1px 5px;white-space:nowrap">{{ c.count }}</span></sc-if>
+                            <sc-if value="{{ c.hasOpen }}"><span style="font-size:11px;font-weight:600;background:#F6DF6E;color:#0B2545;border-radius:6px;padding:1px 5px;white-space:nowrap">{{ c.open }}</span></sc-if>
+                          </button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ===== FORESPØRSLER OG TIMER ===== -->
+          <sc-if value="{{ is.foresp }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em">Forespørsler og timer</h1>
+              <div role="tablist" style="display:flex;gap:4px;background:#FFFFFF;border-radius:99px;padding:3px;align-self:flex-start;box-shadow:0 1px 3px rgba(11,37,69,.06)">
+                <sc-for list="{{ reqTabs }}" as="t" hint-placeholder-count="2">
+                  <button role="tab" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" style="height:40px;border:0;border-radius:99px;padding:0 16px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}<sc-if value="{{ t.hasBadge }}"><span style="background:#F6DF6E;color:#0B2545;border-radius:99px;min-width:22px;height:22px;padding:0 7px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ t.badge }}</span></sc-if></button>
+                </sc-for>
+              </div>
+
+              <sc-if value="{{ isReqTab }}">
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+                    <div style="display:flex;gap:6px;overflow-x:auto;max-width:100%">
+                      <sc-for list="{{ reqFilters }}" as="f" hint-placeholder-count="5">
+                        <button onClick="{{ f.pick }}" aria-pressed="{{ f.on }}" style="height:40px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;background:{{ f.bg }};color:{{ f.fg }};border:{{ f.border }}">{{ f.label }}</button>
+                      </sc-for>
+                    </div>
+                    <sc-if value="{{ canApproveAll }}"><button onClick="{{ approveAll }}" style="margin-left:auto;height:44px;padding:0 16px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">done_all</span>Godkjenn alle som er i orden</button></sc-if>
+                  </div>
+                  <sc-if value="{{ noReqList }}">
+                    <div style="background:#FFFFFF;border-radius:18px;padding:32px 22px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+                      <img src="assets/mascot-hip.png" alt="" style="width:96px;height:96px;object-fit:contain">
+                      <div style="font-size:17px;font-weight:600">Alt er besvart.</div>
+                      <div style="font-size:14px;color:#586174">Du får beskjed på e-post når noen spør om noe.</div>
+                    </div>
+                  </sc-if>
+                  <sc-for list="{{ reqList }}" as="r" hint-placeholder-count="4">
+                    <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px;padding:14px 18px">
+                      <div style="display:flex;align-items:center;gap:12px;flex:1 1 280px;min-width:0">
+                        <div style="width:44px;height:44px;border-radius:99px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ r.iconBg }};color:{{ r.iconFg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">{{ r.icon }}</span></div>
+                        <div style="min-width:0">
+                          <div style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:#586174">{{ r.kindLabel }}</div>
+                          <div style="font-size:16px;font-weight:600;margin-top:2px">{{ r.title }}</div>
+                          <div style="font-size:14px;color:#586174;margin-top:2px;text-wrap:pretty">{{ r.sub }}</div>
+                        </div>
+                      </div>
+                      <div style="display:flex;flex-wrap:wrap;gap:8px">
+                        <sc-for list="{{ r.actions }}" as="a">
+                          <button onClick="{{ a.run }}" style="height:44px;padding:0 16px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;background:{{ a.bg }};color:{{ a.fg }};border:{{ a.border }}">{{ a.label }}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isTimerTab }}">
+                <div style="display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;align-items:center;gap:10px;background:#E2F1E8;color:#1F7D52;border-radius:14px;padding:12px 16px;font-size:14px;font-weight:500"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">payments</span>Godkjente timer går rett til Lønn i regnskapet.</div>
+                  <div style="background:#FFFFFF;border-radius:18px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:14px 18px">
+                      <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:700">Uke 40, 28. sep–4. okt</div><div style="font-size:13px;color:#586174;margin-top:2px">{{ timerSub }}</div></div>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600">{{ timerSum }}</span>
+                      <sc-if value="{{ canTimerOk }}"><button onClick="{{ timerOkAll }}" style="height:44px;padding:0 16px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:14px;font-weight:600;cursor:pointer">Godkjenn de som stemmer</button></sc-if>
+                    </div>
+                    <sc-for list="{{ timerRows }}" as="t" hint-placeholder-count="6">
+                      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:12px 18px;border-top:1px solid #EFEBE2">
+                        <div style="display:flex;align-items:center;gap:12px;flex:1 1 220px;min-width:0">
+                          <div style="width:36px;height:36px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">{{ t.ini }}</div>
+                          <div style="min-width:0">
+                            <div style="font-size:15px;font-weight:600">{{ t.name }}</div>
+                            <div style="display:flex;align-items:center;gap:5px;font-size:13px;margin-top:2px;color:{{ t.stFg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">{{ t.stIcon }}</span>{{ t.stLabel }}</div>
+                            <sc-if value="{{ t.hasAvvik }}"><div style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;font-weight:600;color:#7A5A00;background:#FFF4CC;border:1px solid #EAD88A;border-radius:99px;padding:2px 9px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:14px;line-height:1">warning</span>{{ t.avvik }}</div></sc-if>
+                          </div>
+                        </div>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;min-width:64px;text-align:right">{{ t.hours }}</span>
+                        <sc-if value="{{ t.canOk }}"><button onClick="{{ t.ok }}" style="height:44px;padding:0 16px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">Godkjenn</button></sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{ hasAbsRows }}">
+                    <div style="background:#FFFFFF;border-radius:18px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                      <div style="padding:14px 18px"><div style="font-size:16px;font-weight:700">Fravær til Lønn</div><div style="font-size:13px;color:#586174;margin-top:2px">Godkjent fravær følger med timene til Lønn.</div></div>
+                      <sc-for list="{{ absRows }}" as="f">
+                        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:12px 18px;border-top:1px solid #EFEBE2">
+                          <div style="display:flex;align-items:center;gap:12px;flex:1 1 220px;min-width:0">
+                            <div style="width:36px;height:36px;border-radius:99px;background:#FBEDEA;color:#A2371C;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">event_busy</span></div>
+                            <div style="min-width:0"><div style="font-size:15px;font-weight:600">{{ f.name }}</div><div style="font-size:13px;color:#586174;margin-top:2px">{{ f.label }}</div></div>
+                          </div>
+                          <span style="font-size:13px;font-weight:600;border-radius:99px;padding:4px 10px;background:{{ f.payBg }};color:{{ f.payFg }}">{{ f.pay }}</span>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;min-width:64px;text-align:right">{{ f.hours }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ===== ANSATTE ===== -->
+          <sc-if value="{{ is.ansatte }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 16px">
+                <div style="flex:1 1 280px;min-width:0">
+                  <h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em">Ansatte</h1>
+                  <div style="font-size:15px;color:#586174;margin-top:4px">{{ empSummary }}</div>
+                </div>
+                <button onClick="{{ openInvite }}" style="height:48px;padding:0 22px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer;padding:0 18px;display:flex;align-items:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">person_add</span>Inviter ansatt</button>
+              </div>
+              <sc-if value="{{ empTable }}">
+                <div style="background:#FFFFFF;border-radius:18px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                  <div style="display:grid;grid-template-columns:minmax(200px,1.5fr) minmax(150px,1.1fr) minmax(130px,1fr) 150px 110px 210px;align-items:center;padding:12px 18px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:#586174;gap:12px">
+                    <span>Navn</span><span>Stilling</span><span>Avtale</span><span>Tilgang</span><span style="text-align:right">Timer okt.</span><span></span>
+                  </div>
+                  <sc-for list="{{ empRows }}" as="e" hint-placeholder-count="6">
+                    <div style="display:grid;grid-template-columns:minmax(200px,1.5fr) minmax(150px,1.1fr) minmax(130px,1fr) 150px 110px 210px;align-items:center;padding:12px 18px;border-top:1px solid #EFEBE2;gap:12px">
+                      <button onClick="{{ e.open }}" style="border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;padding:0;min-height:44px;min-width:0">
+                        <div style="width:36px;height:36px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">{{ e.ini }}</div>
+                        <span style="font-size:15px;font-weight:600">{{ e.name }}</span>
+                        <sc-if value="{{ e.leader }}"><span style="font-size:11px;font-weight:600;background:#0B2545;color:#fff;border-radius:99px;padding:2px 8px">Leder</span></sc-if>
+                      </button>
+                      <span style="font-size:14px">{{ e.role }}</span>
+                      <span style="font-size:14px;color:#586174">{{ e.deal }}</span>
+                      <span style="justify-self:start;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;border-radius:99px;padding:4px 10px;background:{{ e.accBg }};color:{{ e.accFg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">{{ e.accIcon }}</span>{{ e.access }}</span>
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;text-align:right">{{ e.month }}</span>
+                      <div style="display:flex;gap:8px;justify-content:flex-end">
+                        <button onClick="{{ e.edit }}" style="height:40px;padding:0 14px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">Endre</button>
+                        <sc-if value="{{ e.canInvite }}"><button onClick="{{ e.invite }}" style="height:40px;padding:0 14px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap">{{ e.inviteLabel }}</button></sc-if>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ empCards }}">
+                <div style="display:grid;grid-template-columns:{{ empCardCols }};gap:10px">
+                  <sc-for list="{{ empRows }}" as="e" hint-placeholder-count="6">
+                    <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+                      <button onClick="{{ e.open }}" style="border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left;padding:0;min-height:44px">
+                        <div style="width:42px;height:42px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">{{ e.ini }}</div>
+                        <div style="flex:1;min-width:0">
+                          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px;font-weight:600">{{ e.name }}</span><sc-if value="{{ e.leader }}"><span style="font-size:11px;font-weight:600;background:#0B2545;color:#fff;border-radius:99px;padding:2px 8px">Leder</span></sc-if></div>
+                          <div style="font-size:13px;color:#586174;margin-top:2px">{{ e.role }} · {{ e.deal }}</div>
+                        </div>
+                        <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#8A909C">chevron_right</span>
+                      </button>
+                      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                        <span style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;border-radius:99px;padding:4px 10px;background:{{ e.accBg }};color:{{ e.accFg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">{{ e.accIcon }}</span>{{ e.access }}</span>
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#586174">{{ e.month }} i okt.</span>
+                        <button onClick="{{ e.edit }}" style="margin-left:auto;height:44px;padding:0 14px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">Endre</button>
+                        <sc-if value="{{ e.canInvite }}"><button onClick="{{ e.invite }}" style="height:44px;padding:0 14px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:14px;font-weight:600;cursor:pointer">{{ e.inviteLabel }}</button></sc-if>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <!-- ===== INNSTILLINGER ===== -->
+          <sc-if value="{{ is.innst }}">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 16px">
+                <div style="flex:1 1 300px;min-width:0">
+                  <h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em">Innstillinger for vaktplanen</h1>
+                  <div style="font-size:15px;color:#586174;margin-top:4px;text-wrap:pretty">Du bestemmer hva de ansatte kan gjøre. Det du slår av, forsvinner helt for dem.</div>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+                  <span style="display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:99px;font-size:13px;font-weight:600;background:{{ setBadge.bg }};color:{{ setBadge.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:16px;line-height:1">{{ setBadge.icon }}</span>{{ setBadge.label }}</span>
+                  <sc-if value="{{ notDefault }}"><button onClick="{{ resetSet }}" style="height:44px;padding:0 14px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer">Tilbakestill til standard</button></sc-if>
+                  <button onClick="{{ saveSet }}" disabled="{{ saveBtn.disabled }}" style="height:44px;padding:0 20px;border-radius:12px;border:0;font-size:15px;font-weight:600;cursor:{{ saveBtn.cursor }};background:{{ saveBtn.bg }};color:{{ saveBtn.fg }}">Lagre</button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:{{ innstCols }};gap:20px;align-items:start">
+                <div style="background:#FFFFFF;border-radius:18px;box-shadow:0 1px 3px rgba(11,37,69,.06);overflow:hidden">
+                  <sc-for list="{{ setRows }}" as="s" hint-placeholder-count="12">
+                    <div style="padding:16px 18px;border-top:{{ s.border }};display:flex;flex-direction:column;gap:12px">
+                      <div style="display:flex;gap:14px;align-items:flex-start">
+                        <div style="flex:1;min-width:0">
+                          <div style="font-size:16px;font-weight:600">{{ s.name }}</div>
+                          <div style="font-size:14px;color:#586174;margin-top:3px;text-wrap:pretty">{{ s.desc }}</div>
+                        </div>
+                        <sc-if value="{{ s.locked }}"><span style="flex-shrink:0;font-size:12px;font-weight:600;background:#EFEBE2;color:#586174;border-radius:99px;padding:4px 10px">Bare i Selskap</span></sc-if>
+                        <sc-if value="{{ s.canToggle }}">
+                          <button role="switch" aria-checked="{{ s.ariaOn }}" aria-label="{{ s.name }}" onClick="{{ s.toggle }}" style="flex-shrink:0;width:52px;height:32px;border-radius:99px;border:0;cursor:pointer;padding:3px;display:flex;align-items:center;background:{{ s.trackBg }};transition:background .15s ease">
+                            <span style="width:26px;height:26px;border-radius:99px;background:#FFFFFF;box-shadow:0 1px 3px rgba(11,37,69,.3);transition:transform .15s ease;transform:{{ s.knob }}"></span>
+                          </button>
+                        </sc-if>
+                      </div>
+                      <sc-if value="{{ s.showSubs }}">
+                        <div style="background:#FBFAF6;border:1px solid #EFEBE2;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:12px">
+                          <sc-for list="{{ s.subs }}" as="u">
+                            <div style="display:flex;flex-direction:column;gap:8px">
+                              <sc-if value="{{ u.isSeg }}">
+                                <div style="display:flex;flex-direction:column;gap:6px">
+                                  <span style="font-size:13px;font-weight:600;color:#586174">{{ u.label }}</span>
+                                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                                    <sc-for list="{{ u.opts }}" as="o">
+                                      <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:40px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}">{{ o.label }}</button>
+                                    </sc-for>
+                                  </div>
+                                </div>
+                              </sc-if>
+                              <sc-if value="{{ u.isCheck }}">
+                                <button role="checkbox" aria-checked="{{ u.on }}" onClick="{{ u.toggle }}" style="border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;padding:0;min-height:40px;font-size:14px">
+                                  <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;color:{{ u.color }};font-variation-settings:'FILL' {{ u.fill }}">{{ u.icon }}</span>{{ u.label }}
+                                </button>
+                              </sc-if>
+                              <sc-if value="{{ u.isNum }}">
+                                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+                                  <span style="font-size:14px">{{ u.label }}</span>
+                                  <div style="display:flex;align-items:center;gap:4px;background:#FFFFFF;border:1px solid #E4DFD4;border-radius:99px;padding:2px">
+                                    <button aria-label="Mindre" onClick="{{ u.dec }}" style="width:40px;height:40px;border-radius:99px;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">remove</span></button>
+                                    <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;min-width:40px;text-align:center">{{ u.value }}</span>
+                                    <button aria-label="Mer" onClick="{{ u.inc }}" style="width:40px;height:40px;border-radius:99px;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">add</span></button>
+                                  </div>
+                                  <span style="font-size:14px;color:#586174">{{ u.unit }}</span>
+                                </div>
+                              </sc-if>
+                              <sc-if value="{{ u.isChips }}">
+                                <div style="display:flex;flex-direction:column;gap:6px">
+                                  <span style="font-size:13px;font-weight:600;color:#586174">{{ u.label }}</span>
+                                  <div style="display:flex;flex-wrap:wrap;gap:6px">
+                                    <sc-for list="{{ u.opts }}" as="o">
+                                      <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:40px;border-radius:99px;padding:0 12px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1">{{ o.icon }}</span>{{ o.label }}</button>
+                                    </sc-for>
+                                  </div>
+                                </div>
+                              </sc-if>
+                              <sc-if value="{{ u.isPay }}">
+                                <div style="display:flex;flex-direction:column;gap:4px">
+                                  <span style="font-size:13px;font-weight:600;color:#586174;text-wrap:pretty">{{ u.label }}</span>
+                                  <sc-for list="{{ u.list }}" as="p">
+                                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;min-height:48px;border-top:1px solid #EFEBE2;padding:4px 0">
+                                      <button role="checkbox" aria-checked="{{ p.on }}" onClick="{{ p.toggle }}" style="flex:1 1 180px;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;padding:0;min-height:40px;font-size:14px">
+                                        <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1;color:{{ p.color }};font-variation-settings:'FILL' {{ p.fill }}">{{ p.icon }}</span>{{ p.name }}
+                                      </button>
+                                      <sc-if value="{{ p.showPay }}">
+                                        <div role="group" aria-label="{{ p.aria }}" style="display:flex;gap:4px">
+                                          <sc-for list="{{ p.pays }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:36px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }};padding:0 12px;font-size:13px">{{ o.label }}</button></sc-for>
+                                        </div>
+                                      </sc-if>
+                                    </div>
+                                  </sc-for>
+                                </div>
+                              </sc-if>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <aside aria-label="Forhåndsvisning" style="position:{{ pvPos }};top:0;display:flex;flex-direction:column;gap:12px;align-items:center">
+                  <div style="align-self:stretch;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Slik ser det ut for de ansatte</div>
+                  <div style="width:100%;max-width:320px;border-radius:36px;border:9px solid #0B1424;background:#F4F1EA;overflow:hidden;display:flex;flex-direction:column">
+                    <div style="padding:16px 12px 12px;display:flex;flex-direction:column;gap:10px">
+                      <div style="background:#0B2545;color:#fff;border-radius:14px;padding:12px 14px">
+                        <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#C9D6EA">Min vakt</div>
+                        <div style="font-size:13px;color:#C9D6EA;margin-top:4px">Mandag 5. okt</div>
+                        <div style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">13:00–21:00</div>
+                      </div>
+                      <sc-if value="{{ pv.showCol }}">
+                        <div style="background:#FFFFFF;border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px">
+                          <div style="width:26px;height:26px;border-radius:99px;background:#C9CDD5;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700">{{ pv.colIni }}</div>
+                          <span style="font-size:13px;font-weight:600;flex:1">{{ pv.colName }}</span>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#586174">07:00–15:00</span>
+                        </div>
+                      </sc-if>
+                      <sc-for list="{{ pv.buttons }}" as="b">
+                        <div style="background:#FFFFFF;border-radius:12px;height:42px;padding:0 12px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">{{ b.icon }}</span>{{ b.label }}</div>
+                      </sc-for>
+                      <sc-if value="{{ pv.noButtons }}"><div style="font-size:12px;color:#586174;padding:0 4px">Den ansatte kan bare se vakten.</div></sc-if>
+                      <sc-if value="{{ pv.showOpen }}">
+                        <div style="background:#FFFFFF;border-radius:12px;padding:10px 12px 10px 15px;box-shadow:inset 4px 0 0 #F6DF6E;display:flex;flex-direction:column;gap:6px">
+                          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:600">Lør 10. okt · Midt</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px">10–18</span></div>
+                          <sc-if value="{{ pv.openWarn }}"><span style="align-self:flex-start;font-size:11px;font-weight:600;color:#7A5A00;background:#FFF4CC;border:1px solid #EAD88A;border-radius:99px;padding:1px 8px">Mer enn stillingen din (30 t totalt)</span></sc-if>
+                          <div style="height:34px;border-radius:10px;background:#0B2545;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center">Jeg tar den</div>
+                          <div style="font-size:11px;color:#586174">{{ pv.openNote }}</div>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <div style="margin-top:auto;background:#FFFFFF;border-top:1px solid #E4DFD4;display:flex;padding:6px 4px 12px">
+                      <sc-for list="{{ pv.nav }}" as="n">
+                        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:#586174"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">{{ n.icon }}</span><span style="font-size:10px">{{ n.label }}</span></div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div style="align-self:stretch;font-size:13px;color:#586174;line-height:1.5;text-wrap:pretty"><span style="font-weight:600;color:#0B2545">Under «Mer»:</span> {{ pv.more }}</div>
+                </aside>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== ASSISTENT (skjerm på mobil og nettbrett stående) ===== -->
+          <sc-if value="{{ is.asst }}">
+            <div style="display:flex;flex-direction:column;gap:14px;max-width:640px;margin:0 auto">
+              <h1 style="margin:0;font-size:26px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:10px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:26px;line-height:1">auto_awesome</span>Assistent</h1>
+              <div style="background:#FFFFFF;border-radius:16px;padding:14px 16px;font-size:15px;line-height:1.45">Hei, Kari. Jeg lager forslag til vaktplanen. Du godkjenner, og jeg publiserer aldri noe selv.</div>
+              <sc-for list="{{ asstMsgs }}" as="m">
+                <sc-if value="{{ m.isUser }}"><div style="align-self:flex-end;max-width:85%;background:#0B2545;color:#fff;border-radius:16px 16px 4px 16px;padding:10px 14px;font-size:15px">{{ m.text }}</div></sc-if>
+                <sc-if value="{{ m.isCard }}">
+                  <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);padding:14px 16px;display:flex;flex-direction:column;gap:10px;border-top:4px solid #F6DF6E">
+                    <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#7A5A00">Forslag</div>
+                    <div style="font-size:16px;font-weight:700">{{ m.title }}</div>
+                    <div style="font-size:14px;color:#586174;line-height:1.45;text-wrap:pretty">{{ m.body }}</div>
+                    <sc-for list="{{ m.rows }}" as="w"><div style="display:flex;gap:8px;font-size:14px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#1F7D52">check</span>{{ w }}</div></sc-for>
+                    <sc-if value="{{ m.hasActions }}"><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ m.actions }}" as="a"><button onClick="{{ a.run }}" style="height:44px;padding:0 16px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;background:{{ a.bg }};color:{{ a.fg }};border:{{ a.border }}">{{ a.label }}</button></sc-for></div></sc-if>
+                    <sc-if value="{{ m.hasDone }}"><span style="align-self:flex-start;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;border-radius:99px;padding:4px 10px;background:{{ m.doneBg }};color:{{ m.doneFg }}">{{ m.done }}</span></sc-if>
+                  </div>
+                </sc-if>
+              </sc-for>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ asstSugs }}" as="g" hint-placeholder-count="3">
+                  <button onClick="{{ g.run }}" style="min-height:44px;padding:8px 14px;border-radius:99px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer;text-align:left">{{ g.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+        </div>
+
+        <!-- rail (mobil liggende) -->
+        <sc-if value="{{ showRail }}">
+          <nav aria-label="Hovedmeny" style="position:absolute;left:0;top:0;bottom:0;width:{{ lay.navLeft }};background:#FFFFFF;border-right:1px solid #E4DFD4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 0 8px 30px;z-index:12">
+            <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+              <button onClick="{{ n.go }}" aria-current="{{ n.current }}" style="width:66px;height:62px;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;color:{{ n.fg }}">
+                <span style="width:50px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;background:{{ n.bg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">{{ n.icon }}</span></span>
+                <span style="font-size:10px;font-weight:{{ n.weight }}">{{ n.short }}</span>
+                <sc-if value="{{ n.hasBadge }}"><span style="position:absolute;top:2px;left:50%;margin-left:8px;background:#F6DF6E;color:#0B2545;border-radius:99px;min-width:18px;height:18px;padding:0 5px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">{{ n.badge }}</span></sc-if>
+              </button>
+            </sc-for>
+          </nav>
+        </sc-if>
+
+        <!-- bunnmeny (mobil stående) -->
+        <sc-if value="{{ showBottom }}">
+          <nav aria-label="Hovedmeny" style="position:absolute;left:0;right:0;bottom:0;height:86px;background:#FFFFFF;border-top:1px solid #E4DFD4;display:flex;padding:6px 4px 24px;z-index:12">
+            <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+              <button onClick="{{ n.go }}" aria-current="{{ n.current }}" style="flex:1;min-width:0;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;color:{{ n.fg }}">
+                <span style="width:52px;height:30px;border-radius:99px;display:flex;align-items:center;justify-content:center;background:{{ n.bg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">{{ n.icon }}</span></span>
+                <span style="font-size:11px;font-weight:{{ n.weight }};white-space:nowrap">{{ n.short }}</span>
+                <sc-if value="{{ n.hasBadge }}"><span style="position:absolute;top:0;left:50%;margin-left:8px;background:#F6DF6E;color:#0B2545;border-radius:99px;min-width:18px;height:18px;padding:0 5px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff">{{ n.badge }}</span></sc-if>
+              </button>
+            </sc-for>
+          </nav>
+        </sc-if>
+        <sc-if value="{{ fx.home }}"><div style="position:absolute;bottom:8px;left:50%;width:134px;height:5px;margin-left:-67px;border-radius:99px;background:#0B2545;z-index:40"></div></sc-if>
+
+        <!-- toast -->
+        <sc-if value="{{ hasToast }}">
+          <div style="position:absolute;left:{{ lay.navLeft }};right:0;bottom:{{ lay.toastBottom }};z-index:70;display:flex;justify-content:center;padding:0 16px;pointer-events:none"><div role="status" style="width:100%;max-width:460px;pointer-events:auto;background:#0B2545;color:#fff;border-radius:14px;padding:12px 12px 12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 10px 24px -8px rgba(11,37,69,.5);animation:fadeIn .2s ease">
+            <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1;color:#F6DF6E">check_circle</span>
+            <span style="flex:1;font-size:14px;line-height:1.35">{{ toastText }}</span>
+            <sc-if value="{{ canUndo }}"><button onClick="{{ undo }}" style="border:0;background:transparent;color:#F6DF6E;font-size:14px;font-weight:700;cursor:pointer;height:40px;padding:0 8px">Angre</button></sc-if>
+          </div></div>
+        </sc-if>
+
+        <!-- overlay: modal / sidepanel / ark -->
+        <sc-if value="{{ hasOv }}">
+          <div style="position:absolute;inset:0;z-index:60;display:flex;flex-direction:{{ ox.dir }};justify-content:{{ ox.justify }};align-items:{{ ox.align }}">
+            <div onClick="{{ closeOv }}" style="position:absolute;inset:0;background:rgba(11,37,69,.35);animation:fadeIn .2s ease"></div>
+            <div role="dialog" aria-modal="true" aria-label="{{ ox.label }}" style="position:relative;background:#F4F1EA;display:flex;flex-direction:column;overflow:hidden;width:{{ ox.w }};height:{{ ox.h }};max-height:{{ ox.maxH }};border-radius:{{ ox.radius }};animation:{{ ox.anim }};box-shadow:0 24px 48px -16px rgba(11,37,69,.45)">
+              <sc-if value="{{ ox.handle }}"><div style="width:40px;height:5px;border-radius:99px;background:#C9CDD5;align-self:center;flex-shrink:0;margin-top:10px"></div></sc-if>
+
+              <!-- lag / endre vakt -->
+              <sc-if value="{{ ovEdit }}">
+                <div style="display:flex;flex-direction:column;min-height:0;flex:1">
+                  <div style="display:flex;align-items:center;gap:12px;padding:14px 20px 10px">
+                    <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:700">{{ ed.title }}</div><div style="font-size:14px;color:#586174;margin-top:2px">{{ ed.sub }}</div></div>
+                    <button aria-label="Lukk" onClick="{{ closeOv }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">close</span></button>
+                  </div>
+                  <div style="flex:1;min-height:0;overflow-y:auto;padding:6px 20px 16px;display:flex;flex-direction:column;gap:16px">
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:14px;font-weight:600">Ansatt</span>
+                      <div style="display:flex;flex-wrap:wrap;gap:6px">
+                        <sc-for list="{{ ed.emps }}" as="o" hint-placeholder-count="6">
+                          <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:44px;border-radius:99px;padding:0 14px 0 6px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}">
+                            <span style="width:32px;height:32px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:{{ o.avBg }};color:{{ o.avFg }}">{{ o.ini }}<sc-if value="{{ o.isOpen }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:17px;line-height:1">front_hand</span></sc-if></span>
+                            {{ o.label }}
+                            <sc-if value="{{ o.hasNote }}"><span style="font-size:11px;font-weight:600;border-radius:99px;padding:1px 7px;background:#F6DF6E;color:#0B2545">{{ o.note }}</span></sc-if>
+                          </button>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:14px;font-weight:600">Dato</span>
+                      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px">
+                        <sc-for list="{{ ed.days }}" as="o" hint-placeholder-count="7">
+                          <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" aria-label="{{ o.aria }}" style="height:52px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}"><span style="font-size:11px">{{ o.short }}</span><span style="font-size:16px;font-weight:700">{{ o.num }}</span></button>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:14px;font-weight:600">Mal</span>
+                      <div style="display:flex;flex-wrap:wrap;gap:6px">
+                        <sc-for list="{{ ed.tpls }}" as="o" hint-placeholder-count="4">
+                          <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:44px;border-radius:12px;padding:0 12px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}"><span style="font-size:14px;font-weight:600">{{ o.label }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px">{{ o.time }}</span></button>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+                      <label style="display:flex;flex-direction:column;gap:6px;flex:1 1 120px"><span style="font-size:14px;font-weight:600">Start</span><input type="time" value="{{ ed.start }}" onChange="{{ ed.setStart }}" style="height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:0 12px;font-family:'IBM Plex Mono',monospace;font-size:17px"></label>
+                      <label style="display:flex;flex-direction:column;gap:6px;flex:1 1 120px"><span style="font-size:14px;font-weight:600">Slutt</span><input type="time" value="{{ ed.end }}" onChange="{{ ed.setEnd }}" style="height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:0 12px;font-family:'IBM Plex Mono',monospace;font-size:17px"></label>
+                      <div style="flex:1 1 180px;min-height:48px;display:flex;align-items:center;gap:8px;font-size:14px;color:#586174"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">coffee</span>{{ ed.pause }}</div>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:16px">
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <span style="font-size:14px;font-weight:600">Sted</span>
+                        <div style="display:flex;background:#FFFFFF;border-radius:99px;padding:3px;border:1px solid #E4DFD4">
+                          <sc-for list="{{ ed.places }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:40px;border:0;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for>
+                        </div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <span style="font-size:14px;font-weight:600">Gjenta</span>
+                        <div style="display:flex;background:#FFFFFF;border-radius:99px;padding:3px;border:1px solid #E4DFD4">
+                          <sc-for list="{{ ed.repeats }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:40px;border:0;border-radius:99px;padding:0 12px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for>
+                        </div>
+                      </div>
+                    </div>
+                    <sc-if value="{{ ed.showComment }}">
+                      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:600">Kommentar</span><textarea value="{{ ed.comment }}" onChange="{{ ed.setComment }}" rows="2" placeholder="Synlig for den ansatte" style="border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:10px 12px;font-size:15px;resize:vertical"></textarea></label>
+                    </sc-if>
+                    <sc-if value="{{ ed.hasInterest }}"><div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#7A5A00;background:#FFF4CC;border-radius:12px;padding:10px 14px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">front_hand</span>{{ ed.interest }}</div></sc-if>
+                    <sc-if value="{{ ed.hasWarn }}">
+                      <div role="alert" style="background:#FFF4CC;border:1px solid #EAD88A;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+                        <sc-for list="{{ ed.warnings }}" as="w"><div style="display:flex;gap:8px;font-size:14px;font-weight:500;color:#0B2545"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;color:#7A5A00">warning</span>{{ w }}</div></sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;padding:12px 20px 18px;border-top:1px solid #E4DFD4;background:#FFFFFF">
+                    <sc-if value="{{ ed.isEditing }}"><button onClick="{{ ed.del }}" style="height:48px;padding:0 14px;border-radius:12px;border:0;background:transparent;color:#A2371C;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">delete</span>Slett</button></sc-if>
+                    <button onClick="{{ closeOv }}" style="margin-left:auto;height:48px;padding:0 18px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer">Avbryt</button>
+                    <button onClick="{{ ed.save }}" style="height:48px;padding:0 22px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer">{{ ed.saveLabel }}</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- ansatt-panel -->
+              <sc-if value="{{ ovPerson }}">
+                <div style="display:flex;flex-direction:column;min-height:0;flex:1;overflow-y:auto">
+                  <div style="display:flex;align-items:flex-start;gap:14px;padding:16px 20px">
+                    <div style="width:56px;height:56px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0">{{ pp.ini }}</div>
+                    <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:700">{{ pp.name }}</div><div style="font-size:14px;color:#586174;margin-top:2px">{{ pp.role }}</div><div style="font-size:14px;color:#586174">{{ pp.deal }}</div></div>
+                    <button aria-label="Lukk" onClick="{{ closeOv }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">close</span></button>
+                  </div>
+                  <div style="padding:0 20px 24px;display:flex;flex-direction:column;gap:16px">
+                    <div style="background:#FFFFFF;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+                      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:600">Uke 41</span><span style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600">{{ pp.hours }}</span></div>
+                      <sc-if value="{{ pp.hasBar }}"><div style="height:6px;border-radius:99px;background:#EFEBE2"><div style="height:100%;border-radius:99px;width:{{ pp.barW }};background:{{ pp.barC }}"></div></div></sc-if>
+                      <sc-if value="{{ pp.hasOt }}"><div style="font-size:13px;font-weight:600;color:#7A5A00">{{ pp.ot }}</div></sc-if>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Vakter</span>
+                      <sc-if value="{{ pp.noShifts }}"><div style="font-size:14px;color:#586174">Ingen vakter denne uka.</div></sc-if>
+                      <sc-for list="{{ pp.shifts }}" as="s">
+                        <button onClick="{{ s.open }}" style="text-align:left;border:0;cursor:pointer;background:#FFFFFF;border-radius:12px;padding:10px 14px 10px 16px;display:flex;align-items:center;gap:12px;min-height:52px;box-shadow:inset 4px 0 0 {{ s.stripe }}">
+                          <span style="font-size:14px;font-weight:600;width:56px">{{ s.day }}</span>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">{{ s.time }}</span>
+                          <span style="font-size:13px;color:#586174;flex:1;min-width:0;text-align:right">{{ s.place }}</span>
+                        </button>
+                      </sc-for>
+                    </div>
+                    <sc-if value="{{ pp.hasAvail }}">
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Tilgjengelighet</span>
+                        <sc-for list="{{ pp.avail }}" as="a"><div style="display:flex;align-items:center;gap:8px;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:500;background:{{ a.bg }};color:{{ a.fg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">{{ a.icon }}</span>{{ a.label }}</div></sc-for>
+                      </div>
+                    </sc-if>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Kontakt</span>
+                      <a href="{{ pp.tel }}" style="background:#FFFFFF;border-radius:12px;padding:0 14px;min-height:48px;display:flex;align-items:center;gap:10px;text-decoration:none;font-size:15px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">call</span><span style="font-family:'IBM Plex Mono',monospace">{{ pp.phone }}</span></a>
+                      <a href="{{ pp.mail }}" style="background:#FFFFFF;border-radius:12px;padding:0 14px;min-height:48px;display:flex;align-items:center;gap:10px;text-decoration:none;font-size:15px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">mail</span>{{ pp.email }}</a>
+                    </div>
+                    <sc-if value="{{ pp.showAbs }}">
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Fravær og saldo</span>
+                        <div style="background:#FFFFFF;border-radius:12px;overflow:hidden">
+                          <sc-for list="{{ pp.saldoRows }}" as="s"><div style="display:flex;justify-content:space-between;gap:12px;padding:11px 14px;font-size:14px;border-top:{{ s.border }}"><span>{{ s.label }}</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600">{{ s.value }}</span></div></sc-for>
+                        </div>
+                        <sc-for list="{{ pp.absList }}" as="f">
+                          <div style="display:flex;align-items:center;gap:10px;background:#FFFFFF;border-radius:12px;padding:10px 14px">
+                            <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1;color:{{ f.color }}">{{ f.icon }}</span>
+                            <div style="min-width:0"><div style="font-size:14px;font-weight:600">{{ f.label }}</div><div style="font-size:12px;color:#586174;margin-top:1px">{{ f.sub }}</div></div>
+                          </div>
+                        </sc-for>
+                        <sc-if value="{{ pp.canShift }}"><button onClick="{{ pp.regAbs }}" style="height:48px;padding:0 18px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">event_busy</span>Registrer fravær</button></sc-if>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ pp.canShift }}"><button onClick="{{ pp.newShift }}" style="height:52px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">add</span>{{ pp.newLabel }}</button></sc-if>
+                    <button onClick="{{ pp.manage }}" style="height:48px;padding:0 18px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">manage_accounts</span>Administrer ansatt</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- fravær: godkjenn / avslå / registrer -->
+              <sc-if value="{{ ovAbs }}">
+                <div style="display:flex;flex-direction:column;min-height:0;flex:1">
+                  <div style="display:flex;align-items:center;gap:12px;padding:14px 20px 10px">
+                    <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:700">{{ ab.title }}</div><div style="font-size:14px;color:#586174;margin-top:2px">{{ ab.sub }}</div></div>
+                    <button aria-label="Lukk" onClick="{{ closeOv }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">close</span></button>
+                  </div>
+                  <div style="flex:1;min-height:0;overflow-y:auto;padding:6px 20px 16px;display:flex;flex-direction:column;gap:16px">
+                    <sc-if value="{{ ab.hasAsked }}"><div style="display:flex;align-items:center;gap:10px;background:#FFFFFF;border-radius:12px;padding:10px 14px;font-size:14px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">forum</span>{{ ab.asked }}</div></sc-if>
+                    <sc-if value="{{ ab.pickDay }}">
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <span style="font-size:14px;font-weight:600">Dato</span>
+                        <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px">
+                          <sc-for list="{{ ab.days }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" aria-label="{{ o.aria }}" style="height:52px;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}"><span style="font-size:11px">{{ o.short }}</span><span style="font-size:16px;font-weight:700">{{ o.num }}</span></button></sc-for>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ ab.approve }}">
+                      <div style="display:flex;flex-direction:column;gap:16px">
+                        <div style="display:flex;flex-direction:column;gap:8px">
+                          <span style="font-size:14px;font-weight:600">Registrer som</span>
+                          <div style="display:flex;flex-wrap:wrap;gap:6px">
+                            <sc-for list="{{ ab.types }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:44px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}">{{ o.label }}</button></sc-for>
+                          </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:8px">
+                          <span style="font-size:14px;font-weight:600">Lønn</span>
+                          <div role="group" aria-label="Lønn" style="display:flex;gap:6px">
+                            <sc-for list="{{ ab.pays }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:44px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}">{{ o.label }}</button></sc-for>
+                          </div>
+                          <div style="display:flex;align-items:flex-start;gap:10px;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.4;background:{{ ab.payBg }};color:{{ ab.payFg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">{{ ab.payIcon }}</span><span style="text-wrap:pretty">{{ ab.payText }}</span></div>
+                          <sc-if value="{{ ab.hasOverride }}"><div style="font-size:13px;color:#7A5A00">{{ ab.override }}</div></sc-if>
+                        </div>
+                        <sc-if value="{{ ab.hasSaldo }}">
+                          <div style="display:flex;flex-direction:column;gap:8px">
+                            <span style="font-size:14px;font-weight:600">Saldo</span>
+                            <div style="display:flex;align-items:center;gap:10px;border-radius:12px;padding:12px 14px;font-size:14px;background:{{ ab.saldoBg }};color:{{ ab.saldoFg }};border:{{ ab.saldoBorder }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">{{ ab.saldoIcon }}</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:500">{{ ab.saldo }}</span></div>
+                            <sc-if value="{{ ab.saldoWarn }}"><div role="alert" style="font-size:13px;font-weight:600;color:#A2371C">Saldoen går under null.</div></sc-if>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{ ab.hasShift }}">
+                          <div style="display:flex;flex-direction:column;gap:8px">
+                            <span style="font-size:14px;font-weight:600">Vakten den dagen</span>
+                            <div style="font-size:14px;color:#586174;text-wrap:pretty">{{ ab.shiftText }}</div>
+                            <div style="display:flex;flex-wrap:wrap;gap:6px">
+                              <sc-for list="{{ ab.acts }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:44px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}">{{ o.label }}</button></sc-for>
+                            </div>
+                            <sc-if value="{{ ab.showCands }}">
+                              <div style="display:flex;flex-wrap:wrap;gap:6px;padding-top:2px">
+                                <sc-for list="{{ ab.cands }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:44px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }};display:flex;align-items:center;gap:8px">{{ o.label }}<sc-if value="{{ o.hasNote }}"><span style="font-size:11px;font-weight:600;border-radius:99px;padding:1px 7px;background:{{ o.noteBg }};color:{{ o.noteFg }}">{{ o.note }}</span></sc-if></button></sc-for>
+                              </div>
+                            </sc-if>
+                          </div>
+                        </sc-if>
+                        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:600">Kommentar til {{ ab.first }} (valgfritt)</span><textarea value="{{ ab.comment }}" onChange="{{ ab.setComment }}" rows="2" style="border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:10px 12px;font-size:15px;resize:vertical"></textarea></label>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ ab.reject }}">
+                      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:600">Grunn (sendes til {{ ab.first }})</span><textarea value="{{ ab.reason }}" onChange="{{ ab.setReason }}" rows="3" placeholder="For eksempel: Vi er for få på jobb den dagen." style="border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:10px 12px;font-size:15px;resize:vertical"></textarea></label>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 20px 18px;border-top:1px solid #E4DFD4;background:#FFFFFF">
+                    <sc-if value="{{ ab.canToggle }}"><button onClick="{{ ab.toggle }}" style="height:48px;padding:0 10px;border:0;background:transparent;font-size:15px;font-weight:600;cursor:pointer;text-decoration:underline">{{ ab.toggleLabel }}</button></sc-if>
+                    <button onClick="{{ closeOv }}" style="margin-left:auto;height:48px;padding:0 18px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer">Avbryt</button>
+                    <button onClick="{{ ab.save }}" disabled="{{ ab.saveDisabled }}" style="height:48px;padding:0 22px;border-radius:12px;border:0;color:#fff;font-size:15px;font-weight:600;cursor:pointer;background:{{ ab.saveBg }};opacity:{{ ab.saveOp }}">{{ ab.saveLabel }}</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- inviter ansatt -->
+              <sc-if value="{{ ovInvite }}">
+                <div style="display:flex;flex-direction:column;min-height:0;flex:1">
+                  <div style="display:flex;align-items:center;gap:12px;padding:14px 20px 10px">
+                    <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:700">Inviter ansatt</div><div style="font-size:14px;color:#586174;margin-top:2px">Den ansatte får en lenke på e-post og trenger ikke passord.</div></div>
+                    <button aria-label="Lukk" onClick="{{ closeOv }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">close</span></button>
+                  </div>
+                  <div style="flex:1;min-height:0;overflow-y:auto;padding:6px 20px 16px;display:flex;flex-direction:column;gap:14px">
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:600">Navn</span><input type="text" autocomplete="name" value="{{ iv.name }}" onChange="{{ iv.setName }}" placeholder="Fornavn Etternavn" style="height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:0 12px;font-size:16px;width:100%"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:600">E-post</span><input type="email" autocomplete="email" value="{{ iv.email }}" onChange="{{ iv.setEmail }}" placeholder="navn@eksempel.no" style="height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:0 12px;font-size:16px;width:100%"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:600">Mobil (valgfritt, for SMS senere)</span><input type="tel" autocomplete="tel" value="{{ iv.phone }}" onChange="{{ iv.setPhone }}" style="height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:0 12px;font-size:16px;width:100%;font-family:'IBM Plex Mono',monospace"></label>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:14px;font-weight:600">Stilling</span>
+                      <div style="display:flex;flex-wrap:wrap;gap:6px">
+                        <sc-for list="{{ iv.roles }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:44px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}">{{ o.label }}</button></sc-for>
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:14px;font-weight:600">Avtale</span>
+                      <div role="group" aria-label="Avtale" style="display:flex;gap:6px">
+                        <sc-for list="{{ iv.deals }}" as="o"><button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="height:44px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:600;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:{{ o.border }}">{{ o.label }}</button></sc-for>
+                      </div>
+                      <sc-if value="{{ iv.isFast }}">
+                        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+                          <span style="font-size:14px">Stillingsprosent</span>
+                          <div style="display:flex;align-items:center;gap:4px;background:#FFFFFF;border:1px solid #E4DFD4;border-radius:99px;padding:2px">
+                            <button aria-label="Mindre" onClick="{{ iv.dec }}" style="width:40px;height:40px;border-radius:99px;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">remove</span></button>
+                            <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;min-width:56px;text-align:center">{{ iv.pct }}</span>
+                            <button aria-label="Mer" onClick="{{ iv.inc }}" style="width:40px;height:40px;border-radius:99px;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">add</span></button>
+                          </div>
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:#586174">{{ iv.pctHours }}</span>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <div style="display:flex;align-items:flex-start;gap:10px;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.4;background:{{ iv.pkgBg }};color:{{ iv.pkgFg }};border:{{ iv.pkgBorder }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:20px;line-height:1">groups</span><span style="text-wrap:pretty">{{ iv.pkg }}</span></div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#586174">Slik ser e-posten ut</span>
+                      <div style="background:#FFFFFF;border-radius:14px;border:1px solid #E4DFD4;padding:16px;display:flex;flex-direction:column;gap:10px">
+                        <img src="assets/rettfort-logo.png" alt="Rettført" style="height:34px;align-self:flex-start;margin:-6px -12px">
+                        <div style="font-size:15px;line-height:1.45">Hei, {{ iv.first }}. Kari Lund har invitert deg til vaktplanen for Nordhavn Kafé AS.</div>
+                        <div style="align-self:flex-start;height:40px;padding:0 16px;border-radius:10px;background:#0B2545;color:#fff;font-size:14px;font-weight:600;display:flex;align-items:center">Logg inn på vaktplanen</div>
+                        <div style="font-size:13px;color:#586174">Lenken gjelder i 7 dager. Du trenger ikke passord.</div>
+                      </div>
+                    </div>
+                    <sc-if value="{{ iv.hasErr }}"><div role="alert" style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#A2371C"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">error</span>{{ iv.err }}</div></sc-if>
+                  </div>
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 20px 18px;border-top:1px solid #E4DFD4;background:#FFFFFF">
+                    <button onClick="{{ closeOv }}" style="margin-left:auto;height:48px;padding:0 18px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer">Avbryt</button>
+                    <button onClick="{{ iv.send }}" style="height:48px;padding:0 22px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">send</span>Send invitasjon</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- administrer ansatt -->
+              <sc-if value="{{ ovEmp }}">
+                <div style="display:flex;flex-direction:column;min-height:0;flex:1">
+                  <div style="display:flex;align-items:center;gap:14px;padding:14px 20px 10px">
+                    <div style="width:48px;height:48px;border-radius:99px;background:#0B2545;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0">{{ em.ini }}</div>
+                    <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:700">{{ em.name }}</div><div style="font-size:14px;color:#586174;margin-top:2px">Administrer ansatt</div></div>
+                    <button aria-label="Lukk" onClick="{{ closeOv }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">close</span></button>
+                  </div>
+                  <div style="flex:1;min-height:0;overflow-y:auto;padding:6px 20px 16px;display:flex;flex-direction:column;gap:14px">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+                      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:600">Stilling</span><input type="text" value="{{ em.role }}" onChange="{{ em.setRole }}" style="height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:0 12px;font-size:16px;width:100%"></label>
+                      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:600">Avtale</span><input type="text" value="{{ em.deal }}" onChange="{{ em.setDeal }}" style="height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:0 12px;font-size:16px;width:100%"></label>
+                      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:600">E-post</span><input type="email" value="{{ em.email }}" onChange="{{ em.setEmail }}" style="height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:0 12px;font-size:16px;width:100%"></label>
+                      <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:600">Mobil</span><input type="tel" value="{{ em.phone }}" onChange="{{ em.setPhone }}" style="height:48px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;padding:0 12px;font-size:16px;width:100%;font-family:'IBM Plex Mono',monospace"></label>
+                    </div>
+                    <div style="background:#FFFFFF;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+                      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                        <span style="font-size:14px;font-weight:600;flex:1">Tilgang til vaktplanen</span>
+                        <span style="display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;border-radius:99px;padding:4px 10px;background:{{ em.accBg }};color:{{ em.accFg }}"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:15px;line-height:1">{{ em.accIcon }}</span>{{ em.accLabel }}</span>
+                      </div>
+                      <div style="font-size:14px;color:#586174">{{ em.accText }}</div>
+                      <button onClick="{{ em.accRun }}" style="align-self:flex-start;height:48px;padding:0 18px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">{{ em.accBtnIcon }}</span>{{ em.accBtn }}</button>
+                      <div style="font-size:13px;color:#586174;line-height:1.45;text-wrap:pretty">{{ em.accHelp }}</div>
+                    </div>
+                    <sc-if value="{{ em.canRemove }}">
+                      <div style="border:1px solid #F0CFC5;border-radius:14px;padding:14px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;background:#FFFFFF">
+                        <div style="flex:1 1 220px;min-width:0"><div style="font-size:14px;font-weight:600">Fjern fra vaktplanen</div><div style="font-size:13px;color:#586174;margin-top:2px;text-wrap:pretty">Hen mister tilgangen. Timer og lønn blir liggende i regnskapet.</div></div>
+                        <button onClick="{{ em.askRemove }}" style="height:44px;padding:0 16px;border-radius:12px;border:1px solid #A2371C;background:#FFFFFF;color:#A2371C;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:19px;line-height:1">person_remove</span>Fjern</button>
+                      </div>
+                    </sc-if>
+                  </div>
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 20px 18px;border-top:1px solid #E4DFD4;background:#FFFFFF">
+                    <button onClick="{{ closeOv }}" style="margin-left:auto;height:48px;padding:0 18px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer">Avbryt</button>
+                    <button onClick="{{ em.save }}" style="height:48px;padding:0 22px;border-radius:12px;border:0;background:#0B2545;color:#fff;font-size:15px;font-weight:600;cursor:pointer">Lagre</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- bekreft fjerning -->
+              <sc-if value="{{ ovRemove }}">
+                <div style="display:flex;flex-direction:column;gap:14px;padding:20px 20px 18px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:44px;height:44px;border-radius:99px;background:#FBEDEA;color:#A2371C;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">person_remove</span></div>
+                    <div style="font-size:20px;font-weight:700;flex:1">{{ rm.title }}</div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <sc-for list="{{ rm.points }}" as="p"><div style="display:flex;gap:8px;font-size:14px;line-height:1.4"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1">chevron_right</span><span style="text-wrap:pretty">{{ p }}</span></div></sc-for>
+                  </div>
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end">
+                    <button onClick="{{ rm.back }}" style="height:48px;padding:0 18px;border-radius:12px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:15px;font-weight:600;cursor:pointer">Avbryt</button>
+                    <button onClick="{{ rm.run }}" style="height:48px;padding:0 20px;border-radius:12px;border:0;background:#A2371C;color:#fff;font-size:15px;font-weight:600;cursor:pointer">Fjern {{ rm.first }}</button>
+                  </div>
+                </div>
+              </sc-if>
+
+              <!-- assistent-panel (nettbrett liggende og PC) -->
+              <sc-if value="{{ ovAsst }}">
+                <div style="display:flex;flex-direction:column;min-height:0;flex:1">
+                  <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid #E4DFD4;background:#FFFFFF">
+                    <span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:24px;line-height:1">auto_awesome</span>
+                    <span style="font-size:18px;font-weight:700;flex:1">Assistent</span>
+                    <button aria-label="Lukk" onClick="{{ closeOv }}" style="width:44px;height:44px;border-radius:99px;border:0;background:#F4F1EA;cursor:pointer;display:flex;align-items:center;justify-content:center"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:22px;line-height:1">close</span></button>
+                  </div>
+                  <div style="flex:1;min-height:0;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+                    <div style="background:#FFFFFF;border-radius:16px;padding:14px 16px;font-size:15px;line-height:1.45">Hei, Kari. Jeg lager forslag til vaktplanen. Du godkjenner, og jeg publiserer aldri noe selv.</div>
+                    <sc-for list="{{ asstMsgs }}" as="m">
+                      <sc-if value="{{ m.isUser }}"><div style="align-self:flex-end;max-width:85%;background:#0B2545;color:#fff;border-radius:16px 16px 4px 16px;padding:10px 14px;font-size:15px">{{ m.text }}</div></sc-if>
+                      <sc-if value="{{ m.isCard }}">
+                        <div style="background:#FFFFFF;border-radius:16px;box-shadow:0 1px 3px rgba(11,37,69,.06);padding:14px 16px;display:flex;flex-direction:column;gap:10px;border-top:4px solid #F6DF6E">
+                          <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#7A5A00">Forslag</div>
+                          <div style="font-size:16px;font-weight:700">{{ m.title }}</div>
+                          <div style="font-size:14px;color:#586174;line-height:1.45;text-wrap:pretty">{{ m.body }}</div>
+                          <sc-for list="{{ m.rows }}" as="w"><div style="display:flex;gap:8px;font-size:14px"><span aria-hidden="true" style="font-family:'Material Symbols Rounded';font-size:18px;line-height:1;color:#1F7D52">check</span>{{ w }}</div></sc-for>
+                          <sc-if value="{{ m.hasActions }}"><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ m.actions }}" as="a"><button onClick="{{ a.run }}" style="height:44px;padding:0 16px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;background:{{ a.bg }};color:{{ a.fg }};border:{{ a.border }}">{{ a.label }}</button></sc-for></div></sc-if>
+                          <sc-if value="{{ m.hasDone }}"><span style="align-self:flex-start;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;border-radius:99px;padding:4px 10px;background:{{ m.doneBg }};color:{{ m.doneFg }}">{{ m.done }}</span></sc-if>
+                        </div>
+                      </sc-if>
+                    </sc-for>
+                  </div>
+                  <div style="padding:12px 20px 18px;border-top:1px solid #E4DFD4;background:#FFFFFF;display:flex;flex-wrap:wrap;gap:8px">
+                    <sc-for list="{{ asstSugs }}" as="g"><button onClick="{{ g.run }}" style="min-height:40px;padding:8px 14px;border-radius:99px;border:1px solid #E4DFD4;background:#FFFFFF;font-size:14px;font-weight:600;cursor:pointer;text-align:left">{{ g.label }}</button></sc-for>
+                    <sc-if value="{{ noSugs }}"><span style="font-size:13px;color:#586174">Assistenten lager bare forslag. Ingenting publiseres uten deg.</span></sc-if>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const DAYS=[['man','Mandag',5],['tir','Tirsdag',6],['ons','Onsdag',7],['tor','Torsdag',8],['fre','Fredag',9],['lør','Lørdag',10],['søn','Søndag',11]];
+const dl=i=>`${DAYS[i][1]} ${DAYS[i][2]}. okt`, dll=i=>dl(i).toLowerCase();
+const TPL={'Åpning':['07:00','15:00'],'Midt':['10:00','18:00'],'Kveld':['13:00','21:00'],'Natt/rydd':['21:00','23:30']};
+const PL={S:'Nordhavn Sentrum',B:'Nordhavn Brygga'},PLS={S:'Sentrum',B:'Brygga'};
+const tm=t=>{const[a,b]=(t||'0:0').split(':').map(Number);return a*60+(b||0);};
+const dur=s=>{let d=(tm(s.end)-tm(s.start))/60;if(d<=0)d+=24;return d;};
+const hrs=s=>{const d=dur(s);return d>5.5?d-.5:d;};
+const nf=n=>{const r=Math.round(n*10)/10;return Number.isInteger(r)?String(r):r.toFixed(1).replace('.',',');};
+const sh=t=>t.endsWith(':00')?t.slice(0,2):t;
+const cap=s=>s[0].toUpperCase()+s.slice(1);
+const EMP={
+  KL:{name:'Kari Lund',first:'Kari',role:'Daglig leder',deal:'Fast 100 %',target:37.5,access:'in',month:'—',phone:'900 11 222',email:'kari@nordhavnkafe.no',pron:'hun',leader:true},
+  SN:{name:'Sara Nilsen',first:'Sara',role:'Skiftleder',deal:'Fast 100 % (37,5 t/uke)',target:37.5,access:'in',month:'52,5 t',phone:'934 56 781',email:'sara@nordhavnkafe.no',pron:'hun'},
+  AH:{name:'Ali Hassan',first:'Ali',role:'Kokk',deal:'Fast 80 % (30 t/uke)',target:30,access:'in',month:'37,5 t',phone:'462 10 993',email:'ali@nordhavnkafe.no',pron:'han'},
+  JB:{name:'Jonas Berg',first:'Jonas',role:'Kafémedarbeider',deal:'Fast 60 % (22,5 t/uke)',target:22.5,access:'in',month:'28,5 t',phone:'412 34 567',email:'jonas@nordhavnkafe.no',pron:'han'},
+  EL:{name:'Emma Lie',first:'Emma',role:'Kafémedarbeider',deal:'Timelønn',target:null,access:'invited',month:'15 t',phone:'978 22 410',email:'emma@nordhavnkafe.no',pron:'hun'},
+  MH:{name:'Mari Holm',first:'Mari',role:'Barista',deal:'Timelønn',target:null,access:'none',month:'22,5 t',phone:'455 67 120',email:'mari@nordhavnkafe.no',pron:'hun'},
+};
+const ROWS=['SN','AH','JB','EL','MH'];
+const mk=(id,emp,day,type,place,x)=>({id,emp,day,type,start:TPL[type][0],end:TPL[type][1],place,interest:[],comment:'',...(x||{})});
+const SHIFTS0=[
+  mk('o1',null,5,'Midt','S',{interest:['JB','EL']}),mk('o2',null,6,'Kveld','B'),
+  mk('s1','SN',0,'Åpning','S'),mk('s2','SN',1,'Åpning','B'),mk('s3','SN',2,'Åpning','B'),mk('s4','SN',3,'Midt','B'),mk('s5','SN',4,'Åpning','S'),mk('s6','SN',5,'Åpning','B'),
+  mk('a1','AH',0,'Midt','S'),mk('a2','AH',1,'Midt','B'),mk('a3','AH',3,'Midt','S'),mk('a4','AH',4,'Midt','B'),
+  mk('j1','JB',0,'Kveld','S',{comment:'Varelevering kl. 15. Ta imot og sjekk mot pakkseddelen.'}),mk('j2','JB',2,'Kveld','B'),mk('j3','JB',4,'Kveld','S',{friReq:true}),
+  mk('e1','EL',1,'Kveld','S'),mk('e2','EL',3,'Kveld','B',{draft:true}),
+  mk('m1','MH',0,'Åpning','B'),mk('m2','MH',2,'Midt','S'),mk('m3','MH',3,'Åpning','S',{swap:true}),
+];
+const AVAIL={JB:{4:'no',5:'yes',6:'yes'},EL:{5:'yes',6:'yes'}},REASON={JB:{4:'Tannlege'}};
+const REQS0=[{id:'r1',kind:'fri'},{id:'r2',kind:'bytte'},{id:'r3',kind:'ledig'},{id:'r5',kind:'fravaer',ok:true}];
+const TIMERS0=[
+  {id:'t1',emp:'JB',hours:27,status:'ok'},
+  {id:'t2',emp:'JB',hours:3.5,status:'wait',avvik:'Fredag 2. okt: 30 min lenger enn planlagt'},
+  {id:'t3',emp:'SN',hours:37.5,status:'wait'},{id:'t4',emp:'AH',hours:30,status:'wait'},
+  {id:'t5',emp:'EL',hours:14.5,status:'wait',avvik:'Tirsdag 29. sep: gikk 30 min tidligere'},
+  {id:'t6',emp:'MH',hours:22.5,status:'ok'},
+];
+const ABS_TYPES=['Fri uten lønn','Ferie','Avspasering','Egenmelding','Sykmelding','Permisjon med lønn','Permisjon uten lønn','Velferdspermisjon'];
+const ABS_PAY={'Fri uten lønn':false,'Ferie':true,'Avspasering':true,'Egenmelding':true,'Sykmelding':true,'Permisjon med lønn':true,'Permisjon uten lønn':false,'Velferdspermisjon':true};
+const ABS_SHORT={'Fri uten lønn':'Fri','Ferie':'Ferie','Avspasering':'Avsp.','Egenmelding':'Egenm.','Sykmelding':'Sykm.','Permisjon med lønn':'Perm.','Permisjon uten lønn':'Perm.','Velferdspermisjon':'Velferd'};
+const SKEY={'Ferie':'ferie','Avspasering':'avsp','Egenmelding':'egen'};
+const SALDO0={KL:{ferie:20,avsp:0,egen:0},SN:{ferie:25,avsp:7.5,egen:3},AH:{ferie:21,avsp:12,egen:0},JB:{ferie:18,avsp:4,egen:1},EL:{ferie:0,avsp:0,egen:0},MH:{ferie:0,avsp:0,egen:2}};
+const HIST={JB:['Ferie 22.–26. juni','Egenmelding 6. aug'],SN:['Ferie 6.–24. juli'],AH:['Avspasering 14. aug']};
+const DEF_SET={colleagues:{on:true,mode:'navn'},open:{on:true,who:'leder',warn:true},swap:{on:true,approve:true,sameType:false},give:{on:true,hours:24},
+  avail:{on:true,mode:'enkel',days:7},absence:{on:true,cfg:Object.fromEntries(ABS_TYPES.map(t=>[t,{on:true,pay:ABS_PAY[t]}])),saldo:true},
+  hours:{on:true,dev:true,auto:false},ot:{on:true,add:40,day:9,week:40},rest:{on:true},comments:{on:true},notif:{on:true,pub:true,chg:true,ans:true},assistant:{on:true}};
+const SET_DEF=[
+  {k:'colleagues',name:'Ansatte ser kollegers vakter',desc:'De ansatte ser hvem som jobber samtidig med dem.',subs:[{t:'seg',f:'mode',label:'Vis',opts:[['navn','Navn'],['opptatt','Bare «opptatt»']]}]},
+  {k:'open',name:'Ledige vakter',desc:'De ansatte ser ledige vakter og kan melde interesse.',subs:[{t:'seg',f:'who',label:'Hvem får vakten',opts:[['leder','Lederen velger'],['forst','Først til mølla']]},{t:'check',f:'warn',label:'Vis advarsel om overtid'}]},
+  {k:'swap',name:'Bytte vakter',desc:'De ansatte kan bytte vakt med en kollega.',subs:[{t:'check',f:'approve',label:'Lederen må godkjenne byttet'},{t:'check',f:'sameType',label:'Bare med kolleger som har samme vakttype'}]},
+  {k:'give',name:'Gi bort vakt',desc:'De ansatte kan gi bort en vakt, så den blir ledig.',subs:[{t:'num',f:'hours',label:'Frist: minst',unit:'timer før vakten',step:12,min:0,max:168}]},
+  {k:'avail',name:'Tilgjengelighet',desc:'De ansatte sier fra når de kan og ikke kan jobbe.',subs:[{t:'seg',f:'mode',label:'Hvordan',opts:[['enkel','Enkel (dager)'],['detaljert','Detaljert (tidsrom)']]},{t:'num',f:'days',label:'Frist: senest',unit:'dager før uka publiseres',step:1,min:0,max:30}]},
+  {k:'absence',name:'Fravær',desc:'De ansatte søker om ferie og annet fravær.',subs:[{t:'pay',f:'cfg',label:'Typer de kan søke om, og om de er med eller uten lønn som standard'},{t:'check',f:'saldo',label:'Vis saldo (feriedager igjen)'}]},
+  {k:'hours',name:'Timeregistrering og godkjenning',desc:'Du godkjenner timene før de går til lønn.',subs:[{t:'check',f:'dev',label:'Ansatte kan melde avvik'},{t:'check',f:'auto',label:'Godkjenn automatisk når timene stemmer med vakten'}]},
+  {k:'ot',name:'Overtid og merarbeid',desc:'Systemet regner ut overtid og merarbeid og advarer deg.',subs:[{t:'seg',f:'add',label:'Overtidstillegg',opts:[[40,'40 %'],[50,'50 %'],[100,'100 %']]},{t:'num',f:'day',label:'Grense per dag',unit:'t',step:.5,min:6,max:13},{t:'num',f:'week',label:'Grense per uke',unit:'t',step:.5,min:30,max:48}]},
+  {k:'rest',name:'Hviletid',desc:'Du får en advarsel hvis det er under 11 t mellom to vakter.'},
+  {k:'comments',name:'Kommentarer på vakter',desc:'Du og de ansatte kan skrive en kommentar på en vakt.'},
+  {k:'notif',name:'Varsler',desc:'De ansatte får beskjed på e-post. SMS kommer senere.',subs:[{t:'check',f:'pub',label:'Ny uke er publisert'},{t:'check',f:'chg',label:'Endringer i vaktene deres'},{t:'check',f:'ans',label:'Svar på forespørsler'}]},
+  {k:'assistant',name:'Assistent i vaktplanen',desc:'Assistenten foreslår vaktplaner og hvem som kan ta ledige vakter.',selskap:true},
+];
+const FMT={
+  mp:{label:'Mobil stående',w:390,h:844,pad:12,outR:58,r:46,bg:'#0B1424',top:46,status:true,notch:true,home:true},
+  ml:{label:'Mobil liggende',w:844,h:390,pad:12,outR:58,r:46,bg:'#0B1424',top:0,sideNotch:true,home:true},
+  tp:{label:'Nettbrett stående',w:820,h:1180,pad:16,outR:40,r:26,bg:'#0B1424',top:28,status:true,home:true},
+  tl:{label:'Nettbrett liggende',w:1180,h:820,pad:16,outR:40,r:26,bg:'#0B1424',top:28,status:true,home:true},
+  pc:{label:'PC',w:1440,h:860,pad:0,outR:12,r:0,bg:'#FFFFFF',top:0,chrome:true},
+};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const clean=(shifts,reqs)=>reqs.filter(r=>{const f=id=>shifts.find(x=>x.id===id);
+  if(r.id==='r1'){const s=f('j3');return s&&s.emp==='JB'&&s.friReq;}
+  if(r.id==='r2'){const s=f('m3');return s&&s.emp==='MH'&&s.swap;}
+  if(r.id==='r3'){const s=f('o1');return s&&!s.emp&&s.interest.length>0;}
+  return true;});
+const btn=(label,run,primary)=>({label,run,bg:primary?'#0B2545':'#FFFFFF',fg:primary?'#FFFFFF':'#0B2545',border:primary?'0':'1px solid #E4DFD4'});
+const seg=(cur,list,pick)=>list.map(([k,l])=>({label:l,on:String(cur===k),pick:()=>pick(k),bg:cur===k?'#0B2545':'transparent',fg:cur===k?'#FFFFFF':'#586174'}));
+
+class Component extends DCLogic {
+  state={fmt:(new URLSearchParams(location.search).get('fmt'))||'pc',pakke:'selskap',ws:'changes',vs:'normal',screen:'uke',view:'uke',selDay:0,place:'all',
+    shifts:SHIFTS0,reqs:REQS0,timers:TIMERS0,access:{},ov:null,ed:null,person:null,reqTab:'req',reqFilter:'alle',
+    set:clone(DEF_SET),setDraft:clone(DEF_SET),msgs:[],hc:null,toast:null,vw:window.innerWidth,
+    roster:['SN','AH','JB','EL','MH'],absences:[],saldo:clone(SALDO0),ab:null,inv:null,em:null,rm:null};
+  scrollRef=React.createRef();
+  componentDidMount(){if(!FMT[this.state.fmt])this.setState({fmt:'pc'});this._rs=()=>this.setState({vw:window.innerWidth});window.addEventListener('resize',this._rs);}
+  componentWillUnmount(){window.removeEventListener('resize',this._rs);clearTimeout(this._t);}
+  wide(f){f=f||this.state.fmt;return f==='tl'||f==='pc';}
+  go(screen,extra){this.setState({screen,ov:null,...(extra||{})},()=>{const el=this.scrollRef.current;if(el)el.scrollTop=0;});}
+  toast(text,undo){clearTimeout(this._t);this.setState({toast:{text,undo:undo||null}});this._t=setTimeout(()=>this.setState({toast:null}),5000);}
+  snap(){const s=this.state;return{shifts:s.shifts,reqs:s.reqs,timers:s.timers,ws:s.ws,access:s.access,msgs:s.msgs,roster:s.roster,absences:s.absences,saldo:s.saldo};}
+  upd(text,fn){const sn=this.snap();this.setState(s=>{const p=fn(s);if(p.shifts){p.reqs=clean(p.shifts,p.reqs||s.reqs);if(p.ws===undefined)p.ws=s.ws==='published'?'changes':s.ws;}return p;});if(text)this.toast(text,sn);}
+  patch(s,id,p){return s.shifts.map(x=>x.id===id?{...x,...p}:x);}
+  openNew(emp,day){if(this.state.vs!=='normal'&&this.state.vs!=='empty')return;this.setState({ov:'edit',ed:{id:null,emp:emp||null,day:day||0,type:'Kveld',start:'13:00',end:'21:00',place:'S',comment:'',repeat:'Aldri'}});}
+  openEdit(id){const s=this.state.shifts.find(x=>x.id===id);if(!s)return;this.setState({ov:'edit',ed:{...s,repeat:'Aldri'}});}
+  setEd(p){this.setState(s=>({ed:{...s.ed,...p}}));}
+  openAbs(req,reject,emp){const st=this.state,cfg=st.set.absence.cfg;let a;
+    if(req&&!st.reqs.find(q=>q.id===req)){this.toast('Forespørselen er allerede besvart.');return;}
+    if(req==='r1')a={req,emp:'JB',day:4,dateLabel:dl(4),type:'Fri uten lønn',asked:'Fri',why:'Tannlege'};
+    else if(req==='r5')a={req,emp:'AH',day:null,dateLabel:'Fredag 16. okt',type:'Avspasering',asked:'Avspasering',why:''};
+    else a={req:null,emp,day:0,dateLabel:dl(0),type:'Egenmelding',asked:'',why:''};
+    const t=cfg[a.type].on?a.type:(ABS_TYPES.find(x=>cfg[x].on)||a.type);
+    this.setState({ov:'absence',ab:{...a,type:t,pay:cfg[t].pay,act:'ledig',giveTo:null,comment:'',reject:!!reject,reason:''}});}
+  setAb(p){this.setState(s=>({ab:{...s.ab,...p}}));}
+  absShift(a){return a.day==null?null:this.state.shifts.find(s=>s.emp===a.emp&&s.day===a.day);}
+  absHours(a){const s=this.absShift(a),E=EMP[a.emp];return s?hrs(s):(E.target?E.target/5:0);}
+  saveAbs(){const a=this.state.ab,E=EMP[a.emp],shift=this.absShift(a),h=this.absHours(a);
+    if(a.act==='give'&&shift&&!a.giveTo&&!a.reject)return;
+    if(a.reject){this.upd(`Forespørselen er avslått. ${E.first} har fått beskjed${a.reason.trim()?' med grunnen din':''}.`,s=>a.req==='r1'?{shifts:this.patch(s,'j3',{friReq:false}),ov:null}:{reqs:s.reqs.filter(q=>q.id!==a.req),ov:null});return;}
+    const actTxt=!shift?'':a.act==='ledig'?' Vakten er nå ledig.':a.act==='give'?` Vakten er gitt til ${EMP[a.giveTo].first}.`:' Vakten er slettet.';
+    this.upd(`${a.type} er registrert for ${E.first}, ${a.pay?'med':'uten'} lønn.${actTxt} ${E.first} har fått beskjed.`,s=>{const k=SKEY[a.type],sal={...s.saldo,[a.emp]:{...(s.saldo[a.emp]||{ferie:0,avsp:0,egen:0})}};
+      if(k==='ferie')sal[a.emp].ferie-=1;if(k==='avsp')sal[a.emp].avsp-=h;if(k==='egen')sal[a.emp].egen+=1;
+      const p={saldo:sal,absences:[...s.absences,{id:'f'+Date.now(),emp:a.emp,day:a.day,dateLabel:a.dateLabel,type:a.type,pay:a.pay,hours:h}],ov:null,reqs:s.reqs.filter(q=>q.id!==a.req)};
+      if(shift)p.shifts=a.act==='delete'?s.shifts.filter(x=>x.id!==shift.id):this.patch(s,shift.id,{emp:a.act==='give'?a.giveTo:null,friReq:false,swap:false,interest:[],draft:true});
+      return p;});}
+  openInvite(){this.setState({ov:'invite',inv:{name:'',email:'',phone:'',role:'Kafémedarbeider',deal:'time',pct:50,err:''}});}
+  setInv(p){this.setState(s=>({inv:{...s.inv,...p,err:''}}));}
+  sendInvite(){const v=this.state.inv,name=v.name.trim(),email=v.email.trim(),err=e=>this.setState(s=>({inv:{...s.inv,err:e}}));
+    if(!name)return err('Skriv inn navnet til den ansatte.');
+    if(!/^\S+@\S+\.\S+$/.test(email))return err('Skriv inn en gyldig e-postadresse.');
+    if(['KL',...this.state.roster].some(k=>EMP[k].email.toLowerCase()===email.toLowerCase()))return err('Denne e-postadressen er allerede i bruk.');
+    const base=name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();let key=base,n=2;while(EMP[key])key=base+(n++);
+    const first=name.split(/\s+/)[0],fast=v.deal==='fast',t=37.5*v.pct/100;
+    EMP[key]={name,first,role:v.role,deal:fast?`Fast ${v.pct} % (${nf(t)} t/uke)`:'Timelønn',target:fast?t:null,access:'invited',month:'0 t',phone:v.phone.trim()||'–',email,pron:'hen'};
+    this.upd(`Invitasjonen er sendt til ${email}. ${first} logger inn med lenken i e-posten.`,s=>({roster:[...s.roster,key],access:{...s.access,[key]:'invited'},ov:null}));}
+  openEmp(k){const E=EMP[k];this.setState({ov:'empEdit',em:{key:k,role:E.role,deal:E.deal,email:E.email,phone:E.phone}});}
+  setEm(p){this.setState(s=>({em:{...s.em,...p}}));}
+  saveEmp(){const m=this.state.em,E=EMP[m.key];Object.assign(E,{role:m.role.trim()||E.role,deal:m.deal.trim()||E.deal,email:m.email.trim()||E.email,phone:m.phone.trim()||E.phone});this.setState({ov:null});this.toast(`Endringene for ${E.first} er lagret.`);}
+  resetLogin(k){const E=EMP[k];this.toast(`Ny innloggingslenke er sendt til ${E.email}. De gamle lenkene virker ikke lenger, og ${E.first} er logget ut på alle enheter.`);}
+  invite(k){const E=EMP[k];this.upd(`Invitasjonen er sendt til ${E.email}. ${cap(E.pron)} logger inn med lenken i e-posten.`,x=>({access:{...x.access,[k]:'invited'}}));}
+  removeEmp(k){const E=EMP[k],n=this.state.shifts.filter(s=>s.emp===k).length;
+    this.upd(`${E.name} er fjernet fra vaktplanen.${n?` ${n} ${n===1?'vakt er':'vakter er'} nå ledige.`:''}`,s=>({roster:s.roster.filter(x=>x!==k),ov:null,
+      shifts:s.shifts.map(x=>{const y={...x,interest:x.interest.filter(i=>i!==k)};return x.emp===k?{...y,emp:null,friReq:false,swap:false,interest:[],draft:true}:y;})}));}
+  saveEd(){const e=this.state.ed,editing=!!e.id,draftWs=this.state.ws==='draft';
+    this.upd(editing?(draftWs?'Vakten er endret i utkastet.':'Vakten er endret. Publiser for å varsle.'):(draftWs?'Vakten er lagt til i utkastet.':'Vakten er lagt til. Publiser for å varsle.'),s=>{
+      const fields={emp:e.emp,day:e.day,type:e.type,start:e.start,end:e.end,place:e.place,comment:e.comment,draft:true};
+      if(editing){const old=s.shifts.find(x=>x.id===e.id);const moved=old.emp!==e.emp;
+        return{shifts:this.patch(s,e.id,{...fields,...(moved?{friReq:false,swap:false,interest:[]}:{})}),ov:null};}
+      return{shifts:[...s.shifts,{id:'n'+Date.now(),interest:[],...fields}],ov:null};});}
+  delEd(){const id=this.state.ed.id;this.upd('Vakten er slettet.',s=>({shifts:s.shifts.filter(x=>x.id!==id),ov:null}));}
+  moveShift(id,emp,day){const s=this.state.shifts.find(x=>x.id===id);this._drag=null;if(!s||(s.emp===emp&&s.day===day))return;
+    this.upd(`Vakten er flyttet til ${emp?EMP[emp].first:'Ledige vakter'}, ${dll(day)}.`,st=>({shifts:this.patch(st,id,{emp,day,draft:true,...(s.emp!==emp?{friReq:false,swap:false,interest:[]}:{})})}));}
+  give(id,emp){const s=this.state.shifts.find(x=>x.id===id),E=EMP[emp];
+    this.upd(`Vakten ${dll(s.day)} er gitt til ${E.first}. ${cap(E.pron)} får e-post når du publiserer.`,st=>({shifts:this.patch(st,id,{emp,interest:[],draft:true})}));}
+  timerOk(ids,text){this.upd(text,s=>({timers:s.timers.map(t=>ids.includes(t.id)?{...t,status:'ok'}:t)}));}
+  publish(){const s=this.state;if(s.ws==='published')return;const n=this.state.set.notif;
+    const txt=s.ws==='draft'?(n.on&&n.pub?'Uke 41 er publisert. 5 ansatte har fått e-post.':'Uke 41 er publisert.'):(n.on&&n.chg?'Endringene er publisert. De som er berørt, har fått e-post.':'Endringene er publisert.');
+    this.setState(st=>({ws:'published',shifts:st.shifts.map(x=>({...x,draft:false}))}));this.toast(txt);}
+  openAsst(){if(this.wide())this.setState({ov:'asst'});else this.go('asst');}
+  ask(k){const s=this.state,sat=s.shifts.find(x=>x.id==='o1'),satOpen=sat&&!sat.emp;let card;
+    const tot=e=>s.shifts.filter(x=>x.emp===e).reduce((a,x)=>a+hrs(x),0),wk=s.set.ot.week;
+    if(k==='week')card={q:'Lag vaktplan for neste uke',title:'Uke 42, 12.–18. okt',body:'Samme oppsett som uke 41, tilpasset det de ansatte har sagt om tilgjengelighet.',rows:['24 vakter, 178,5 t til sammen','Ingen får overtid','Sara får 37,5 t i stedet for 45 t','Søndagskvelden går til Emma, som har sagt at hun kan'],act:[['Lagre som utkast','week_ok']]};
+    else if(k==='sat')card=satOpen?{q:'Hvem bør ta lørdag?',title:'Emma Lie bør ta lørdag 10. okt',body:`Hun har sagt at hun kan jobbe, og får ikke overtid. Jonas har også meldt interesse, men får da merarbeid (${nf(tot('JB')+7.5)} t, avtalen er 22,5 t).`,rows:[],act:[['Gi lørdag til Emma','sat_ok']]}
+      :{q:'Hvem bør ta lørdag?',title:'Lørdagsvakten er allerede tatt',body:'Den ledige vakten lørdag 10. okt har fått en ansatt.',rows:[],act:[]};
+    else{const over=this.state.roster.filter(e=>tot(e)>wk);const s6=s.shifts.find(x=>x.id==='s6');
+      card=over.length?{q:'Får noen overtid denne uka?',title:over.map(e=>`${EMP[e].name} får ${nf(tot(e)-wk)} t overtid`).join(', '),body:over.includes('SN')&&s6&&s6.emp==='SN'?`Sara har ${nf(tot('SN'))} t denne uka, og grensen er ${nf(wk)} t. Emma har sagt at hun kan jobbe lørdag, så hun kan ta Saras lørdagsvakt.`:'Se over vaktene til de som får overtid.',rows:[],act:over.includes('SN')&&s6&&s6.emp==='SN'?[['Flytt Saras lørdag til Emma','ot_ok']]:[]}
+        :{q:'Får noen overtid denne uka?',title:'Nei, ingen får overtid denne uka',body:`Alle er under ${nf(wk)} t.`,rows:[],act:[]};}
+    const id='m'+Date.now();
+    this.setState(st=>({msgs:[...st.msgs,{id:id+'q',user:true,text:card.q,k},{id,card:true,k,title:card.title,body:card.body,rows:card.rows,act:card.act,done:null}]}));}
+  asstDo(mid,a){const done=(lbl)=>this.setState(st=>({msgs:st.msgs.map(m=>m.id===mid?{...m,done:lbl}:m)}));
+    if(a==='dismiss'){done('Forkastet');return;}
+    if(a==='week_ok'){done('Lagret som utkast');this.toast('Uke 42 er lagret som utkast. De ansatte ser den ikke ennå.');return;}
+    if(a==='sat_ok'){const s=this.state.shifts.find(x=>x.id==='o1');if(s&&!s.emp)this.give('o1','EL');done('Godkjent');return;}
+    if(a==='ot_ok'){this.upd('Saras lørdagsvakt er flyttet til Emma. Publiser for å varsle.',st=>({shifts:this.patch(st,'s6',{emp:'EL',draft:true})}));done('Godkjent');}}
+
+  renderVals(){
+    const st=this.state,fm=st.fmt,F=FMT[fm],mob=fm==='mp',rail=fm==='ml',wide=this.wide(),sel=st.pakke==='selskap',set=st.set,wk=set.ot.week;
+    const normal=st.vs==='normal',empty=st.vs==='empty';
+    // frame
+    const outW=F.w+2*F.pad,outH=F.h+2*F.pad+(F.chrome?40:0),avW=st.vw-48-(st.vw>=1100?260:0),sc=Math.min(1,Math.max(.3,avW/outW));
+    const fx={boxW:Math.round(outW*sc)+'px',boxH:Math.round(outH*sc)+'px',outW:outW+'px',outH:outH+'px',transform:'scale('+sc+')',outR:F.outR+'px',bg:F.bg,pad:F.pad+'px',ring:F.chrome?'#E4DFD4':'#2A3446',
+      w:F.w+'px',h:F.h+'px',r:F.r+'px',chrome:!!F.chrome,status:!!F.status,notch:!!F.notch,sideNotch:!!F.sideNotch,home:!!F.home,statusPad:F.notch?'4px 30px 0 34px':'0 28px',statusFont:F.notch?'15px':'13px'};
+    const navW=rail?100:0,row1=mob?56:rail?52:fm==='pc'?64:56,hdrH=row1+((fm==='tp'||fm==='tl')?56:0);
+    const lay={top:F.top+'px',hdrH:hdrH+'px',contentTop:(F.top+hdrH)+'px',navLeft:navW+'px',bottom:mob?'86px':'0px',
+      pad:{mp:'16px 16px 28px',ml:'14px 20px 24px',tp:'20px 20px 32px',tl:'22px 24px 32px',pc:'24px 32px 40px'}[fm],
+      maxW:st.screen==='uke'?'1280px':st.screen==='innst'?'1160px':'1040px',toastBottom:mob?'100px':'24px'};
+    const hdr={row1H:row1+'px',padX:mob?'12px':'20px',brandWord:!mob,tabsInline:fm==='pc',tabsBelow:fm==='tp'||fm==='tl',regText:fm==='pc'||fm==='tl',asst:sel&&!mob&&!rail};
+    // data
+    const vis=empty?[]:st.shifts.filter(s=>st.place==='all'||s.place===st.place);
+    const reqs=empty?[]:st.reqs,timers=empty?[]:st.timers;
+    const tot=e=>st.shifts.filter(x=>x.emp===e).reduce((a,x)=>a+hrs(x),0);
+    const otIds=new Set();if(set.ot.on)this.state.roster.forEach(e=>{let c=0;st.shifts.filter(x=>x.emp===e).sort((a,b)=>a.day-b.day||tm(a.start)-tm(b.start)).forEach(x=>{c+=hrs(x);if(c>wk)otIds.add(x.id);});});
+    const waitT=timers.filter(t=>t.status==='wait'),badge=reqs.length+waitT.length;
+    // nav
+    const NAV=[['uke','Uke','Uke','calendar_view_week'],['foresp','Forespørsler','Svar','inbox',badge],['ansatte','Ansatte','Ansatte','group'],['innst','Innstillinger','Innstillinger','tune']];
+    if(sel&&(mob||rail))NAV.push(['asst','Assistent','Assistent','auto_awesome']);
+    const mkNav=([k,l,s,i,b])=>{const on=st.screen===k;return{label:l,short:s,icon:i,go:()=>k==='asst'?this.openAsst():this.go(k),current:on?'page':'false',bg:on?'#FFF4CC':'transparent',fg:on?'#0B2545':'#586174',weight:on?700:500,hasBadge:!!b,badge:b};};
+    const tabs=NAV.filter(n=>n[0]!=='asst').map(mkNav),navItems=NAV.map(mkNav);
+    // chips
+    const compact=fm==='tp'||fm==='ml'||mob;
+    const look=s=>{let bg='#FFFFFF',stripe='#0B2545',border='1px solid #E4DFD4',flag='',fb='',ff='';
+      if(!s.emp){const n=s.interest.length;bg='#FFF9E0';stripe='#F6DF6E';flag=n?`${n} interessert${n>1?'e':''}`:'Ingen interesse ennå';fb=n?'#F6DF6E':'#FFFFFF';ff=n?'#0B2545':'#7A5A00';}
+      else if(s.friReq){bg='#FBEDEA';stripe='#A2371C';flag='Fri søkt';fb='#A2371C';ff='#FFFFFF';}
+      else if(s.swap){bg='#EEF2F9';stripe='#C9D6EA';flag='Vil bytte bort';fb='#C9D6EA';ff='#0B2545';}
+      else if(otIds.has(s.id)){bg='#FFF4CC';border='1px solid #EAD88A';flag='Overtid';fb='#F6DF6E';ff='#0B2545';}
+      if(st.ws==='draft'||(st.ws==='changes'&&s.draft)){border='1.5px dashed #586174';if(!flag&&st.ws==='changes'){flag='Ikke publisert';fb='#EFEBE2';ff='#0B2545';}}
+      return{bg,stripe,border,flag,fb,ff};};
+    const chip=s=>{const L=look(s),who=s.emp?EMP[s.emp].name:'Ledig vakt';
+      return{time:compact?`${sh(s.start)}–${sh(s.end)}`:`${s.start}–${s.end}`,sub:compact?s.type:`${s.type} · ${PLS[s.place]}`,bg:L.bg,border:L.border,stripe:L.stripe,hasFlag:!!L.flag,flag:L.flag,flagBg:L.fb,flagFg:L.ff,
+        aria:`${who}, ${dll(s.day)}, ${s.start} til ${s.end}, ${s.type}, ${PL[s.place]}${L.flag?', '+L.flag:''}. Trykk for å endre.`,
+        open:()=>this.openEdit(s.id),drag:wide||fm==='tp'?'true':'false',dragStart:e=>{this._drag=s.id;try{e.dataTransfer.setData('text/plain',s.id);e.dataTransfer.effectAllowed='move';}catch(_){}}};};
+    const availTags=(e,d,has)=>{const abs=st.absences.filter(x=>e&&x.emp===e&&x.day===d);if(abs.length)return abs.map(x=>({label:x.type,short:ABS_SHORT[x.type],icon:'event_busy',bg:'#FBEDEA',fg:'#A2371C'}));
+      const a=e&&AVAIL[e]&&AVAIL[e][d];if(!a||!set.avail.on)return[];if(a==='yes'&&!has)return[{label:'Kan jobbe',short:'Kan',icon:'check_circle',bg:'#E2F1E8',fg:'#1F7D52'}];
+      if(a==='no'){const has2=st.shifts.some(x=>x.emp===e&&x.day===d&&x.friReq);if(has2)return[];const r=REASON[e]&&REASON[e][d];return[{label:r?`Kan ikke: ${r}`:'Kan ikke',short:'Kan ikke',icon:'block',bg:'#FBEDEA',fg:'#A2371C'}];}return[];};
+    const rowsDef=[null,...this.state.roster];
+    const rows=rowsDef.map(e=>{const cells=DAYS.map((_,d)=>{const list=vis.filter(s=>s.emp===e&&s.day===d).sort((a,b)=>tm(a.start)-tm(b.start)),key=`${e||'o'}-${d}`,hov=st.hc===key;
+        return{chips:list.map(chip),tags:availTags(e,d,list.length>0),add:()=>this.openNew(e,d),addLabel:`Ny vakt ${e?'for '+EMP[e].first+' ':''}${dll(d)}`,addH:list.length?'26px':'40px',
+          addOp:String(hov?1:(fm==='pc'?0:(list.length?0:.6))),bg:d===0?'#FCFBF7':(e?'#FFFFFF':'#FFFDF3'),
+          enter:()=>this.setState({hc:key}),leave:()=>this.setState(s=>s.hc===key?{hc:null}:null),over:ev=>ev.preventDefault(),drop:ev=>{ev.preventDefault();this.moveShift(this._drag,e,d);},
+          list};});
+      const mini=cells.map((c,d)=>{const s=c.list[0];if(s){const L=look(s);return{label:`${sh(s.start)}–${sh(s.end)}`,icon:s.friReq?'block':s.swap?'swap_horiz':!s.emp?'front_hand':otIds.has(s.id)?'warning':'',bg:L.bg,border:L.border,fg:'#0B2545',run:()=>this.openEdit(s.id),aria:chip(s).aria};}
+        const t=c.tags[0];if(t)return{label:t.short,icon:t.icon,bg:t.bg,border:'1px solid transparent',fg:t.fg,run:c.add,aria:`${t.label}. ${c.addLabel}`};
+        return{label:'',icon:'add',bg:'#FBFAF6',border:'1px dashed #C9CDD5',fg:'#8A909C',run:c.add,aria:c.addLabel};});
+      if(!e){const n=vis.filter(s=>!s.emp).length;return{isOpen:true,isEmp:false,sub:`${n} ${n===1?'vakt':'vakter'}`,cells,mini,cardBg:'#FFF9E0'};}
+      const E=EMP[e],t=tot(e),tg=E.target,over=set.ot.on&&t>wk,mer=set.ot.on&&!over&&tg&&tg<37.5&&t>tg;
+      return{isOpen:false,isEmp:true,ini:e,name:mob?E.name:E.name,hours:tg?`${nf(t)} / ${nf(tg)} t`:`${nf(t)} t`,hasBar:!!tg,barW:Math.min(100,tg?t/tg*100:0)+'%',barC:over||mer?'#F6DF6E':'#0B2545',
+        hasOt:over||mer,ot:over?`${nf(t-wk)} t overtid`:mer?`${nf(t-tg)} t merarbeid`:'',open:()=>this.setState({ov:'person',person:e}),aria:`${E.name}, ${nf(t)} timer denne uka. Åpne`,cells,mini,cardBg:'#FFFFFF'};});
+    const nameW={ml:150,tp:150,tl:190,pc:220,mp:120}[fm];
+    const gridDays=DAYS.map((d,i)=>({short:d[0]+'.',num:d[2],numBg:i===0?'#0B2545':'transparent',numFg:i===0?'#FFFFFF':'#0B2545',aria:`Vis ${dll(i)}`,pick:()=>this.setState({view:'dag',selDay:i})}));
+    // day
+    const dShifts=vis.filter(s=>s.day===st.selDay).sort((a,b)=>(a.emp?1:0)-(b.emp?1:0)||tm(a.start)-tm(b.start));
+    const dayItems=dShifts.map(s=>{const L=look(s),c=chip(s);return{name:s.emp?EMP[s.emp].name:'Ledig vakt',ini:s.emp||'',isOpen:!s.emp,avBg:s.emp?'#0B2545':'#F6DF6E',avFg:s.emp?'#FFFFFF':'#0B2545',
+      sub:`${s.type} · ${PL[s.place]}`,time:`${s.start}–${s.end}`,bg:L.bg,border:L.border,stripe:L.stripe,hasFlag:!!L.flag,flag:L.flag,flagBg:L.fb,flagFg:L.ff,open:c.open,aria:c.aria};});
+    const dayNotes=[];this.state.roster.forEach(e=>{const a=AVAIL[e]&&AVAIL[e][st.selDay];if(!a||!set.avail.on)return;const r=REASON[e]&&REASON[e][st.selDay];
+      dayNotes.push(a==='yes'?{label:`${EMP[e].name} kan jobbe`,icon:'check_circle',bg:'#E2F1E8',fg:'#1F7D52'}:{label:`${EMP[e].name} kan ikke${r?': '+r:''}`,icon:'block',bg:'#FBEDEA',fg:'#A2371C'});});
+    st.absences.filter(x=>x.day===st.selDay).forEach(x=>dayNotes.unshift({label:`${EMP[x.emp].name}: ${x.type}, ${x.pay?'med':'uten'} lønn`,icon:'event_busy',bg:'#FBEDEA',fg:'#A2371C'}));
+    const dayPicker=DAYS.map((d,i)=>{const on=i===st.selDay,n=vis.filter(s=>s.day===i).length;return{short:d[0]+'.',num:d[2],count:String(n),on:String(on),aria:`${dl(i)}, ${n} vakter`,
+      bg:on?'#0B2545':'#FFFFFF',fg:on?'#FFFFFF':'#0B2545',border:i===0&&!on?'2px solid #0B2545':'1px solid #E4DFD4',pick:()=>this.setState({selDay:i})};});
+    // month
+    const monthCells=Array.from({length:35},(_,i)=>{const sep=i<3,nov=i>33,num=sep?28+i:nov?1:i-2,w41=i>=7&&i<=13,w40=i<7,today=i===7;
+      let count='',open='';if(w41){const d=i-7,n=vis.filter(s=>s.day===d&&s.emp).length,o=vis.filter(s=>s.day===d&&!s.emp).length;count=n?`${n} vakter`:'';open=o?`${o} ledig`:'';}
+      else if(w40&&!empty){const n=(i%7===5)?3:(i%7===6)?2:5;count=`${n} vakter`;}
+      if(mob){count=count?count.split(' ')[0]:'';}
+      return{num,count,hasCount:!!count,open:mob&&open?open.split(' ')[0]:open,hasOpen:!!open,h:mob?'58px':'86px',fg:sep||nov?'#8A909C':'#0B2545',
+        bg:today?'#FFF4CC':w41?'#FFFFFF':'#FBFAF6',border:today?'2px solid #0B2545':'1px solid #EFEBE2',aria:`${num}. ${sep?'september':nov?'november':'oktober'}${count?', '+count:''}`,
+        pick:()=>w41?this.setState({view:'dag',selDay:i-7}):this.toast(w40?'Uke 40 er ferdig. Timene finner du under Forespørsler og timer.':'Denne uka er ikke laget ennå.')};});
+    // requests
+    const sF=id=>st.shifts.find(x=>x.id===id);
+    const reqItem=r=>{
+      if(r.kind==='fri'){const s=sF('j3');return{kind:'fri',kindLabel:'Fri',icon:'event_busy',iconBg:'#FBEDEA',iconFg:'#A2371C',title:'Jonas Berg ber om fri',sub:`${dl(s.day)} · ${s.start}–${s.end} · «${REASON.JB[4]}»`,
+        actions:[btn('Godkjenn',()=>this.openAbs('r1'),true),btn('Avslå',()=>this.openAbs('r1',true))]};}
+      if(r.kind==='bytte'){const s=sF('m3');return{kind:'bytte',kindLabel:'Bytte',icon:'swap_horiz',iconBg:'#EEF2F9',iconFg:'#0B2545',title:'Mari Holm vil bytte bort',sub:`${dl(s.day)} · ${s.start}–${s.end} · Ingen kollega har tatt den ennå`,
+        actions:[btn('Gjør vakten ledig',()=>this.upd('Torsdagsvakten er nå ledig. Mari har fått beskjed.',x=>({shifts:this.patch(x,'m3',{emp:null,swap:false,draft:true,interest:[]})})),true),btn('Avslå',()=>this.upd('Byttet er avslått. Mari har fått beskjed.',x=>({shifts:this.patch(x,'m3',{swap:false})})))]};}
+      if(r.kind==='ledig'){const s=sF('o1'),names=s.interest.map(e=>EMP[e].name),mer=s.interest.filter(e=>EMP[e].target&&tot(e)+hrs(s)>EMP[e].target);
+        return{kind:'ledig',kindLabel:'Ledig vakt',icon:'front_hand',iconBg:'#FFF4CC',iconFg:'#7A5A00',title:`Ledig ${dll(s.day)} · ${s.start}–${s.end}`,
+          sub:`${names.join(' og ')} har meldt interesse.${mer.length?' '+mer.map(e=>EMP[e].first).join(' og ')+' får merarbeid.':''}`,actions:s.interest.map((e,i)=>btn(`Gi til ${EMP[e].first}`,()=>this.give('o1',e),i===0))};}
+      return{kind:'fravaer',kindLabel:'Fravær',icon:'beach_access',iconBg:'#E2F1E8',iconFg:'#1F7D52',title:'Ali Hassan søker avspasering',sub:'Fredag 16. okt · hele dagen · Ingen vakter den dagen',
+        actions:[btn('Godkjenn',()=>this.openAbs('r5'),true),btn('Avslå',()=>this.openAbs('r5',true))]};};
+    const reqItems=reqs.map(reqItem);
+    const cleanT=waitT.filter(t=>!t.avvik);
+    const okClean=()=>this.timerOk(cleanT.map(t=>t.id),`${cleanT.length} ${cleanT.length===1?'timeliste':'timelister'} er godkjent og sendt til Lønn.`);
+    const needs=[...reqItems];
+    if(waitT.length&&set.hours.on){const ppl=new Set(waitT.map(t=>t.emp)).size,dev=waitT.filter(t=>t.avvik).length;
+      needs.push({icon:'schedule',iconBg:'#EFEBE2',iconFg:'#0B2545',title:'Timer for uke 40 venter',sub:`${ppl} ansatte · ${nf(waitT.reduce((a,t)=>a+t.hours,0))} t${dev?` · ${dev} med avvik`:''}`,
+        actions:[...(cleanT.length?[btn('Godkjenn de som stemmer',okClean,true)]:[]),btn('Se timer',()=>this.go('foresp',{reqTab:'timer'}))]});}
+    const FILT=[['alle','Alle'],['fri','Fri'],['bytte','Bytter'],['ledig','Ledige'],['fravaer','Fravær']];
+    const reqFilters=FILT.map(([k,l])=>{const n=k==='alle'?reqItems.length:reqItems.filter(r=>r.kind===k).length,on=st.reqFilter===k;
+      return{label:`${l} (${n})`,on:String(on),bg:on?'#0B2545':'#FFFFFF',fg:on?'#FFFFFF':'#0B2545',border:on?'1px solid #0B2545':'1px solid #E4DFD4',pick:()=>this.setState({reqFilter:k})};});
+    const reqList=reqItems.filter(r=>st.reqFilter==='alle'||r.kind===st.reqFilter);
+    const okReqs=reqs.filter(r=>r.ok);
+    const approveAll=()=>{const nr=okReqs.length,nt=cleanT.length;const parts=[nr&&`${nr} fravær`,nt&&`${nt} ${nt===1?'timeliste':'timelister'}`].filter(Boolean).join(' og ');
+      this.upd(`Godkjent: ${parts}. Resten trenger at du ser på dem.`,x=>({reqs:x.reqs.filter(q=>!q.ok),
+        ...(x.reqs.some(q=>q.id==='r5')?{absences:[...x.absences,{id:'f'+Date.now(),emp:'AH',day:null,dateLabel:'Fredag 16. okt',type:'Avspasering',pay:true,hours:6}],saldo:{...x.saldo,AH:{...x.saldo.AH,avsp:x.saldo.AH.avsp-6}}}:{}),timers:x.timers.map(t=>t.status==='wait'&&!t.avvik?{...t,status:'ok'}:t)}));};
+    const timerRows=timers.map(t=>{const E=EMP[t.emp],ok=t.status==='ok';return{ini:t.emp,name:E.name,hours:`${nf(t.hours)} t`,stIcon:ok?'check_circle':'radio_button_unchecked',stLabel:ok?'Godkjent av leder':'Venter på godkjenning',stFg:ok?'#586174':'#0B2545',
+      hasAvvik:!!t.avvik,avvik:t.avvik||'',canOk:!ok,ok:()=>this.timerOk([t.id],`${nf(t.hours)} t for ${E.first} er godkjent og sendt til Lønn.`)};});
+    // ansatte
+    const empRows=['KL',...this.state.roster].map(e=>{const E=EMP[e],a=st.access[e]||E.access;const A={in:['Logget inn','check_circle','#E2F1E8','#1F7D52'],invited:['Invitert','mail','#FFF4CC','#7A5A00'],none:['Ikke invitert','person_off','#EFEBE2','#586174']}[a];
+      return{ini:e,name:E.name,role:E.role,deal:E.deal,leader:!!E.leader,access:A[0],accIcon:A[1],accBg:A[2],accFg:A[3],month:E.month,canInvite:a!=='in',inviteLabel:a==='invited'?'Send på nytt':'Inviter',
+        open:()=>this.setState({ov:'person',person:e}),invite:()=>this.invite(e),edit:()=>this.openEmp(e)};});
+    // innstillinger
+    const d=st.setDraft,isDef=JSON.stringify(d)===JSON.stringify(DEF_SET),dirty=JSON.stringify(d)!==JSON.stringify(st.set);
+    const setD=(k,f,v)=>this.setState(s=>({setDraft:{...s.setDraft,[k]:{...s.setDraft[k],[f]:v}}}));
+    const setRows=SET_DEF.map((r,i)=>{const v=d[r.k],locked=r.selskap&&!sel,on=v.on&&!locked;
+      const subs=(r.subs||[]).map(u=>{const cur=v[u.f];
+        if(u.t==='seg')return{isSeg:true,label:u.label,opts:u.opts.map(([k,l])=>({label:l,on:String(cur===k),pick:()=>setD(r.k,u.f,k),bg:cur===k?'#0B2545':'#FFFFFF',fg:cur===k?'#FFFFFF':'#0B2545',border:cur===k?'1px solid #0B2545':'1px solid #E4DFD4'}))};
+        if(u.t==='check')return{isCheck:true,label:u.label,on:String(!!cur),icon:cur?'check_box':'check_box_outline_blank',fill:cur?1:0,color:cur?'#0B2545':'#8A909C',toggle:()=>setD(r.k,u.f,!cur)};
+        if(u.t==='num')return{isNum:true,label:u.label,unit:u.unit,value:nf(cur),dec:()=>setD(r.k,u.f,Math.max(u.min,cur-u.step)),inc:()=>setD(r.k,u.f,Math.min(u.max,cur+u.step))};
+        if(u.t==='pay')return{isPay:true,label:u.label,list:ABS_TYPES.map(n=>{const c=cur[n];return{name:n,on:String(c.on),icon:c.on?'check_box':'check_box_outline_blank',fill:c.on?1:0,color:c.on?'#0B2545':'#8A909C',
+          toggle:()=>setD(r.k,u.f,{...cur,[n]:{...c,on:!c.on}}),showPay:c.on,aria:'Lønn for '+n,
+          pays:[[true,'Med lønn'],[false,'Uten lønn']].map(([k,l])=>({label:l,on:String(c.pay===k),bg:c.pay===k?'#0B2545':'#FFFFFF',fg:c.pay===k?'#FFFFFF':'#0B2545',border:c.pay===k?'1px solid #0B2545':'1px solid #E4DFD4',pick:()=>setD(r.k,u.f,{...cur,[n]:{...c,pay:k}})}))};})};
+        return{isChips:true,label:u.label,opts:u.opts.map(o=>{const has=cur.includes(o);return{label:o,on:String(has),icon:has?'check':'add',bg:has?'#0B2545':'#FFFFFF',fg:has?'#FFFFFF':'#0B2545',border:has?'1px solid #0B2545':'1px solid #E4DFD4',pick:()=>setD(r.k,u.f,has?cur.filter(x=>x!==o):[...cur,o])};})};});
+      return{name:r.name,desc:r.desc,border:i?'1px solid #EFEBE2':'0',locked,canToggle:!locked,ariaOn:String(on),trackBg:on?'#1F7D52':'#C9CDD5',knob:on?'translateX(20px)':'translateX(0)',
+        toggle:()=>setD(r.k,'on',!v.on),showSubs:on&&subs.length>0,subs};});
+    const pv={nav:[['Oversikt','home'],['Vakter','calendar_month'],d.open.on&&['Ledige','front_hand'],d.hours.on&&['Timer','schedule'],['Mer','menu']].filter(Boolean).map(([label,icon])=>({label,icon})),
+      more:[d.avail.on&&'Tilgjengelighet',d.absence.on&&'Fravær',(d.swap.on||d.give.on)&&'Bytter',d.colleagues.on&&'Kolleger','Min side'].filter(Boolean).join(' · '),
+      buttons:[(d.swap.on||d.give.on)&&{label:d.swap.on&&d.give.on?'Gi bort / bytt vakt':d.swap.on?'Bytt vakt':'Gi bort vakt',icon:'swap_horiz'},(d.avail.on||d.absence.on)&&{label:'Be om fri denne dagen',icon:'event_busy'},d.comments.on&&{label:'Legg til kommentar',icon:'chat_bubble'}].filter(Boolean),
+      showCol:d.colleagues.on,colName:d.colleagues.mode==='navn'?'Sara Nilsen':'Opptatt',colIni:d.colleagues.mode==='navn'?'SN':'',showOpen:d.open.on,openWarn:d.open.warn&&d.ot.on,
+      openNote:d.open.who==='leder'?'Lederen bestemmer hvem som får vakten.':'Den som trykker først, får vakten.'};
+    pv.noButtons=pv.buttons.length===0;
+    // edit
+    let ed={};
+    if(st.ov==='edit'&&st.ed){const e=st.ed,E=e.emp&&EMP[e.emp],warn=[];
+      if(E){const others=st.shifts.filter(s=>s.emp===e.emp&&s.id!==e.id),t=others.reduce((a,s)=>a+hrs(s),0)+hrs(e);
+        if(set.ot.on){if(t>wk)warn.push(`Gir ${E.first} ${nf(t-wk)} t overtid (${nf(t)} t denne uka)`);else if(E.target&&E.target<37.5&&t>E.target)warn.push(`Gir ${E.first} merarbeid: ${nf(t)} t, avtalen er ${nf(E.target)} t`);if(dur(e)>set.ot.day)warn.push(`Over ${nf(set.ot.day)} t på én dag`);}
+        if(others.some(s=>s.day===e.day))warn.push(`${E.first} har allerede en vakt ${dll(e.day)}`);
+        const a=AVAIL[e.emp]&&AVAIL[e.emp][e.day];if(a==='no'){const r=REASON[e.emp]&&REASON[e.emp][e.day];warn.push(`${E.first} har sagt at ${E.pron} ikke kan${r?` («${r}»)`:''}`);}
+        if(set.rest.on){const p=others.find(s=>s.day===e.day-1),n=others.find(s=>s.day===e.day+1);
+          if(p){const g=(24*60-tm(p.end)+tm(e.start))/60;if(g<11)warn.push(`Under 11 t hvile (${nf(g)} t etter vakten ${DAYS[e.day-1][1].toLowerCase()})`);}
+          if(n){const g=(24*60-tm(e.end)+tm(n.start))/60;if(g<11)warn.push(`Under 11 t hvile (${nf(g)} t før vakten ${DAYS[e.day+1][1].toLowerCase()})`);}}}
+      const dd=dur(e),orig=e.id&&st.shifts.find(s=>s.id===e.id),interest=orig&&!orig.emp?orig.interest:[];
+      const pick=(cur,v)=>({on:String(cur),bg:cur?'#0B2545':'#FFFFFF',fg:cur?'#FFFFFF':'#0B2545',border:cur?'1px solid #0B2545':'1px solid #E4DFD4'});
+      ed={title:e.id?'Endre vakt':'Ny vakt',sub:`${dl(e.day)} · ${PL[e.place]}`,isEditing:!!e.id,
+        emps:[null,...this.state.roster].map(k=>({...pick(e.emp===k),label:k?EMP[k].first:'Ledig',ini:k||'',isOpen:!k,avBg:k?(e.emp===k?'#FFFFFF':'#0B2545'):'#F6DF6E',avFg:k?(e.emp===k?'#0B2545':'#FFFFFF'):'#0B2545',
+          hasNote:!!k&&interest.includes(k),note:'interessert',pick:()=>this.setEd({emp:k})})),
+        days:DAYS.map((x,i)=>({...pick(e.day===i),short:x[0]+'.',num:x[2],aria:dl(i),pick:()=>this.setEd({day:i})})),
+        tpls:Object.keys(TPL).map(k=>({...pick(e.type===k&&e.start===TPL[k][0]&&e.end===TPL[k][1]),label:k,time:TPL[k].join('–'),pick:()=>this.setEd({type:k,start:TPL[k][0],end:TPL[k][1]})})),
+        start:e.start,end:e.end,setStart:ev=>this.setEd({start:ev.target.value}),setEnd:ev=>this.setEd({end:ev.target.value}),
+        pause:dd>5.5?`Pause 30 min · ${nf(dd-.5)} t arbeid`:`Ingen pause · ${nf(dd)} t`,
+        places:seg(e.place,[['S','Sentrum'],['B','Brygga']],k=>this.setEd({place:k})),repeats:seg(e.repeat,[['Aldri','Aldri'],['Hver uke','Hver uke'],['Annenhver uke','Annenhver uke']],k=>this.setEd({repeat:k})),
+        showComment:set.comments.on,comment:e.comment||'',setComment:ev=>this.setEd({comment:ev.target.value}),
+        hasInterest:interest.length>0,interest:`${interest.map(k=>EMP[k].name).join(' og ')} har meldt interesse.`,
+        warnings:warn,hasWarn:warn.length>0,saveLabel:warn.length?'Lagre likevel':'Lagre',save:()=>this.saveEd(),del:()=>this.delEd()};}
+    // person
+    let pp={};
+    if(st.ov==='person'&&st.person){const e=st.person,E=EMP[e],list=st.shifts.filter(s=>s.emp===e).sort((a,b)=>a.day-b.day),t=tot(e),tg=E.target,over=t>wk,mer=!over&&tg&&tg<37.5&&t>tg;
+      const av=AVAIL[e]?Object.entries(AVAIL[e]).map(([dd,v])=>{const r=REASON[e]&&REASON[e][dd];return v==='yes'?{label:`${dl(+dd)}: kan jobbe`,icon:'check_circle',bg:'#E2F1E8',fg:'#1F7D52'}:{label:`${dl(+dd)}: kan ikke${r?' ('+r+')':''}`,icon:'block',bg:'#FBEDEA',fg:'#A2371C'};}):[];
+      pp={ini:e,name:E.name,role:E.role,deal:E.deal,hours:tg?`${nf(t)} / ${nf(tg)} t`:`${nf(t)} t`,hasBar:!!tg,barW:Math.min(100,tg?t/tg*100:0)+'%',barC:over||mer?'#F6DF6E':'#0B2545',hasOt:!!(over||mer),ot:over?`${nf(t-wk)} t overtid`:mer?`${nf(t-tg)} t merarbeid`:'',
+        shifts:list.map(s=>({day:`${DAYS[s.day][0]}. ${DAYS[s.day][2]}`,time:`${s.start}–${s.end}`,place:PLS[s.place],stripe:look(s).stripe,open:()=>this.openEdit(s.id)})),noShifts:!list.length,
+        hasAvail:av.length>0&&set.avail.on,avail:av,phone:E.phone,email:E.email,tel:'tel:'+E.phone.replace(/ /g,''),mail:'mailto:'+E.email,showAbs:set.absence.on,regAbs:()=>this.openAbs(null,false,e),manage:()=>this.openEmp(e),
+        saldoRows:(()=>{const s=st.saldo[e]||{ferie:0,avsp:0,egen:0};return[['Ferie',`${s.ferie} dager igjen`],['Avspasering',`${nf(s.avsp)} t`],['Egenmelding',`${s.egen} av 24 dager brukt`]].map(([label,value],i)=>({label,value,border:i?'1px solid #EFEBE2':'0'}));})(),
+        absList:[...st.absences.filter(x=>x.emp===e).map(x=>({label:`${x.type} · ${x.dateLabel}`,sub:`${x.pay?'Med':'Uten'} lønn · ${nf(x.hours)} t`,icon:'event_busy',color:'#A2371C'})),...(HIST[e]||[]).map(t=>({label:t,sub:'Godkjent',icon:'check_circle',color:'#586174'}))],
+        canShift:!E.leader,newLabel:`Lag vakt for ${E.first}`,newShift:()=>this.openNew(e,0)};}
+    // overlay
+    const sheet=!wide,kind=st.ov;
+    const pkS=on=>({on:String(on),bg:on?'#0B2545':'#FFFFFF',fg:on?'#FFFFFF':'#0B2545',border:on?'1px solid #0B2545':'1px solid #E4DFD4'});
+    const nEmp=st.roster.length+1;
+    let ab={};
+    if(st.ov==='absence'&&st.ab){const a=st.ab,E=EMP[a.emp],shift=this.absShift(a),hh=this.absHours(a),cfg=set.absence.cfg,k=SKEY[a.type],sal=st.saldo[a.emp]||{ferie:0,avsp:0,egen:0};
+      let saldo='',warn=false;
+      if(set.absence.saldo&&k==='ferie'){saldo=`Ferie: ${sal.ferie} dager igjen → ${sal.ferie-1}`;warn=sal.ferie-1<0;}
+      if(set.absence.saldo&&k==='avsp'){saldo=`Avspasering: ${nf(sal.avsp)} t → ${nf(sal.avsp-hh)} t`;warn=sal.avsp-hh<0;}
+      if(set.absence.saldo&&k==='egen'){saldo=`Egenmelding: ${sal.egen} → ${sal.egen+1} av 24 dager brukt`;warn=sal.egen+1>24;}
+      const cands=st.roster.filter(x=>x!==a.emp&&!st.shifts.some(s=>s.emp===x&&s.day===a.day)).map(x=>{const Ex=EMP[x],t=tot(x)+(shift?hrs(shift):0),can=AVAIL[x]&&AVAIL[x][a.day]==='yes',no=AVAIL[x]&&AVAIL[x][a.day]==='no',over=t>wk,mer=!over&&Ex.target&&Ex.target<37.5&&t>Ex.target;
+        const note=no?'kan ikke':can?'kan jobbe':over?'overtid':mer?'merarbeid':'';return{...pkS(a.giveTo===x),label:Ex.first,note,hasNote:!!note,rank:can?0:note?2:1,noteBg:can?'#E2F1E8':no?'#FBEDEA':'#FFF4CC',noteFg:can?'#1F7D52':no?'#A2371C':'#7A5A00',pick:()=>this.setAb({giveTo:x})};}).sort((p,q)=>p.rank-q.rank);
+      const payText=!hh?'Ingen planlagte timer denne dagen, så ingenting går til Lønn.':a.pay?(a.type==='Ferie'?`Ferie: ${nf(hh)} t trekkes i lønn og dekkes av feriepenger.`:`Med lønn: ${nf(hh)} t går til Lønn som fravær med lønn.`):`Uten lønn: ${nf(hh)} t trekkes, og ingenting betales.`;
+      const saveDisabled=!a.reject&&!!shift&&a.act==='give'&&!a.giveTo;
+      ab={title:a.reject?'Avslå forespørsel':a.req?'Godkjenn fravær':'Registrer fravær',sub:`${E.name} · ${a.dateLabel}`,first:E.first,hasAsked:!!a.req,asked:`Søkte om: ${a.asked}${a.why?` · «${a.why}»`:''}`,
+        pickDay:!a.req&&!a.reject,days:DAYS.map((x,i)=>({...pkS(a.day===i),short:x[0]+'.',num:x[2],aria:dl(i),pick:()=>this.setAb({day:i,dateLabel:dl(i),giveTo:null})})),
+        approve:!a.reject,reject:a.reject,
+        types:ABS_TYPES.filter(t=>cfg[t].on||t===a.type).map(t=>({...pkS(a.type===t),label:t,pick:()=>this.setAb({type:t,pay:cfg[t].pay})})),
+        pays:[[true,'Med lønn'],[false,'Uten lønn']].map(([v,l])=>({...pkS(a.pay===v),label:l,pick:()=>this.setAb({pay:v})})),
+        payText,payIcon:a.pay?'payments':'money_off',payBg:a.pay?'#E2F1E8':'#EFEBE2',payFg:a.pay?'#1F7D52':'#0B2545',
+        hasOverride:a.pay!==cfg[a.type].pay,override:`Standard for ${a.type.toLowerCase()} er ${cfg[a.type].pay?'med':'uten'} lønn. Du har endret det for dette fraværet.`,
+        hasSaldo:!!saldo,saldo,saldoWarn:warn,saldoIcon:warn?'warning':'account_balance_wallet',saldoBg:warn?'#FBEDEA':'#FFFFFF',saldoFg:warn?'#A2371C':'#0B2545',saldoBorder:warn?'1px solid #A2371C':'1px solid #E4DFD4',
+        hasShift:!!shift,shiftText:shift?`${E.first} har vakt ${shift.start}–${shift.end} (${shift.type}, ${PLS[shift.place]}). Hva skal skje med den?`:'',
+        acts:[['ledig','Gjør ledig'],['give','Gi til …'],['delete','Slett vakten']].map(([v,l])=>({...pkS(a.act===v),label:l,pick:()=>this.setAb({act:v})})),showCands:a.act==='give',cands,
+        comment:a.comment,setComment:ev=>this.setAb({comment:ev.target.value}),reason:a.reason,setReason:ev=>this.setAb({reason:ev.target.value}),
+        canToggle:!!a.req,toggleLabel:a.reject?'Godkjenn i stedet':'Avslå i stedet',toggle:()=>this.setAb({reject:!a.reject}),
+        saveLabel:a.reject?'Avslå':a.req?'Godkjenn':'Registrer',saveBg:a.reject?'#A2371C':'#0B2545',saveDisabled,saveOp:saveDisabled?'.45':'1',save:()=>this.saveAbs()};}
+    let iv={};
+    if(st.ov==='invite'&&st.inv){const v=st.inv,n=nEmp+1,lim=sel?15:5,extra=n>lim;
+      iv={name:v.name,email:v.email,phone:v.phone,setName:ev=>this.setInv({name:ev.target.value}),setEmail:ev=>this.setInv({email:ev.target.value}),setPhone:ev=>this.setInv({phone:ev.target.value}),
+        roles:['Kafémedarbeider','Barista','Kokk','Skiftleder'].map(r=>({...pkS(v.role===r),label:r,pick:()=>this.setInv({role:r})})),
+        deals:[['fast','Fast stilling'],['time','Timelønn']].map(([k,l])=>({...pkS(v.deal===k),label:l,pick:()=>this.setInv({deal:k})})),
+        isFast:v.deal==='fast',pct:`${v.pct} %`,pctHours:`${nf(37.5*v.pct/100)} t/uke`,dec:()=>this.setInv({pct:Math.max(10,v.pct-10)}),inc:()=>this.setInv({pct:Math.min(100,v.pct+10)}),
+        pkg:extra?`Dette blir ansatt nr. ${n}. ${sel?'Selskap':'Start'} har ${lim} inkludert, så det koster 29 kr/mnd ekstra.`:`Dette blir ansatt nr. ${n}. Det er inkludert i ${sel?'Selskap':'Start'} (${lim} ansatte).`,
+        pkgBg:extra?'#FFF4CC':'#FFFFFF',pkgFg:extra?'#7A5A00':'#0B2545',pkgBorder:extra?'1px solid #EAD88A':'1px solid #E4DFD4',
+        first:v.name.trim().split(/\s+/)[0]||'Emil',hasErr:!!v.err,err:v.err,send:()=>this.sendInvite()};}
+    let em={};
+    if(st.ov==='empEdit'&&st.em){const m=st.em,k=m.key,E=EMP[k],a=st.access[k]||E.access;const A={in:['Logget inn','check_circle','#E2F1E8','#1F7D52'],invited:['Invitert','mail','#FFF4CC','#7A5A00'],none:['Ikke invitert','person_off','#EFEBE2','#586174']}[a];
+      em={ini:k,name:E.name,role:m.role,deal:m.deal,email:m.email,phone:m.phone,setRole:ev=>this.setEm({role:ev.target.value}),setDeal:ev=>this.setEm({deal:ev.target.value}),setEmail:ev=>this.setEm({email:ev.target.value}),setPhone:ev=>this.setEm({phone:ev.target.value}),
+        accLabel:A[0],accIcon:A[1],accBg:A[2],accFg:A[3],accText:a==='in'?'Har logget inn. Sist innlogget i dag kl. 08:12.':a==='invited'?'Invitasjonen er sendt. Lenken gjelder i 7 dager.':'Har ikke fått invitasjon ennå.',
+        accBtn:a==='in'?'Tilbakestill innlogging':a==='invited'?'Send invitasjonen på nytt':'Send invitasjon',accBtnIcon:a==='in'?'lock_reset':'send',
+        accHelp:a==='in'?`Ansatte logger inn uten passord. Tilbakestill sender en ny lenke til ${E.email}. De gamle lenkene slutter å virke, og ${E.first} blir logget ut på alle enheter. Bruk dette hvis noen har mistet telefonen eller ikke kommer inn.`:`${E.first} får en e-post med en lenke og trenger ikke passord.`,
+        accRun:a==='in'?()=>this.resetLogin(k):()=>this.invite(k),canRemove:!E.leader,askRemove:()=>this.setState({ov:'remove',rm:k}),save:()=>this.saveEmp()};}
+    let rm={};
+    if(st.ov==='remove'&&st.rm){const k=st.rm,E=EMP[k],n=st.shifts.filter(s=>s.emp===k).length;
+      rm={title:`Fjerne ${E.name}?`,first:E.first,points:['Mister tilgangen til vaktplanen med en gang. Innloggingslenken slutter å virke.',n?`${n} ${n===1?'vakt':'vakter'} i uke 41 blir ledige.`:'Har ingen vakter i uke 41.','Timer, fravær og lønn blir liggende i regnskapet.','Du kan invitere hen igjen senere.'],run:()=>this.removeEmp(k),back:()=>this.openEmp(k)};}
+    const absRows=st.absences.map(x=>({name:EMP[x.emp].name,label:`${x.type} · ${x.dateLabel}`,hours:`${nf(x.hours)} t`,pay:x.pay?(x.type==='Ferie'?'Feriepenger':'Med lønn'):'Uten lønn',payBg:x.pay?'#E2F1E8':'#EFEBE2',payFg:x.pay?'#1F7D52':'#0B2545'}));
+    const MODAL={edit:'620px',absence:'580px',invite:'560px',empEdit:'580px',remove:'460px'},tall=kind!=='remove';
+    const ox=MODAL[kind]&&!sheet?{dir:'row',justify:'center',align:'center',w:MODAL[kind],h:'auto',maxH:'90%',radius:'18px',anim:'fadeIn .2s ease',handle:false}
+      :!sheet?{dir:'row',justify:'flex-end',align:'stretch',w:'420px',h:'100%',maxH:'100%',radius:'18px 0 0 18px',anim:'slideIn .25s ease',handle:false}
+      :{dir:'column',justify:'flex-end',align:'stretch',w:'auto',h:MODAL[kind]&&tall?(rail?'100%':'90%'):'auto',maxH:rail?'100%':'90%',radius:rail?'0':'22px 22px 0 0',anim:'sheetUp .25s ease',handle:!rail};
+    ox.label=kind==='edit'?ed.title:kind==='person'?pp.name:kind==='absence'?ab.title:kind==='invite'?'Inviter ansatt':kind==='empEdit'?em.name:kind==='remove'?rm.title:'Assistent';
+    // assistent
+    const asstMsgs=st.msgs.map(m=>m.user?{isUser:true,isCard:false,text:m.text}:{isUser:false,isCard:true,title:m.title,body:m.body,rows:m.rows,hasActions:!m.done&&m.act.length>0,
+      actions:[...m.act.map(([l,a])=>btn(l,()=>this.asstDo(m.id,a),true)),...(m.act.length?[btn('Forkast',()=>this.asstDo(m.id,'dismiss'))]:[])],hasDone:!!m.done,done:m.done||'',doneBg:m.done==='Forkastet'?'#EFEBE2':'#E2F1E8',doneFg:m.done==='Forkastet'?'#586174':'#1F7D52'});
+    const asked=new Set(st.msgs.filter(m=>m.user).map(m=>m.k));
+    const asstSugs=[['week','Lag vaktplan for neste uke'],['sat','Hvem bør ta lørdag?'],['ot','Får noen overtid denne uka?']].filter(([k])=>!asked.has(k)).map(([k,label])=>({label,run:()=>this.ask(k)}));
+    // controls
+    const opt=(cur,list,pick)=>list.map(([k,l])=>({label:l,bg:cur===k?'#0B2545':'transparent',fg:cur===k?'#FFFFFF':'#586174',pick:()=>pick(k)}));
+    const fmtOpts=opt(fm,Object.entries(FMT).map(([k,v])=>[k,v.label]),k=>this.setState(s=>{const w=k==='tl'||k==='pc';let p={fmt:k};
+      if(s.ov==='asst'&&!w)p={...p,ov:null,screen:'asst'};else if(s.screen==='asst'&&w)p={...p,screen:'uke',ov:'asst'};return p;}));
+    const pakkeOpts=opt(st.pakke,[['selskap','Selskap'],['start','Start']],k=>this.setState(s=>({pakke:k,...(k==='start'&&(s.ov==='asst'||s.screen==='asst')?{ov:null,screen:'uke'}:{})})));
+    const wsOpts=opt(st.ws,[['draft','Utkast'],['changes','Endringer ikke publisert'],['published','Publisert']],k=>this.setState({ws:k}));
+    const vsOpts=opt(st.vs,[['normal','Normal'],['loading','Laster'],['empty','Tom'],['error','Feil']],k=>this.setState({vs:k}));
+    const IDX=[['uke','Uke · Trenger svar',()=>this.go('uke',{view:'uke'})],['dag','Uke · dagvisning',()=>this.go('uke',{view:'dag',selDay:4})],['mnd','Uke · måned',()=>this.go('uke',{view:'mnd'})],
+      ['ny','Lag vakt (overtid)',()=>{this.go('uke');this.openNew('SN',6);}],['endre','Endre vakt (kan ikke)',()=>{this.go('uke');this.openEdit('j3');}],['person','Ansatt-panel',()=>{this.go('uke');this.setState({ov:'person',person:'JB'});}],
+      ['abs','Godkjenn fravær',()=>{this.go('uke');this.openAbs('r1');}],['reg','Registrer fravær',()=>{this.go('uke');this.openAbs(null,false,'SN');}],
+      ['foresp','Forespørsler',()=>this.go('foresp',{reqTab:'req'})],['timer','Timer',()=>this.go('foresp',{reqTab:'timer'})],['ansatte','Ansatte',()=>this.go('ansatte')],['inv','Inviter ansatt',()=>{this.go('ansatte');this.openInvite();}],['emp','Administrer ansatt',()=>{this.go('ansatte');this.openEmp('JB');}],['innst','Innstillinger',()=>this.go('innst')],
+      ...(sel?[['asst','Assistent',()=>{if(this.wide()){this.go('uke');this.setState({ov:'asst'});}else this.go('asst');}]]:[])];
+    const curIdx=st.ov==='absence'?(st.ab&&st.ab.req?'abs':'reg'):st.ov==='invite'?'inv':(st.ov==='empEdit'||st.ov==='remove')?'emp':st.ov==='edit'?(st.ed&&st.ed.id?'endre':'ny'):st.ov==='person'?'person':st.ov==='asst'?'asst':st.screen==='uke'?(st.view==='dag'?'dag':st.view==='mnd'?'mnd':'uke'):st.screen==='foresp'?(st.reqTab==='timer'?'timer':'foresp'):st.screen;
+    const index=IDX.map(([k,label,go])=>{const on=k===curIdx;return{label,go,bg:on?'#FFFFFF':'transparent',fg:on?'#0B2545':'#586174',weight:on?700:500};});
+    const nDraft=st.shifts.filter(s=>s.draft).length;
+    const WS={draft:['Utkast','edit_note','#EFEBE2','#0B2545'],changes:['Endringer ikke publisert','pending','#FFF4CC','#7A5A00'],published:['Publisert','check_circle','#E2F1E8','#1F7D52']}[st.ws];
+    const pub=st.ws==='published';
+    const view=st.view,isUkeV=view==='uke';
+    return{
+      fmtOpts,pakkeOpts,wsOpts,vsOpts,index,empHref:`Vaktplan%20v2.dc.html?fmt=${fm}`,fx,lay,hdr,tabs,navItems,showBottom:mob,showRail:rail,sel,scrollRef:this.scrollRef,
+      screenLabel:{uke:'Leder · Uke',foresp:'Leder · Forespørsler og timer',ansatte:'Leder · Ansatte',innst:'Leder · Innstillinger',asst:'Leder · Assistent'}[st.screen],
+      asstBtn:{pressed:String(st.ov==='asst'),bg:st.ov==='asst'?'#0B2545':'#FFFFFF',fg:st.ov==='asst'?'#FFFFFF':'#0B2545'},toggleAsst:()=>st.ov==='asst'?this.setState({ov:null}):this.openAsst(),
+      is:{uke:st.screen==='uke',foresp:st.screen==='foresp',ansatte:st.screen==='ansatte',innst:st.screen==='innst',asst:st.screen==='asst'},
+      otherWeek:()=>this.toast('I prototypen er bare uke 41 med.'),
+      wsBadge:{label:WS[0],icon:WS[1],bg:WS[2],fg:WS[3]},
+      publish:{label:pub?'Publisert':'Publiser og varsle',disabled:pub,cursor:pub?'default':'pointer',bg:pub?'#EFEBE2':'#0B2545',fg:pub?'#586174':'#FFFFFF',run:()=>this.publish()},
+      viewOpts:seg(view,[['dag','Dag'],['uke','Uke'],['mnd','Måned']],k=>this.setState({view:k})),
+      placeOpts:seg(st.place,[['all','Alle steder'],['S','Sentrum'],['B','Brygga']],k=>this.setState({place:k})),
+      hasBanner:normal&&(st.ws==='draft'||(st.ws==='changes'&&nDraft>0)),
+      bannerText:st.ws==='draft'?'Uka er et utkast. De ansatte ser den ikke før du publiserer. Vakter med stiplet kant er ikke publisert.':`${nDraft} ${nDraft===1?'endring er':'endringer er'} ikke publisert (stiplet kant). De ansatte ser fortsatt forrige versjon.`,
+      vsLoading:st.vs==='loading',vsError:st.vs==='error',vsEmpty:empty&&st.screen==='uke',vsNormal:normal,retry:()=>this.setState({vs:'normal'}),
+      emptyCreate:()=>{this.setState({vs:'normal'});this.openNew('SN',0);},emptyAsk:()=>{this.setState({vs:'normal'});this.openAsst();this.ask('week');},
+      needs,needsCount:needs.length,hasNeeds:needs.length>0,noNeeds:needs.length===0,goForesp:()=>this.go('foresp',{reqTab:'req'}),
+      isGrid:isUkeV&&!mob,isStrip:isUkeV&&mob,isDag:view==='dag',isMnd:view==='mnd',
+      gridCols:`${nameW}px repeat(7,minmax(0,1fr))`,gridMin:rail?'920px':'0px',gridDays,rows,
+      dayPicker,dayTitle:dl(st.selDay),daySum:`${nf(dShifts.filter(s=>s.emp).reduce((a,s)=>a+hrs(s),0))} t planlagt`,dayItems,dayNotes,noDayItems:!dayItems.length,
+      dayCols:fm==='pc'||fm==='tl'?'repeat(2,minmax(0,1fr))':'minmax(0,1fr)',addDay:()=>this.openNew(null,st.selDay),addDayLabel:`Ny vakt ${dll(st.selDay)}`,
+      monthHead:['man','tir','ons','tor','fre','lør','søn'],monthCells,
+      reqTabs:[['req','Forespørsler',reqs.length],['timer','Timer',waitT.length]].map(([k,l,n])=>{const on=st.reqTab===k;return{label:l,on:String(on),hasBadge:n>0,badge:n,bg:on?'#0B2545':'transparent',fg:on?'#FFFFFF':'#586174',pick:()=>this.setState({reqTab:k})};}),
+      isReqTab:st.reqTab==='req',isTimerTab:st.reqTab==='timer',reqFilters,reqList,noReqList:reqList.length===0,canApproveAll:okReqs.length+cleanT.length>0,approveAll,
+      timerRows,timerSum:`${nf(timers.reduce((a,t)=>a+t.hours,0))} t`,timerSub:waitT.length?`${waitT.length} venter på godkjenning`:'Alt er godkjent',canTimerOk:cleanT.length>0,timerOkAll:okClean,
+      empSummary:nEmp<=(sel?15:5)?`${nEmp} ansatte. Alle er med i ${sel?'Selskap':'Start'}, som har plass til ${sel?15:5}.`:`${nEmp} ansatte. ${sel?15:5} er med i ${sel?'Selskap':'Start'}, ${nEmp-(sel?15:5)} er ekstra (${(nEmp-(sel?15:5))*29} kr/mnd)`,
+      openInvite:()=>this.openInvite(),ab,iv,em,rm,ovAbs:st.ov==='absence',ovInvite:st.ov==='invite',ovEmp:st.ov==='empEdit',ovRemove:st.ov==='remove',absRows,hasAbsRows:absRows.length>0,empRows,empTable:wide,empCards:!wide,empCardCols:fm==='tp'||fm==='ml'?'repeat(2,minmax(0,1fr))':'minmax(0,1fr)',
+      setRows,notDefault:!isDef,setBadge:isDef?{label:'Standard',icon:'verified',bg:'#E2F1E8',fg:'#1F7D52'}:{label:'Endret fra standard',icon:'tune',bg:'#FFF4CC',fg:'#7A5A00'},
+      resetSet:()=>this.setState({setDraft:clone(DEF_SET)}),saveSet:()=>{if(!dirty)return;this.setState({set:clone(d)});this.toast('Innstillingene er lagret. De ansatte ser endringene med en gang.');},
+      saveBtn:{disabled:!dirty,cursor:dirty?'pointer':'default',bg:dirty?'#0B2545':'#EFEBE2',fg:dirty?'#FFFFFF':'#8A909C'},
+      innstCols:wide?'minmax(0,1fr) 320px':'minmax(0,1fr)',pvPos:wide?'sticky':'static',pv,
+      asstMsgs,asstSugs,noSugs:asstSugs.length===0,
+      hasToast:!!st.toast,toastText:st.toast?st.toast.text:'',canUndo:!!(st.toast&&st.toast.undo),undo:()=>{const u=st.toast&&st.toast.undo;if(u)this.setState({...u,toast:null});},
+      hasOv:!!st.ov,ox,ovEdit:st.ov==='edit',ovPerson:st.ov==='person',ovAsst:st.ov==='asst',closeOv:()=>this.setState({ov:null}),ed,pp,
+    };
+  }
+}
+</script>
+</body>
+</html>

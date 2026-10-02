@@ -208,6 +208,14 @@ export async function angrepunkt(t: Sporring, orgId: string, o: AngreOmfang): Pr
   return (await t.en<{ id: string }>('insert into vakt_angre (organisasjon_id, data) values ($1, $2) returning id', [orgId, JSON.stringify({ deler, ansatt })]))!.id;
 }
 
+/** Rader handlingen lagde (vakter, fravær): å angre er å slette dem. */
+export async function leggTilAngre(t: Sporring, orgId: string, id: string, nye: { vakter?: string[]; fravaer?: string[] }) {
+  const deler: Del[] = [];
+  if (nye.vakter?.length) deler.push({ tabell: 'vakt', slett: 'organisasjon_id = $1 and id = any($2::uuid[])', p: [orgId, nye.vakter], rader: [] });
+  if (nye.fravaer?.length) deler.push({ tabell: 'fravaer', slett: 'organisasjon_id = $1 and id = any($2::uuid[])', p: [orgId, nye.fravaer], rader: [] });
+  if (deler.length) await t.q(`update vakt_angre set data = jsonb_set(data, '{deler}', (data->'deler') || $3::jsonb) where id = $1 and organisasjon_id = $2`, [id, orgId, JSON.stringify(deler)]);
+}
+
 /** Setter tilbake alt fra angrepunktet. */
 export async function angre(t: Sporring, orgId: string, id: string) {
   const r = await t.en<{ data: unknown }>('select data from vakt_angre where id = $1 and organisasjon_id = $2', [id, orgId]);
@@ -255,7 +263,7 @@ async function sjekkAnsatt(t: Sporring, orgId: string, ansattId: string | null) 
 export interface NyVakt { id?: string | null; ansattId: string | null; dato: string; start: string; slutt: string; type?: string | null; sted?: string | null; kommentar?: string | null; gjenta?: 'aldri' | 'uke' | 'annenhver' }
 
 /** Lagrer en ny eller endret vakt og gir advarslene tilbake. Advarsler stopper ikke lagringen. */
-export async function lagreVakt(t: Sporring, orgId: string, v: NyVakt): Promise<{ id: string; advarsler: string[]; kopier: number }> {
+export async function lagreVakt(t: Sporring, orgId: string, v: NyVakt): Promise<{ id: string; advarsler: string[]; kopier: number; nye: string[] }> {
   if (!datoOk(v.dato)) throw new RegnskapsFeil('Velg en dag.');
   if (!gyldigTid(v.start) || !gyldigTid(v.slutt)) throw new RegnskapsFeil('Skriv klokkeslett som 07:00.');
   if (v.start === v.slutt) throw new RegnskapsFeil('Vakten må vare minst ett minutt.');
@@ -275,19 +283,20 @@ export async function lagreVakt(t: Sporring, orgId: string, v: NyVakt): Promise<
     }
     if (f.dato !== v.dato) await merkEndret(t, orgId, f.dato, [f.ansatt_id]);
     await merkEndret(t, orgId, v.dato, [f.ansatt_id, v.ansattId]);
-    return { id, advarsler: varsel, kopier: 0 };
+    return { id, advarsler: varsel, kopier: 0, nye: [] };
   }
   const sett = (dato: string) => t.en<{ id: string }>('insert into vakt (organisasjon_id, ansatt_id, dato, start, slutt, type, sted, kommentar, ikke_publisert) values ($1,$2,$3,$4,$5,$6,$7,$8,true) returning id',
     [orgId, v.ansattId, dato, v.start, v.slutt, type, sted, kommentar]);
   id = (await sett(v.dato))!.id;
   await merkEndret(t, orgId, v.dato, [v.ansattId]);
   let kopier = 0;
+  const nye = [id];
   // Gjenta: åtte uker frem.
   if (v.gjenta === 'uke' || v.gjenta === 'annenhver') {
     const steg = v.gjenta === 'uke' ? 7 : 14;
-    for (let d = steg; d <= 56; d += steg) { const dato = plussDager(v.dato, d); await sett(dato); await merkEndret(t, orgId, dato, [v.ansattId]); kopier++; }
+    for (let d = steg; d <= 56; d += steg) { const dato = plussDager(v.dato, d); nye.push((await sett(dato))!.id); await merkEndret(t, orgId, dato, [v.ansattId]); kopier++; }
   }
-  return { id, advarsler: varsel, kopier };
+  return { id, advarsler: varsel, kopier, nye };
 }
 
 export async function advarslerFor(t: Sporring, orgId: string, v: { id?: string | null; ansattId: string | null; dato: string; start: string; slutt: string }): Promise<string[]> {
@@ -564,7 +573,7 @@ export interface Behandling {
  * Lederen godkjenner eller avslår fri eller fravær, eller registrerer fravær selv.
  * Godkjent: fraværet lagres med type, lønn og timer, og vaktene i perioden blir ledige, gis bort eller slettes.
  */
-export async function behandleFravaer(t: Sporring, orgId: string, b: Behandling): Promise<{ ansattId: string; navn: string; type: string; medLonn: boolean; vakter: number; handling: string; giTilNavn: string | null; fra: string; til: string }> {
+export async function behandleFravaer(t: Sporring, orgId: string, b: Behandling): Promise<{ ansattId: string; navn: string; type: string; medLonn: boolean; vakter: number; handling: string; giTilNavn: string | null; fra: string; til: string; nyttFravaer: string | null }> {
   let ansattId: string, fra: string, til: string, friId: string | null = null, fravId: string | null = null, grunn: string | null = null;
   if (b.kilde === 'fri') {
     const f = await t.en<{ ansatt_id: string; dato: string; grunn: string | null }>(`select ansatt_id, dato::text as dato, grunn from fri_foresporsel where id = $1 and organisasjon_id = $2 and status = 'venter'`, [b.id, orgId]);
@@ -584,7 +593,7 @@ export async function behandleFravaer(t: Sporring, orgId: string, b: Behandling)
   if (b.avslag) {
     if (friId) await t.q(`update fri_foresporsel set status = 'avslatt' where id = $1`, [friId]);
     if (fravId) await t.q(`update fravaer set status = 'avslatt', svar = $2 where id = $1`, [fravId, svar]);
-    return { ansattId, navn, type: 'avslag', medLonn: false, vakter: 0, handling: 'avslag', giTilNavn: null, fra, til };
+    return { ansattId, navn, type: 'avslag', medLonn: false, vakter: 0, handling: 'avslag', giTilNavn: null, fra, til, nyttFravaer: null };
   }
   const type = b.type && erFravaerstype(b.type) ? b.type : 'Fri uten lønn';
   const medLonn = typeof b.medLonn === 'boolean' ? b.medLonn : FRAVAER_LONN[type as Fravaerstype];
@@ -592,8 +601,9 @@ export async function behandleFravaer(t: Sporring, orgId: string, b: Behandling)
   const vakter = (await vakterMellom(t, orgId, fra, til)).filter(v => v.ansattId === ansattId);
   const handling = b.handling ?? 'ledig';
   if (handling === 'gi' && vakter.length && !b.giTil) throw new RegnskapsFeil('Velg hvem som skal ta vakten.');
+  let nyttFravaer: string | null = null;
   if (fravId) await t.q(`update fravaer set status = 'godkjent', type = $2, med_lonn = $3, timer_min = $4, svar = $5 where id = $1`, [fravId, type, medLonn, timerMin, svar]);
-  else fravId = (await t.en<{ id: string }>(`insert into fravaer (organisasjon_id, ansatt_id, fra, til, type, med_lonn, timer_min, status, grunn, svar, fri_id) values ($1,$2,$3,$4,$5,$6,$7,'godkjent',$8,$9,$10) returning id`,
+  else fravId = nyttFravaer = (await t.en<{ id: string }>(`insert into fravaer (organisasjon_id, ansatt_id, fra, til, type, med_lonn, timer_min, status, grunn, svar, fri_id) values ($1,$2,$3,$4,$5,$6,$7,'godkjent',$8,$9,$10) returning id`,
     [orgId, ansattId, fra, til, type, medLonn, timerMin, grunn, svar, friId]))!.id;
   if (friId) await t.q(`update fri_foresporsel set status = 'godkjent' where id = $1`, [friId]);
   for (const d of dagerMellom(fra, til)) {
@@ -607,7 +617,7 @@ export async function behandleFravaer(t: Sporring, orgId: string, b: Behandling)
     else if (handling === 'gi' && b.giTil) await tildel(t, orgId, v.id, b.giTil);
     else await gjorLedig(t, orgId, v.id);
   }
-  return { ansattId, navn, type, medLonn, vakter: vakter.length, handling, giTilNavn, fra, til };
+  return { ansattId, navn, type, medLonn, vakter: vakter.length, handling, giTilNavn, fra, til, nyttFravaer };
 }
 
 // ---------- Bytter mellom kolleger ----------
@@ -801,7 +811,8 @@ export async function tilbakestillInnlogging(t: Sporring, orgId: string, ansattI
   const a = await t.en<{ bruker_id: string | null }>('select bruker_id from ansatt where id = $1 and organisasjon_id = $2 and aktiv', [ansattId, orgId]);
   if (!a) throw new RegnskapsFeil('Fant ikke den ansatte.');
   await t.q('delete from vakt_lenke where ansatt_id = $1', [ansattId]);
-  if (a.bruker_id) await t.q('delete from sesjon where bruker_id = $1 and organisasjon_id = $2', [a.bruker_id, orgId]);
+  if (!a.bruker_id) return (await inviterAnsatt(t, orgId, ansattId)).token;
+  await t.q('delete from sesjon where bruker_id = $1 and organisasjon_id = $2', [a.bruker_id, orgId]);
   return nyLenke(t, ansattId);
 }
 

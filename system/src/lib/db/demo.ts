@@ -1,7 +1,7 @@
 // Eksempeldata for testmodus (når databasen ikke er koblet til). Kjøres bare i PGlite.
 // Innlogging: demo@rettfort.no / rettfort-demo (bedrift) og regnskap@rettfort.no / rettfort-demo (byrå).
 
-import { lagreVaktAnsatt, lagreVakt, publiser, vakterMellom, settInteresse, settTilgjengelig } from '../tjenester/vaktplan';
+import { lagreVaktAnsatt, lagreVakt, publiser, vakterMellom, settInteresse, settTilgjengelig, lagreSteder, byttBort, inviterAnsatt, soknadFravaer, innstillinger, meldAvvik, godkjennTimeliste } from '../tjenester/vaktplan';
 import { ukeDager } from '../vaktplan';
 import type { Db } from './index';
 import { hashPassord } from '../auth';
@@ -64,22 +64,57 @@ export async function seedDemo(db: Db): Promise<void> {
   const ola = (await db.en<{ id: string }>(`select id from ansatt where navn = 'Ola Nilsen' and organisasjon_id = $1`, [org]))!.id;
   for (const m of mnd) await db.tx(t => kjorLonn(t, org, `2026-${m}`, `2026-${m}-25`, [{ ansattId: ola, timer: 120 + Number(m) * 3 }]));
 
-  // Vaktplan: uke 40 og 41 med en ledig vakt noen vil ta og en forespørsel om fri.
-  const jonas = await lagreVaktAnsatt(db, org, { navn: 'Jonas Berg', kontakt: 'jonas@havoyfisk.no', stilling: 'Butikkmedarbeider', lonnType: 'fast', stillingsprosent: 60, sats: 2700000 });
+  // Vaktplan: uke 40 er ferdig (timer venter), uke 41 er publisert med en upublisert endring,
+  // en ledig vakt to vil ta, en forespørsel om fri, et bytte og en søknad om avspasering.
+  await lagreSteder(db, org, ['Butikken', 'Kaia']);
+  const ny = async (navn: string, epost: string, stilling: string, lonnType: 'fast' | 'time', pst: number, sats: number) => {
+    const id = await lagreVaktAnsatt(db, org, { navn, kontakt: epost, stilling, lonnType, stillingsprosent: pst, sats });
+    await inviterAnsatt(db, org, id);
+    await db.q(`update ansatt set tilgang = 'aktiv', sist_inne = now() - interval '2 hours' where id = $1`, [id]);
+    return id;
+  };
   const sara = (await db.en<{ id: string }>(`select id from ansatt where navn = 'Sara Havøy' and organisasjon_id = $1`, [org]))!.id;
-  await db.q(`update ansatt set kontakt = epost where organisasjon_id = $1 and kontakt is null`, [org]);
+  await db.q(`update ansatt set kontakt = epost, mobil = '934 56 781', stilling = 'Skiftleder', tilgang = 'aktiv' where id = $1`, [sara]);
+  await db.q(`update ansatt set i_vaktplan = false where id = $1`, [ola]);
+  const ali = await ny('Ali Hassan', 'ali@havoyfisk.no', 'Kokk', 'fast', 80, 3600000);
+  const jonas = await ny('Jonas Berg', 'jonas@havoyfisk.no', 'Butikkmedarbeider', 'fast', 60, 2700000);
+  const emma = await ny('Emma Lie', 'emma@havoyfisk.no', 'Butikkmedarbeider', 'time', 100, 21000);
+  const mari = await ny('Mari Holm', 'mari@havoyfisk.no', 'Selger', 'time', 100, 22000);
+  await db.q(`update ansatt set tilgang = 'invitert' where id = $1`, [emma]);
+  await db.q(`update ansatt set tilgang = 'ingen' where id = $1`, [mari]);
+  await db.q(`update ansatt set avspasering_min = 720 where id = $1`, [ali]);
+  const M = { 'Åpning': ['07:00', '15:00'], 'Midt': ['10:00', '18:00'], 'Kveld': ['13:00', '21:00'] } as const;
+  const vakt = (ansattId: string | null, dato: string, type: keyof typeof M, sted: string, kommentar?: string) => lagreVakt(db, org, { ansattId, dato, start: M[type][0], slutt: M[type][1], type, sted, kommentar });
   for (const uke of [40, 41]) {
     const d = ukeDager(2026, uke);
-    for (const i of [0, 1, 2, 3, 4]) await lagreVakt(db, org, { ansattId: sara, dato: d[i], start: '07:00', slutt: '15:00' });
-    for (const i of [0, 2, 4]) await lagreVakt(db, org, { ansattId: jonas, dato: d[i], start: '13:00', slutt: '21:00' });
-    for (const i of [1, 3]) await lagreVakt(db, org, { ansattId: ola, dato: d[i], start: '10:00', slutt: '18:00' });
-    await lagreVakt(db, org, { ansattId: uke === 41 ? null : ola, dato: d[5], start: '10:00', slutt: '16:00' });
+    for (const i of [0, 1, 2, 3, 4, 5]) await vakt(sara, d[i], 'Åpning', i % 2 ? 'Kaia' : 'Butikken');
+    for (const i of [0, 1, 3, 4]) await vakt(ali, d[i], 'Midt', i % 2 ? 'Kaia' : 'Butikken');
+    for (const i of [0, 2, 4]) await vakt(jonas, d[i], 'Kveld', i === 2 ? 'Kaia' : 'Butikken', uke === 41 && i === 0 ? 'Varelevering kl. 15. Ta imot og sjekk mot pakkseddelen.' : undefined);
+    await vakt(emma, d[1], 'Kveld', 'Butikken');
+    await vakt(mari, d[0], 'Åpning', 'Kaia'); await vakt(mari, d[2], 'Midt', 'Butikken'); await vakt(mari, d[3], 'Åpning', 'Butikken');
+    if (uke === 41) { await vakt(null, d[5], 'Midt', 'Butikken'); await vakt(null, d[6], 'Kveld', 'Kaia'); }
     await publiser(db, org, 2026, uke);
   }
-  const lordag = (await vakterMellom(db, org, '2026-10-10', '2026-10-10')).find(v => !v.ansattId);
-  if (lordag) await settInteresse(db, org, ola, lordag.id, true);
-  await settTilgjengelig(db, org, jonas, '2026-10-09', 'kan_ikke', 'Tannlege');
-  await settTilgjengelig(db, org, ola, '2026-10-06', 'kan');
+  const d41 = ukeDager(2026, 41);
+  await vakt(emma, d41[3], 'Kveld', 'Kaia'); // ikke publisert ennå
+  const lordag = (await vakterMellom(db, org, d41[5], d41[5])).find(v => !v.ansattId);
+  if (lordag) { await settInteresse(db, org, jonas, lordag.id, true); await settInteresse(db, org, emma, lordag.id, true); }
+  await settTilgjengelig(db, org, jonas, d41[4], 'kan_ikke', 'Tannlege');
+  for (const x of [5, 6]) { await settTilgjengelig(db, org, jonas, d41[x], 'kan'); await settTilgjengelig(db, org, emma, d41[x], 'kan'); }
+  const mariTor = (await vakterMellom(db, org, d41[3], d41[3])).find(v => v.ansattId === mari);
+  if (mariTor) await byttBort(db, org, mari, mariTor.id, true);
+  await soknadFravaer(db, org, ali, { type: 'Avspasering', fra: '2026-10-16', til: '2026-10-16' }, await innstillinger(db, org));
+  // Fravær tidligere i år og timer for uke 40
+  for (const [fra, til, type] of [['2026-06-22', '2026-06-26', 'Ferie'], ['2026-08-06', '2026-08-06', 'Egenmelding']] as const) {
+    await db.q(`insert into fravaer (organisasjon_id, ansatt_id, fra, til, type, med_lonn, status) values ($1,$2,$3,$4,$5,true,'godkjent')`, [org, jonas, fra, til, type]);
+  }
+  const d40 = ukeDager(2026, 40);
+  const v40 = await vakterMellom(db, org, d40[0], d40[6]);
+  const jonasFre = v40.find(v => v.ansattId === jonas && v.dato === d40[4]);
+  if (jonasFre) await meldAvvik(db, org, jonas, { vaktId: jonasFre.id, start: '13:00', slutt: '21:30' });
+  const emmaTir = v40.find(v => v.ansattId === emma && v.dato === d40[1]);
+  if (emmaTir) await meldAvvik(db, org, emma, { vaktId: emmaTir.id, start: '13:00', slutt: '20:30', tekst: 'Gikk 30 min tidligere' });
+  await godkjennTimeliste(db, org, 2026, 40, [mari]);
 
   // Terminene januar–august er sendt
   for (const d of ['2026-01-15', '2026-03-15', '2026-05-15']) {
