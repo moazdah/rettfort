@@ -27,8 +27,8 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
   <header style="position:sticky;top:0;z-index:20;background:rgba(247,245,240,.94);backdrop-filter:blur(10px);border-bottom:1px solid #E7E2D7">
     <div style="max-width:1240px;margin:0 auto;height:68px;padding:{{ hdrPad }};display:flex;align-items:center;gap:{{ hdrGap }}">
       <a href="/" aria-label="Rettført" style="width:104px;height:26px;overflow:hidden;position:relative;display:block;flex:none"><img src="/assets/rettfort-logo.png" alt="Rettført" style="position:absolute;left:-14px;top:-8px;width:130px;height:auto;max-width:none"></a>
-      <nav style="display:flex;align-items:center;gap:2px;flex:1;min-width:0">
-        <button onClick="{{ toggleMenu }}" aria-expanded="{{ menuStr }}" style="height:42px;padding:{{ fnPad }};border-radius:99px;border:0;background:{{ menuBg }};font-size:15.5px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap" style-hover="background:#ECE7DC">Funksjoner<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ chev }});transition:transform .25s"><path d="M6 9l6 6l6-6"></path></svg></button>
+      <nav style="display:flex;align-items:center;gap:2px;flex:{{ navFlex }};min-width:0;order:{{ navOrder }}">
+        <button onClick="{{ toggleMenu }}" aria-expanded="{{ menuStr }}" aria-label="Funksjoner og meny" style="height:{{ fnH }};width:{{ fnW }};padding:{{ fnPad }};border-radius:99px;border:0;background:{{ menuBg }};font-size:15.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap" style-hover="background:#ECE7DC"><sc-if value="{{ notNarrow }}" hint-placeholder-val="{{ true }}">Funksjoner<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate({{ chev }});transition:transform .25s"><path d="M6 9l6 6l6-6"></path></svg></sc-if><sc-if value="{{ narrowNav }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="{{ burger }}"></path></svg></sc-if></button>
         <sc-if value="{{ notNarrow }}" hint-placeholder-val="{{ true }}">
           <a href="/#priser" style="height:42px;padding:0 14px;border-radius:99px;font-size:15.5px;color:#3D4759;display:flex;align-items:center" style-hover="background:#ECE7DC;color:#0B2545">Priser</a>
           <a href="/bak-rettfort" style="height:42px;padding:0 14px;border-radius:99px;font-size:15.5px;color:#3D4759;display:flex;align-items:center;white-space:nowrap" style-hover="background:#ECE7DC;color:#0B2545">Bak Rettført</a>
@@ -37,7 +37,7 @@ button{font-family:inherit;cursor:pointer;color:inherit;}
       <sc-if value="{{ notNarrow }}" hint-placeholder-val="{{ true }}">
         <a href="https://min.xn--rettfrt-u1a.no/logg-inn" style="height:42px;padding:0 18px;border-radius:99px;border:1px solid #0B2545;font-size:15px;font-weight:500;display:flex;align-items:center;white-space:nowrap;flex:none" style-hover="background:#fff">Logg inn</a>
       </sc-if>
-      <a href="https://min.xn--rettfrt-u1a.no/registrer" style="height:{{ sgH }};padding:{{ sgPad }};border-radius:99px;background:#0B2545;color:#fff;font-size:{{ sgFs }};font-weight:600;display:flex;align-items:center;white-space:nowrap;flex:none" style-hover="background:#16345E;color:#fff">Start gratis</a>
+      <a href="https://min.xn--rettfrt-u1a.no/registrer" style="margin-left:{{ sgMl }};height:{{ sgH }};padding:{{ sgPad }};border-radius:99px;background:#0B2545;color:#fff;font-size:{{ sgFs }};font-weight:600;display:flex;align-items:center;white-space:nowrap;flex:none" style-hover="background:#16345E;color:#fff">Start gratis</a>
     </div>
     <sc-if value="{{ menu }}" hint-placeholder-val="{{ false }}">
       <div style="position:absolute;left:0;right:0;top:68px;background:#fff;border-bottom:1px solid #E7E2D7;box-shadow:0 30px 60px -30px rgba(11,37,69,.35)">
@@ -389,7 +389,8 @@ class Component extends DCLogic {
       menu: s.menu, menuStr: s.menu ? 'true' : 'false', menuBg: s.menu ? '#ECE7DC' : 'transparent', chev: s.menu ? '180deg' : '0deg',
       toggleMenu: () => this.setState(x => ({ menu: !x.menu })), closeMenu: () => this.setState({ menu: false }),
       menuCols: narrow ? '1fr' : w < 1000 ? 'repeat(2,minmax(0,1fr))' : 'repeat(3,minmax(0,1fr))', notNarrow: w >= 760, narrowMenu: s.menu && w < 760,
-      hdrPad: w < 760 ? '0 16px' : '0 24px', hdrGap: w < 760 ? '8px' : '28px', fnPad: w < 760 ? '0 10px' : '0 14px',
+      hdrPad: w < 760 ? '0 16px' : '0 24px', narrowNav: w < 760, navOrder: w < 760 ? 3 : 0, navFlex: w < 760 ? 'none' : '1', sgMl: w < 760 ? 'auto' : '0',
+      fnH: w < 760 ? '44px' : '42px', fnW: w < 760 ? '44px' : 'auto', burger: s.menu ? 'M6 6l12 12M18 6L6 18' : 'M4 7h16M4 12h16M4 17h16', hdrGap: w < 760 ? '8px' : '28px', fnPad: w < 760 ? '0' : '0 14px',
       sgH: w < 440 ? '38px' : '42px', sgPad: w < 440 ? '0 14px' : '0 20px', sgFs: w < 440 ? '14.5px' : '15px',
       mainPad: narrow ? '20px 12px 16px' : '40px 24px 24px', colPad: narrow ? '28px 16px' : '40px 32px',
       nextName: this.NAMES[nx], goNext: () => this.setState({ page: nx, menu: false }),
